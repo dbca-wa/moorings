@@ -173,7 +173,7 @@ module.exports = {
                         // var availability_admin = "<br/><a target='_blank' href='/availability_admin/?site_id=__ID__' >Availability</a>";
                         var availability_admin = "<a target='_blank' href='/availability2/?site_id=__ID__&arrival="+today+"&departure="+today_week_later+"&gear_type=all&num_adult=2&num_child=0&num_concession=0&num_infant=0&vessel_size=0.1&vessel_draft=0.1&vessel_beam=0.1&vessel_weight=0.1' >Availability</a>";
                         var column = "";
-                        if(full.noinvent){
+                        if(full.noinvent) {
                             column = "<td ><a href='#' class='detailRoute' data-campground=\"__ID__\" >View</a><br/>";
                         } else {
                             column = "<td ><a href='__ID__' class='detailRoute' data-campground=\"__ID__\" >Edit</a><br/>";
@@ -186,7 +186,7 @@ module.exports = {
 
                         column += full.mooring_type == '0' ? addBooking : "";
                         column += full.mooring_type == '0' ? availability_admin:"";
-                        olumn += "</td>";
+                        column += "</td>";
                         column = column.replace(/__Current_Closure__/,full.current_closure);
                         return column.replace(/__ID__/g, id);
                     }
@@ -282,7 +282,8 @@ module.exports = {
            if (mm < 10) {
              mm = '0' + mm;
            } 
-           var today = yyyy + '/' + mm + '/'+ dd + '/'; 
+           //var today = yyyy + '/' + mm + '/'+ dd + '/';
+           var today = yyyy + '/' + mm + '/'+ dd; 
            return today
         },
         updateTable: function() {
