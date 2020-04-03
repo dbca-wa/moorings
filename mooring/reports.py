@@ -105,26 +105,26 @@ def booking_refunds(start,end):
                         pass
                         #raise ValidationError('Couldn\'t find a booking matched to invoice reference {}'.format(e.invoice.reference))
                     for line in invoice.order.lines.all():
-                        for k,v in line.refund_details['card'].items():
-                            if k == str(b.id):
-                                track = None
-                                try:
-                                    track = TrackRefund.objects.get(type=2,refund_id=k)
-                                except TrackRefund.DoesNotExist:
-                                    pass
-                                name = ''
-                                reason = ''
-                                if track:
-                                    name = track.user.get_full_name() if track.user.get_full_name() else track.user.email
-                                    reason = track.details
-                                if booking:
-                                    b_name = '{} {}'.format(booking.details.get('first_name',''),booking.details.get('last_name',''))
-                                    writer.writerow([booking.confirmation_number,b_name,'Card',v,line.oracle_code,b.created.strftime('%d/%m/%Y'),name,reason,invoice.reference])
-                                elif admission_booking:
-                                    b_name = '{}' .format(admission_booking.customer)
-                                    writer.writerow([admission_booking.confirmation_number,b_name,'Card',v,line.oracle_code,b.created.strftime('%d/%m/%Y'),name,reason,invoice.reference])
-                                else:
-                                    writer.writerow(['','','Card',v,line.oracle_code,b.created.strftime('%d/%m/%Y'),name,invoice.reference])
+                        for k,v in line.payment_details['order'].items():
+                            #if k == str(b.id): # removed as not valid under the allocation scenario
+                            track = None
+                            try:
+                                track = TrackRefund.objects.get(type=2,refund_id=b.id)
+                            except TrackRefund.DoesNotExist:
+                                pass
+                            name = ''
+                            reason = ''
+                            if track:
+                                name = track.user.get_full_name() if track.user.get_full_name() else track.user.email
+                                reason = track.details
+                            if booking:
+                                b_name = '{} {}'.format(booking.details.get('first_name',''),booking.details.get('last_name',''))
+                                writer.writerow([booking.confirmation_number,b_name,'Card',v,line.oracle_code,b.created.strftime('%d/%m/%Y'),name,reason,invoice.reference])
+                            elif admission_booking:
+                                b_name = '{}' .format(admission_booking.customer)
+                                writer.writerow([admission_booking.confirmation_number,b_name,'Card',v,line.oracle_code,b.created.strftime('%d/%m/%Y'),name,reason,invoice.reference])
+                            else:
+                                writer.writerow(['','','Card',v,line.oracle_code,b.created.strftime('%d/%m/%Y'),name,invoice.reference])
             except Invoice.DoesNotExist:
                 pass
 
