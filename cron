@@ -1,2 +1,2 @@
-30 0 * * * www-data export $(grep -v '^#' /etc/.cronenv | xargs -d '\n') && python /app/manage_mo.py runcrons >> /app/logs/cronjob_mo.log 2>&1
-*/30 * * * * www-data export $(grep -v '^#' /etc/.cronenv | xargs -d '\n') && python /app/manage_mo.py check_oracle_bpoint >> /app/logs/oracle_bpoint_checker.log 2>&1
+30 0 * * * root eval $(grep -v -e '^#' /etc/.cronenv | xargs -I {} echo export \'{}\') && python /app/manage_mo.py runcrons >> /app/logs/cronjob_mo.log 2>&1
+*/30 * * * * root eval $(grep -v -e '^#' /etc/.cronenv | xargs -I {} echo export \'{}\') && python /app/manage_mo.py check_oracle_bpoint >> /app/logs/oracle_bpoint_checker.log 2>&1
