@@ -1,6 +1,7 @@
 from django import forms
 from ledger.address.models import Country
 from mooring import models
+from mooring import utils
 from crispy_forms.helper import FormHelper
 from crispy_forms.layout import Layout, Submit, HTML, Fieldset, MultiField, Div
 from django.forms import Form, ModelForm, ChoiceField, FileField, CharField, Textarea, ClearableFileInput, HiddenInput, Field, RadioSelect, ModelChoiceField, Select
@@ -80,6 +81,28 @@ class BookingPeriodOptionForm(forms.ModelForm):
         else:
            self.helper.add_input(Submit('Create', 'Create', css_class='btn-lg', style='margin-top: 15px;' ))
 
+class AnnualBookingPeriodOptionForm(forms.ModelForm):
+    #mooring_group = ChoiceField(choices=[],)
+    class Meta:
+        model = models.AnnualBookingPeriodOption
+        fields = ['start_time','finish_time',]
+
+    def __init__(self, *args, **kwargs):
+        # User must be passed in as a kwarg.
+        super(AnnualBookingPeriodOptionForm, self).__init__(*args, **kwargs)
+        self.helper = BaseFormHelper()
+        for f in self.fields:
+           self.fields[f].widget.attrs.update({'class': 'form-control'})
+        vessel_category_pricing = HTML('{% include "mooring/dash/add_edit_annual_vessel_category.html" %}')
+
+        self.helper.form_id = 'id_annual_booking_periods_form'
+        if self.initial['action'] == 'edit':
+           self.helper.add_input(Submit('Update', 'Update', css_class='btn-lg', style='margin-top: 15px;' ))
+        else:
+           self.helper.add_input(Submit('Create', 'Create', css_class='btn-lg', style='margin-top: 15px;' ))
+
+        self.helper.layout = Layout('start_time','finish_time',vessel_category_pricing)
+
 class ChangeGroupForm(forms.ModelForm):
 
     class Meta:
@@ -96,6 +119,84 @@ class ChangeGroupForm(forms.ModelForm):
         self.helper.form_id = 'id_change_group_form'
         #self.helper.attrs = {'novalidate': ''}
         #self.helper.add_input(Submit('Continue', 'Continue', css_class='btn-lg'))
+
+
+class AnnualAdmissionForm(forms.ModelForm):
+
+    first_name = forms.CharField(label="Given Name(s)", widget=forms.TextInput(attrs={'class': "form-control"}))
+    last_name = forms.CharField(widget=forms.TextInput(attrs={'required':True, 'class': "form-control"}), label="Last Name")
+    postal_address_line_1 = forms.CharField(widget=forms.TextInput(attrs={'required':True, 'class': "form-control"}), label="Postal Address Line 1")
+    postal_address_line_2 = forms.CharField(widget=forms.TextInput(attrs={'required':False, 'class': "form-control"}), label="Postal Address Line 2", required=False)
+    postcode = forms.CharField(max_length=4, label="Post Code",widget=forms.TextInput(attrs={'required':True, 'class': "form-control"}))
+    state = forms.CharField(max_length=4, label="State", widget=forms.Select(attrs={'class': "form-control" }))
+    country = forms.ModelChoiceField(queryset=Country.objects.all(), to_field_name="iso_3166_1_a2", widget=forms.Select(attrs={'class': "form-control" }))
+    phone = forms.CharField(widget=forms.TextInput(attrs={'required':False, 'class': "form-control"}), label="Phone", required=False)
+    mobile = forms.CharField(widget=forms.TextInput(attrs={'required':False, 'class': "form-control"}), label="Mobile", required=False)
+    email = forms.EmailField(label="Email", widget=forms.TextInput(attrs={'required':True, 'class': "form-control"}))
+    confirm_email = forms.EmailField(label ="Confirm Email", widget=forms.TextInput(attrs={'required':True, 'class': "form-control"}))
+
+    vessel_rego = forms.CharField(label="Vessel Registration", widget=forms.TextInput(attrs={'class': "form-control"}))
+    vessel_name = forms.CharField(label="Vessel Name", widget=forms.TextInput(attrs={'class': "form-control"}))
+    vessel_length = forms.CharField(label="Registered Vessel Length (meters)", widget=forms.TextInput(attrs={'class': "form-control"}))
+
+    booking_period = forms.ChoiceField(widget=forms.Select(attrs={'class': "form-control" }))
+    terms = forms.BooleanField(label="I agree to the <A href=''>terms and conditions</A> (Including insurance requirements)")
+
+    class Meta:
+        model = models.BookingAnnualAdmission
+        fields = []
+
+    def clean(self):
+        super(AnnualAdmissionForm, self).clean()
+       
+        if ('email' in self.cleaned_data):
+            if 'confirm_email' in self.cleaned_data:
+                if (self.cleaned_data.get('email')) != (self.cleaned_data.get('confirm_email')):
+                    raise forms.ValidationError('Your email and confirm email address do not match.')#+self.cleaned_data.get('terms'))
+        if len(self.cleaned_data.get('phone')) < 8 and len(self.cleaned_data.get('mobile')) < 8:
+                 raise forms.ValidationError('Please provide at least one valid phone or mobile number.')
+
+        if self.cleaned_data.get('terms') is not True:
+            raise forms.ValidationError('Please check terms and conditions.')
+
+        vessel_length = self.cleaned_data.get('vessel_length') 
+        booking_period = self.cleaned_data.get('booking_period')
+   
+        response = 'error'
+        if models.AnnualBookingPeriodGroup.objects.filter(id=int(booking_period)).count() > 0:
+             try:
+                annual_admission = utils.get_annual_admissions_pricing_info(booking_period,vessel_length)
+                price = annual_admission['abpovc'].price
+                response = 'success'
+                if annual_admission['response'] == 'error':
+                    response = 'error'
+             except:
+                pass
+                price = "No price available"
+                response = 'error'
+        if response == 'error':
+             raise forms.ValidationError('Sorry, no matching booking period available for your vessel size.')
+
+    def __init__(self, *args, **kwargs):
+        # User must be passed in as a kwarg.
+        super(AnnualAdmissionForm, self).__init__(*args, **kwargs)
+        self.helper = BaseFormHelper()
+        self.helper.form_id = 'id_annual_admission_form'
+        self.fields['first_name'].css_class = 'form-control'
+
+        # START Get Annual Booking Periods
+        if models.AdmissionsLocation.objects.filter(key=self.initial['loc']).count() > 0:
+             al = models.AdmissionsLocation.objects.filter(key=self.initial['loc'])[0]
+             apg = models.AnnualBookingPeriodGroup.objects.filter(mooring_group__in=[al.mooring_group.id,], status=1)
+             booking_period_list = []
+             booking_period_list.append(['','Please Select a Period'])
+             for a in apg:
+                   booking_period_list.append([a.id, a.name])
+
+             self.fields['booking_period'].choices = booking_period_list
+        dynamic_selections = HTML('{% include "mooring/booking/annual_admission_form_js.html" %}')
+        self.helper.layout = Layout(HTML("<div class='row'><div class='col-lg-6'>"),HTML('<div class="well"><h3 class="text-primary" style="text-align: center;">Personal Details</h3>'),'first_name','last_name','postal_address_line_1','postal_address_line_2','country',HTML("<div class='row'><div class='col-lg-6'>"),'postcode',HTML("</div><div class='col-lg-6'>"),'state',HTML('</div></div>'),'phone','mobile','email','confirm_email',HTML('</div></div>'),HTML('<div class="col-lg-6">'),HTML('<div class="well"><h3 class="text-primary" style="text-align: center;">Vessel Details</h3>'),'vessel_rego','vessel_name','vessel_length',HTML('<h3 class="text-primary" style="text-align: center;">Annual Admission Period</h3>'),'booking_period', HTML('</div></div><div class="col-lg-12"><div class="well">'),HTML('<div class="row"><div class="col-md-12"><div class="row"><div class="col-md-6"><div class="form-group"><label for="Total Price">Total Price <span class="text-muted">(GST inclusive.)</span></label> <div class="input-group"><span class="input-group-addon">AUD $</span> <input type="text" id="id_total_price" readonly="readonly" class="form-control"></div></div></div></div>'),HTML('<div class="row"><div class="col-md-6"><div class="small-12 medium-12 large-4 columns"><label class="label-plain" style="width: 250px;">Click <a href="http://ria.wa.gov.au/about-us/Fees-and-charges" taget="_blank">here</a> for price information.</label></div></div> <div class="col-md-6"><div class="row"><div class="col-md-12 "><div class="checkbox"><label>'),'terms',HTML('</div></div><div class="col-md-12 " style="margin-top: 20px; text-align: right;">'),Submit('ProceedtoPayment', 'Proceed to Payment', css_class='btn btn-primary'),HTML('</div></div></div></div>'),HTML('</div></div></div></div></div>'), dynamic_selections)
+
 
 class FailedRefundCompletedForm(forms.ModelForm):
 
@@ -134,6 +235,29 @@ class BookingPeriodForm(forms.ModelForm):
         else:
            self.helper.add_input(Submit('Create', 'Create', css_class='btn-lg', style='margin-top: 15px;'))
 
+class AnnualBookingPeriodForm(forms.ModelForm):
+    #mooring_group = ChoiceField(choices=[],)
+    class Meta:
+        model = models.AnnualBookingPeriodGroup
+        fields = ['name','start_time','finish_time','status','mooring_group']
+
+    def __init__(self, *args, **kwargs):
+        # User must be passed in as a kwarg.
+        super(AnnualBookingPeriodForm, self).__init__(*args, **kwargs)
+        self.helper = BaseFormHelper()
+        self.fields['mooring_group'].choices = []
+        if 'mooring_group_choices'  in self.initial:
+            self.fields['mooring_group'].choices = self.initial['mooring_group_choices']
+        for f in self.fields:
+           self.fields[f].widget.attrs.update({'class': 'form-control'})
+        vessel_category_pricing = HTML('{% include "mooring/dash/add_edit_annual_vessel_category.html" %}')
+
+        self.helper.form_id = 'id_change_group_form'
+        if self.initial['action'] == 'edit':
+           self.helper.add_input(Submit('Update', 'Update', css_class='btn-lg', style='margin-top: 15px;' ))
+        else:
+           self.helper.add_input(Submit('Create', 'Create', css_class='btn-lg', style='margin-top: 15px;'))
+        self.helper.layout = Layout('','')
 
 class UpdateChangeGroupForm(forms.ModelForm):
     #mooring_group = ChoiceField(choices=[],)

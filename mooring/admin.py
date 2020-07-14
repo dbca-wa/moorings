@@ -118,6 +118,11 @@ class FeatureAdmin(admin.ModelAdmin):
     ordering = ('name',)
     search_fields = ('name',)
 
+
+class BookingAnnualInvoiceInline(admin.TabularInline):
+    model = models.BookingAnnualInvoice
+    extra = 0
+
 class BookingInvoiceInline(admin.TabularInline):
     model = models.BookingInvoice
     extra = 0
@@ -164,6 +169,20 @@ class BookingAdmin(admin.ModelAdmin):
     def has_add_permission(self, request, obj=None):
         return False
 
+@admin.register(models.BookingAnnualAdmission)
+class BookingAnnualAdmissionAdmin(admin.ModelAdmin):
+    raw_id_fields = ('customer','created_by','overridden_by','canceled_by',)
+    list_display = ('id','customer','start_dt','expiry_dt','booking_type','cost_total','created_by','created')
+    ordering = ('-id',)
+    search_fileds = ('customer','id',)
+    list_filter = ('created_by',)
+    readonly_fields=('created',)
+    inlines = [BookingAnnualInvoiceInline,]
+
+    def has_add_permission(self, request, obj=None):
+        return False
+
+
 @admin.register(models.MooringsiteBooking)
 class MooringsiteBookingAdmin(admin.ModelAdmin):
     list_display = ('campsite','date','booking','booking_type')
@@ -176,6 +195,33 @@ class MooringsiteRateAdmin(admin.ModelAdmin):
     list_display = ('campsite','rate','allow_public_holidays','booking_period')
     list_filter = ('campsite','rate','allow_public_holidays','booking_period')
     search_fields = ('campsite__name',)
+
+
+@admin.register(models.VesselSizeCategory)
+class VesselSizeCategory(admin.ModelAdmin):
+    list_display = ('name','start_size','end_size','status','mooring_group','created')
+    search_fields = ('name',)
+
+    def get_queryset(self, request):
+        """ Filter based on the mooring group of the user. """
+        qs = super(VesselSizeCategory, self).get_queryset(request)
+        if request.user.is_superuser:
+            return qs
+        group = models.MooringAreaGroup.objects.filter(members__in=[request.user,])
+        return qs.filter(mooring_group__in=group)
+
+    def formfield_for_foreignkey(self, db_field, request, **kwargs):
+        if db_field.name == 'mooring_group':
+            kwargs['queryset'] = models.MooringAreaGroup.objects.filter(members__in=[request.user,])
+        return super(VesselSizeCategory, self).formfield_for_foreignkey(db_field, request, **kwargs)
+
+    def save_model(self, request, obj, form, change):
+        if obj.mooring_group == None:
+            groups = models.MooringAreaGroup.objects.filter(members__in=[request.user,])
+            if groups.count() == 1:
+                obj.mooring_group = groups[0]
+        super(VesselSizeCategory, self).save_model(request, obj, form, change)
+
 
 @admin.register(models.Contact)
 class ContactAdmin(admin.ModelAdmin):

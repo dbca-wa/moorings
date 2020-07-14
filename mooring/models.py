@@ -508,6 +508,63 @@ class MooringAreaImage(models.Model):
         super(MooringAreaImage,self).delete(*args,**kwargs)
 
 
+class AnnualBookingPeriodGroup(models.Model):
+
+    STATUS = (
+        (0, 'Inactive'),
+        (1, 'Active'),
+    )
+
+    name = models.CharField(max_length=100)
+    mooring_group = models.ForeignKey('MooringAreaGroup', blank=False, null=False)
+    start_time = models.DateTimeField(null=True, blank=True)
+    finish_time = models.DateTimeField(null=True, blank=True)
+    status = models.SmallIntegerField(choices=STATUS, default=1)
+    created = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return self.name
+
+class AnnualBookingPeriodOption(models.Model):
+
+    annual_booking_period_group = models.ForeignKey('AnnualBookingPeriodGroup', blank=False, null=False)
+    start_time = models.DateTimeField(null=True, blank=True)
+    finish_time = models.DateTimeField(null=True, blank=True)
+    created = models.DateTimeField(auto_now_add=True)
+    
+    def __str__(self):
+        return self.start_time.strftime('%Y-%m-%d %H:%M:%S')+' to '+self.finish_time.strftime('%Y-%m-%d %H:%M:%S')
+
+
+class VesselSizeCategory(models.Model):
+
+    STATUS = (
+        (0, 'Inactive'),
+        (1, 'Active'),
+    )
+
+    name = models.CharField(max_length=100)
+    start_size = models.DecimalField(max_digits=8, decimal_places=2, default='0.00') 
+    end_size = models.DecimalField(max_digits=8, decimal_places=2, default='0.00')
+    status = models.SmallIntegerField(choices=STATUS, default=1)
+    mooring_group = models.ForeignKey('MooringAreaGroup', blank=False, null=False)
+    created = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return self.name
+
+
+class AnnualBookingPeriodOptionVesselCategoryPrice(models.Model):
+
+    annual_booking_period_option = models.ForeignKey('AnnualBookingPeriodOption', blank=False, null=False)
+    vessel_category = models.ForeignKey('VesselSizeCategory', blank=False, null=False)
+    price = models.DecimalField(max_digits=8, decimal_places=2, default='0.00', blank=True, null=True, unique=False)
+    oracle_code = models.CharField(max_length=50,null=True,blank=True)
+    created = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return self.price
+
 class ChangePricePeriod(models.Model):
 
     REFUND_CALCULATION_TYPE = (
@@ -1185,6 +1242,63 @@ class MooringsiteRate(models.Model):
         for attr, value in data.items():
             setattr(self, attr, value)
         self.save()
+
+class BookingAnnualAdmission(models.Model):
+
+    BOOKING_TYPE_CHOICES = (
+        (0, 'Reception booking'),
+        (1, 'Internet booking'),
+        (2, 'Black booking'),
+        (3, 'Temporary reservation'),
+        (4, 'Cancelled Booking'),
+        (5, 'Changed Booking')
+    )
+
+    customer = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.PROTECT, blank=True, null=True)
+    start_dt = models.DateTimeField()
+    expiry_dt = models.DateTimeField()
+    details = JSONField(null=True, blank=True)
+    booking_type = models.SmallIntegerField(choices=BOOKING_TYPE_CHOICES, default=0)
+    annual_booking_period_group = models.ForeignKey('AnnualBookingPeriodGroup',null=True, blank=True)
+    cost_total = models.DecimalField(max_digits=8, decimal_places=2, default='0.00')
+    override_price = models.DecimalField(max_digits=8, decimal_places=2, blank=True, null=True)
+    override_reason = models.ForeignKey('DiscountReason', null=True, blank=True)
+    override_reason_info = models.TextField(blank=True, null=True)
+    overridden_by = models.ForeignKey(settings.AUTH_USER_MODEL,on_delete=models.PROTECT, blank=True, null=True, related_name='overridden_annual_bookings')
+    is_canceled = models.BooleanField(default=False)
+    send_invoice = models.BooleanField(default=False)
+    cancellation_reason = models.TextField(null=True,blank=True)
+    cancelation_time = models.DateTimeField(null=True,blank=True)
+    confirmation_sent = models.BooleanField(default=False)
+    created = models.DateTimeField(default=timezone.now)
+    created_by = models.ForeignKey(settings.AUTH_USER_MODEL,on_delete=models.PROTECT, blank=True, null=True,related_name='created_by_annual_booking')
+    canceled_by = models.ForeignKey(settings.AUTH_USER_MODEL,on_delete=models.PROTECT, blank=True, null=True,related_name='canceled_annual_bookings')
+    override_lines = JSONField(null=True, blank=True, default={})
+    sticker_no = models.TextField(blank=True, null=True) 
+
+    def __str__(self):
+         return str(self.id)
+
+
+class BookingAnnualInvoice(models.Model):
+    booking_annual_admission = models.ForeignKey(BookingAnnualAdmission, related_name='annual_booking_invoices')
+    invoice_reference = models.CharField(max_length=50, null=True, blank=True, default='')
+    system_invoice = models.BooleanField(default=False)
+
+    def __str__(self):
+        return 'Booking {} : Invoice #{}'.format(self.id,self.invoice_reference)
+
+    # Properties
+    # ==================
+    @property
+    def active(self):
+        try:
+            invoice = Invoice.objects.get(reference=self.invoice_reference)
+            return False if invoice.voided else True
+        except Invoice.DoesNotExist:
+            pass
+        return False
+
 
 
 class Booking(models.Model):
