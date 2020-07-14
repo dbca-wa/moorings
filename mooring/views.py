@@ -1878,7 +1878,7 @@ class AnnualAdmissionsView(CreateView):
         #self.object.override_reason
         #self.object.override_reason_info
         #self.object.overridden_by
-        if self.request.user:
+        if self.request.user.is_authenticated:
            self.object.created_by = self.request.user
         else:
            self.object.created_by = customer
