@@ -1878,7 +1878,10 @@ class AnnualAdmissionsView(CreateView):
         #self.object.override_reason
         #self.object.override_reason_info
         #self.object.overridden_by
-        self.object.created_by = self.request.user
+        if self.request.user:
+           self.object.created_by = self.request.user
+        else:
+           self.object.created_by = customer
         #self.object.completed_date = datetime.now()
         #self.object.completed_by = self.request.user
         #self.object.status = 1
