@@ -8,6 +8,7 @@ import calendar
 import time
 import math
 import hashlib
+import io
 from six.moves.urllib.parse import urlparse
 from wsgiref.util import FileWrapper
 from django.db.models import Q, Min
@@ -40,6 +41,7 @@ from datetime import datetime,timedelta, date
 from decimal import Decimal
 from ledger.payments.utils import systemid_check, update_payments
 from mooring.context_processors import mooring_url, template_context
+from mooring import models
 from mooring.models import (MooringArea,
                                 District,
                                 Contact,
@@ -4420,6 +4422,85 @@ class AdmissionsKeyFromURLView(views.APIView):
             print(traceback.print_exc())
             raise
 
+
+@require_http_methods(['GET'])
+def get_provinces_by_country(request, country_code):
+    provinces = []
+    read_data = ""
+    json_response = []
+    json_response = utils.get_provinces(country_code)
+#    with io.open(settings.BASE_DIR+'/mooring/data/provinces.json', "r", encoding="utf-8") as my_file:
+#             read_data = my_file.read() 
+#    provinces = json.loads(read_data)
+#
+#    for p in provinces:
+#        if p['country'] == country_code:
+#            json_response.append(p)
+    return HttpResponse(geojson.dumps({
+              'data': json_response,
+              'country_code': country_code,
+              'status': 'success',
+           }), content_type='application/json')
+
+
+
+@require_http_methods(['GET'])
+def get_annual_admission_pricing(request, annual_booking_period_id, vessel_size):
+
+    nowdt = datetime.now()
+    price = '0.00'
+    response = 'error' 
+    if models.AnnualBookingPeriodGroup.objects.filter(id=int(annual_booking_period_id)).count() > 0:
+         try: 
+            annual_admission = utils.get_annual_admissions_pricing_info(annual_booking_period_id,vessel_size)
+            price = annual_admission['abpovc'].price
+            response = 'success'
+            if annual_admission['response'] == 'error':
+                response = 'error'
+         except:
+            pass
+            price = "No price available"
+            response = 'error' 
+
+         #abpg = models.AnnualBookingPeriodGroup.objects.get(id=int(annual_booking_period_id))
+         #vsc = models.VesselSizeCategory.objects.filter(start_size__lte=float(vessel_size),end_size__gte=float(vessel_size))
+         #print (vsc)
+         #abpo= models.AnnualBookingPeriodOption.objects.filter(start_time__lte=nowdt,finish_time__gte=nowdt)
+         #print (abpo)
+         #abpovc = models.AnnualBookingPeriodOptionVesselCategoryPrice.objects.filter(annual_booking_period_option=abpo[0],vessel_category=vsc[0].id)
+         #print (abpovc.count())
+         #print (abpovc[0].id)
+         #price = abpovc[0].price
+
+    return HttpResponse(geojson.dumps({
+              'price': str(price),
+              'vessel_size': vessel_size,
+              'status': 'success',
+              'response' : response
+           }), content_type='application/json')
+
+
+@require_http_methods(['GET'])
+def get_annual_admission_pricing_old(request, annual_booking_period_id, vessel_size):
+
+    nowdt = datetime.now()
+    price = '0.00'
+    if models.AnnualBookingPeriodGroup.objects.filter(id=int(annual_booking_period_id)).count() > 0:
+         abpg = models.AnnualBookingPeriodGroup.objects.get(id=int(annual_booking_period_id))
+         vsc = models.VesselSizeCategory.objects.filter(start_size__lte=float(vessel_size),end_size__gte=float(vessel_size))
+         print (vsc)
+         abpo= models.AnnualBookingPeriodOption.objects.filter(start_time__lte=nowdt,finish_time__gte=nowdt)
+         print (abpo)
+         abpovc = models.AnnualBookingPeriodOptionVesselCategoryPrice.objects.filter(annual_booking_period_option=abpo[0],vessel_category=vsc[0].id)
+         print (abpovc.count())
+         print (abpovc[0].id)
+         price = abpovc[0].price
+
+    return HttpResponse(geojson.dumps({
+              'price': str(price),
+              'vessel_size': vessel_size,
+              'status': 'success',
+           }), content_type='application/json')
 
 
 def get_current_booking(ongoing_booking, request): 

@@ -1,0 +1,93 @@
+<script>
+	var iform =  { 
+		var: {},
+		province_dropdown: function(e) { 
+                   var country_code = $(e).val();
+		   var state = '{{ state }}';
+			$.ajax({
+				  type: "GET",
+				  url: "/api/get_country_provinces/"+country_code+"/",
+  				  data: "",
+				  cache: false,
+				  success: function(data){
+					  var selection_html = "<option value=''>Please Select</option>";
+					  
+                                          for ( var i = 0, l = data['data'].length; i < l; i++ ) {
+						  var selected = '';
+						  if (data['data'][i]['short'] == state ) {
+                                                      selected = 'selected';
+					          }
+						  selection_html += "<option "+selected+" value='"+data['data'][i]['short']+"'>"+data['data'][i]['name']+"</option>";
+						  
+					  }
+
+					  $("#id_state").html(selection_html);
+		                  }
+			});
+			
+		},
+                get_annual_pricing: function(annual_booking_period_id, vessel_size) { 
+                        $('#id_total_price').val('0.00'); 
+                        $.ajax({
+                                  type: "GET",
+                                  url: "/api/get_annual_admission_pricing/"+annual_booking_period_id+"/"+vessel_size+"/",
+                                  data: "",
+                                  cache: false,
+                                  success: function(data){
+                                       console.log(data);
+					 $('#id_total_price').val(data['price']);
+                                  }
+                        });
+
+
+
+ 	        },
+	        init: function() {
+			$("#id_country").change(function() {
+		              iform.province_dropdown(this);
+	                      // Check input( $( this ).val() ) for validity here
+			});
+			$("#id_country").val("AU");
+			iform.province_dropdown($("#id_country"));
+
+                        $("#id_booking_period").change(function() {
+                              var annual_booking_period_id =$('#id_booking_period').val();
+                              var vessel_size = $('#id_vessel_length').val();
+                              iform.get_annual_pricing(annual_booking_period_id, vessel_size);
+                              // Check input( $( this ).val() ) for validity here
+                        });
+                        $("#id_vessel_length").blur(function() {
+                              var annual_booking_period_id =$('#id_booking_period').val();
+                              var vessel_size = $('#id_vessel_length').val();
+                              iform.get_annual_pricing(annual_booking_period_id, vessel_size);
+                              // Check input( $( this ).val() ) for validity here
+                        });
+                        var vessel_length = $("#id_vessel_length").val();
+			var booking_period = $("#id_booking_period").val();
+			if (vessel_length.length > 0) {
+                              if (booking_period.length > 0) { 
+                                   iform.get_annual_pricing(booking_period, vessel_length);
+
+		              }
+			}
+
+		}
+
+  	}
+
+var preload = {
+          init: function() {
+              if (window.jQuery) {
+		      iform.init();
+
+              } else {
+                     var scriptTag = document.createElement('script');
+                     scriptTag.src = '/static/common/js/jquery.min.js';
+                     document.head.appendChild(scriptTag);
+                     setTimeout(function() { preload.init();}, 200);
+ 	      }
+          }
+}
+preload.init();
+
+</script>

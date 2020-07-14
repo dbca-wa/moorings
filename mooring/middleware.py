@@ -4,7 +4,7 @@ import datetime
 from django.core.urlresolvers import reverse
 from django.http import HttpResponseRedirect
 from django.utils import timezone
-from mooring.models import Booking, AdmissionsBooking
+from mooring.models import Booking, AdmissionsBooking, BookingAnnualAdmission
 
 CHECKOUT_PATH = re.compile('^/ledger/checkout/checkout')
 
@@ -28,6 +28,24 @@ class BookingTimerMiddleware(object):
                 # on POST boosts remaining time to at least 2 minutes
                 booking.save()
 
+        if 'annual_admission_booking' in request.session:
+            print ("ANNUAL ADMISSION MIDDLE WARE")
+            try:
+                booking = BookingAnnualAdmission.objects.get(pk=request.session['annual_admission_booking'])
+                print ("FOUND")
+                print (booking)
+            except:
+                # no idea what object is in self.request.session['ad_booking'], ditch it
+                del request.session['annual_admission_booking']
+                return
+            if booking.booking_type != 3:
+                # booking in the session is not a temporary type, ditch it
+                del request.session['annual_admission_booking']
+            elif CHECKOUT_PATH.match(request.path) and request.method == 'POST':
+                # safeguard against e.g. part 1 of the multipart checkout confirmation process passing, then part 2 timing out.
+                # on POST boosts remaining time to at least 2 minutes
+                booking.save()
+            print ("END ANNUAL")
         if 'ps_booking' in request.session:
         #    print ("BOOKING SESSION : "+str(request.session['ps_booking']))
             try:
@@ -51,7 +69,7 @@ class BookingTimerMiddleware(object):
 
         # force a redirect if in the checkout
         if ('ps_booking_internal' not in request.COOKIES) and CHECKOUT_PATH.match(request.path):
-            if ('ps_booking' not in request.session) and CHECKOUT_PATH.match(request.path) and ('ad_booking' not in request.session):
+            if ('ps_booking' not in request.session) and CHECKOUT_PATH.match(request.path) and ('ad_booking' not in request.session) and ('annual_admission_booking' not in request.session):
                 return HttpResponseRedirect(reverse('public_make_booking'))
             else:
                 return

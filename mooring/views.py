@@ -50,7 +50,13 @@ from mooring.models import (MooringArea,
                                 CancelPricePeriod,
                                 BookingPeriod,
                                 BookingPeriodOption,
-                                RefundFailed
+                                RefundFailed,
+                                AnnualBookingPeriodGroup,
+                                AnnualBookingPeriodOption,
+                                VesselSizeCategory,
+                                AnnualBookingPeriodOptionVesselCategoryPrice,
+                                BookingAnnualAdmission,
+                                BookingAnnualInvoice
                                 )
 
 from mooring.serialisers import AdmissionsBookingSerializer, AdmissionsLineSerializer
@@ -1784,6 +1790,122 @@ class ForbiddenView(TemplateView):
     def get(self, request, *args, **kwargs):
         return super(ForbiddenView, self).get(request, *args, **kwargs)
 
+class AnnualAdmissionsView(CreateView):
+    template_name = 'mooring/dash/view_annual_admissions.html'
+    model = BookingAnnualAdmission
+   
+    def get(self, request, *args, **kwargs):
+        if is_payment_officer(request.user) == True:
+            return super(AnnualAdmissionsView, self).get(request, *args, **kwargs)
+        else:
+             return HttpResponseRedirect("/forbidden")
+
+    def get_form_class(self):
+        return app_forms.AnnualAdmissionForm
+    
+    def get_context_data(self, **kwargs):
+        context = super(AnnualAdmissionsView, self).get_context_data(**kwargs)
+        request = self.request
+        context['state'] = "WA"
+        if self.request.POST.get('state'):
+            context['state'] = self.request.POST.get('state')
+        return context  
+
+    def get_initial(self):
+        initial = super(AnnualAdmissionsView, self).get_initial()
+        initial['loc'] = self.kwargs['loc']
+        initial['country'] = "AU"
+        if self.request.POST.get('country'):
+            initial['country'] = self.request.POST.get('country')
+        return initial
+
+    def post(self, request, *args, **kwargs):
+        if request.POST.get('cancel'):
+            return HttpResponseRedirect(reverse('annual_admissions_view'))
+        return super(AnnualAdmissionsView, self).post(request, *args, **kwargs)
+
+    def form_valid(self, form):
+        print ("SUBMITTED BOOKING")
+        self.object = form.save(commit=False)
+        forms_data = form.cleaned_data
+        customer = None
+        if self.request.user.is_anonymous() or self.request.user.is_staff:
+            try:
+               customer = EmailUser.objects.get(email=form.cleaned_data.get('email').lower())
+            except EmailUser.DoesNotExist:
+               customer = EmailUser.objects.create(
+                    email=form.cleaned_data.get('email').lower(),
+                    first_name=form.cleaned_data.get('first_name'),
+                    last_name=form.cleaned_data.get('last_name'),
+                    phone_number=form.cleaned_data.get('phone'),
+                    mobile_number=form.cleaned_data.get('mobile')
+               )
+               Address.objects.create(line1='address', user=customer, postcode=form.cleaned_data.get('postcode'), country=form.cleaned_data.get('country').iso_3166_1_a2)
+        else:
+            customer = self.request.user
+
+
+       
+        lines = []
+        booking_period = self.request.POST.get('booking_period')
+        abg = AnnualBookingPeriodGroup.objects.get(id=int(booking_period))
+        annual_admission = utils.get_annual_admissions_pricing_info(self.request.POST.get('booking_period'),self.request.POST.get('vessel_length'))
+        details={}
+        details['first_name'] = self.request.POST.get('first_name')
+        details['last_name'] = self.request.POST.get('last_name')
+        details['postal_address_line_1'] = self.request.POST.get('postal_address_line_1')
+        details['postal_address_line_2'] = self.request.POST.get('postal_address_line_2')
+        details['country'] = self.request.POST.get('country')       
+        details['state'] = self.request.POST.get('state')
+        details['phone'] = self.request.POST.get('phone')
+        details['mobile'] = self.request.POST.get('mobile')
+        details['email'] = self.request.POST.get('email')
+        details['confirm_email'] = self.request.POST.get('confirm_email')
+        details['vessel_rego'] = self.request.POST.get('vessel_rego')
+        details['vessel_name'] = self.request.POST.get('vessel_name')
+        details['vessel_length'] = self.request.POST.get('vessel_length')
+        details['terms'] = self.request.POST.get('terms')
+        #print (annual_admission)
+        total_cost = annual_admission['abpovc'].price
+        oracle_code = annual_admission['abpovc'].oracle_code
+        lines.append({'ledger_description': 'Annual Admissions {} - {}'.format(str(abg.start_time.strftime('%d/%m/%Y')), str(abg.finish_time.strftime('%d/%m/%Y'))), "quantity": 1, 'price_incl_tax': total_cost, "oracle_code": oracle_code, 'line_status': 1})
+
+        self.object.customer = customer
+        self.object.start_dt = abg.start_time
+        self.object.expiry_dt = abg.finish_time 
+        self.object.booking_type = 3
+        self.object.annual_booking_period_group = abg
+        self.object.cost_total = total_cost
+        self.object.details = details
+        #self.object.override_price
+        #self.object.override_reason
+        #self.object.override_reason_info
+        #self.object.overridden_by
+        self.object.created_by = self.request.user
+        #self.object.completed_date = datetime.now()
+        #self.object.completed_by = self.request.user
+        #self.object.status = 1
+        self.object.save()
+        #lines = []
+        #lines.append({'ledger_description': 'Annual Admissions {} - {}'.format(str(abg.start_time), str(abg.finish_time)), "quantity": 1, 'price_incl_tax': '20.00', "oracle_code": 'ORCALE CODE', 'line_status': 1})
+
+        
+        self.request.session['annual_admission_booking'] = self.object.id
+        booking = self.object
+        reservation = u"Annual Admission for {} from {} to {} ".format(
+               u'{} {}'.format(booking.customer.first_name, booking.customer.last_name),
+                str(abg.start_time),
+                str(abg.finish_time),
+        )
+
+        logger.info('{} built annual admission booking {} and handing over to payment gateway'.format('User {} with id {}'.format(booking.customer.get_full_name(),booking.customer.id) if booking.customer else 'An anonymous user',booking.id))
+
+        # if request.user.is_staff:
+        #     result = utils.checkout(request, booking, lines, invoice_text=reservation, internal=True)
+        # else:
+        result = utils.annual_admission_checkout(self.request, booking, lines, invoice_text=reservation)
+        return result
+        #return HttpResponseRedirect("/map/")
 
 class RefundFailedView(ListView):
     template_name = 'mooring/dash/view_failed_refunds.html'
@@ -1960,7 +2082,43 @@ class BookingPeriodGroupView(ListView):
     def get_initial(self):
         initial = super(BookingPeriodGroupView, self).get_initial()
         initial['action'] = 'list'
+
         return initial
+
+
+class AnnualBookingPeriodGroupView(ListView):
+    template_name = 'mooring/dash/view_booking_annual_period_groups.html'
+    model = AnnualBookingPeriodGroup 
+
+    def get(self, request, *args, **kwargs):
+#        pk = self.kwargs['pk']
+        if utils.check_mooring_admin_access(request) == True:
+            context_processor = template_context(self.request)
+#            app = self.get_object()
+            return super(AnnualBookingPeriodGroupView, self).get(request, *args, **kwargs)
+        else:
+             messages.error(self.request, 'Forbidden from viewing this page.')
+             return HttpResponseRedirect("/forbidden")
+
+    def get_context_data(self, **kwargs):
+        context = super(AnnualBookingPeriodGroupView, self).get_context_data(**kwargs)
+        request = self.request
+        if request.user.is_superuser:
+            mg = MooringAreaGroup.objects.all()
+        else:
+            mg = MooringAreaGroup.objects.filter(members__in=[request.user,])
+
+        context['bp_groups'] = AnnualBookingPeriodGroup.objects.filter(mooring_group__in=mg)
+        return context
+
+    def get_form_class(self):
+        return app_forms.BookingPeriodForm
+
+    def get_initial(self):
+        initial = super(AnnualBookingPeriodGroupView, self).get_initial()
+        initial['action'] = 'list'
+        return initial
+
 
 
 
@@ -2011,6 +2169,49 @@ class BookingPeriodAddChangeGroup(CreateView):
         forms_data = form.cleaned_data
         return HttpResponseRedirect(reverse('dash-bookingperiod'))
 
+class AnnualBookingPeriodAddChangeGroup(CreateView):
+    template_name = 'mooring/dash/add_change_annual_period_group.html'
+    model = AnnualBookingPeriodGroup 
+
+    def get(self, request, *args, **kwargs):
+        return super(AnnualBookingPeriodAddChangeGroup, self).get(request, *args, **kwargs)
+
+    def get_context_data(self, **kwargs):
+        context = super(AnnualBookingPeriodAddChangeGroup, self).get_context_data(**kwargs)
+        context['query_string'] = ''
+        return context
+
+    def get_initial(self):
+        initial = super(AnnualBookingPeriodAddChangeGroup, self).get_initial()
+        initial['action'] = 'new'
+        request = self.request
+        initial['mooring_group_choices'] = []
+        mg = []
+        if request.user.is_superuser:
+            mg = MooringAreaGroup.objects.all()
+        else:
+            mg = MooringAreaGroup.objects.filter(members__in=[request.user,])
+
+        for i in mg:
+            initial['mooring_group_choices'].append((i.id,i.name))
+        return initial
+
+    def get_form_class(self):
+        return app_forms.AnnualBookingPeriodForm
+
+    def post(self, request, *args, **kwargs):
+        if request.POST.get('cancel'):
+            return HttpResponseRedirect(self.get_absolute_url())
+        return super(AnnualBookingPeriodAddChangeGroup, self).post(request, *args, **kwargs)
+
+    def form_valid(self, form):
+        self.object = form.save(commit=False)
+        forms_data = form.cleaned_data
+        self.object.start_time = datetime.strptime(self.request.POST.get('start_time'), '%d/%m/%Y %H:%M')
+        self.object.finish_time = datetime.strptime(self.request.POST.get('finish_time'), '%d/%m/%Y %H:%M')
+        self.object.save()
+        return HttpResponseRedirect(reverse('dash-annualbookingperiod'))
+
 class BookingPeriodEditChangeGroup(UpdateView):
     template_name = 'mooring/dash/add_change_period_group.html'
     model = BookingPeriod 
@@ -2044,6 +2245,7 @@ class BookingPeriodEditChangeGroup(UpdateView):
 
         for i in mg:
             initial['mooring_group_choices'].append((i.id,i.name))
+
         return initial
 
     def get_form_class(self):
@@ -2057,7 +2259,57 @@ class BookingPeriodEditChangeGroup(UpdateView):
     def form_valid(self, form):
         self.object = form.save()
         forms_data = form.cleaned_data
-        return HttpResponseRedirect(reverse('dash-bookingperiod'))
+        return HttpResponseRedirect(reverse('dash-annualbookingperiod'))
+
+class AnnualBookingPeriodEditChangeGroup(UpdateView):
+    template_name = 'mooring/dash/add_change_annual_period_group.html'
+    model = AnnualBookingPeriodGroup
+
+    def get(self, request, *args, **kwargs):
+        return super(AnnualBookingPeriodEditChangeGroup, self).get(request, *args, **kwargs)
+
+    def get_context_data(self, **kwargs):
+        context = super(AnnualBookingPeriodEditChangeGroup, self).get_context_data(**kwargs)
+        context['query_string'] = ''
+        return context
+
+    def get_initial(self):
+        initial = super(AnnualBookingPeriodEditChangeGroup, self).get_initial()
+        initial['action'] = 'edit'
+        request = self.request
+        initial['mooring_group_choices'] = []
+        mg = []
+        if request.user.is_superuser:
+            mg = MooringAreaGroup.objects.all()
+        else:
+            mg = MooringAreaGroup.objects.filter(members__in=[request.user,])
+
+        for i in mg:
+            initial['mooring_group_choices'].append((i.id,i.name))
+
+        pk = self.kwargs['pk']
+        abp = AnnualBookingPeriodGroup.objects.get(id=pk)
+        if abp.start_time is not None:
+            initial['start_time'] = datetime.strftime(abp.start_time + timedelta(hours=8), '%d/%m/%Y %H:%M')
+        if abp.finish_time is not None:
+            initial['finish_time'] = datetime.strftime(abp.finish_time + timedelta(hours=8), '%d/%m/%Y %H:%M')
+        return initial
+
+    def get_form_class(self):
+        return app_forms.AnnualBookingPeriodForm
+
+    def post(self, request, *args, **kwargs):
+        if request.POST.get('cancel'):
+            return HttpResponseRedirect(self.get_absolute_url())
+        return super(AnnualBookingPeriodEditChangeGroup, self).post(request, *args, **kwargs)
+
+    def form_valid(self, form):
+        self.object = form.save(commit=False)
+        forms_data = form.cleaned_data
+        self.object.start_time = datetime.strptime(self.request.POST.get('start_time'), '%d/%m/%Y %H:%M')
+        self.object.finish_time = datetime.strptime(self.request.POST.get('finish_time'), '%d/%m/%Y %H:%M')
+        self.object.save()
+        return HttpResponseRedirect(reverse('dash-annualbookingperiod'))
 
 class BookingPeriodView(UpdateView):
     template_name = 'mooring/dash/view_booking_periods.html'
@@ -2083,6 +2335,34 @@ class BookingPeriodView(UpdateView):
 
     def get_initial(self):
         initial = super(BookingPeriodView, self).get_initial()
+        initial['action'] = 'list'
+        return initial
+
+class AnnualBookingPeriodView(UpdateView):
+    template_name = 'mooring/dash/view_annual_booking_periods.html'
+    model = AnnualBookingPeriodGroup 
+
+    def get(self, request, *args, **kwargs):
+        pk = self.kwargs['pk']
+        if utils.mooring_group_access_level_booking_period(pk,request) == True:
+            context_processor = template_context(self.request)
+            app = self.get_object()
+            return super(AnnualBookingPeriodView, self).get(request, *args, **kwargs)
+        else:
+            messages.error(self.request, 'Forbidden from viewing this page.')
+            return HttpResponseRedirect("/forbidden")
+
+    def get_context_data(self, **kwargs):
+        context = super(AnnualBookingPeriodView, self).get_context_data(**kwargs)
+        context['bp_group_id'] = self.kwargs['pk']
+        context['annual_booking_periods'] = AnnualBookingPeriodOption.objects.filter(annual_booking_period_group=context['bp_group_id'])
+        return context
+
+    def get_form_class(self):
+        return app_forms.BookingPeriodForm
+
+    def get_initial(self):
+        initial = super(AnnualBookingPeriodView, self).get_initial()
         initial['action'] = 'list'
         return initial
 
@@ -2120,8 +2400,6 @@ class BookingPeriodAddOption(CreateView):
             initial['change_group_choices'].append((i.id,i.name))
         for i in cancel_group:
             initial['cancel_group_choices'].append((i.id,i.name))
- 
-
         return initial
 
     def get_form_class(self):
@@ -2141,9 +2419,161 @@ class BookingPeriodAddOption(CreateView):
         self.object.save()
         bp.booking_period.add(self.object)
         bp.save()
-
         return HttpResponseRedirect(reverse('dash-bookingperiod-group-view', args=(self.kwargs['bp_group_id'],)))
 
+
+class AnnualBookingPeriodAddOption(CreateView):
+    template_name = 'mooring/dash/add_annual_change_period_option.html'
+    model = AnnualBookingPeriodOption 
+
+    def get(self, request, *args, **kwargs):
+        pk = self.kwargs['bp_group_id']
+        if utils.mooring_group_access_level_booking_period(pk,request) == True:
+            return super(AnnualBookingPeriodAddOption, self).get(request, *args, **kwargs)
+        else:
+            messages.error(self.request, 'Forbidden from viewing this page.')
+            return HttpResponseRedirect("/forbidden")
+
+    def get_context_data(self, **kwargs):
+        context = super(AnnualBookingPeriodAddOption, self).get_context_data(**kwargs)
+        #context['query_string'] = ''
+        context['bp_group_id'] = self.kwargs['bp_group_id']
+
+        vsc_array = []
+        vsc =VesselSizeCategory.objects.filter(status=1)
+        for v in vsc:
+            price = '0.00'
+            oracle_code = ''
+            vsc_array.append({'id': v.id, 'name' : v.name, 'start_size': v.start_size, 'end_size': v.end_size, 'price': price,'oracle_code': oracle_code})
+        context['vessel_size_category'] = vsc_array
+
+
+        return context
+
+    def get_initial(self):
+        initial = super(AnnualBookingPeriodAddOption, self).get_initial()
+        initial['action'] = 'new'
+        request = self.request
+        return initial
+
+    def get_form_class(self):
+        return app_forms.AnnualBookingPeriodOptionForm
+
+    def post(self, request, *args, **kwargs):
+        if request.POST.get('cancel'):
+            return HttpResponseRedirect(self.get_absolute_url())
+        return super(AnnualBookingPeriodAddOption, self).post(request, *args, **kwargs)
+
+    def form_valid(self, form):
+        self.object = form.save(commit=False)
+        forms_data = form.cleaned_data
+        
+        bp_group_id = self.kwargs['bp_group_id']
+        bp = AnnualBookingPeriodGroup.objects.get(pk=bp_group_id)
+        self.object.start_time = datetime.strptime(self.request.POST.get('start_time'), '%d/%m/%Y %H:%M')
+        self.object.finish_time = datetime.strptime(self.request.POST.get('finish_time'), '%d/%m/%Y %H:%M')
+        self.object.annual_booking_period_group = bp
+        self.object.save()
+
+
+        for pkeys in self.request.POST:
+            if 'vessel_size_category' == pkeys[:20]:
+                vcs_id = pkeys.replace("vessel_size_category_", "")
+                vsc = VesselSizeCategory.objects.get(id=int(vcs_id))
+                price = self.request.POST.get(pkeys)
+                oracle_code = self.request.POST.get("vs_category_oracle_code_"+vcs_id)
+                if AnnualBookingPeriodOptionVesselCategoryPrice.objects.filter(annual_booking_period_option=self.object,vessel_category=vsc).count() > 0:
+                     abpocp = AnnualBookingPeriodOptionVesselCategoryPrice.objects.filter(annual_booking_period_option=self.object,vessel_category=vsc)[0]
+                     abpocp.price = price
+                     abpocp.oracle_code = oracle_code
+                     abpocp.save()
+                else:
+                     AnnualBookingPeriodOptionVesselCategoryPrice.objects.create(annual_booking_period_option=self.object,vessel_category=vsc,price=price,oracle_code=oracle_code)
+
+        return HttpResponseRedirect(reverse('dash-annual-bookingperiod-group-view', args=(self.kwargs['bp_group_id'],)))
+
+
+class AnnualBookingPeriodEditOption(UpdateView):
+    template_name = 'mooring/dash/add_annual_change_period_option.html'
+    model = AnnualBookingPeriodOption 
+
+    def get(self, request, *args, **kwargs):
+        pk = self.kwargs['pk']
+        bp_group_id = self.kwargs['bp_group_id']
+        if utils.mooring_group_access_level_booking_period_option(pk,bp_group_id,request) == True:
+            pass
+            #if MooringsiteBooking.objects.filter(booking_period_option_id=pk).count() > 0:
+            #    messages.error(self.request, 'This booking period cannot be changed as it already associated with an existing booking.')
+            #    return HttpResponseRedirect(reverse('dash-bookingperiod-group-view', args=(bp_group_id,)))
+
+            return super(AnnualBookingPeriodEditOption, self).get(request, *args, **kwargs)
+        else:
+            messages.error(self.request, 'Forbidden from viewing this page.')
+            return HttpResponseRedirect("/forbidden")
+
+    def get_context_data(self, **kwargs):
+        context = super(AnnualBookingPeriodEditOption, self).get_context_data(**kwargs)
+        #context['query_string'] = ''
+        context['bp_group_id'] = self.kwargs['bp_group_id']
+
+        vsc_array = []
+        vsc =VesselSizeCategory.objects.filter(status=1)
+        for v in vsc:
+            price = '0.00'
+            oracle_code = ''
+            if AnnualBookingPeriodOptionVesselCategoryPrice.objects.filter(annual_booking_period_option=self.object,vessel_category=v).count() > 0:
+                 a = AnnualBookingPeriodOptionVesselCategoryPrice.objects.filter(annual_booking_period_option=self.object,vessel_category=v)[0]
+                 price = a.price
+                 oracle_code = a.oracle_code
+            vsc_array.append({'id': v.id, 'name' : v.name, 'start_size': v.start_size, 'end_size': v.end_size, 'price': price,'oracle_code': oracle_code})
+        context['vessel_size_category'] = vsc_array
+
+
+        return context
+
+    def get_initial(self):
+        initial = super(AnnualBookingPeriodEditOption, self).get_initial()
+        initial['action'] = 'edit'
+        pk = self.kwargs['pk']
+        abp = AnnualBookingPeriodOption.objects.get(id=pk)
+        request = self.request
+        initial['start_time'] = datetime.strftime(abp.start_time + timedelta(hours=8), '%d/%m/%Y %H:%M')
+        initial['finish_time'] = datetime.strftime(abp.finish_time + timedelta(hours=8), '%d/%m/%Y %H:%M')
+        return initial
+
+    def get_form_class(self):
+        return app_forms.AnnualBookingPeriodOptionForm
+
+    def post(self, request, *args, **kwargs):
+        if request.POST.get('cancel'):
+            return HttpResponseRedirect(self.get_absolute_url())
+        return super(AnnualBookingPeriodEditOption, self).post(request, *args, **kwargs)
+
+    def form_valid(self, form):
+        self.object = form.save(commit=False)
+        forms_data = form.cleaned_data
+        bp_group_id = self.kwargs['bp_group_id']
+        self.object.start_time = datetime.strptime(self.request.POST.get('start_time'), '%d/%m/%Y %H:%M')
+        self.object.finish_time = datetime.strptime(self.request.POST.get('finish_time'), '%d/%m/%Y %H:%M')
+
+        self.object.save()
+        
+        for pkeys in self.request.POST:
+            if 'vessel_size_category' == pkeys[:20]:
+                vcs_id = pkeys.replace("vessel_size_category_", "")
+                vsc = VesselSizeCategory.objects.get(id=int(vcs_id))
+                price = self.request.POST.get(pkeys)
+                oracle_code = self.request.POST.get("vs_category_oracle_code_"+vcs_id)
+                if AnnualBookingPeriodOptionVesselCategoryPrice.objects.filter(annual_booking_period_option=self.object,vessel_category=vsc).count() > 0:
+                     abpocp = AnnualBookingPeriodOptionVesselCategoryPrice.objects.filter(annual_booking_period_option=self.object,vessel_category=vsc)[0]
+                     abpocp.price = price
+                     abpocp.oracle_code = oracle_code
+                     abpocp.save()
+                else:
+                     AnnualBookingPeriodOptionVesselCategoryPrice.objects.create(annual_booking_period_option=self.object,vessel_category=vsc,price=price,oracle_code=oracle_code)
+        
+
+        return HttpResponseRedirect(reverse('dash-annual-bookingperiod-group-view', args=(bp_group_id,)))
 
 
 class BookingPeriodEditOption(UpdateView):
@@ -2415,7 +2845,93 @@ class AdmissionBookingCancelCompletedView(LoginRequiredMixin, TemplateView):
         }
         return render(request, self.template_name, context)
 
+class AnnualAdmissionSuccessView(TemplateView):
+    template_name = 'mooring/booking/annual-admission-success.html'
 
+    def get(self, request, *args, **kwargs):
+        print ("ANNUAL BOOKING SUCCESS ")
+        try:
+            print ("TRY SUSSE")
+            context_processor = template_context(self.request)
+            basket = None
+            booking = utils.get_annual_admission_session_booking(request.session)
+            if self.request.user.is_authenticated():
+                basket = Basket.objects.filter(status='Submitted', owner=request.user).order_by('-id')[:1]
+            else:
+                basket = Basket.objects.filter(status='Submitted', owner=booking.customer).order_by('-id')[:1]
+            order = Order.objects.get(basket=basket[0])
+            invoice = Invoice.objects.get(order_number=order.number)
+            invoice_ref = invoice.reference
+            book_inv, created = BookingAnnualInvoice.objects.get_or_create(booking_annual_admission=booking, invoice_reference=invoice_ref)
+
+            #invoice_ref = request.GET.get('invoice')
+            if booking.booking_type == 3:
+                try:
+                    inv = Invoice.objects.get(reference=invoice_ref)
+                    order = Order.objects.get(number=inv.order_number)
+                    order.user = booking.customer
+                    order.save()
+                except Invoice.DoesNotExist:
+                    print ("INVOICE ERROR")
+                    logger.error('{} tried making a booking with an incorrect invoice'.format('User {} with id {}'.format(booking.customer.get_full_name(),booking.customer.id) if booking.customer else 'An anonymous user'))
+                    return redirect('public_make_booking')
+                if inv.system not in ['0516']:
+                    print ("SYSTEM ERROR")
+                    logger.error('{} tried making a booking with an invoice from another system with reference number {}'.format('User {} with id {}'.format(booking.customer.get_full_name(),booking.customer.id) if booking.customer else 'An anonymous user',inv.reference))
+                    return redirect('public_make_booking')
+
+                if book_inv:
+                    # set booking to be permanent fixture
+                    booking.booking_type = 1  # internet booking
+                    booking.expiry_time = None
+                    update_payments(invoice_ref)
+                    #Calculate Admissions and create object
+                    booking.save()
+                    #if not request.user.is_staff:
+                    #    print "USER IS NOT STAFF."
+                    utils.delete_annual_admission_session_booking(request.session)
+                    # send out the invoice before the confirmation is sent if total is greater than zero
+                    #if booking.cost_total > 0:
+                    #emails.send_booking_invoice(booking,request,context_processor)
+                    # for fully paid bookings, fire off confirmation emaili
+                    #if booking.invoice_status == 'paid':
+                    request.session['annual_admission_last_booking'] = booking.id
+                    context = {
+                      'booking': booking,
+                      'book_inv': [book_inv],
+                    }
+                    print ("COMPLETED SUCCESS")
+                    return render(request, self.template_name, context)
+
+        except Exception as e:
+            print ("EXCEPTION")
+            print (e)
+#            if 'ps_booking_internal' in request.COOKIES:
+#                print "INTERNAL REDIRECT"
+#                return redirect('dash-bookings')
+
+            print ("LAST ANNUAL")
+            print (request.session['annual_admission_last_booking'])
+            if ('annual_admission_last_booking' in request.session) and BookingAnnualAdmission.objects.filter(id=request.session['annual_admission_last_booking']).exists():
+                booking = BookingAnnualAdmission.objects.get(id=request.session['annual_admission_last_booking'])
+                if BookingAnnualInvoice.objects.filter(booking_annual_admission=booking).count() > 0:
+                    bi = BookingAnnualInvoice.objects.filter(booking_annual_admission=booking)
+                    book_inv = bi[0].invoice_reference
+#                    book_inv = BookingInvoice.objects.get(booking=booking).invoice_reference
+            else:
+                print ("SUCCESS RETURN HOME ")
+                return redirect('home')
+
+        #if request.user.is_staff:
+        #    return redirect('dash-bookings')
+        context = {
+            'booking': booking,
+            'book_inv': [book_inv]
+        }
+        return render(request, self.template_name, context)
+
+
+    
 class BookingSuccessView(TemplateView):
     template_name = 'mooring/booking/success.html'
 

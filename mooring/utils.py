@@ -5,6 +5,7 @@ import json
 import calendar
 import geojson
 import requests
+import io
 from django.conf import settings
 from django.core.urlresolvers import reverse, reverse_lazy
 from django.core.exceptions import ValidationError
@@ -18,7 +19,8 @@ from pytz import timezone as pytimezone
 from ledger.payments.models import Invoice,OracleInterface,CashTransaction
 from ledger.payments.utils import oracle_parser_on_invoice,update_payments
 from ledger.checkout.utils import create_basket_session, create_checkout_session, place_order_submission, get_cookie_basket
-from mooring.models import (MooringArea, Mooringsite, MooringsiteRate, MooringsiteBooking, Booking, BookingInvoice, MooringsiteBookingRange, Rate, MooringAreaBookingRange,MooringAreaStayHistory, MooringsiteRate, MarinaEntryRate, BookingVehicleRego, AdmissionsBooking, AdmissionsOracleCode, AdmissionsRate, AdmissionsLine, ChangePricePeriod, CancelPricePeriod, GlobalSettings, MooringAreaGroup, AdmissionsLocation, ChangeGroup, CancelGroup, BookingPeriod, BookingPeriodOption, AdmissionsBookingInvoice)
+from mooring.models import (MooringArea, Mooringsite, MooringsiteRate, MooringsiteBooking, Booking, BookingInvoice, MooringsiteBookingRange, Rate, MooringAreaBookingRange,MooringAreaStayHistory, MooringsiteRate, MarinaEntryRate, BookingVehicleRego, AdmissionsBooking, AdmissionsOracleCode, AdmissionsRate, AdmissionsLine, ChangePricePeriod, CancelPricePeriod, GlobalSettings, MooringAreaGroup, AdmissionsLocation, ChangeGroup, CancelGroup, BookingPeriod, BookingPeriodOption, AdmissionsBookingInvoice, BookingAnnualAdmission)
+from mooring import models
 from mooring.serialisers import BookingRegoSerializer, MooringsiteRateSerializer, MarinaEntryRateSerializer, RateSerializer, MooringsiteRateReadonlySerializer, AdmissionsRateSerializer
 from mooring.emails import send_booking_invoice,send_booking_confirmation
 from oscar.apps.order.models import Order
@@ -1354,6 +1356,31 @@ def create_temp_bookingupdate(request,arrival,departure,booking_details,old_book
 
     return booking
 
+
+def get_annual_admissions_pricing_info(annual_booking_period_id,vessel_size):
+    nowdt = datetime.now()
+    price = '0.00'
+
+    annual_admissions = {'response': 'error', 'abpg': {}, 'abpo': {}, 'abpovc': {}}
+    if models.AnnualBookingPeriodGroup.objects.filter(id=int(annual_booking_period_id)).count() > 0:
+         abpg = models.AnnualBookingPeriodGroup.objects.get(id=int(annual_booking_period_id))
+         vsc = models.VesselSizeCategory.objects.filter(start_size__lte=float(vessel_size),end_size__gte=float(vessel_size))
+         print (vsc)
+         abpo= models.AnnualBookingPeriodOption.objects.filter(start_time__lte=nowdt,finish_time__gte=nowdt)
+         print (abpo)
+         if abpo.count() > 0 and vsc.count() > 0:
+             abpovc = models.AnnualBookingPeriodOptionVesselCategoryPrice.objects.filter(annual_booking_period_option=abpo[0],vessel_category=vsc[0].id)
+
+             price = abpovc[0].price
+             annual_admissions['abpg'] = abpg
+             if abpo.count() > 0: 
+                 annual_admissions['abpo'] = abpo[0]
+             if abpovc.count() > 0:
+                 annual_admissions['abpovc'] = abpovc[0]
+                 annual_admissions['response'] = 'success'
+    return annual_admissions
+
+
 def iiiicreate_temp_bookingupdate(request,arrival,departure,booking_details,old_booking,total_price):
     # delete all the campsites in the old moving so as to transfer them to the new booking
     old_booking.campsites.all().delete()
@@ -1660,6 +1687,64 @@ def admissionsCheckout(request, admissionsBooking, lines, invoice_text=None, vou
 def get_basket(request):
     return get_cookie_basket(settings.OSCAR_BASKET_COOKIE_OPEN,request)
 
+def annual_admission_checkout(request, booking, lines, invoice_text=None, vouchers=[], internal=False):
+    basket_params = {
+        'products': lines,
+        'vouchers': vouchers,
+        'system': settings.PS_PAYMENT_SYSTEM_ID,
+        'custom_basket': True,
+    }
+    print ("BBASLK")
+    print (basket_params)
+    basket, basket_hash = create_basket_session(request, basket_params)
+    print ("NEXT")
+    checkout_params = {
+        'system': settings.PS_PAYMENT_SYSTEM_ID,
+        'fallback_url': request.build_absolute_uri('/'),
+        'return_url': request.build_absolute_uri(reverse('public_booking_annual_admission_success')),
+        'return_preload_url': request.build_absolute_uri(reverse('public_booking_annual_admission_success')),
+        'force_redirect': True,
+        'proxy': True if internal else False,
+        'invoice_text': invoice_text,
+    }
+    if internal or request.user.is_anonymous():
+        checkout_params['basket_owner'] = booking.customer.id
+
+
+    create_checkout_session(request, checkout_params)
+
+
+
+#    if internal:
+#        response = place_order_submission(request)
+#    else:
+    response = HttpResponseRedirect(reverse('checkout:index'))
+    # inject the current basket into the redirect response cookies
+    # or else, anonymous users will be directionless
+    response.set_cookie(
+            settings.OSCAR_BASKET_COOKIE_OPEN, basket_hash,
+            max_age=settings.OSCAR_BASKET_COOKIE_LIFETIME,
+            secure=settings.OSCAR_BASKET_COOKIE_SECURE, httponly=True
+    )
+
+    #if booking.cost_total < 0:
+    #    response = HttpResponseRedirect('/refund-payment')
+    #    response.set_cookie(
+    #        settings.OSCAR_BASKET_COOKIE_OPEN, basket_hash,
+    #        max_age=settings.OSCAR_BASKET_COOKIE_LIFETIME,
+    #        secure=settings.OSCAR_BASKET_COOKIE_SECURE, httponly=True
+    #    )
+
+    ## Zero booking costs
+    #if booking.cost_total < 1 and booking.cost_total > -1:
+    #    response = HttpResponseRedirect('/no-payment')
+    #    response.set_cookie(
+    #        settings.OSCAR_BASKET_COOKIE_OPEN, basket_hash,
+    #        max_age=settings.OSCAR_BASKET_COOKIE_LIFETIME,
+    #        secure=settings.OSCAR_BASKET_COOKIE_SECURE, httponly=True
+    #    )
+    return response
+
 
 def checkout(request, booking, lines, invoice_text=None, vouchers=[], internal=False):
     basket_params = {
@@ -1874,6 +1959,21 @@ def get_session_admissions_booking(session):
     except AdmissionsBooking.DoesNotExist:
         raise Exception('Admissions booking not found for booking_id {}'.format(booking_id))
 
+def get_annual_admission_session_booking(session):
+    if 'annual_admission_booking' in session:
+        booking_id = session['annual_admission_booking']
+    else:
+        raise Exception('Annual Admission Booking not in Session')
+
+    try:
+        return BookingAnnualAdmission.objects.get(id=booking_id)
+    except BookingAnnualAdmission.DoesNotExist:
+        raise Exception('Annual Admission Booking not found for booking_id {}'.format(booking_id))
+
+def delete_annual_admission_session_booking(session):
+    if 'annual_admission_booking' in session:
+        del session['annual_admission_booking']
+        session.modified = True
 
 def delete_session_admissions_booking(session):
     if 'ad_booking' in session:
@@ -2020,4 +2120,19 @@ def check_mooring_admin_access(request):
           return True
     return False
 
+
+def get_provinces(country_code):
+    provinces = []
+    read_data = ""
+    json_response = []
+    with io.open(settings.BASE_DIR+'/mooring/data/provinces.json', "r", encoding="utf-8") as my_file:
+             read_data = my_file.read()
+    provinces = json.loads(read_data)
+
+    for p in provinces:
+        if p['country'] == country_code:
+            if 'short' in p:
+               json_response.append(p)
+
+    return json_response
 

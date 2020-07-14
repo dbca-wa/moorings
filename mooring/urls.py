@@ -60,6 +60,9 @@ api_patterns = [
     url(r'^api/oracle_job$',api.OracleJob.as_view(), name='get-oracle'),
     url(r'^api/bulkPricing', api.BulkPricingView.as_view(),name='bulkpricing-api'),
     url(r'^api/search_suggest', api.search_suggest, name='search_suggest'),
+    url(r'^api/get_country_provinces/(?P<country_code>[A-Z]+)/', api.get_provinces_by_country, name='get_country_provinces'),
+    url(r'^api/get_annual_admission_pricing/(?P<annual_booking_period_id>[0-9]+)/(?P<vessel_size>[0-9]+.[0-9]+)/', api.get_annual_admission_pricing, name='get_annual_admission_pricing_float'),
+    url(r'^api/get_annual_admission_pricing/(?P<annual_booking_period_id>[0-9]+)/(?P<vessel_size>[0-9]+)/', api.get_annual_admission_pricing, name='get_annual_admission_pricing'),
     url(r'^api/create_booking', api.create_booking, name='create_booking'),
     url(r'^api/create_admissions_booking', api.create_admissions_booking, name="create_admissions_booking"),
     url(r'api/get_confirmation/(?P<booking_id>[0-9]+)/$', api.get_confirmation, name='get_confirmation'),
@@ -76,7 +79,6 @@ api_patterns = [
 #    url(r'^api/admissions_key$', api.AdmissionsKeyFromURLView.as_view(), name='admissions_key'),
     url(r'^api/',include(router.urls))
 ]
-
 # URL Patterns
 urlpatterns = [
     url(r'^admin/', admin.site.urls),
@@ -113,6 +115,14 @@ urlpatterns = [
     url(r'^dashboard/bookingperiods/(?P<pk>[0-9]+)/delete', views.BookingPeriodDeleteGroup.as_view(), name='dash-bookingperiod-group-delete'),
     url(r'^dashboard/bookingperiods/(?P<pk>[0-9]+)/view', views.BookingPeriodView.as_view(), name='dash-bookingperiod-group-view'),
     url(r'^dashboard/bookingperiods', views.BookingPeriodGroupView.as_view(), name='dash-bookingperiod'),
+
+   
+    url(r'^dashboard/annual-bookingperiods-option/(?P<bp_group_id>[0-9]+)/edit/(?P<pk>[0-9]+)', views.AnnualBookingPeriodEditOption.as_view(), name='dash-annual-booking-period-option-edit'),
+    url(r'^dashboard/annual-bookingperiods-option/(?P<bp_group_id>[0-9]+)/create', views.AnnualBookingPeriodAddOption.as_view(), name='dash-annual-booking-period-option-add'),
+    url(r'^dashboard/annual-bookingperiods/(?P<pk>[0-9]+)/view', views.AnnualBookingPeriodView.as_view(), name='dash-annual-bookingperiod-group-view'),
+    url(r'^dashboard/annual-bookingperiods/(?P<pk>[0-9]+)/edit', views.AnnualBookingPeriodEditChangeGroup.as_view(), name='dash-annual-bookingperiod-group-edit'),
+    url(r'^dashboard/annual-bookingperiods/create', views.AnnualBookingPeriodAddChangeGroup.as_view(), name='dash-annual-bookingperiod-group-add'),
+    url(r'^dashboard/annual-bookingperiods', views.AnnualBookingPeriodGroupView.as_view(), name='dash-annualbookingperiod'),
     url(r'^dashboard/failed-refunds/(?P<pk>[0-9]+)/complete', views.RefundFailedCompleted.as_view(), name='dash-complete_failed_refund'),
     url(r'^dashboard/failed-refunds-completed', views.RefundFailedCompletedView.as_view(), name='dash-failed_refunds_completed'),
     url(r'^dashboard/failed-refunds', views.RefundFailedView.as_view(), name='dash-failedrefunds'),
@@ -123,6 +133,7 @@ urlpatterns = [
     url(r'^refund-payment/', views.RefundPaymentView.as_view(), name='refund_payment'),
     url(r'^no-payment/', views.ZeroBookingView.as_view(), name='no_payment_booking'),
     url(r'^mybookings/', views.MyBookingsView.as_view(), name='public_my_bookings'),
+    url(r'^annual-admissions/(?P<loc>[a-z]+)/$', views.AnnualAdmissionsView.as_view(), name='annual_admissions_view'),
     url(r'^booking-history/(?P<pk>[0-9]+)/', views.ViewBookingHistory.as_view(), name='view_booking_history'),
     url(r'^booking-history-refund/(?P<pk>[0-9]+)/', views.RefundBookingHistory.as_view(), name='view_refund_booking_history'),
     url(r'^view-booking/(?P<pk>[0-9]+)/', views.ViewBookingView.as_view(), name='public_view_booking'),
@@ -130,6 +141,7 @@ urlpatterns = [
     url(r'^cancel-booking/(?P<pk>[0-9]+)/', views.CancelBookingView.as_view(), name='public_cancel_booking'),
     url(r'^cancel-admissions-booking/(?P<pk>[0-9]+)/', views.CancelAdmissionsBookingView.as_view(), name='public_cancel_admissions_booking'),
     url(r'^success/', views.BookingSuccessView.as_view(), name='public_booking_success'),
+    url(r'^annual-admission-success/', views.AnnualAdmissionSuccessView.as_view(), name='public_booking_annual_admission_success'),
     url(r'^cancel-completed/(?P<booking_id>[0-9]+)/', views.BookingCancelCompletedView.as_view(), name='public_booking_cancelled'),
     url(r'^cancel-admission-completed/(?P<booking_id>[0-9]+)/', views.AdmissionBookingCancelCompletedView.as_view(), name='public_admission_booking_cancelled'),
     url(r'^success_admissions/', views.AdmissionsBookingSuccessView.as_view(), name='public_admissions_success'),
