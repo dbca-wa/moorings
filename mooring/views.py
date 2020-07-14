@@ -1795,10 +1795,7 @@ class AnnualAdmissionsView(CreateView):
     model = BookingAnnualAdmission
    
     def get(self, request, *args, **kwargs):
-        if is_payment_officer(request.user) == True:
-            return super(AnnualAdmissionsView, self).get(request, *args, **kwargs)
-        else:
-             return HttpResponseRedirect("/forbidden")
+        return super(AnnualAdmissionsView, self).get(request, *args, **kwargs)
 
     def get_form_class(self):
         return app_forms.AnnualAdmissionForm
