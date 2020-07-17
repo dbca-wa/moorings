@@ -1,0 +1,76 @@
+<div class="well">
+    <div class="row"><div class="col-sm-12">
+        <h3 class="text-primary" style='font-weight: bold'>Rottnest Island Annual Admission Fee</h3>
+    </div></div>
+    <div class="row">
+        <div class="col-sm-3">
+		&nbsp;
+        </div>
+        <div class="col-sm-9">
+            <div class="row" style=''>
+                <div class="col-sm-4">
+                    <b>Annual admission fee period:</b>
+                </div>
+                <div class="col-sm-8">
+			{{ booking.start_dt|date:"d/m/Y" }} - {{ booking.expiry_dt|date:"d/m/Y" }}
+                </div>
+            </div><div class="row">
+                <div class="col-sm-4">
+                    <b>Vessel registration number:</b>
+                </div>
+                <div class="col-sm-8">
+                    {{ booking.details.vessel_rego }}
+                </div>
+            </div><div class="row" style=''>
+                <div class="col-sm-4">
+                    <b>Registered vessel length:</b>
+                </div>
+                <div class="col-sm-8">
+                    {{ booking.details.vessel_length }}m
+                </div>
+            </div><div class="row">
+                <div class="col-sm-4">
+                    <b>Annual admission fee confirmation number:</b>
+                </div>
+                <div class="col-sm-8">
+                    {{ booking.confirmation_number }}
+                </div>
+            </div><div class="row">
+                <div class="col-sm-4">
+                    <b>Date paid:</b>
+                </div>
+                <div class="col-sm-8">
+                    {{ booking.created|date:"d/m/Y" }}
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-sm-12">&nbsp;</div>
+            </div>
+
+            <div class="row">
+               <div class="col-sm-4">
+                   {% if request.user.is_authenticated %}
+                            {% for bi in book_inv %}
+                            <a href="{% url 'mooring-invoice-pdf' bi %}" class="btn btn-info btn-lg" >Invoice</a>
+                            {% endfor %}
+                   {% endif %}
+
+                </div>
+                <div class="col-sm-8">
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-sm-12">&nbsp;</div>
+            </div>
+
+            <div class="row">
+		<div class="col-sm-12">Your sticker will be dispatched within 10 working days</div>
+	    </div>          
+	    
+	    
+	    
+          </div>
+        </div>
+    </div>
+</div>
+

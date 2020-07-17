@@ -56,12 +56,27 @@
                               iform.get_annual_pricing(annual_booking_period_id, vessel_size);
                               // Check input( $( this ).val() ) for validity here
                         });
+
                         $("#id_vessel_length").blur(function() {
                               var annual_booking_period_id =$('#id_booking_period').val();
                               var vessel_size = $('#id_vessel_length').val();
                               iform.get_annual_pricing(annual_booking_period_id, vessel_size);
                               // Check input( $( this ).val() ) for validity here
                         });
+
+                        $("#id_override_price_selection").click(function() {
+			      var id_override_price_selection =  $('#id_override_price_selection').prop( 'checked');
+			      if (id_override_price_selection == true) { 
+                                   $('#override_box').show(); 
+			      } else {
+                                   $('#override_box').hide();
+			      }
+                        });
+                        var id_override_price_selection =  $('#id_override_price_selection').prop( 'checked');
+			if (id_override_price_selection == true) {
+		           $('#override_box').show();
+			}
+
                         var vessel_length = $("#id_vessel_length").val();
 			var booking_period = $("#id_booking_period").val();
 			if (vessel_length.length > 0) {

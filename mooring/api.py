@@ -4459,6 +4459,7 @@ def get_annual_admission_pricing(request, annual_booking_period_id, vessel_size)
                 response = 'error'
          except:
             pass
+            
             price = "No price available"
             response = 'error' 
 

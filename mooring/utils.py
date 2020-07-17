@@ -1360,17 +1360,13 @@ def create_temp_bookingupdate(request,arrival,departure,booking_details,old_book
 def get_annual_admissions_pricing_info(annual_booking_period_id,vessel_size):
     nowdt = datetime.now()
     price = '0.00'
-
     annual_admissions = {'response': 'error', 'abpg': {}, 'abpo': {}, 'abpovc': {}}
     if models.AnnualBookingPeriodGroup.objects.filter(id=int(annual_booking_period_id)).count() > 0:
          abpg = models.AnnualBookingPeriodGroup.objects.get(id=int(annual_booking_period_id))
          vsc = models.VesselSizeCategory.objects.filter(start_size__lte=float(vessel_size),end_size__gte=float(vessel_size))
-         print (vsc)
-         abpo= models.AnnualBookingPeriodOption.objects.filter(start_time__lte=nowdt,finish_time__gte=nowdt)
-         print (abpo)
+         abpo= models.AnnualBookingPeriodOption.objects.filter(start_time__lte=nowdt,finish_time__gte=nowdt,annual_booking_period_group=abpg)
          if abpo.count() > 0 and vsc.count() > 0:
-             abpovc = models.AnnualBookingPeriodOptionVesselCategoryPrice.objects.filter(annual_booking_period_option=abpo[0],vessel_category=vsc[0].id)
-
+             abpovc = models.AnnualBookingPeriodOptionVesselCategoryPrice.objects.filter(annual_booking_period_option=abpo[0],vessel_category=vsc[0])
              price = abpovc[0].price
              annual_admissions['abpg'] = abpg
              if abpo.count() > 0: 
@@ -1688,16 +1684,14 @@ def get_basket(request):
     return get_cookie_basket(settings.OSCAR_BASKET_COOKIE_OPEN,request)
 
 def annual_admission_checkout(request, booking, lines, invoice_text=None, vouchers=[], internal=False):
+
     basket_params = {
         'products': lines,
         'vouchers': vouchers,
         'system': settings.PS_PAYMENT_SYSTEM_ID,
         'custom_basket': True,
     }
-    print ("BBASLK")
-    print (basket_params)
     basket, basket_hash = create_basket_session(request, basket_params)
-    print ("NEXT")
     checkout_params = {
         'system': settings.PS_PAYMENT_SYSTEM_ID,
         'fallback_url': request.build_absolute_uri('/'),
@@ -1709,7 +1703,6 @@ def annual_admission_checkout(request, booking, lines, invoice_text=None, vouche
     }
     if internal or request.user.is_anonymous():
         checkout_params['basket_owner'] = booking.customer.id
-
 
     create_checkout_session(request, checkout_params)
 

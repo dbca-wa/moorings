@@ -9,10 +9,13 @@ def mooring_url(request):
        template_group = 'rottnest'
        TERMS  = "https://www.rottnestisland.com/~/media/Files/boating-documents/marine-hire-facilities-tcs.pdf?la=en"
        PUBLIC_URL='https://mooring-ria.dbca.wa.gov.au/'
+       mooring_group = 'ria'
     else:
        template_group = 'pvs'
        TERMS = "/know/online-mooring-site-booking-terms-and-conditions"
        PUBLIC_URL='https://mooring.dbca.wa.gov.au'
+       mooring_group = 'pvs'
+
 
     is_officer = False
     is_inventory = False
@@ -50,7 +53,8 @@ def mooring_url(request):
         'IS_ADMIN' : is_admin,
         'IS_PAYMENT_OFFICER' : is_payment_officer,
         'IS_CUSTOMER' : is_customer,
-        'PUBLIC_URL' : PUBLIC_URL
+        'PUBLIC_URL' : PUBLIC_URL,
+        'MOORING_GROUP': mooring_group
         }
 
 

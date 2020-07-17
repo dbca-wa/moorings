@@ -4,7 +4,7 @@ from mooring import models
 from mooring import utils
 from crispy_forms.helper import FormHelper
 from crispy_forms.layout import Layout, Submit, HTML, Fieldset, MultiField, Div
-from django.forms import Form, ModelForm, ChoiceField, FileField, CharField, Textarea, ClearableFileInput, HiddenInput, Field, RadioSelect, ModelChoiceField, Select
+from django.forms import Form, ModelForm, ChoiceField, FileField, CharField, Textarea, ClearableFileInput, HiddenInput, Field, RadioSelect, ModelChoiceField, Select, CheckboxInput
 
 class BaseFormHelper(FormHelper):
     form_class = 'form-horizontal'
@@ -142,6 +142,11 @@ class AnnualAdmissionForm(forms.ModelForm):
     booking_period = forms.ChoiceField(widget=forms.Select(attrs={'class': "form-control" }))
     terms = forms.BooleanField(label="I agree to the <A href=''>terms and conditions</A> (Including insurance requirements)")
 
+    override_price_selection = forms.BooleanField(label="Override Price", widget=forms.CheckboxInput(attrs={'class': "iiform-control", 'style' : 'margin-left: 0px; position: inherit;' }), required=False) #label="<b>Override Price</b>", required=False)
+    override_price = forms.CharField(max_length=10, label="Price", widget=forms.TextInput(attrs={'required':False, 'class': "form-control", 'step' : '0.01' }), required=False)
+    override_reason = forms.ChoiceField(label="Reason", widget=forms.Select(attrs={'class': "form-control" }), required=False)
+    override_details = forms.CharField(widget=forms.Textarea(attrs={'required':False, 'class': "form-control"}), label="Details",required=False)
+
     class Meta:
         model = models.BookingAnnualAdmission
         fields = []
@@ -161,7 +166,7 @@ class AnnualAdmissionForm(forms.ModelForm):
 
         vessel_length = self.cleaned_data.get('vessel_length') 
         booking_period = self.cleaned_data.get('booking_period')
-   
+
         response = 'error'
         if models.AnnualBookingPeriodGroup.objects.filter(id=int(booking_period)).count() > 0:
              try:
@@ -176,6 +181,19 @@ class AnnualAdmissionForm(forms.ModelForm):
                 response = 'error'
         if response == 'error':
              raise forms.ValidationError('Sorry, no matching booking period available for your vessel size.')
+
+        if self.cleaned_data.get('override_price_selection') is True: 
+            if self.cleaned_data.get('override_reason'):
+                override_reason = self.cleaned_data.get('override_reason')
+                dr = models.DiscountReason.objects.filter(id=override_reason)
+                if dr[0].detailRequired is True:
+                    if len(self.cleaned_data.get('override_details')) > 1:
+                          pass
+                    else: 
+                        raise forms.ValidationError('Please complete override details')
+            else:
+                raise forms.ValidationError('Please select an override reason') 
+             
 
     def __init__(self, *args, **kwargs):
         # User must be passed in as a kwarg.
@@ -192,10 +210,22 @@ class AnnualAdmissionForm(forms.ModelForm):
              booking_period_list.append(['','Please Select a Period'])
              for a in apg:
                    booking_period_list.append([a.id, a.name])
-
              self.fields['booking_period'].choices = booking_period_list
+
+        discount_reason = []
+        discount_reason.append(['','Please Select a Period'])
+        for d in self.initial['discount_reason']:
+              discount_reason.append([d.id,d.text])
+        self.fields['override_reason'].choices = discount_reason  
+
         dynamic_selections = HTML('{% include "mooring/booking/annual_admission_form_js.html" %}')
-        self.helper.layout = Layout(HTML("<div class='row'><div class='col-lg-6'>"),HTML('<div class="well"><h3 class="text-primary" style="text-align: center;">Personal Details</h3>'),'first_name','last_name','postal_address_line_1','postal_address_line_2','country',HTML("<div class='row'><div class='col-lg-6'>"),'postcode',HTML("</div><div class='col-lg-6'>"),'state',HTML('</div></div>'),'phone','mobile','email','confirm_email',HTML('</div></div>'),HTML('<div class="col-lg-6">'),HTML('<div class="well"><h3 class="text-primary" style="text-align: center;">Vessel Details</h3>'),'vessel_rego','vessel_name','vessel_length',HTML('<h3 class="text-primary" style="text-align: center;">Annual Admission Period</h3>'),'booking_period', HTML('</div></div><div class="col-lg-12"><div class="well">'),HTML('<div class="row"><div class="col-md-12"><div class="row"><div class="col-md-6"><div class="form-group"><label for="Total Price">Total Price <span class="text-muted">(GST inclusive.)</span></label> <div class="input-group"><span class="input-group-addon">AUD $</span> <input type="text" id="id_total_price" readonly="readonly" class="form-control"></div></div></div></div>'),HTML('<div class="row"><div class="col-md-6"><div class="small-12 medium-12 large-4 columns"><label class="label-plain" style="width: 250px;">Click <a href="http://ria.wa.gov.au/about-us/Fees-and-charges" taget="_blank">here</a> for price information.</label></div></div> <div class="col-md-6"><div class="row"><div class="col-md-12 "><div class="checkbox"><label>'),'terms',HTML('</div></div><div class="col-md-12 " style="margin-top: 20px; text-align: right;">'),Submit('ProceedtoPayment', 'Proceed to Payment', css_class='btn btn-primary'),HTML('</div></div></div></div>'),HTML('</div></div></div></div></div>'), dynamic_selections)
+
+        override_box = Div()
+        if self.initial['allow_override_fees'] is True:
+            override_box = Div('override_price_selection',HTML('<div class="small-12 medium-12 large-12 columns" style="display:none;" id="override_box">'),Fieldset('','override_price','override_reason','override_details'),HTML('</div>'))
+        #override_box =HTML('<div class="small-12 medium-12 large-12 columns">')
+
+        self.helper.layout = Layout(HTML("<div class='row'><div class='col-lg-6'>"),HTML('<div class="well"><h3 class="text-primary" style="text-align: center;">Personal Details</h3>'),'first_name','last_name','postal_address_line_1','postal_address_line_2','country',HTML("<div class='row'><div class='col-lg-6'>"),'postcode',HTML("</div><div class='col-lg-6'>"),'state',HTML('</div></div>'),'mobile','phone','email','confirm_email',HTML('</div></div>'),HTML('<div class="col-lg-6">'),HTML('<div class="well"><h3 class="text-primary" style="text-align: center;">Vessel Details</h3>'),'vessel_rego','vessel_name','vessel_length',HTML('<h3 class="text-primary" style="text-align: center;">Annual Admission Period</h3>'),'booking_period', HTML('</div></div><div class="col-lg-12"><div class="well">'),HTML('<div class="row"><div class="col-md-12"><div class="row"><div class="col-md-6"><div class="form-group"><label for="Total Price">Total Price <span class="text-muted">(GST inclusive.)</span></label> <div class="input-group"><span class="input-group-addon">AUD $</span> <input type="text" id="id_total_price" readonly="readonly" class="form-control"></div></div></div></div>'),HTML('<div class="row"><div class="col-md-6"><div class="small-12 medium-12 large-4 columns"><label class="label-plain" style="width: 250px;">Click <a href="http://ria.wa.gov.au/about-us/Fees-and-charges" taget="_blank">here</a> for price information.</label>'),override_box,HTML('</div></div> <div class="col-md-6"><div class="row"><div class="col-md-12 "><div class="checkbox"><label>'),'terms',HTML('</div></div><div class="col-md-12 " style="margin-top: 20px; text-align: right;">'),Submit('ProceedtoPayment', 'Proceed to Payment', css_class='btn btn-primary'),HTML('</div></div></div></div>'),HTML('</div></div></div></div></div>'), dynamic_selections)
 
 
 class FailedRefundCompletedForm(forms.ModelForm):
