@@ -17,6 +17,7 @@ from django import forms
 from django.contrib import messages
 from mooring import forms as app_forms
 from mooring.forms import LoginForm, MakeBookingsForm, AnonymousMakeBookingsForm, VehicleInfoFormset
+from mooring import models
 from mooring.models import (MooringArea,
                                 MooringsiteBooking,
                                 Mooringsite,
@@ -1811,9 +1812,19 @@ class AnnualAdmissionsView(CreateView):
     def get_initial(self):
         initial = super(AnnualAdmissionsView, self).get_initial()
         initial['loc'] = self.kwargs['loc']
+        
+        al = AdmissionsLocation.objects.filter(key=self.kwargs['loc'])
+        initial['mooring_group'] = al[0].mooring_group
         initial['country'] = "AU"
         if self.request.POST.get('country'):
             initial['country'] = self.request.POST.get('country')
+        
+        initial['allow_override_fees'] = False
+        initial['discount_reason'] = DiscountReason.objects.filter(mooring_group=al[0].mooring_group)
+        payments_officer_group = self.request.user.groups.filter(name__in=['Payments Officers']).exists()
+        if payments_officer_group:
+             initial['allow_override_fees'] = True
+
         return initial
 
     def post(self, request, *args, **kwargs):
@@ -1825,6 +1836,11 @@ class AnnualAdmissionsView(CreateView):
         print ("SUBMITTED BOOKING")
         self.object = form.save(commit=False)
         forms_data = form.cleaned_data
+        payments_officer_group = self.request.user.groups.filter(name__in=['Payments Officers']).exists()
+        if payments_officer_group:
+             allow_override_fees = True
+
+
         customer = None
         if self.request.user.is_anonymous() or self.request.user.is_staff:
             try:
@@ -1865,7 +1881,6 @@ class AnnualAdmissionsView(CreateView):
         #print (annual_admission)
         total_cost = annual_admission['abpovc'].price
         oracle_code = annual_admission['abpovc'].oracle_code
-        lines.append({'ledger_description': 'Annual Admissions {} - {}'.format(str(abg.start_time.strftime('%d/%m/%Y')), str(abg.finish_time.strftime('%d/%m/%Y'))), "quantity": 1, 'price_incl_tax': total_cost, "oracle_code": oracle_code, 'line_status': 1})
 
         self.object.customer = customer
         self.object.start_dt = abg.start_time
@@ -1874,10 +1889,22 @@ class AnnualAdmissionsView(CreateView):
         self.object.annual_booking_period_group = abg
         self.object.cost_total = total_cost
         self.object.details = details
-        #self.object.override_price
-        #self.object.override_reason
-        #self.object.override_reason_info
-        #self.object.overridden_by
+        override_lines = None
+
+        if allow_override_fees is True:
+            if self.request.POST.get('override_price_selection', 'off') == 'on':
+               pass
+               dr = DiscountReason.objects.get(id=self.request.POST.get('override_reason'))
+               self.object.override_price = self.request.POST.get('override_price')
+               self.object.override_reason = dr
+               self.object.override_reason_info = self.request.POST.get('override_details')
+               self.object.overridden_by = self.request.user
+               override_lines = {'ledger_description': '{} - {}'.format(dr.text, str(self.object.override_reason_info)), "quantity": 1, 'price_incl_tax': Decimal('0.00'), "oracle_code": oracle_code, 'line_status': 1}
+               total_cost = self.object.override_price
+
+        lines.append({'ledger_description': 'Annual Admissions {} - {}'.format(str(abg.start_time.strftime('%d/%m/%Y')), str(abg.finish_time.strftime('%d/%m/%Y'))), "quantity": 1, 'price_incl_tax': total_cost, "oracle_code": oracle_code, 'line_status': 1})
+        if override_lines:
+            lines.append(override_lines)
         if self.request.user.is_authenticated:
            self.object.created_by = self.request.user
         else:
@@ -1894,8 +1921,8 @@ class AnnualAdmissionsView(CreateView):
         booking = self.object
         reservation = u"Annual Admission for {} from {} to {} ".format(
                u'{} {}'.format(booking.customer.first_name, booking.customer.last_name),
-                str(abg.start_time),
-                str(abg.finish_time),
+                str(abg.start_time.strftime('%d/%m/%Y')),
+                str(abg.finish_time.strftime('%d/%m/%Y')),
         )
 
         logger.info('{} built annual admission booking {} and handing over to payment gateway'.format('User {} with id {}'.format(booking.customer.get_full_name(),booking.customer.id) if booking.customer else 'An anonymous user',booking.id))
@@ -2864,6 +2891,8 @@ class AnnualAdmissionSuccessView(TemplateView):
             invoice_ref = invoice.reference
             book_inv, created = BookingAnnualInvoice.objects.get_or_create(booking_annual_admission=booking, invoice_reference=invoice_ref)
 
+            
+
             #invoice_ref = request.GET.get('invoice')
             if booking.booking_type == 3:
                 try:
@@ -2892,7 +2921,8 @@ class AnnualAdmissionSuccessView(TemplateView):
                     utils.delete_annual_admission_session_booking(request.session)
                     # send out the invoice before the confirmation is sent if total is greater than zero
                     #if booking.cost_total > 0:
-                    #emails.send_booking_invoice(booking,request,context_processor)
+                    print ("SEND EMAIL")
+                    emails.send_annual_admission_booking_invoice(booking,request,context_processor)
                     # for fully paid bookings, fire off confirmation emaili
                     #if booking.invoice_status == 'paid':
                     request.session['annual_admission_last_booking'] = booking.id
@@ -2905,13 +2935,10 @@ class AnnualAdmissionSuccessView(TemplateView):
 
         except Exception as e:
             print ("EXCEPTION")
-            print (e)
 #            if 'ps_booking_internal' in request.COOKIES:
 #                print "INTERNAL REDIRECT"
 #                return redirect('dash-bookings')
 
-            print ("LAST ANNUAL")
-            print (request.session['annual_admission_last_booking'])
             if ('annual_admission_last_booking' in request.session) and BookingAnnualAdmission.objects.filter(id=request.session['annual_admission_last_booking']).exists():
                 booking = BookingAnnualAdmission.objects.get(id=request.session['annual_admission_last_booking'])
                 if BookingAnnualInvoice.objects.filter(booking_annual_admission=booking).count() > 0:
@@ -2919,14 +2946,15 @@ class AnnualAdmissionSuccessView(TemplateView):
                     book_inv = bi[0].invoice_reference
 #                    book_inv = BookingInvoice.objects.get(booking=booking).invoice_reference
             else:
-                print ("SUCCESS RETURN HOME ")
+                print ("SUCCESS RETURN HOME")
                 return redirect('home')
 
         #if request.user.is_staff:
         #    return redirect('dash-bookings')
         context = {
             'booking': booking,
-            'book_inv': [book_inv]
+            'book_inv': [book_inv],
+            'context_processor' : context_processor
         }
         return render(request, self.template_name, context)
 

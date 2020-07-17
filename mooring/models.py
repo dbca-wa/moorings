@@ -563,7 +563,7 @@ class AnnualBookingPeriodOptionVesselCategoryPrice(models.Model):
     created = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
-        return self.price
+        return str(self.price)
 
 class ChangePricePeriod(models.Model):
 
@@ -1278,6 +1278,11 @@ class BookingAnnualAdmission(models.Model):
 
     def __str__(self):
          return str(self.id)
+
+
+    @property
+    def confirmation_number(self):
+         return 'AA{}'.format(self.id)
 
 
 class BookingAnnualInvoice(models.Model):
