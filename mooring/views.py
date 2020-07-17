@@ -1837,6 +1837,7 @@ class AnnualAdmissionsView(CreateView):
         self.object = form.save(commit=False)
         forms_data = form.cleaned_data
         payments_officer_group = self.request.user.groups.filter(name__in=['Payments Officers']).exists()
+        allow_override_fees=False
         if payments_officer_group:
              allow_override_fees = True
 
