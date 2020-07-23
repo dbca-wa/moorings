@@ -41,6 +41,7 @@ from datetime import datetime,timedelta, date
 from decimal import Decimal
 from ledger.payments.utils import systemid_check, update_payments
 from mooring.context_processors import mooring_url, template_context
+from mooring import doctopdf
 from mooring import models
 from mooring.models import (MooringArea,
                                 District,
@@ -4487,6 +4488,29 @@ def cancel_annual_admissions(request):
            }), content_type='application/json', status=status_code)
 
     
+@require_http_methods(['GET'])
+def get_annual_admission_letter(request, *args, **kwargs):
+    # fetch booking for ID
+    booking_id = kwargs.get('booking_id', None)
+    if (booking_id is None):
+        return HttpResponse('Booking ID not specified', status=400)
+
+    try:
+        booking =  models.BookingAnnualAdmission.objects.get(id=booking_id)
+    except Booking.DoesNotExist:
+        return HttpResponse('Annual Admission Booking unavailable', status=403)
+
+    # check permissions
+    if not ((request.user == booking.customer) or is_officer(request.user)):
+        return HttpResponse('Permission Denied', status=403)
+
+    response = HttpResponse(content_type='application/pdf')
+    response['Content-Disposition'] = 'attachment; filename="annual-admission-letter-AA{}.pdf"'.format(booking_id)
+
+    #pdf.create_confirmation(response, booking)
+    response.content = doctopdf.create_annual_admission_letter(booking)
+
+    return response
 
 @require_http_methods(['GET'])
 def update_sticker_admission_booking(request):
