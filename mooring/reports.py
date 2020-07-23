@@ -43,6 +43,54 @@ def outstanding_bookings():
         email.send()
     except:
         raise
+def annual_admissions_booking_report(aadata):
+    try:
+        bookings = []
+        today = datetime.date.today()
+        strIO = StringIO()
+        fieldnames = ['ID','Fist Name','Last Name','Mobile','Phone','Vessel Rego','Vessel Length','Sticker No','Year','Status','Booking Period','Postal Address 1','Postal Address 2','Post Code','State','Country' ]
+        writer = csv.writer(strIO)
+        writer.writerow(fieldnames)
+        for o in aadata:
+            email = ''
+            country = ''
+            postal_address_line_1 = ''
+            postal_address_line_2 = ''
+            post_code = ''
+            state = ''
+            vessel_length = ''
+            vessel_name = ''
+            vessel_rego = ''
+            phone = ''
+            mobile = ''
+            sticker_no = ''
+            if o['sticker_no']:
+                 sticker_no = o['sticker_no']
+            if o['details']:
+                phone = o['details']['phone']
+                mobile = o['details']['mobile']
+                vessel_length = o['details']['vessel_length']
+                vessel_name = o['details']['vessel_name']
+                vessel_rego = o['details']['vessel_rego']
+                country = o['details']['country']
+                postal_address_line_1 = o['details']['postal_address_line_1']
+                postal_address_line_2 = o['details']['postal_address_line_2']
+                state = o['details']['state']
+                vessel_length = o['details']['vessel_length']
+                if 'postcode' in o['details']:
+                   post_code = o['details']['post_code']         
+
+                        
+            writer.writerow(['AA'+str(o['id']),o['customer']['first_name'],o['customer']['last_name'],mobile,phone,vessel_rego,vessel_length,sticker_no,o['year'],o['status'],o['annual_booking_period_group_name'],postal_address_line_1,postal_address_line_2,post_code,state,country])
+
+        strIO.flush()
+        strIO.seek(0)
+        return strIO
+
+    except:
+        raise
+
+
 
 def booking_refunds(start,end):
     try:

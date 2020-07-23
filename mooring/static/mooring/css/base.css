@@ -60,7 +60,7 @@
 .horizontal-scroll {
     overflow-x: scroll;
 }
-
+/*
 .modal-header {
     background-color: #529b6b;
     color: #fcb13f;
@@ -74,7 +74,7 @@
 .modal-footer {
     background-color: #529b6b;
 }
-
+*/
 .popover {
     max-width: 100%;
 }

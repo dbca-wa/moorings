@@ -4443,6 +4443,279 @@ def get_provinces_by_country(request, country_code):
            }), content_type='application/json')
 
 
+@require_http_methods(['GET'])
+def cancel_annual_admissions(request):
+
+    response = 'success'
+    status = 'success'
+    status_code = 200
+    booking_id = request.GET.get('booking_id','')
+    cancellation_reason  = request.GET.get('cancellation_reason','')
+    nowdt = datetime.now()
+    try:
+        if request.user.is_authenticated:
+           pass
+        else:
+           raise ValidationError('Permission Denied')
+
+        payments_officer_group = request.user.groups.filter(name__in=['Payments Officers']).exists()
+
+        if payments_officer_group is True:
+             
+             baa = models.BookingAnnualAdmission.objects.get(id=booking_id)
+             if baa.booking_type == 4:
+                  raise ValidationError('Annual booking already cancelled')
+             baa.booking_type=4
+             baa.is_canceled=True
+             baa.canceled_by=request.user
+             baa.cancelation_time=nowdt
+             baa.cancellation_reason = cancellation_reason
+             baa.save()
+        else:
+             raise ValidationError('Permission Denied Cancelling Booking')
+    
+    except Exception as e:
+       response = str(e)
+       status = 'error'
+       status_code = 500
+    
+
+
+    return HttpResponse(geojson.dumps({
+              'status': status,
+              'response' : response
+           }), content_type='application/json', status=status_code)
+
+    
+
+@require_http_methods(['GET'])
+def update_sticker_admission_booking(request):
+
+    response = 'success'
+    status = 'success'
+    status_code = 200
+    booking_id = request.GET.get('booking_id','')
+    sticker_no = request.GET.get('sticker_no','')
+    try:
+        if request.user.is_authenticated:
+           pass
+        else:
+           raise ValidationError('Permission Denied')
+        payments_officer_group = request.user.groups.filter(name__in=['Payments Officers']).exists()
+
+        if payments_officer_group is True:
+             nowdt = datetime.now()
+             baa = models.BookingAnnualAdmission.objects.get(id=booking_id)
+             sticker_no_history = baa.sticker_no_history
+             sticker_no_history.append({'value': sticker_no, 'user_id': request.user.id, 'first_name': request.user.first_name, 'last_name': request.user.last_name,'updated': nowdt.strftime('%Y-%m-%d %H:%M:%S')})
+             baa.sticker_no_history = sticker_no_history
+             baa.sticker_no=sticker_no
+             baa.save()
+        else:
+             raise ValidationError('Permission Denied updating Sticker')
+
+
+    except Exception as e:
+       response = str(e)
+       status = 'error'
+       status_code = 500
+
+    return HttpResponse(geojson.dumps({
+              'status': status,
+              'response' : response
+           }), content_type='application/json', status=status_code)
+
+
+
+
+#get_annual_admission_booking
+@require_http_methods(['GET'])
+def get_annual_admission_booking(request):
+
+    #import time
+    #time.sleep(8.4)
+
+
+    nowdt = datetime.now()
+    price = '0.00'
+    status = 'success'
+    status_code = 200
+    response = ''
+    data_type = request.GET.get('data_type','')
+    data = []
+    try:
+       context = {}
+       if request.user.is_authenticated:
+           pass
+       else:
+           raise ValidationError('Permission Denied')
+       mooring_groups = MooringAreaGroup.objects.filter(members__in=[request.user,])
+
+       status = 'success'
+       booking_period = request.GET.get('booking_period','')
+       booking_status = request.GET.get('booking_status','')
+       keyword = request.GET.get('keyword','')
+
+       nowdt = datetime.strptime(str(datetime.utcnow().strftime('%Y-%m-%d %H:%M:%S')), '%Y-%m-%d %H:%M:%S')
+       context['status'] = 0
+       context['keyword'] = ''
+       baainvoices_temp = {}
+       context['annual_booking_period_group'] = models.AnnualBookingPeriodGroup.objects.all()
+       baainvoices = models.BookingAnnualInvoice.objects.select_related('booking_annual_admission').values('booking_annual_admission__id','invoice_reference').filter(Q(booking_annual_admission__booking_type=1) | Q(booking_annual_admission__booking_type=4))
+       for b in baainvoices:
+           baainvoices_temp[b['booking_annual_admission__id']] = []
+           baainvoices_temp[b['booking_annual_admission__id']].append(b['invoice_reference'])
+       baa = []
+       baarows = models.BookingAnnualAdmission.objects.filter(Q(booking_type=1) | Q(booking_type=4))
+       for c in baarows:
+           appendrow = False
+           start_dt = datetime.strptime(str(c.start_dt.strftime('%Y-%m-%d %H:%M:%S')), '%Y-%m-%d %H:%M:%S')
+           expiry_dt = datetime.strptime(str(c.expiry_dt.strftime('%Y-%m-%d %H:%M:%S')), '%Y-%m-%d %H:%M:%S')
+
+           row = {}
+           row['id'] = c.id
+           row['customer_name'] = c.customer.first_name+' '+c.customer.last_name
+           row['customer'] = {}
+           if c.customer:
+              row['customer'] = {"fullname": c.customer.first_name+' '+c.customer.last_name, 'first_name' : c.customer.first_name, 'last_name' : c.customer.last_name}
+           row['start_dt'] = c.start_dt.strftime('%d/%m/%Y %H:%M %p')
+           row['expiry_dt'] = c.expiry_dt.strftime('%d/%m/%Y %H:%M %p')
+           row['details'] = c.details
+           row['booking_type'] = c.booking_type
+           row['annual_booking_period_group'] = c.annual_booking_period_group.id
+           row['annual_booking_period_group_name'] = ''
+           if c.annual_booking_period_group:
+               row['annual_booking_period_group_name'] = c.annual_booking_period_group.name
+           row['cost_total'] = str(c.cost_total)
+           row['year'] = c.start_dt.strftime('%Y')+'/'+c.expiry_dt.strftime('%y')
+           row['override_price'] = ''
+           if c.override_price is not None:
+              row['override_price'] = str(c.override_price)
+           row['override_reason'] = ''
+           if c.override_reason:
+               row['override_reason'] = c.override_reason.text
+           row['override_reason_info'] = ''
+           if c.override_reason_info is not None:
+               row['override_reason_info'] = c.override_reason_info
+           row['overridden_by'] = {"fullname":'', 'first_name' : '', 'last_name' : ''}
+           if c.overridden_by:
+               row['overridden_by'] = {"fullname": c.overridden_by.first_name+' '+c.overridden_by.last_name, 'first_name' : c.overridden_by.first_name, 'last_name' : c.overridden_by.last_name}
+           row['is_canceled'] = c.is_canceled
+           row['send_invoice'] = c.send_invoice
+           row['cancellation_reason'] =  ''
+           if c.cancellation_reason is not None:
+               row['cancellation_reason'] = c.cancellation_reason
+           row['cancelation_time'] = ''
+           if c.cancelation_time:
+               cancelation_time = c.cancelation_time+timedelta(hours=8)
+               row['cancelation_time'] = cancelation_time.strftime('%d/%m/%Y %H:%M %p')
+           row['confirmation_sent'] = c.confirmation_sent
+           created= c.created+timedelta(hours=8)
+           row['created'] = created.strftime('%d/%m/%Y %H:%M %p')
+           row['created_by'] = {"fullname": c.created_by.first_name+' '+c.created_by.last_name, 'first_name' : c.created_by.first_name, 'last_name' : c.created_by.last_name} 
+           row['canceled_by'] = {"fullname":'', 'first_name' : '', 'last_name' : ''}
+           if c.canceled_by:
+               row['canceled_by'] = {"fullname": c.canceled_by.first_name+' '+c.canceled_by.last_name, 'first_name' : c.canceled_by.first_name, 'last_name' : c.canceled_by.last_name}
+           row['override_lines'] = c.override_lines
+           row['sticker_no'] = c.sticker_no
+           row['sticker_no_history'] = []
+            
+           row['sticker_no_history'] =  c.sticker_no_history
+           if c.id in baainvoices_temp:
+               row['invoices'] = baainvoices_temp[c.id]
+           if c.booking_type == 1:
+               row['status'] = 'current'
+               if expiry_dt < nowdt:
+                   row['status'] = 'expired'
+               if start_dt > nowdt:
+                   row['status'] = 'future'
+
+               if c.sticker_no is not None:
+
+                  if len(c.sticker_no) > 0:
+                     pass
+                  else:
+                     row['status'] = 'awaiting sticker'
+               else:
+                   row['status'] = 'awaiting sticker'
+           if c.booking_type == 4:
+               row['status'] = 'cancelled'
+
+                
+           # booking period filter
+           if booking_period == 'ALL':
+               appendrow = True
+           else:
+                if c.annual_booking_period_group.id == int(booking_period):
+                     appendrow = True
+           # booking status filter
+           if appendrow is True:
+                if booking_status == 'ALL':
+                     appendrow = True
+                else:
+                    if row['status'] == booking_status:
+                         appendrow = True
+                    else:
+                        appendrow = False
+           # keyword filter
+           if appendrow is True:
+               appendrow = False
+               if keyword.lower() in row['customer_name'].lower():
+                    appendrow = True
+               if row['details']:
+                   if keyword in row['details']['phone']:
+                      appendrow = True
+                   if keyword in row['details']['mobile']:
+                      appendrow = True
+                   if keyword.lower() in row['details']['vessel_rego'].lower():
+                      appendrow = True
+               if keyword == str(c.id):
+                   appendrow = True
+               if keyword.lower() == 'aa'+str(c.id):
+                   appendrow = True
+               if c.sticker_no:
+                   if keyword.lower() in c.sticker_no.lower():
+                      appendrow = True
+
+           if appendrow is True:
+                if c.annual_booking_period_group.mooring_group in mooring_groups:
+                     baa.append(row)
+       data = baa
+
+
+
+    except Exception as e:
+       response = str(e)
+       status = 'error'
+
+    #abpg = models.AnnualBookingPeriodGroup.objects.get(id=int(annual_booking_period_id))
+    #vsc = models.VesselSizeCategory.objects.filter(start_size__lte=float(vessel_size),end_size__gte=float(vessel_size))
+    #print (vsc)
+    #abpo= models.AnnualBookingPeriodOption.objects.filter(start_time__lte=nowdt,finish_time__gte=nowdt)
+    #print (abpo)
+    #abpovc = models.AnnualBookingPeriodOptionVesselCategoryPrice.objects.filter(annual_booking_period_option=abpo[0],vessel_category=vsc[0].id)
+    #print (abpovc.count())
+    #print (abpovc[0].id)
+    #price = abpovc[0].price
+
+    if data_type == 'csv':
+        filename = 'annual_admissions_booking_report_'+nowdt.strftime('%Y%m%d%H%M%S')
+        report = reports.annual_admissions_booking_report(data)
+        response = HttpResponse(FileWrapper(report), content_type='text/csv', status=status_code)
+        response['Content-Disposition'] = 'attachment; filename="{}.csv"'.format(filename)
+
+        return response
+
+
+
+    else:
+           return HttpResponse(geojson.dumps({
+                     'data': data,
+                     'status': status,
+                     'response' : response
+                  }), content_type='application/json')
+
+
 
 @require_http_methods(['GET'])
 def get_annual_admission_pricing(request, annual_booking_period_id, vessel_size):
@@ -4489,12 +4762,8 @@ def get_annual_admission_pricing_old(request, annual_booking_period_id, vessel_s
     if models.AnnualBookingPeriodGroup.objects.filter(id=int(annual_booking_period_id)).count() > 0:
          abpg = models.AnnualBookingPeriodGroup.objects.get(id=int(annual_booking_period_id))
          vsc = models.VesselSizeCategory.objects.filter(start_size__lte=float(vessel_size),end_size__gte=float(vessel_size))
-         print (vsc)
          abpo= models.AnnualBookingPeriodOption.objects.filter(start_time__lte=nowdt,finish_time__gte=nowdt)
-         print (abpo)
          abpovc = models.AnnualBookingPeriodOptionVesselCategoryPrice.objects.filter(annual_booking_period_option=abpo[0],vessel_category=vsc[0].id)
-         print (abpovc.count())
-         print (abpovc[0].id)
          price = abpovc[0].price
 
     return HttpResponse(geojson.dumps({

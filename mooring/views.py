@@ -147,7 +147,6 @@ class MooringAvailability2Selector(TemplateView):
             booking = Booking.objects.create(mooringarea=mooringarea,booking_type=3,expiry_time=timezone.now()+timedelta(seconds=settings.BOOKING_TIMEOUT),details=details,arrival=booking_period_start,departure=booking_period_finish)
             request.session['ps_booking'] = booking.id
             request.session.modified = True
-    
 
         return render(request, self.template_name, context)
 
@@ -193,6 +192,116 @@ class MooringAreaFeed(ICalFeed):
         return '{} - {}'.format(item.campground.name, ', '.join([
             x[0] for x in item.campsites.values_list('campsite__name').distinct()
         ] ))
+
+class DashboardAnnualAdmissionView(UserPassesTestMixin, ListView):
+    template_name = 'mooring/dash/dash_tables_annual_admissions.html'
+    model = RefundFailed
+
+    def get(self, request, *args, **kwargs):
+        if is_payment_officer(request.user) == True:
+            return super(DashboardAnnualAdmissionView, self).get(request, *args, **kwargs)
+        else:
+            return HttpResponseRedirect("/forbidden")
+
+    def get_context_data(self, **kwargs):
+        context = super(DashboardAnnualAdmissionView, self).get_context_data(**kwargs)
+        request = self.request
+        nowdt = datetime.strptime(str(datetime.utcnow().strftime('%Y-%m-%d %H:%M:%S')), '%Y-%m-%d %H:%M:%S')
+        context['status'] = 0
+        context['keyword'] = ''
+        baainvoices_temp = {}
+        anpg = []
+        pg = AnnualBookingPeriodGroup.objects.all()
+        mooring_groups = MooringAreaGroup.objects.filter(members__in=[self.request.user,])
+        print (mooring_groups)
+        for f in pg:
+             print (f.mooring_group)
+             if f.mooring_group in mooring_groups: 
+                  anpg.append(f)
+        
+
+
+        context['annual_booking_period_group'] = anpg
+        #baainvoices = BookingAnnualInvoice.objects.select_related('booking_annual_admission').values('booking_annual_admission__id','invoice_reference').filter(Q(booking_annual_admission__booking_type=1) | Q(booking_annual_admission__booking_type=4))
+        #for b in baainvoices:
+        #    baainvoices_temp[b['booking_annual_admission__id']] = []
+        #    baainvoices_temp[b['booking_annual_admission__id']].append(b['invoice_reference'])
+        #baa = []
+        #baarows = BookingAnnualAdmission.objects.filter(Q(booking_type=1) | Q(booking_type=4))
+        #for c in baarows:
+        #    start_dt = datetime.strptime(str(c.start_dt.strftime('%Y-%m-%d %H:%M:%S')), '%Y-%m-%d %H:%M:%S')
+        #    expiry_dt = datetime.strptime(str(c.expiry_dt.strftime('%Y-%m-%d %H:%M:%S')), '%Y-%m-%d %H:%M:%S')
+
+        #    row = {}
+        #    row['id'] = c.id
+        #    row['customer_name'] = c.customer.first_name+' '+c.customer.last_name
+        #    row['customer'] = c.customer
+        #    row['start_dt'] = c.start_dt
+        #    row['expiry_dt'] = c.expiry_dt
+        #    row['details'] = c.details
+        #    row['booking_type'] = c.booking_type
+        #    row['annual_booking_period_group'] = c.annual_booking_period_group.id
+        #    row['cost_total'] = c.cost_total
+        #    row['override_price'] = c.override_price
+        #    row['override_reason'] = c.override_reason
+        #    row['override_reason_info'] = c.override_reason_info
+        #    row['overridden_by'] = c.overridden_by
+        #    row['is_canceled'] = c.is_canceled
+        #    row['send_invoice'] = c.send_invoice
+        #    row['cancellation_reason'] = c.cancellation_reason
+        #    row['cancelation_time'] = c.cancelation_time
+        #    row['confirmation_sent'] = c.confirmation_sent
+        #    row['created'] = c.created
+        #    row['created_by'] = c.created_by
+        #    row['canceled_by'] = c.canceled_by
+        #    row['override_lines'] = c.override_lines
+        #    row['sticker_no'] = c.sticker_no
+
+        #    if c.id in baainvoices_temp:
+        #        row['invoices'] = baainvoices_temp[c.id]
+        #    if c.booking_type == 1:
+        #        row['status'] = 'current'
+        #        if expiry_dt < nowdt:
+        #            row['status'] = 'expired'
+        #        if start_dt > nowdt:
+        #            row['status'] = 'future'
+
+        #    baa.append(row)
+
+        #context['baa'] = baa
+
+
+        #if 'status' in self.request.GET:
+        #    context['status'] = self.request.GET['status']
+        #if 'keyword' in self.request.GET:
+        #    context['keyword'] = self.request.GET['keyword']
+
+        #if is_payment_officer(request.user) == True:
+        #    if 'status' in self.request.GET:
+        #        context['status'] = self.request.GET['status']
+        #    if 'keyword' in self.request.GET:
+        #        context['keyword'] = self.request.GET['keyword']
+        #    if context['status'] == 'ALL':
+        #        query = Q()
+        #    else:
+        #        query = Q(status=context['status'])
+        #    if context['keyword'].isdigit():
+        #        query &= Q(Q(invoice_reference__icontains=context['keyword']) | Q(booking_id=int(context['keyword'])))
+        #    else:
+        #        query &= Q(Q(invoice_reference__icontains=context['keyword']))
+        #    failrefunds_list =[]
+        #    failrefunds = RefundFailed.objects.filter(query)
+        #    mg = MooringAreaGroup.objects.all()
+        return context
+
+    def get_initial(self):
+        initial = super(DashboardAnnualAdmissionView, self).get_initial()
+        initial['action'] = 'list'
+        return initial
+
+    def test_func(self):
+        return is_officer(self.request.user)
+
 
 class DashboardView(UserPassesTestMixin, TemplateView):
     template_name = 'mooring/dash/dash_tables_campgrounds.html'
@@ -1871,6 +1980,7 @@ class AnnualAdmissionsView(CreateView):
         details['postal_address_line_2'] = self.request.POST.get('postal_address_line_2')
         details['country'] = self.request.POST.get('country')       
         details['state'] = self.request.POST.get('state')
+        details['post_code'] = self.request.POST.get('post_code')
         details['phone'] = self.request.POST.get('phone')
         details['mobile'] = self.request.POST.get('mobile')
         details['email'] = self.request.POST.get('email')
