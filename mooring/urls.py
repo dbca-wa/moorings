@@ -69,6 +69,7 @@ api_patterns = [
     url(r'^api/create_booking', api.create_booking, name='create_booking'),
     url(r'^api/create_admissions_booking', api.create_admissions_booking, name="create_admissions_booking"),
     url(r'api/get_confirmation/(?P<booking_id>[0-9]+)/$', api.get_confirmation, name='get_confirmation'),
+    url(r'^api/get_aa_letter/(?P<booking_id>[0-9]+)/$', api.get_annual_admission_letter, name='get_aa_letter'),
     url(r'api/get_admissions_confirmation/(?P<booking_id>[0-9]+)/$', api.get_admissions_confirmation, name='get_admissions_confirmation'),
     url(r'^api/reports/booking_refunds$', api.BookingRefundsReportView.as_view(),name='booking-refunds-report'),
     url(r'^api/reports/bookings$', api.BookingReportView.as_view(),name='bookings-report'),

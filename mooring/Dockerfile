@@ -17,7 +17,7 @@ ENV SECRET_KEY=$SECRET_KEY
 #  && pip install --upgrade pip
 
 RUN apt-get update -y \ 
-  && apt-get install --no-install-recommends -y wget git libmagic-dev gcc binutils libproj-dev gdal-bin libpq-dev gunicorn\
+  && apt-get install --no-install-recommends -y wget git libmagic-dev gcc binutils libproj-dev gdal-bin libpq-dev gunicorn libreoffice\
   python python-setuptools python-dev python-pip \
   && pip install --upgrade pip
 
@@ -44,6 +44,8 @@ COPY gunicorn.ini ./
 COPY manage_mo.py ./manage_mo.py
 COPY ledger ./ledger
 COPY mooring ./mooring
+RUN mkdir /app/tmp/
+RUN chmod 777 /app/tmp/
 RUN python manage_mo.py collectstatic --noinput
 EXPOSE 8080
 HEALTHCHECK --interval=1m --timeout=5s --start-period=10s --retries=3 CMD ["wget", "-q", "-O", "-", "http://localhost:8080/"]
