@@ -63,6 +63,9 @@ api_patterns = [
     url(r'^api/get_country_provinces/(?P<country_code>[A-Z]+)/', api.get_provinces_by_country, name='get_country_provinces'),
     url(r'^api/get_annual_admission_pricing/(?P<annual_booking_period_id>[0-9]+)/(?P<vessel_size>[0-9]+.[0-9]+)/', api.get_annual_admission_pricing, name='get_annual_admission_pricing_float'),
     url(r'^api/get_annual_admission_pricing/(?P<annual_booking_period_id>[0-9]+)/(?P<vessel_size>[0-9]+)/', api.get_annual_admission_pricing, name='get_annual_admission_pricing'),
+    url(r'^api/booking/annual-admissions/', api.get_annual_admission_booking, name='get_annual_admission_booking'),
+    url(r'^api/booking/cancel-annual-admissions/', api.cancel_annual_admissions, name='cancel-annual-admissions'),
+    url(r'^api/booking/update_sticker_admission_booking/', api.update_sticker_admission_booking, name='update_sticker_admission_booking'),
     url(r'^api/create_booking', api.create_booking, name='create_booking'),
     url(r'^api/create_admissions_booking', api.create_admissions_booking, name="create_admissions_booking"),
     url(r'api/get_confirmation/(?P<booking_id>[0-9]+)/$', api.get_confirmation, name='get_confirmation'),
@@ -93,6 +96,7 @@ urlpatterns = [
     #url(r'^ical/campground/(?P<ground_id>[0-9]+)/$', views.MooringAreaFeed(), name='campground_calendar'),
     url(r'^dashboard/moorings/$', views.DashboardView.as_view(), name='dash-campgrounds'),
     url(r'^dashboard/mooringsite-types$', views.DashboardView.as_view(), name='dash-campsite-types'),
+    url(r'^dashboard/bookings/annual-admissions/$', views.DashboardAnnualAdmissionView.as_view(), name='annual-admissions-dash-bookings'),
     url(r'^dashboard/bookings/edit/', views.DashboardView.as_view(), name='dash-bookings'),
     url(r'^dashboard/bookings$', views.DashboardView.as_view(), name='dash-bookings'),
     url(r'^dashboard/bulkpricing$', views.DashboardView.as_view(), name='dash-bulkpricing'),
@@ -115,8 +119,6 @@ urlpatterns = [
     url(r'^dashboard/bookingperiods/(?P<pk>[0-9]+)/delete', views.BookingPeriodDeleteGroup.as_view(), name='dash-bookingperiod-group-delete'),
     url(r'^dashboard/bookingperiods/(?P<pk>[0-9]+)/view', views.BookingPeriodView.as_view(), name='dash-bookingperiod-group-view'),
     url(r'^dashboard/bookingperiods', views.BookingPeriodGroupView.as_view(), name='dash-bookingperiod'),
-
-   
     url(r'^dashboard/annual-bookingperiods-option/(?P<bp_group_id>[0-9]+)/edit/(?P<pk>[0-9]+)', views.AnnualBookingPeriodEditOption.as_view(), name='dash-annual-booking-period-option-edit'),
     url(r'^dashboard/annual-bookingperiods-option/(?P<bp_group_id>[0-9]+)/create', views.AnnualBookingPeriodAddOption.as_view(), name='dash-annual-booking-period-option-add'),
     url(r'^dashboard/annual-bookingperiods/(?P<pk>[0-9]+)/view', views.AnnualBookingPeriodView.as_view(), name='dash-annual-bookingperiod-group-view'),

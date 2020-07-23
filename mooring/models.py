@@ -1275,6 +1275,7 @@ class BookingAnnualAdmission(models.Model):
     canceled_by = models.ForeignKey(settings.AUTH_USER_MODEL,on_delete=models.PROTECT, blank=True, null=True,related_name='canceled_annual_bookings')
     override_lines = JSONField(null=True, blank=True, default={})
     sticker_no = models.TextField(blank=True, null=True) 
+    sticker_no_history = JSONField(null=True, blank=True, default=[])
 
     def __str__(self):
          return str(self.id)
