@@ -24,6 +24,12 @@ from mooring.exceptions import BookingRangeWithinException
 from django.core.cache import cache
 from ledger.payments.models import Invoice
 from ledger.accounts.models import EmailUser
+from django.core.files.storage import FileSystemStorage
+
+#today = datetime.now()
+#today_path = today.strftime("%Y/%m/%d/%H")
+private_storage = FileSystemStorage(location=settings.BASE_DIR+"/private-media/", base_url='/private-media/')
+
 
 # Create your models here.
 
@@ -520,10 +526,20 @@ class AnnualBookingPeriodGroup(models.Model):
     start_time = models.DateTimeField(null=True, blank=True)
     finish_time = models.DateTimeField(null=True, blank=True)
     status = models.SmallIntegerField(choices=STATUS, default=1)
+    #letter = models.FileField(upload_to=letter_storage,null=True,blank=True)
+    letter = models.FileField(max_length=512, upload_to='letter/%Y/%m/%d/%H/', storage=private_storage, null=True,blank=True)
     created = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
         return self.name
+
+    def save(self, **kwargs):
+        if self.letter:
+           print (self.letter.name)
+           self.letter.name = str(self.id)+'-'+self.letter.name
+
+        super(AnnualBookingPeriodGroup, self).save()         
+        #return 'letter/%Y/%m/%d/%H/'+self.id
 
 class AnnualBookingPeriodOption(models.Model):
 

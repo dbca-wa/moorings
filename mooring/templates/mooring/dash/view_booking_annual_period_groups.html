@@ -50,14 +50,14 @@
 	</div>	
         <table width="100%" id='table-policy' class='hover table table-striped table-bordered dt-responsive nowrap dataTable no-footer dtr-inline'>
         <thead>
-        <tr><th>ID</th><th>Booking Period Group</th><th>Booking Periods</th><th>Action</th></tr>
+        <tr><th>ID</th><th>Booking Period Group</th><th>Letter</th><th>Action</th></tr>
         </thead>
         <tbody>
         {% for bp in bp_groups %}
             <tr>
                 <td>{{ bp.id }}</td>
                 <td>{{ bp.name }}</td>
-                <td>{% for p in bp.booking_period.all %} {{ p.period_name }} ({{ p.option_description }})<BR> {% endfor %}</td>
+		<td>{% if bp.letter %}<a href='/private-media/{{ bp.letter.name }}' target='bppg_{{ bp.id }}'>{{ bp.letter.name }}</a>{% endif %}</td>
                 <td>
                    <a href='{% url 'dash-annual-bookingperiod-group-edit' bp.id %}'>Edit</a><BR>
                    <a href='{% url 'dash-annual-bookingperiod-group-view' bp.id %}'>View Periods</a><BR>

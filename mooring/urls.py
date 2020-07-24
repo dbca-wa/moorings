@@ -154,6 +154,7 @@ urlpatterns = [
     url(r'^admissions-cost/$', views.AdmissionsCostView.as_view(), name='admissions_cost'),
     url(r'mooring/payments/invoice-pdf/(?P<reference>\d+)',views.InvoicePDFView.as_view(), name='mooring-invoice-pdf'),
     url(r'^mooringsiteratelog/(?P<pk>[0-9]+)/', views.MooringsiteRateLogView.as_view(), name='mooringsiteratelog'),
+    url(r'^private-media/letter/[0-9]+/[0-9]+/[0-9]+/[0-9]+/(?P<file_id>\d+)-\w+.(?P<extension>\w\w\w\w)$', views.getLetterFile, name='view_private_file2'),
 
 ##    url(r'^static/(?P<path>.*)$', 'django.conf.urls.static'),
 #    {'document_root': settings.STATIC_ROOT},
