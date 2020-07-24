@@ -39,7 +39,12 @@ def docx_replace_regex(doc_obj, regex , replace, key, bold_font=False,italic_fon
 
 
 def create_annual_admission_letter(booking):
-    confirmation_doc = settings.BASE_DIR+"/mooring/templates/doc/AnnualAdmissionStickerLetter.docx"
+    print ("Letter File")
+    confirmation_doc = None
+    if booking.annual_booking_period_group.letter:
+        print (booking.annual_booking_period_group.letter.path)
+        confirmation_doc = booking.annual_booking_period_group.letter.path
+    #confirmation_doc = settings.BASE_DIR+"/mooring/templates/doc/AnnualAdmissionStickerLetter.docx"
     temp_directory = settings.BASE_DIR+"/tmp/"
 
 
@@ -72,6 +77,7 @@ def create_annual_admission_letter(booking):
 
 
 def create_annual_admission_letter_old(booking):
+    print 
     confirmation_doc = settings.BASE_DIR+"/mooring/templates/doc/AnnualAdmissionStickerLetter.docx"
     temp_directory = settings.BASE_DIR+"/tmp/"
 

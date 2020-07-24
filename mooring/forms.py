@@ -270,7 +270,7 @@ class AnnualBookingPeriodForm(forms.ModelForm):
     #mooring_group = ChoiceField(choices=[],)
     class Meta:
         model = models.AnnualBookingPeriodGroup
-        fields = ['name','start_time','finish_time','status','mooring_group']
+        fields = ['name','start_time','finish_time','status','mooring_group','letter']
 
     def __init__(self, *args, **kwargs):
         # User must be passed in as a kwarg.
@@ -283,6 +283,12 @@ class AnnualBookingPeriodForm(forms.ModelForm):
            self.fields[f].widget.attrs.update({'class': 'form-control'})
         vessel_category_pricing = HTML('{% include "mooring/dash/add_edit_annual_vessel_category.html" %}')
 
+        print ("LETTER")
+        print (self.initial['action'])
+        if self.initial['action'] == 'new':
+            del self.fields['letter']
+        #self.initial['letter'].url = '/private-media/'
+        #print (self.initial['letter'].url)
         self.helper.form_id = 'id_change_group_form'
         if self.initial['action'] == 'edit':
            self.helper.add_input(Submit('Update', 'Update', css_class='btn-lg', style='margin-top: 15px;' ))
