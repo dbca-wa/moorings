@@ -1925,6 +1925,7 @@ class AnnualAdmissionsView(CreateView):
         initial['loc'] = self.kwargs['loc']
         
         al = AdmissionsLocation.objects.filter(key=self.kwargs['loc'])
+        initial['termscondsurl'] = al[0].annual_admissions_terms
         initial['mooring_group'] = al[0].mooring_group
         initial['country'] = "AU"
         if self.request.POST.get('country'):
@@ -1935,7 +1936,7 @@ class AnnualAdmissionsView(CreateView):
         payments_officer_group = self.request.user.groups.filter(name__in=['Payments Officers']).exists()
         if payments_officer_group:
              initial['allow_override_fees'] = True
-
+        initial['vessel_length'] = '0.00'
         return initial
 
     def post(self, request, *args, **kwargs):
@@ -2016,7 +2017,7 @@ class AnnualAdmissionsView(CreateView):
                override_lines = {'ledger_description': '{} - {}'.format(dr.text, str(self.object.override_reason_info)), "quantity": 1, 'price_incl_tax': Decimal('0.00'), "oracle_code": oracle_code, 'line_status': 1}
                total_cost = self.object.override_price
 
-        lines.append({'ledger_description': 'Annual Admissions {} - {}'.format(str(abg.start_time.strftime('%d/%m/%Y')), str(abg.finish_time.strftime('%d/%m/%Y'))), "quantity": 1, 'price_incl_tax': total_cost, "oracle_code": oracle_code, 'line_status': 1})
+        lines.append({'ledger_description': 'Annual Admissions Fee for Vessel {}, {}m  ({} - {})'.format(details['vessel_rego'], details['vessel_length'],str(abg.start_time.strftime('%d/%m/%Y')), str(abg.finish_time.strftime('%d/%m/%Y'))), "quantity": 1, 'price_incl_tax': total_cost, "oracle_code": oracle_code, 'line_status': 1})
         if override_lines:
             lines.append(override_lines)
         if self.request.user.is_authenticated:

@@ -202,6 +202,9 @@ class AnnualAdmissionForm(forms.ModelForm):
         self.helper = BaseFormHelper()
         self.helper.form_id = 'id_annual_admission_form'
         self.fields['first_name'].css_class = 'form-control'
+        terms_url =''
+        if 'termscondsurl' in self.initial:
+             terms_url = self.initial['termscondsurl']
 
         # START Get Annual Booking Periods
         if models.AdmissionsLocation.objects.filter(key=self.initial['loc']).count() > 0:
@@ -217,13 +220,15 @@ class AnnualAdmissionForm(forms.ModelForm):
         discount_reason.append(['','Please Select a Period'])
         for d in self.initial['discount_reason']:
               discount_reason.append([d.id,d.text])
-        self.fields['override_reason'].choices = discount_reason  
-
+        self.fields['override_reason'].choices = discount_reason 
+        vessel_tooltip = '<div align="left" class="tooltip2"><span class="tooltiptext" style="top: -60px;">Length must have two decimal places i.e. 9.00 metres or 12.35 metres</span><img height="14px" style="margin-bottom: 2px;" src="/static/img/information_icon.png"></div>'
+        self.fields['vessel_length'].label = "Registered Vessel Length (meters) "+vessel_tooltip
         dynamic_selections = HTML('{% include "mooring/booking/annual_admission_form_js.html" %}')
 
         override_box = Div()
         if self.initial['allow_override_fees'] is True:
             override_box = Div('override_price_selection',HTML('<div class="small-12 medium-12 large-12 columns" style="display:none;" id="override_box">'),Fieldset('','override_price','override_reason','override_details'),HTML('</div>'))
+        self.fields['terms'].label = "I agree to the <A href='"+terms_url+"' target='rottnest_admission_terms'>terms and conditions</A> (Including insurance requirements)"
         #override_box =HTML('<div class="small-12 medium-12 large-12 columns">')
 
         self.helper.layout = Layout(HTML("<div class='row'><div class='col-lg-6'>"),HTML('<div class="well"><h3 class="text-primary" style="text-align: center;">Personal Details</h3>'),'first_name','last_name','postal_address_line_1','postal_address_line_2',HTML("<div class='row'><div class='col-lg-6'>"),'country',HTML("</div><div class='col-lg-6'>"),'suburb',HTML('</div></div>'),HTML("<div class='row'><div class='col-lg-6'>"),'postcode',HTML("</div><div class='col-lg-6'>"),'state',HTML('</div></div>'),'mobile','phone','email','confirm_email',HTML('</div></div>'),HTML('<div class="col-lg-6">'),HTML('<div class="well"><h3 class="text-primary" style="text-align: center;">Vessel Details</h3>'),'vessel_rego','vessel_name','vessel_length',HTML('<h3 class="text-primary" style="text-align: center;">Annual Admission Period</h3>'),'booking_period', HTML('</div></div><div class="col-lg-12"><div class="well">'),HTML('<div class="row"><div class="col-md-12"><div class="row"><div class="col-md-6"><div class="form-group"><label for="Total Price">Total Price <span class="text-muted">(GST inclusive.)</span></label> <div class="input-group"><span class="input-group-addon">AUD $</span> <input type="text" id="id_total_price" readonly="readonly" class="form-control"></div></div></div></div>'),HTML('<div class="row"><div class="col-md-6"><div class="small-12 medium-12 large-4 columns"><label class="label-plain" style="width: 250px;">Click <a href="http://ria.wa.gov.au/about-us/Fees-and-charges" taget="_blank">here</a> for price information.</label>'),override_box,HTML('</div></div> <div class="col-md-6"><div class="row"><div class="col-md-12 "><div class="checkbox"><label>'),'terms',HTML('</div></div><div class="col-md-12 " style="margin-top: 20px; text-align: right;">'),Submit('ProceedtoPayment', 'Proceed to Payment', css_class='btn btn-primary'),HTML('</div></div></div></div>'),HTML('</div></div></div></div></div>'), dynamic_selections)
