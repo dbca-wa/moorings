@@ -196,7 +196,15 @@ class AnnualAdmissionForm(forms.ModelForm):
                 raise forms.ValidationError('Please select an override reason') 
              
         if float(self.cleaned_data.get('vessel_length')) > float(0.01):
-             pass
+             vl = self.cleaned_data.get('vessel_length')
+             vl_split = vl.split('.')
+             if len(vl_split) > 1:
+                   if len(vl_split[1]) == 2:
+                       pass
+                   else:
+                       raise forms.ValidationError('Invalid decimal length,  please provide a valid vessel length in decimals 0.00.')
+             else:
+                 raise forms.ValidationError('Please provide a valid vessel length in decimals 0.00.')
         else:
             raise forms.ValidationError('Please provide a valid vessel length.')
 
