@@ -195,6 +195,11 @@ class AnnualAdmissionForm(forms.ModelForm):
             else:
                 raise forms.ValidationError('Please select an override reason') 
              
+        if float(self.cleaned_data.get('vessel_length')) > float(0.01):
+             pass
+        else:
+            raise forms.ValidationError('Please provide a valid vessel length.')
+
 
     def __init__(self, *args, **kwargs):
         # User must be passed in as a kwarg.
