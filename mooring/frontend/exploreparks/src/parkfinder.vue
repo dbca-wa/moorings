@@ -236,8 +236,10 @@
             </div>
 <!-- here -->
             <div class="small-12 medium-9 large-6 columns">
-		<div class="alert alert-warning" style='text-align: center' role="alert" v-if="admissions_key" id="admissions_link"> <strong style='font-size: 16px;' ></span><a :href='"/annual-admissions/" + admissions_key + "/"'>Click here for paying annual admission fees only (more information)</a></strong><br></div>   
-                <div class="alert alert-warning" style='text-align: center' role="alert" v-if="admissions_key" id="admissions_link"> <strong style='font-size: 16px;' ></span><a :href='"/admissions/" + admissions_key + "/"'>Click here for paying admission fees only</a></strong><br></div>
+		<div class="alert alert-warning" style='text-align: center' role="alert" v-if="admissions_key" id="admissions_link"> <strong style='font-size: 16px;' ></span><a :href='"/annual-admissions/" + admissions_key + "/"'>Click here for paying annual admission fees only</a></strong><br></div>   
+                <div class="alert alert-warning" style='text-align: center' role="alert" v-if="admissions_key" id="admissions_link"> <strong style='font-size: 16px;' ></span><a :href='"/admissions/" + admissions_key + "/"'>Click here for paying individual admission fees for a single visit</a></strong><br></div>
+		<div class="alert alert-info" style='text-align: center' role="alert" v-if="admissions_key" id="admissions_link"> <strong style='font-size: 16px;' ></span><a href='https://rottnestisland.com/boating/Fees'>Click here to more information on admission fees</a></strong><br></div>
+
                 <div style='width: 100%; height: 1px;' align='right'>
                        <div v-show='mapLoading == true' class='map-loading' style='border: 1px solid #00000' ><img style='width:20px; height: 20px;' src='/static/common/img/ajax-loader-spinner.gif'>&nbsp;&nbsp;Please Wait</div>
                 </div>
