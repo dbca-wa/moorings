@@ -66,6 +66,7 @@ api_patterns = [
     url(r'^api/booking/annual-admissions/', api.get_annual_admission_booking, name='get_annual_admission_booking'),
     url(r'^api/booking/cancel-annual-admissions/', api.cancel_annual_admissions, name='cancel-annual-admissions'),
     url(r'^api/booking/update_sticker_admission_booking/', api.update_sticker_admission_booking, name='update_sticker_admission_booking'),
+    url(r'^api/get_vessel_info/', api.get_vessel_info, name='get_vessel_info'),
     url(r'^api/create_booking', api.create_booking, name='create_booking'),
     url(r'^api/create_admissions_booking', api.create_admissions_booking, name="create_admissions_booking"),
     url(r'api/get_confirmation/(?P<booking_id>[0-9]+)/$', api.get_confirmation, name='get_confirmation'),

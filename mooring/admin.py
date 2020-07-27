@@ -175,8 +175,8 @@ class BookingAnnualAdmissionAdmin(admin.ModelAdmin):
     list_display = ('id','customer','start_dt','expiry_dt','booking_type','cost_total','created_by','created')
     ordering = ('-id',)
     search_fileds = ('customer','id',)
-    list_filter = ('created_by',)
-    readonly_fields=('created',)
+    list_filter = ('booking_type',)
+    readonly_fields=('created','sticker_no_history')
     inlines = [BookingAnnualInvoiceInline,]
 
     def has_add_permission(self, request, obj=None):
@@ -550,6 +550,15 @@ class PromoArea(admin.GeoModelAdmin):
             if groups.count() == 1:
                 obj.mooring_group = groups[0]
         super(PromoArea, self).save_model(request, obj, form, change)
+
+
+
+
+@admin.register(models.VesselDetail)
+class VesselDetail(admin.ModelAdmin):
+    list_display = ('rego_no', 'vessel_name', 'vessel_size', 'vessel_draft','vessel_beam','vessel_weight','created')
+    ordering = ('rego_no',)
+    search_fields = ('rego_no','vessel_name')
 
 
 @admin.register(models.RegisteredVessels)

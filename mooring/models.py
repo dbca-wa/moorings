@@ -1803,6 +1803,23 @@ class MarinaEntryRate(models.Model):
         today = datetime.now().date()
         return (self.period_start > today and not self.period_end) or ( self.period_start > today <= self.period_end)
 
+
+class VesselDetail(models.Model):
+    rego_no = models.CharField(max_length=200)
+    vessel_name = models.CharField(max_length=400) 
+    vessel_size = models.DecimalField(max_digits=8, decimal_places=2, default='0.00')
+    vessel_draft = models.DecimalField(max_digits=8, decimal_places=2, default='0.00')
+    vessel_beam = models.DecimalField(max_digits=8, decimal_places=2, default='0.00')
+    vessel_weight = models.DecimalField(max_digits=8, decimal_places=2, default='0.00')
+    created = models.DateTimeField(default=timezone.now)
+
+    class Meta:
+        verbose_name_plural = "Vessel Details"
+
+    def __str__(self):
+        return self.rego_no
+
+
 class RegisteredVessels(models.Model):
     rego_no = models.CharField(max_length=200)
     vessel_size = models.DecimalField(max_digits=8, decimal_places=2, default='0.00')
@@ -1817,7 +1834,8 @@ class RegisteredVessels(models.Model):
     expiry_an = models.DateField(null=True, blank=True)
 
     class Meta:
-        verbose_name_plural = "Registered Vessels"
+        verbose_name = "Registered Vessel (Lotus)"
+        verbose_name_plural = "Registered Vessels (Lotus)"
 
     @property
     def admissionsPaid(self):
