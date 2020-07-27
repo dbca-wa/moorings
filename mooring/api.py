@@ -4445,6 +4445,51 @@ def get_provinces_by_country(request, country_code):
 
 
 @require_http_methods(['GET'])
+def get_vessel_info(request):
+
+    response = 'success'
+    status = 'success'
+    status_code = 200
+    vessel_rego = request.GET.get('vessel_rego','')
+    vessel_info = {'vessel_size': '0.00', 'vessel_draft': '0.00', 'vessel_beam': '0.00', 'vessel_weight': '0.00'}
+    nowdt = datetime.now()
+    try:
+        vessel_info = {'vessel_size': '0.00', 'vessel_draft': '0.00', 'vessel_beam': '0.00', 'vessel_weight': '0.00'}
+        if models.RegisteredVessels.objects.filter(rego_no=vessel_rego).count() > 0:
+            pass
+            rv = models.RegisteredVessels.objects.filter(rego_no=vessel_rego)
+            vessel_info['vessel_size'] = str(rv[0].vessel_size)
+            #vessel_info['vessel_draft'] = str(rv[0].vessel_draft)
+            #vessel_info['vessel_beam'] = str(rv[0].vessel_beam)
+            #vessel_info['vessel_weight'] = str(rv[0].vessel_weight)
+        else:
+            if models.VesselDetail.objects.filter(rego_no=vessel_rego).count() > 0:
+                vd = models.VesselDetail.objects.filter(rego_no=vessel_rego)
+                vessel_info['vessel_size'] = str(vd[0].vessel_size)
+                #vessel_info['vessel_draft'] = str(vd[0].vessel_draft)
+                #vessel_info['vessel_beam'] = str(vd[0].vessel_beam)
+                #vessel_info['vessel_weight'] = str(vd[0].vessel_weight)
+            else:
+                status = 'error'
+                response = 'No vessel information'
+
+
+    except Exception as e:
+       response = str(e)
+       status = 'error'
+       status_code = 500
+
+
+
+    return HttpResponse(geojson.dumps({
+              'status': status,
+              'response' : response,
+              'vessel_info' : vessel_info
+           }), content_type='application/json', status=status_code)
+
+
+
+@require_http_methods(['GET'])
 def cancel_annual_admissions(request):
 
     response = 'success'

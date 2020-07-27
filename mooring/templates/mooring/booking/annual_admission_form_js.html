@@ -9,7 +9,7 @@
 				  url: "/api/get_country_provinces/"+country_code+"/",
   				  data: "",
 				  cache: false,
-				  success: function(data){
+				  success: function(data) {
 					  var selection_html = "<option value=''>Please Select</option>";
 					  
                                           for ( var i = 0, l = data['data'].length; i < l; i++ ) {
@@ -18,7 +18,6 @@
                                                       selected = 'selected';
 					          }
 						  selection_html += "<option "+selected+" value='"+data['data'][i]['short']+"'>"+data['data'][i]['name']+"</option>";
-						  
 					  }
 
 					  $("#id_state").html(selection_html);
@@ -42,6 +41,17 @@
 
 
  	        },
+		get_vessel_info: function(rego_no) {
+                        $.ajax({
+                                  type: "GET",
+                                  url: "/api/get_vessel_info/",
+                                  data: {'vessel_rego': rego_no},
+                                  cache: false,
+                                  success: function(data) {
+                                         $('#id_vessel_length').val(data['vessel_info']['vessel_size']);
+                                  }
+                        });
+		},
 	        init: function() {
 			$("#id_country").change(function() {
 		              iform.province_dropdown(this);
@@ -50,6 +60,11 @@
 			$("#id_country").val("AU");
 			iform.province_dropdown($("#id_country"));
 
+                        $("#id_vessel_rego").change(function() {
+			     console.log('rego');
+                             var vessel_rego = $('#id_vessel_rego').val();
+                             iform.get_vessel_info(vessel_rego);
+			});
                         $("#id_booking_period").change(function() {
                               var annual_booking_period_id =$('#id_booking_period').val();
                               var vessel_size = $('#id_vessel_length').val();
