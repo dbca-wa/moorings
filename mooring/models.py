@@ -569,6 +569,9 @@ class VesselSizeCategory(models.Model):
     def __str__(self):
         return self.name
 
+    class Meta:
+        verbose_name_plural = "Vessel Size Categories"
+
 
 class AnnualBookingPeriodOptionVesselCategoryPrice(models.Model):
 
