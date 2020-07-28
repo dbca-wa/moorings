@@ -25,6 +25,7 @@ from mooring.serialisers import BookingRegoSerializer, MooringsiteRateSerializer
 from mooring.emails import send_booking_invoice,send_booking_confirmation
 from oscar.apps.order.models import Order
 from ledger.payments.invoice import utils
+from mooring import models
 
 def create_booking_by_class(campground_id, campsite_class_id, start_date, end_date, num_adult=0, num_concession=0, num_child=0, num_infant=0, num_mooring=0, vessel_size=0):
     """Create a new temporary booking in the system."""
@@ -2093,6 +2094,17 @@ def mooring_group_access_level_booking_period(pk,request):
               return True
     
      return False
+
+def mooring_group_access_level_annual_booking_period(pk,request):
+     mooring_groups = MooringAreaGroup.objects.filter(members__in=[request.user,])
+     if request.user.is_superuser is True:
+          return True
+     else:
+          if models.AnnualBookingPeriodGroup.objects.filter(pk=pk,mooring_group__in=mooring_groups).count() > 0:
+              return True
+
+     return False
+
 
 def mooring_group_access_level_booking_period_option(pk,bp_group_id,request):
      mooring_groups = MooringAreaGroup.objects.filter(members__in=[request.user,])

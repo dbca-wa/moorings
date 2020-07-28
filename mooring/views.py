@@ -2408,7 +2408,14 @@ class AnnualBookingPeriodEditChangeGroup(UpdateView):
     model = AnnualBookingPeriodGroup
 
     def get(self, request, *args, **kwargs):
-        return super(AnnualBookingPeriodEditChangeGroup, self).get(request, *args, **kwargs)
+
+        pk = self.kwargs['pk']
+        if utils.mooring_group_access_level_annual_booking_period(pk,request) == True:
+            return super(AnnualBookingPeriodEditChangeGroup, self).get(request, *args, **kwargs)
+        else:
+            messages.error(self.request, 'Forbidden from viewing this page.')
+            return HttpResponseRedirect("/forbidden")
+
 
     def get_context_data(self, **kwargs):
         context = super(AnnualBookingPeriodEditChangeGroup, self).get_context_data(**kwargs)
@@ -2570,7 +2577,7 @@ class AnnualBookingPeriodAddOption(CreateView):
 
     def get(self, request, *args, **kwargs):
         pk = self.kwargs['bp_group_id']
-        if utils.mooring_group_access_level_booking_period(pk,request) == True:
+        if utils.mooring_group_access_level_annual_booking_period(pk,request) == True:
             return super(AnnualBookingPeriodAddOption, self).get(request, *args, **kwargs)
         else:
             messages.error(self.request, 'Forbidden from viewing this page.')
@@ -2635,6 +2642,45 @@ class AnnualBookingPeriodAddOption(CreateView):
         return HttpResponseRedirect(reverse('dash-annual-bookingperiod-group-view', args=(self.kwargs['bp_group_id'],)))
 
 
+class AnnualBookingPeriodDeleteOption(DeleteView):
+    template_name = 'mooring/dash/delete_annual_period_option.html'
+    model = AnnualBookingPeriodOption
+
+    def get(self, request, *args, **kwargs):
+        pk = self.kwargs['pk']
+        bp_group_id = self.kwargs['bp_group_id']
+        abpo = models.AnnualBookingPeriodOption.objects.get(id=int(pk))
+        if utils.mooring_group_access_level_annual_booking_period(abpo.annual_booking_period_group.id,request) == True:
+            return super(AnnualBookingPeriodDeleteOption, self).get(request, *args, **kwargs)
+        else:
+            messages.error(self.request, 'Forbidden from viewing this page.')
+            return HttpResponseRedirect("/forbidden")
+
+    def get_context_data(self, **kwargs):
+        context = super(AnnualBookingPeriodDeleteOption, self).get_context_data(**kwargs)
+        context['bp_group_id'] = self.kwargs['bp_group_id']
+        return context
+    def get_absolute_url(self):
+        return reverse('dash-annual-bookingperiod-group-view', args=(self.kwargs['bp_group_id'],))
+
+    def get_success_url(self):
+        return reverse('dash-annual-bookingperiod-group-view', args=(self.kwargs['bp_group_id'],))
+
+
+    def post(self, request, *args, **kwargs):
+        if request.POST.get('cancel'):
+            return HttpResponseRedirect(self.get_absolute_url())
+        pk = self.kwargs['pk']
+        bp_group_id = self.kwargs['bp_group_id']
+
+        try:
+           self.delete(request, *args, **kwargs)
+           messages.success(self.request, 'Annual Booking Period Option Successfully Removed')
+        except Exception as e:
+           messages.error(self.request, 'There was and error trying to deleting annual booking option.')
+        return HttpResponseRedirect(self.get_absolute_url())
+
+
 class AnnualBookingPeriodEditOption(UpdateView):
     template_name = 'mooring/dash/add_annual_change_period_option.html'
     model = AnnualBookingPeriodOption 
@@ -2642,12 +2688,8 @@ class AnnualBookingPeriodEditOption(UpdateView):
     def get(self, request, *args, **kwargs):
         pk = self.kwargs['pk']
         bp_group_id = self.kwargs['bp_group_id']
-        if utils.mooring_group_access_level_booking_period_option(pk,bp_group_id,request) == True:
-            pass
-            #if MooringsiteBooking.objects.filter(booking_period_option_id=pk).count() > 0:
-            #    messages.error(self.request, 'This booking period cannot be changed as it already associated with an existing booking.')
-            #    return HttpResponseRedirect(reverse('dash-bookingperiod-group-view', args=(bp_group_id,)))
-
+        abpo = models.AnnualBookingPeriodOption.objects.get(id=int(pk))
+        if utils.mooring_group_access_level_annual_booking_period(abpo.annual_booking_period_group.id,request) == True:
             return super(AnnualBookingPeriodEditOption, self).get(request, *args, **kwargs)
         else:
             messages.error(self.request, 'Forbidden from viewing this page.')
@@ -2811,7 +2853,47 @@ class BookingPeriodDeleteGroup(DeleteView):
            messages.error(self.request, 'There was and error trying to delete booking group ')
            return HttpResponseRedirect(reverse('dash-bookingperiod-group-delete', args=(pk,)))
         return HttpResponseRedirect(self.get_success_url())
-#        return super(BookingPeriodDeleteGroup, self).post(request, *args, **kwargs)
+
+class AnnualBookingPeriodDeleteGroup(DeleteView):
+    template_name = 'mooring/dash/delete_annual_period_group.html'
+    model = AnnualBookingPeriodGroup 
+
+    def get(self, request, *args, **kwargs):
+        pk = self.kwargs['pk']
+        if utils.mooring_group_access_level_annual_booking_period(pk,request) == True:
+            print (models.BookingAnnualAdmission.objects.filter(annual_booking_period_group__id=int(pk)))
+            if models.BookingAnnualAdmission.objects.filter(annual_booking_period_group__id=int(pk)).count() > 0:
+                 messages.error(self.request,'Unable to delete groups that have annual admissions bookings linked.')
+                 return HttpResponseRedirect(reverse('dash-annualbookingperiod'))
+
+            
+            return super(AnnualBookingPeriodDeleteGroup, self).get(request, *args, **kwargs)
+        else:
+            messages.error(self.request, 'Forbidden from viewing this page.')
+            return HttpResponseRedirect("/forbidden")
+
+
+    def get_context_data(self, **kwargs):
+        context = super(AnnualBookingPeriodDeleteGroup, self).get_context_data(**kwargs)
+        return context
+
+    def get_absolute_url(self):
+        return reverse('dash-annualbookingperiod')
+
+    def get_success_url(self):
+        return reverse('dash-annualbookingperiod')
+
+    def post(self, request, *args, **kwargs):
+        if request.POST.get('cancel'):
+            return HttpResponseRedirect(self.get_absolute_url())
+        pk = self.kwargs['pk']
+        try:
+           self.delete(request, *args, **kwargs)
+           messages.success(self.request, 'Annual Booking Group Successfully Removed')
+        except Exception as e:
+           messages.error(self.request, 'There was and error trying to delete annual booking group ')
+           return HttpResponseRedirect(reverse('dash-annual-bookingperiod-group-delete', args=(pk,)))
+        return HttpResponseRedirect(self.get_success_url())
 
 class BookingPeriodDeleteOption(DeleteView):
     template_name = 'mooring/dash/delete_period_option.html'
@@ -3038,6 +3120,7 @@ class AnnualAdmissionSuccessView(TemplateView):
                     #if booking.cost_total > 0:
                     print ("SEND EMAIL")
                     emails.send_annual_admission_booking_invoice(booking,request,context_processor)
+                    emails.send_new_annual_admission_booking_internal(booking,request,context_processor)
                     # for fully paid bookings, fire off confirmation emaili
                     #if booking.invoice_status == 'paid':
                     request.session['annual_admission_last_booking'] = booking.id

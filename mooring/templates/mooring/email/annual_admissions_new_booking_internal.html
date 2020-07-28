@@ -1,0 +1,9 @@
+<p>Dear Staff,</p>
+<p>A new annual admission booking has been completed. Details of booking are below:<p>
+
+<table width='100%'>
+	<tr><td style='font-weight: bold' >Booking #</td><td>AA{{ booking.id }}</td></tr>
+	<tr><td style='font-weight: bold' >Name</td><td>{{ booking.details.first_name}} {{ booking.details.last_name }}</td></tr>
+	<tr><td style='font-weight: bold' >Booking period</td><td>{{ booking.annual_booking_period_group.name }}</td></tr>
+</table>
+

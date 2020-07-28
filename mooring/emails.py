@@ -3,6 +3,7 @@ from io import BytesIO
 from django.conf import settings
 
 from mooring import pdf
+from mooring import models
 from mooring.models import MooringsiteBooking, AdmissionsBooking, AdmissionsLine, AdmissionsLocation, BookingAnnualInvoice
 #from ledger.payments.pdf import create_invoice_pdf_bytes
 from mooring.invoice_pdf import create_invoice_pdf_bytes
@@ -170,16 +171,11 @@ def send_annual_admission_booking_invoice(booking,request, context_processor):
     context= {'booking': booking, 'context_processor': context_processor}
     to = booking.customer.email
     filename = 'invoice-annual_admissions-{}.pdf'.format(booking.id)
-    print ("M 1")
     references = [b.invoice_reference for b in BookingAnnualInvoice.objects.filter(booking_annual_admission=booking)]
     invoice = Invoice.objects.filter(reference__in=references).order_by('-created')[0]
-    print ("M 2")
     invoice_pdf = create_invoice_pdf_bytes(filename,invoice, request, context_processor)
-    print ("M 3")
     template_group = context_processor['TEMPLATE_GROUP']
-    print ("M 4")
     sendHtmlEmail([to],subject,context,template,cc,bcc,from_email,template_group,attachments=[(filename, invoice_pdf, 'application/pdf')])
-    print ("M 5")
 
 def send_booking_invoice(booking,request, context_processor):
     subject = 'Your booking invoice'
@@ -251,6 +247,33 @@ def send_admissions_booking_confirmation(admissionsBooking, request, context_pro
 #    email_obj.send([email], from_address=rottnest_email, context=context, cc=cc, bcc=bcc, attachments=[(filename, att.read(), 'application/pdf')])
 
     sendHtmlEmail([email],subject,context,template,cc,bcc,from_email,template_group,attachments=[('confirmation-AD{}.pdf'.format(admissionsBooking.id), att.read(), 'application/pdf')])
+
+
+def send_new_annual_admission_booking_internal(booking, request, context_processor):
+    email_obj = TemplateEmailBase()
+
+    subject = 'New Annual Admission booking for {} with AA{}'.format(booking.details['first_name']+' '+booking.details['last_name'],str(booking.id))
+    template = 'mooring/email/annual_admissions_new_booking_internal.html'
+    cc = None
+    bcc = None
+    from_email = None
+    template_group = context_processor['TEMPLATE_GROUP']
+
+    
+    email = 'jason.moore@dbca.wa.gov.au' 
+ 
+    context = {
+        'booking': booking,
+        'context_processor': context_processor
+    }
+
+    mooring_group = booking.annual_booking_period_group.mooring_group
+    print ("mooring group")
+    print (mooring_group)
+    for b in models.AnnualAdmissionEmail.objects.filter(mooring_group=mooring_group):
+        print ("Sending email:"+b.email)
+        sendHtmlEmail([b.email],subject,context,template,cc,bcc,from_email,template_group,attachments=[])
+
 
 def send_booking_confirmation(booking,request,context_processor):
     email_obj = TemplateEmailBase()

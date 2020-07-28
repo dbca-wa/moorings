@@ -513,7 +513,15 @@ class MooringAreaImage(models.Model):
             pass
         super(MooringAreaImage,self).delete(*args,**kwargs)
 
+class AnnualAdmissionEmail(models.Model):
+    mooring_group = models.ForeignKey('MooringAreaGroup', blank=False, null=False)
+    email = models.CharField(max_length=300)
+    active = models.BooleanField(default=True)
 
+    def __str__(self):
+        return self.email
+
+    
 class AnnualBookingPeriodGroup(models.Model):
 
     STATUS = (
@@ -540,7 +548,11 @@ class AnnualBookingPeriodGroup(models.Model):
 
         super(AnnualBookingPeriodGroup, self).save()         
         #return 'letter/%Y/%m/%d/%H/'+self.id
-
+    def delete(self, **kwargs):
+        if BookingAnnualAdmission.objects.filter(annual_booking_period_group=self).count() > 0:
+             raise ValidationError('Unable to delete to existing annual admissions bookings linked to this annual admission booking group.')
+        else:
+            super(AnnualBookingPeriodGroup, self).delete()
 class AnnualBookingPeriodOption(models.Model):
 
     annual_booking_period_group = models.ForeignKey('AnnualBookingPeriodGroup', blank=False, null=False)
