@@ -4688,8 +4688,10 @@ def get_annual_admission_booking(request):
            row['override_lines'] = c.override_lines
            row['sticker_no'] = c.sticker_no
            row['sticker_no_history'] = []
-            
-           row['sticker_no_history'] =  c.sticker_no_history
+           for j in c.sticker_no_history: 
+               print (j['updated'])
+               j['updated_friendly'] = datetime.strptime(j['updated'], '%Y-%m-%d %H:%M:%S').strftime('%d/%m/%Y %H:%M %p')
+               row['sticker_no_history'].append(j)
            if c.id in baainvoices_temp:
                row['invoices'] = baainvoices_temp[c.id]
            if c.booking_type == 1:
