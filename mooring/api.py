@@ -2222,7 +2222,8 @@ def create_admissions_booking(request, *args, **kwargs):
         'noOfChildren': request.POST.get('noOfChildren', 0),
         'noOfInfants': request.POST.get('noOfInfants', 0),
         'warningReferenceNo': request.POST.get('warningRefNo'),
-        'location' : location.pk
+        'location' : location.pk,
+        'mobile': request.POST.get('mobile')
     }
 
     if len(request.POST.get('vesselReg', '')) > 0: 
@@ -2247,7 +2248,8 @@ def create_admissions_booking(request, *args, **kwargs):
         noOfInfants = serializer.validated_data['noOfInfants'],
         warningReferenceNo = serializer.validated_data['warningReferenceNo'],
         booking_type = 3,
-        location = serializer.validated_data['location']
+        location = serializer.validated_data['location'],
+        mobile = serializer.validated_data['mobile'],
     )
 
     data2 = {
@@ -2749,7 +2751,6 @@ class AdmissionsBookingViewSet(viewsets.ModelViewSet):
         #bt = [0,1]
         #if canceled == str('True'):
         #   bt = [0,1,4]
-        print("LINE 1", datetime.now().strftime("%d/%m/%Y %H:%M:%S"))	
         bt = [0,1,4]
         recordsTotal = 0
         data = []
@@ -2778,12 +2779,10 @@ class AdmissionsBookingViewSet(viewsets.ModelViewSet):
 
 
             admission_line = AdmissionsLine.objects.all().values('admissionsBooking_id','location__mooring_group')
-            print("LINE 1.011", datetime.now().strftime("%d/%m/%Y %H:%M:%S"))
             for al in admission_line:
                   if al['admissionsBooking_id'] not in admission_line_obj:
                        admission_line_obj[al['admissionsBooking_id']] = al
                        
-            print("LINE 1.012", datetime.now().strftime("%d/%m/%Y %H:%M:%S"))
 
             groups = MooringAreaGroup.objects.filter(members__in=[request.user,])
             for group in groups:
@@ -2800,14 +2799,12 @@ class AdmissionsBookingViewSet(viewsets.ModelViewSet):
             for ms in msb_obj:
                    mooring_site_booking[ms['booking__id']] = ms
             #print (mooring_site_booking)
-            print("LINE 1.01", datetime.now().strftime("%d/%m/%Y %H:%M:%S"))
             ap = Booking.objects.all().values('id','admission_payment__id').exclude(admission_payment=None)
             #print (ap)
             for a in ap:
                 booking_admission_link[a['id']] = a['admission_payment__id']
                 admission_booking_link[a['admission_payment__id']] = a['id']
             #print (admission_booking_link)
-            print("LINE 1.02", datetime.now().strftime("%d/%m/%Y %H:%M:%S"))
             # If groups then we need to filter data by groups.
             if groups.count() > 0:
                 filtered_ids = []
@@ -2901,7 +2898,6 @@ class AdmissionsBookingViewSet(viewsets.ModelViewSet):
 #            recordsTotal = len(data)
 #            recordsTotal = AdmissionsBooking.objects.filter(booking_type__in=[0,1,4],`
             #search = request.GET.get('search[value]') if request.GET.get('search[value]') else None
-            print("LINE 2", datetime.now().strftime("%d/%m/%Y %H:%M:%S"))
             search = request.GET.get('search_keyword') if request.GET.get('search_keyword') else None
             start = request.GET.get('start') if request.GET.get('start') else 0
             length = request.GET.get('length') if request.GET.get('length') else len(data)
@@ -2959,16 +2955,15 @@ class AdmissionsBookingViewSet(viewsets.ModelViewSet):
                       if date_match is True:
                            data_temp.append(row)
                 data = data_temp
-            print("LINE 3", datetime.now().strftime("%d/%m/%Y %H:%M:%S"))
             #    data = data.distinct().filter(admissionsline__arrivalDate__lte=date_to)
             #print (data)
             recordsFiltered = int(len(data))
             data = data[int(start):int(length)+int(start)]
             serializer = AdmissionsBookingSerializer(data,many=True)
             res = serializer.data
-            print("LINE 4", datetime.now().strftime("%d/%m/%Y %H:%M:%S"))
             #print (res)
             for r in res:
+                r['booking'] = ""
                 ad = AdmissionsBooking.objects.get(pk=r['id'])
                 adLines = AdmissionsLine.objects.filter(admissionsBooking=ad)
                 lines = []
@@ -2978,7 +2973,8 @@ class AdmissionsBookingViewSet(viewsets.ModelViewSet):
                     r.update({'lines' : lines})
                 if Booking.objects.filter(admission_payment=ad).count() > 0:
                     booking = Booking.objects.filter(admission_payment=ad)[0]
-                    r.update({'booking': booking.id})
+                    #r.update({'booking': booking.id})
+                    r['booking'] = booking.id
                     bi = BookingInvoice.objects.filter(booking=booking)
                     inv = []
                     for b in bi:
@@ -3004,7 +3000,6 @@ class AdmissionsBookingViewSet(viewsets.ModelViewSet):
                     r.update({'customerName': name, 'email': email})
                 else:
                     r.update({'customerName': 'No customer', 'email': "No customer"})
-                print("LINE 5", datetime.now().strftime("%d/%m/%Y %H:%M:%S"))
         except Exception as e:
             res ={
                 "Error": str(e)
@@ -3777,29 +3772,29 @@ class BookingPeriodViewSet(viewsets.ModelViewSet):
         except Exception as e:
             raise serializers.ValidationError(str(e))
 
-class RegisteredVesselsViewSet(viewsets.ModelViewSet):
-    queryset = RegisteredVessels.objects.all()
-    serializer_class = RegisteredVesselsSerializer
-    permission_classes = (IsAuthenticatedOrReadOnly,)
-
-    def list(self, request, *args, **kwargs):
-        rego = request.GET.get('rego') if request.GET.get('rego') else None
-        queryset = self.get_queryset()
-        if rego is not None:
-            if len(rego) > 2:
-               queryset = queryset.filter(rego_no=rego.upper())
-               serializer = self.get_serializer(queryset, many=True)
-               return Response(serializer.data)
-            else:
-                raise serializers.ValidationError("Please enter more characters")
- 
-        else:
-           raise serializers.ValidationError("Please provide Rego")
-
-    def retrieve(self, request, pk=None):
-        instance = self.get_object()
-        serializer = self.get_serializer(instance,method='get')
-        return Response(serializer.data)
+#class RegisteredVesselsViewSet(viewsets.ModelViewSet):
+#    queryset = RegisteredVessels.objects.all()
+#    serializer_class = RegisteredVesselsSerializer
+#    permission_classes = (IsAuthenticatedOrReadOnly,)
+#
+#    def list(self, request, *args, **kwargs):
+#        rego = request.GET.get('rego') if request.GET.get('rego') else None
+#        queryset = self.get_queryset()
+#        if rego is not None:
+#            if len(rego) > 2:
+#               queryset = queryset.filter(rego_no=rego.upper())
+#               serializer = self.get_serializer(queryset, many=True)
+#               return Response(serializer.data)
+#            else:
+#                raise serializers.ValidationError("Please enter more characters")
+# 
+#        else:
+#           raise serializers.ValidationError("Please provide Rego")
+#
+#    def retrieve(self, request, pk=None):
+#        instance = self.get_object()
+#        serializer = self.get_serializer(instance,method='get')
+#        return Response(serializer.data)
 
 
 # Reasons
@@ -4594,8 +4589,31 @@ def update_sticker_admission_booking(request):
               'response' : response
            }), content_type='application/json', status=status_code)
 
+@require_http_methods(['GET'])
+def get_paid_admissions(request):
+    now_dt = datetime.now()
+    rego = request.GET.get('rego','')
+    dateArrival = request.GET.get('dateArrival','')
+    dtarrival = datetime.strptime(dateArrival, '%d/%m/%Y')
 
+    response = []
+    if RegisteredVessels.objects.filter(rego_no=rego).count() > 0:
+         rv = RegisteredVessels.objects.filter(rego_no=rego)
+         response.append({'admissionsPaid': rv[0].admissionsPaid, 'id': rv[0].id, 'rego_no': rv[0].rego_no})
+         if rv[0].admissionsPaid is False:
+              baa = BookingAnnualAdmission.objects.filter(booking_type=1,start_dt__lte=dtarrival,expiry_dt__gte=dtarrival,rego_no=rego)
+              if baa.count() > 0:
+                  response.append({'admissionsPaid': True, 'id': baa[0].id, 'rego_no': baa[0].rego_no})
 
+    else:
+        #baa = BookingAnnualAdmission.objects.filter(start_dt__lte=now_dt,expiry_dt__gte=now_dt,rego_no=rego)
+        baa = models.BookingAnnualAdmission.objects.filter(booking_type=1,start_dt__lte=dtarrival,expiry_dt__gte=dtarrival,rego_no=rego)
+        if baa.count() > 0:
+            response.append({'admissionsPaid': True, 'id': baa[0].id, 'rego_no': baa[0].rego_no})
+
+    return HttpResponse(geojson.dumps(
+              response
+           ), content_type='application/json')
 
 #get_annual_admission_booking
 @require_http_methods(['GET'])

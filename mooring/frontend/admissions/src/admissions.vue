@@ -44,6 +44,15 @@
                                             </div>
                                         </div>
                                     </div>
+                                    <div class="row">
+                                        <div class="small-12 medium-12 large-4 columns">
+                                            <label class="label-plain2">Mobile</label>
+                                            <div class="col-sm-8">
+                                                <input  id="id_mobile" v-model="mobile" class="form-control" name="mobile" type="text" required/>
+                                            </div>
+                                        </div>
+                                    </div>
+				    
                                     <div class="row" v-if="errorMsgPersonal">
                                         <div class="alert alert-danger" id="warning" role="alert">{{ errorMsgPersonal }}</div>
                                     </div>
@@ -235,6 +244,7 @@ export default {
         lastName: '',
         email: '',
         emailConfirm: '',
+        mobile: '',
         currentCostDateStart: '',
         currentCostDateEnd: '',
         adultCost: 0,
@@ -263,6 +273,7 @@ export default {
             warningRefNo: false,
             givenName: false,
             lastName: false,
+            movile: false,
             email: false,
             emailConfirm: false,
             }
@@ -337,6 +348,7 @@ export default {
             this.validateNoOfPeople();
             var warningRefNo = this.warningRefNo;
             this.validateWarningRefNo();
+            var mobile = this.mobile;
             
             var errs = this.errors
             if(errs.arrivalDate === true || errs.overnightStay === true || errs.givenName === true || errs.lastName === true || errs.email === true || errs.noOfAdults === true || errs.noOfChildren === true || errs.noOfInfants === true){
@@ -359,6 +371,7 @@ export default {
                     lastName: lastName,
                     email: email,
                     location: location,
+                    mobile: mobile
                     // mooring_group: mooring_group
                 }
                 $.ajax({
@@ -484,6 +497,7 @@ export default {
             var fieldToCheck = this.arrivalDate;
             if(!fieldToCheck){
                 this.errors.arrivalDate = true;
+
             } else {
                 this.calculateTotal();
                 var selectedDate = new Date(fieldToCheck);
@@ -500,13 +514,16 @@ export default {
                     }
                 }
             }
+	    this.validateVesselReg();
         },
         validateVesselReg: function() {
             let vm = this;
             vm.vesselReg = vm.vesselReg.replace(/ /g, ""); 
             var reg = vm.vesselReg;
+	    var dateArrival = $('#dateArrival').val();
             var data = {
-                'rego': reg
+                'rego': reg,
+		'dateArrival': dateArrival
             }
             vm.noPayment = false;
             if(reg){

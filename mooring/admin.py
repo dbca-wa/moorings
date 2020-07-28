@@ -172,7 +172,7 @@ class BookingAdmin(admin.ModelAdmin):
 @admin.register(models.BookingAnnualAdmission)
 class BookingAnnualAdmissionAdmin(admin.ModelAdmin):
     raw_id_fields = ('customer','created_by','overridden_by','canceled_by',)
-    list_display = ('id','customer','start_dt','expiry_dt','booking_type','cost_total','created_by','created')
+    list_display = ('id','customer','start_dt','expiry_dt','rego_no','booking_type','cost_total','created_by','created')
     ordering = ('-id',)
     search_fileds = ('customer','id',)
     list_filter = ('booking_type',)
@@ -447,7 +447,7 @@ class AdmissionLineInline(admin.TabularInline):
 @admin.register(models.AdmissionsBooking)
 class AdmissionBooking(admin.ModelAdmin):
     raw_id_fields = ('customer',)
-    list_display = ('confirmation_number', 'customer', 'totalCost')
+    list_display = ('confirmation_number', 'booking_type','customer','mobile', 'totalCost','created')
     readonly_fields=('created_by','canceled_by',)
     inlines = [AdmissionLineInline]
 

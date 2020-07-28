@@ -49,7 +49,7 @@ router.register(r'contacts',api.ContactViewSet)
 router.register(r'countries', api.CountryViewSet)
 router.register(r'bookingPeriodOptions', api.BookingPeriodOptionsViewSet)
 router.register(r'bookingPeriod', api.BookingPeriodViewSet)
-router.register(r'registeredVessels', api.RegisteredVesselsViewSet)
+#router.register(r'registeredVessels', api.RegisteredVesselsViewSet)
 
 api_patterns = [
     url(r'^api/profile$',api.GetProfile.as_view(), name='get-profile'),
@@ -59,6 +59,7 @@ api_patterns = [
     url(r'^api/profile/update_address$',api.UpdateProfileAddress.as_view(), name='update-profile-address'),
     url(r'^api/oracle_job$',api.OracleJob.as_view(), name='get-oracle'),
     url(r'^api/bulkPricing', api.BulkPricingView.as_view(),name='bulkpricing-api'),
+    url(r'^api/registeredVessels/', api.get_paid_admissions,name='get_paid_admissions'),
     url(r'^api/search_suggest', api.search_suggest, name='search_suggest'),
     url(r'^api/get_country_provinces/(?P<country_code>[A-Z]+)/', api.get_provinces_by_country, name='get_country_provinces'),
     url(r'^api/get_annual_admission_pricing/(?P<annual_booking_period_id>[0-9]+)/(?P<vessel_size>[0-9]+.[0-9]+)/', api.get_annual_admission_pricing, name='get_annual_admission_pricing_float'),
