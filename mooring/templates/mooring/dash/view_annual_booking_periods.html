@@ -51,7 +51,7 @@
         </thead>
         <tbody>
         {% for p in annual_booking_periods %}
-	<tr><td>{{ p.id }}</td><td>{{ p.start_time }}</td><td>{{ p.finish_time }}</td><td><a href='{% url 'dash-annual-booking-period-option-edit' object.id p.id %}'>Edit</a><br><a href=''>Delete</a><br></td></tr>
+	<tr><td>{{ p.id }}</td><td>{{ p.start_time }}</td><td>{{ p.finish_time }}</td><td><a href='{% url 'dash-annual-booking-period-option-edit' object.id p.id %}'>Edit</a><br><a href='{% url 'dash-annual-booking-period-option-delete' object.id p.id %}'>Delete</a><br></td></tr>
 
 	{% endfor %}
         </tbody>

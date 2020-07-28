@@ -552,7 +552,10 @@ class PromoArea(admin.GeoModelAdmin):
         super(PromoArea, self).save_model(request, obj, form, change)
 
 
-
+@admin.register(models.AnnualAdmissionEmail)
+class AnnualAdmissionEmailAdmin(admin.ModelAdmin):
+    list_display = ('mooring_group','email','active')
+    list_filter = ('mooring_group',)
 
 @admin.register(models.VesselDetail)
 class VesselDetail(admin.ModelAdmin):
