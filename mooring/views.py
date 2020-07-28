@@ -978,6 +978,12 @@ class MakeBookingsView(TemplateView):
                     vessel = vessel[0]
                     if vessel:
                         no_admissions = vessel.admissionsPaid
+                if no_admissions is False:
+                    baa = BookingAnnualAdmission.objects.filter(booking_type=1,start_dt__lte=booking.arrival,expiry_dt__gte=booking.arrival,rego_no=details['vessel_rego'])
+                    if baa.count() > 0:
+                        no_admissions = True
+ 
+
             details['admission_fees'] = no_admissions
             
             if not no_admissions:
@@ -1271,6 +1277,11 @@ class MakeBookingsView(TemplateView):
             admissionsPaid = vessel.admissionsPaid
             if vessel.admissionsPaid:
                 admissionLines = []
+        if admissionsPaid is False:
+            baa = BookingAnnualAdmission.objects.filter(booking_type=1,start_dt__lte=booking.arrival,expiry_dt__gte=booking.arrival,rego_no=details['vessel_rego'])
+            if baa.count() > 0:
+                 admissionsPaid = True
+
         booking.details['admission_fees'] = admissionsPaid 
  
 
