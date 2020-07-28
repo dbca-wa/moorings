@@ -1363,7 +1363,7 @@ def get_annual_admissions_pricing_info(annual_booking_period_id,vessel_size):
     annual_admissions = {'response': 'error', 'abpg': {}, 'abpo': {}, 'abpovc': {}}
     if models.AnnualBookingPeriodGroup.objects.filter(id=int(annual_booking_period_id)).count() > 0:
          abpg = models.AnnualBookingPeriodGroup.objects.get(id=int(annual_booking_period_id))
-         vsc = models.VesselSizeCategory.objects.filter(start_size__lte=float(vessel_size),end_size__gte=float(vessel_size))
+         vsc = models.VesselSizeCategory.objects.filter(start_size__lte=Decimal(vessel_size),end_size__gte=Decimal(vessel_size))
          abpo= models.AnnualBookingPeriodOption.objects.filter(start_time__lte=nowdt,finish_time__gte=nowdt,annual_booking_period_group=abpg)
          if abpo.count() > 0 and vsc.count() > 0:
              abpovc = models.AnnualBookingPeriodOptionVesselCategoryPrice.objects.filter(annual_booking_period_option=abpo[0],vessel_category=vsc[0])

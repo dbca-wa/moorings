@@ -224,13 +224,13 @@ class AnnualAdmissionForm(forms.ModelForm):
              al = models.AdmissionsLocation.objects.filter(key=self.initial['loc'])[0]
              apg = models.AnnualBookingPeriodGroup.objects.filter(mooring_group__in=[al.mooring_group.id,], status=1)
              booking_period_list = []
-             booking_period_list.append(['','Please Select a Period'])
+             booking_period_list.append(['','Please select a period'])
              for a in apg:
                    booking_period_list.append([a.id, a.name])
              self.fields['booking_period'].choices = booking_period_list
 
         discount_reason = []
-        discount_reason.append(['','Please Select a Period'])
+        discount_reason.append(['','Please select a reason'])
         for d in self.initial['discount_reason']:
               discount_reason.append([d.id,d.text])
         self.fields['override_reason'].choices = discount_reason 
