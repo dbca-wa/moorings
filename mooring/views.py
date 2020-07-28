@@ -2003,6 +2003,7 @@ class AnnualAdmissionsView(CreateView):
         self.object.booking_type = 3
         self.object.annual_booking_period_group = abg
         self.object.cost_total = total_cost
+        self.object.rego_no = self.request.POST.get('vessel_rego')
         self.object.details = details
         override_lines = None
 

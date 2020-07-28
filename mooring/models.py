@@ -1289,6 +1289,7 @@ class BookingAnnualAdmission(models.Model):
     start_dt = models.DateTimeField()
     expiry_dt = models.DateTimeField()
     details = JSONField(null=True, blank=True)
+    rego_no = models.CharField(max_length=255, blank=True,null=True) 
     booking_type = models.SmallIntegerField(choices=BOOKING_TYPE_CHOICES, default=0)
     annual_booking_period_group = models.ForeignKey('AnnualBookingPeriodGroup',null=True, blank=True)
     cost_total = models.DecimalField(max_digits=8, decimal_places=2, default='0.00')
@@ -2010,6 +2011,7 @@ class AdmissionsBooking(models.Model):
     created = models.DateTimeField(default=timezone.now)
     location = models.ForeignKey(AdmissionsLocation, blank=True, null=True)    
     override_lines = JSONField(null=True, blank=True, default={})
+    mobile = models.CharField(max_length=50, blank=True)
 
     def __str__(self):
         email = ''

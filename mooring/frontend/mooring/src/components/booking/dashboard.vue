@@ -242,6 +242,7 @@ export default {
                     "url": api_endpoints.bookings,
                     "dataSrc": 'results',
                     data :function (d) {
+                        console.log('start');
                         if (vm.filterDateFrom) {
                             d.arrival = vm.filterDateFrom;
                         }
@@ -259,6 +260,7 @@ export default {
                         if (vm.filterBookingKeyword.length > 0) {
 			     d.search_keyword = vm.filterBookingKeyword;
 			}
+                        console.log('end');
                         return d;
                     }
                 },
@@ -286,26 +288,27 @@ export default {
                         }
                     },
                     {
+                        data: "firstname",
                         mRender: function(data, type, full) {
-                            //var name = full.firstname +" "+full.lastname;
-                            var first_name = full.firstname ? full.firstname : '';
-                            var last_name = full.lastname ? full.lastname : '';
-                            var name = first_name +" "+ last_name;
-                            var max_length = 25;
-                            var short_name = (name.length > max_length) ? name.substring(0,max_length-1)+'...' : name;
-                            var popover =  (name.length > max_length) ? "class=\"name_popover\"":"";
-                            var column = '<td ><div '+popover+' tabindex="0" data-toggle="popover" data-placement="top" data-content="__NAME__">'+short_name+'</div>';
+                            var name = full.firstname +" "+full.lastname;
+                             var first_name = full.firstname ? full.firstname : '';
+                             var last_name = full.lastname ? full.lastname : '';
+                             var name = first_name +" "+ last_name;
+                             var max_length = 25;
+                             var short_name = (name.length > max_length) ? name.substring(0,max_length-1)+'...' : name;
+                             var popover =  (name.length > max_length) ? "class=\"name_popover\"":"";
+                             var column = '<td ><div '+popover+' tabindex="0" data-toggle="popover" data-placement="top" data-content="__NAME__">'+short_name+'</div>';
 
-                            column += '<BR>'+ full.booking_phone_number;
-                            column += '</td>';
-                            column.replace(/__SHNAME__/g, short_name);
-                            return column.replace(/__NAME__/g, name);
-
+                             column += '<BR>'+ full.booking_phone_number;
+                             column += '</td>';
+                             column.replace(/__SHNAME__/g, short_name);
+                             return column.replace(/__NAME__/g, name);
                         },
                         orderable:false,
                         searchable:false
                     },
                     {
+                        data: "regos",
                         mRender: function(data, type, full){
                             if (full.regos.length > 0){
                                 var rego = full.regos[0].vessel;
@@ -318,6 +321,7 @@ export default {
                         searchable:false
                     },
                     {
+                        data: "mooringsite_bookings",
                         mRender: function(data, type, full){
                             var line = "<td>";
                             for (var msb in full.mooringsite_bookings){
@@ -330,6 +334,7 @@ export default {
                         searchable: false
                     },
                     {
+                        data: "mooringsite_bookings",
                         mRender: function(data, type, full){
                             var line = '<td>';
                             for (var msb in full.mooringsite_bookings){
@@ -358,6 +363,7 @@ export default {
                     {
                         orderable:false,
                         searchable:false,
+                        data: "mooringsite_bookings",
                         mRender:function(data,type,full){
                             var line = '<td>';
                             for (var msb in full.mooringsite_bookings){
@@ -371,6 +377,7 @@ export default {
                     {
                         orderable:false,
                         searchable:false,
+                        data: "mooringsite_bookings",
                         mRender:function(data,type,full){
                             var line = '<td>';
                             for (var msb in full.mooringsite_bookings){
@@ -395,6 +402,7 @@ export default {
                         'createdCell': helpers.dtPopoverCellFn
                     },
                     {
+                        data: "mooringsite_bookings",
                         mRender: function(data, type, full) {
                             var status = (data == true) ? "Open" : "Temporarily Closed";
                             var booking = JSON.stringify(full);
@@ -425,7 +433,7 @@ export default {
                                 var cancel_booking = "<a href='/cancel-booking/"+full.id+"' class='text-primary' idata-cancel='"+booking+"' > Cancel</a><br/>";
                                 column += cancel_booking;
                                 column += change_booking;
-				}
+			        }
                             }
 
                             full.has_history ? column += "<a href='/view-booking/"+full.id+"' class='text-primary' data-history = '"+booking+"' > View History</a><br/>" : '';
@@ -486,8 +494,9 @@ export default {
                         searchable:false
                     },
                     {
+                        data: "booking", 
                         mRender: function(data, type, full){
-                            if (full.booking){
+                             if (full.booking){
                                 return "<a href='/api/get_confirmation/"+full.booking+"' target='_blank' class='text-primary'>PS"+full.booking+"</a><br/>"
                             } else {
                                 return "-"
@@ -502,6 +511,12 @@ export default {
                         searchable:false
                     },
                     {
+                        data: "mobile",
+                        orderable:false,
+                        searchable:false
+                    },
+                    {
+                        data: "vesselRegNo",
                         mRender: function(data,type,full){
                             if(full.vesselRegNo){
                                 return full.vesselRegNo;
@@ -513,6 +528,7 @@ export default {
                         searchable:false
                     },
                     {
+                        data: "noOfAdults",
                         mRender:function(data,type,full){
                             return full.noOfAdults + full.noOfChildren + full.noOfInfants;
                         },
@@ -520,7 +536,7 @@ export default {
                         searchable:false
                     },
                     {
-                        data:"arrivalDate",
+                        data:"lines",
                         orderable:false,
                         searchable:false,
                         mRender:function(data,type,full){
@@ -532,6 +548,7 @@ export default {
                         }
                     },
                     {
+                         data: "warningReferenceNo",
                          mRender: function(data,type,full){
                             if(full.warningReferenceNo){
                                 return full.warningReferenceNo;
@@ -543,6 +560,7 @@ export default {
                         searchable:false
                     },
                     {
+                        data: "invoice_ref",
                         mRender: function(data, type, full) {
                             var search = "";
                             var invoices = "";
@@ -576,7 +594,7 @@ export default {
                 ]
             },
             dtHeaders:["Confirmation #", "Person", "Vessel Reg #", "Mooring", "Region", "From", "To", "Status", "Action"],
-            dtHeaders2:["Confirmation #", "Booking #", "Person", "Vessel Reg #", "Total Attendees", "Admission Date", "Warning Ref #", "Action"],
+            dtHeaders2:["Confirmation #", "Booking #", "Person","Mobile", "Vessel Reg #", "Total Attendees", "Admission Date", "Warning Ref #", "Action"],
             dateFromPicker:null,
             dateToPicker:null,
             dateFromPicker2:null,
@@ -1090,7 +1108,7 @@ export default {
                 var data = res.body.results;
 
                 var json2csv = require('json2csv');
-                var fields = ["Confirmation No", "Customer", "Email", "Overnight Stay", "Arrival Date", "Total Attendees", "Adults","Children","Infants", "Vessel Reg No", "Warning Reference", "Invoice Reference",'Vessel Size','Vessel Draft','Vessel Beam','Vessel Weight']
+                var fields = ["Confirmation No", "Customer", "Email", "Mobile", "Overnight Stay", "Arrival Date", "Total Attendees", "Adults","Children","Infants", "Vessel Reg No", "Warning Reference", "Invoice Reference",'Vessel Size','Vessel Draft','Vessel Beam','Vessel Weight']
                 
                 var bookings = [];
                 $.each(data,function (i,booking) {
@@ -1107,7 +1125,10 @@ export default {
                             case 2:
                                 bk[field] = booking.email;
                             break;
-                            case 3:
+                            case 3: 
+                                 bk[field] = booking.mobile;
+                                 break;
+                            case 4:
                                 var answer = "";
                                 if(booking.lines){
                                     for (var line in booking.lines){
@@ -1124,7 +1145,7 @@ export default {
                                 }
                                 bk[field] = answer;
                             break;
-                            case 4:
+                            case 5:
                                 var dates = ""
                                 if (booking.lines){
                                     for (var line in booking.lines){
@@ -1136,25 +1157,25 @@ export default {
                                 }
                                 bk[field] = dates
                             break;
-                            case 5:
+                            case 6:
                                 bk[field] = booking.noOfAdults + booking.noOfChildren + booking.noOfInfants;
                             break;
-                            case 6:
+                            case 7:
                                 bk[field] = booking.noOfAdults;
                             break;
-                            case 7:
+                            case 8:
                                 bk[field] = booking.noOfChildren;
                             break;
-                            case 8:
+                            case 9:
                                 bk[field] = booking.noOfInfants;
                             break;
-                            case 9:
+                            case 10:
                                 bk[field] = booking.vesselRegNo;
                             break;
-                            case 10:
+                            case 11:
                                 bk[field] = booking.warningReferenceNo;
                             break;
-                            case 11:
+                            case 12:
                                 bk[field] = booking.invoice_ref;
                             break;
                         }
