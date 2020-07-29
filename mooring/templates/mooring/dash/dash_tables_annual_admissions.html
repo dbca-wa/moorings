@@ -530,6 +530,7 @@
                                                   var phone = '';
 						  var vessel_info = '';
 						  if (data['data'][i]['details']) {
+					              fullname = data['data'][i]['details']['first_name']+' '+data['data'][i]['details']['last_name'];
 						      if (data['data'][i]['details']['phone'].length > 0) {
 							      // phones = phones + data['data'][i]['details']['phone']+'<br>';
                                                               phone = data['data'][i]['details']['phone'];
