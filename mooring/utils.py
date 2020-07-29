@@ -1843,6 +1843,9 @@ def allocate_refund_to_invoice(request, booking, lines, invoice_text=None, inter
         if booking.__class__.__name__ == 'AdmissionsBooking':
             print ("AdmissionsBooking")
             book_inv, created = AdmissionsBookingInvoice.objects.get_or_create(admissions_booking=booking, invoice_reference=new_invoice.reference, system_invoice=True)
+        elif booking.__class__.__name__ == 'BookingAnnualAdmission':
+            print ("BookingAnnualAdmission")
+            book_inv, created = models.BookingAnnualInvoice.objects.get_or_create(booking_annual_admission=booking, invoice_reference=new_invoice.reference, system_invoice=True)
         else:
             book_inv, created = BookingInvoice.objects.get_or_create(booking=booking, invoice_reference=new_invoice.reference, system_invoice=True)
 
