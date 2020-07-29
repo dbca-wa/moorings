@@ -1984,6 +1984,7 @@ class AdmissionsLocation(models.Model):
     text = models.CharField(max_length=255, blank=False, null=False)
     mooring_group = models.ForeignKey(MooringAreaGroup, blank=False, null=False)
     annual_admissions_terms = models.CharField(max_length=1024, blank=False, null=False, default ='')
+    annual_admissions_more_price_info_url = models.CharField(max_length=1024, blank=False, null=False, default ='')
 
     def __str__(self):
         return self.text

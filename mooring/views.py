@@ -1937,6 +1937,7 @@ class AnnualAdmissionsView(CreateView):
         
         al = AdmissionsLocation.objects.filter(key=self.kwargs['loc'])
         initial['termscondsurl'] = al[0].annual_admissions_terms
+        initial['annual_admissions_more_price_info_url'] = al[0].annual_admissions_more_price_info_url
         initial['mooring_group'] = al[0].mooring_group
         initial['country'] = "AU"
         if self.request.POST.get('country'):
