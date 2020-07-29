@@ -56,7 +56,7 @@ def create_annual_admission_letter(booking):
        address = '{}'.format(booking.details.get('postal_address_line_1', ''))
 
 
-    context = { 'customername' : '{} {}'.format(booking.details.get('first_name', ''), booking.details.get('last_name', '')), 'customeraddress': address, "customersuburb": booking.details.get('suburb', ''), "customerstate": booking.details.get('state', ''), 'customerpostcode': booking.details.get('post_code', ''),'bookingyear': '{}/{}'.format(booking.annual_booking_period_group.start_time.strftime('%Y'),booking.annual_booking_period_group.finish_time.strftime('%y')), 'admissionsexpiry': booking.annual_booking_period_group.finish_time.strftime('%d %B %Y'), 'vessel': booking.details.get('vessel_rego', ''), 'customerfirstname': booking.details.get('first_name', ''), 'bookingdate': '20 Aug 2020'   }
+    context = { 'customername' : '{} {}'.format(booking.details.get('first_name', ''), booking.details.get('last_name', '')), 'customeraddress': address, "customersuburb": booking.details.get('suburb', ''), "customerstate": booking.details.get('state', ''), 'customerpostcode': booking.details.get('post_code', ''),'bookingyear': '{}/{}'.format(booking.annual_booking_period_group.start_time.strftime('%Y'),booking.annual_booking_period_group.finish_time.strftime('%y')), 'admissionsexpiry': booking.annual_booking_period_group.finish_time.strftime('%d %B %Y'), 'vessel': booking.details.get('vessel_rego', ''), 'customerfirstname': booking.details.get('first_name', ''), 'bookingdate': booking.created.strftime('%d %B %Y')   }
     doc.render(context)
 
     try:

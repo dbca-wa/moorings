@@ -132,7 +132,7 @@ class AnnualAdmissionForm(forms.ModelForm):
     state = forms.CharField(max_length=4, label="State", widget=forms.Select(attrs={'class': "form-control" }))
     country = forms.ModelChoiceField(queryset=Country.objects.all(), to_field_name="iso_3166_1_a2", widget=forms.Select(attrs={'class': "form-control" }))
     phone = forms.CharField(widget=forms.TextInput(attrs={'required':False, 'class': "form-control"}), label="Phone", required=False)
-    mobile = forms.CharField(widget=forms.TextInput(attrs={'required':False, 'class': "form-control"}), label="Mobile", required=False)
+    mobile = forms.CharField(widget=forms.TextInput(attrs={'required':True, 'class': "form-control"}), label="Mobile", required=True)
     email = forms.EmailField(label="Email", widget=forms.TextInput(attrs={'required':True, 'class': "form-control"}))
     confirm_email = forms.EmailField(label ="Confirm Email", widget=forms.TextInput(attrs={'required':True, 'class': "form-control"}))
 
