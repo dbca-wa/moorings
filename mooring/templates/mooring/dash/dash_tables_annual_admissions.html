@@ -465,7 +465,7 @@
                                        },
                              }).done(function (data, textStatus, request) {
                                  // csv => Blob
-                                 var blob = new Blob([data]);
+			         var blob = new Blob([data], {type: 'text/csv'});
 
                                  // the file name from server.
                                  var filename = "";
@@ -475,7 +475,7 @@
                                      var matches = filenameRegex.exec(disposition);
                                      if (matches != null && matches[1]) filename = matches[1].replace(/['"]/g, '');
                                  }
-
+                                 
                                  if (window.navigator && window.navigator.msSaveOrOpenBlob) { // for IE
                                       window.navigator.msSaveOrOpenBlob(blob, filename);
                                  } else { // for others
@@ -570,19 +570,14 @@
                                                      action_buttons = action_buttons + "<a href="+'"'+"javascript:annual_bookings.cancel_booking_confirm('"+data['data'][i]['id']+"');"+'"'+";>Cancel</a><br>";
 					          
 						  action_buttons = action_buttons + "<a href="+'"'+"javascript:annual_bookings.update_sticker('"+data['data'][i]['id']+"','"+data['data'][i]['sticker_no']+"');"+'"'+" >Update Sticker No</a><br>";
+					          action_buttons = action_buttons + "<a href='/annual-admissions-booking-history-refund/"+data['data'][i]['id']+"/'>Oracle Refund</a><br>";
+
 					          }
                                                   action_buttons = action_buttons + pdf_invoices;
 						  action_buttons = action_buttons + '<i style="color:red;" class="fa fa-file-pdf-o"></i> <a href="/api/get_aa_letter/'+data['data'][i]['id']+'">Letter</a><br>';
 
 
 						  var rowc = annual_bookings.var.datatables.row.add([bookingid,fullname,phones,vessel_info,sticker_no,booking_year,status,action_buttons,data['data'][i]['created'], data['data'][i]['created_by'],data['data'][i]['email'], data['data'][i]['overridden_by'],  data['data'][i]['override_price'], data['data'][i]['override_reason'], data['data'][i]['override_reason_info'], phone, data['data'][i]['canceled_by'], data['data'][i]['cancellation_reason'],  data['data'][i]['cancelation_time'],data['data'][i]['sticker_no_history']]).draw();
-						   console.log(rowc.child);
-						  //t.row.add( [ ... ] ).node().id = 'myId';
-  					          // annual_bookings.var.datatables.row.add(["Collapse","","","","","","","",""]).draw();
-                                                 // $('td:eq(1)', annual_bookings.var.datatables.row).attr('colspan', 5);
-						  // var tableabb = $('#table-abb').DataTable();
-						  // tableabb.row.add([1,'dfsa','asdf','dsfads','dsafasfad','2324sfas','sdafsaf','66sgfsdg']).draw();
-						  // tableabb.clear().draw();
 
                                                   
                                           }

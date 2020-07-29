@@ -112,7 +112,9 @@ filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#d0e4f7', end
             <h2>Refund - Allocation Pool</h2>
 	</div>
         <div class="pull-right">
+		      {% if booking_class_type == 'Booking' %}
                       <a class='btn btn-primary' href="{% url 'view_booking_history' booking_id %}">Booking History</a>
+		      {% endif %}
                       <a class='btn btn-primary' href='/ledger/payments/invoice/payment?{% for bh in booking_history %}{% if bh.booking.booking_type != 3 %}{% for bi in bh.invoices %}invoice={{ bi.invoice_reference }}&{% endfor %}{% endif %}{% endfor %}'>Ledger Group Invoices</a>
         </div>
 
@@ -404,6 +406,7 @@ filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#d0e4f7', end
     refund_booking.var.newest_booking_id = {{ newest_booking }};
     refund_booking.var.bpoint_trans_totals = {{ invoice_line_items.bpoint_trans_totals|safe }};
     refund_booking.var.oracle_code_refund_allocation_pool = '{{ oracle_code_refund_allocation_pool }}';
+    refund_booking.var.api_url = '{{ API_URL }}';
     window.onload = function() { refund_booking.init(); }
 </script>
 </div>

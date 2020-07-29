@@ -10,7 +10,8 @@ var refund_booking =  {
               booking_id: 0,
               newest_booking_id: 0,
               bpoint_trans_totals: {},
-              oracle_code_refund_allocation_pool: ''
+              oracle_code_refund_allocation_pool: '',
+	      api_url: '',
            }, 
    	from_money_add_row:  function() {
               refund_booking.var.row_id = refund_booking.var.row_id + 1;
@@ -345,9 +346,9 @@ var refund_booking =  {
                                                          bpoint_trans_split_array.push({'txn_number': txn_number, 'line-amount': line_amount});
                                                   }
                                              }
-                                    });
+                                   });
                                    $.ajax({
-                                   url: '/api/refund_oracle',
+                                   url: refund_booking.var.api_url,
                                    data: {
                                            csrfmiddlewaretoken: $('input[name="csrfmiddlewaretoken"]').val(), 
                                            money_from : JSON.stringify(from_money_pool_array),
