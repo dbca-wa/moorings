@@ -17,8 +17,10 @@
             <tr>
                 <td style='height: 600px; padding:11px;' valign='top' >
                     {{ body }}
-
+		    {% if signature == 'off' %}
+		    {% else %}
                     {% include "mooring/email/signature-rottnest.html" %}
+		    {% endif %}
                 </td>
 
             </TR>

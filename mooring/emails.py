@@ -164,11 +164,11 @@ def send_admissions_booking_invoice(admissionsBooking, request, context_processo
 
 def send_annual_admission_booking_invoice(booking,request, context_processor):
     subject = 'Your booking invoice'
-    template = 'mooring/email/booking_invoice.html'
+    template = 'mooring/email/booking_invoice_annual_admissions.html'
     cc = None
     bcc = None
     from_email = None
-    context= {'booking': booking, 'context_processor': context_processor}
+    context= {'booking': booking, 'context_processor': context_processor, 'signature': 'off'}
     to = booking.customer.email
     filename = 'invoice-annual_admissions-{}.pdf'.format(booking.id)
     references = [b.invoice_reference for b in BookingAnnualInvoice.objects.filter(booking_annual_admission=booking)]
@@ -264,7 +264,8 @@ def send_new_annual_admission_booking_internal(booking, request, context_process
  
     context = {
         'booking': booking,
-        'context_processor': context_processor
+        'context_processor': context_processor,
+        'signature': 'off'
     }
 
     mooring_group = booking.annual_booking_period_group.mooring_group
