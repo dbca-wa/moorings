@@ -4758,6 +4758,10 @@ def get_annual_admission_booking(request):
                       appendrow = True
                    if keyword.lower() in row['details']['vessel_rego'].lower():
                       appendrow = True
+                   for sh in row['sticker_no_history']:
+                       if 'value' in sh:
+                           if keyword.lower() in sh['value'].lower():
+                               appendrow = True
                if keyword == str(c.id):
                    appendrow = True
                if keyword.lower() == 'aa'+str(c.id):

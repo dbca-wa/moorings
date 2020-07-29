@@ -170,7 +170,7 @@ def send_annual_admission_booking_invoice(booking,request, context_processor):
     from_email = None
     context= {'booking': booking, 'context_processor': context_processor, 'signature': 'off'}
     to = booking.customer.email
-    filename = 'invoice-annual_admissions-{}.pdf'.format(booking.id)
+    filename = 'invoice-annual_admission-{}.pdf'.format(booking.id)
     references = [b.invoice_reference for b in BookingAnnualInvoice.objects.filter(booking_annual_admission=booking)]
     invoice = Invoice.objects.filter(reference__in=references).order_by('-created')[0]
     invoice_pdf = create_invoice_pdf_bytes(filename,invoice, request, context_processor)
@@ -260,8 +260,6 @@ def send_new_annual_admission_booking_internal(booking, request, context_process
     template_group = context_processor['TEMPLATE_GROUP']
 
     
-    email = 'jason.moore@dbca.wa.gov.au' 
- 
     context = {
         'booking': booking,
         'context_processor': context_processor,
@@ -269,8 +267,6 @@ def send_new_annual_admission_booking_internal(booking, request, context_process
     }
 
     mooring_group = booking.annual_booking_period_group.mooring_group
-    print ("mooring group")
-    print (mooring_group)
     for b in models.AnnualAdmissionEmail.objects.filter(mooring_group=mooring_group):
         print ("Sending email:"+b.email)
         sendHtmlEmail([b.email],subject,context,template,cc,bcc,from_email,template_group,attachments=[])
