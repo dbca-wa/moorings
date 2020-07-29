@@ -2029,7 +2029,7 @@ class AnnualAdmissionsView(CreateView):
                override_lines = {'ledger_description': '{} - {}'.format(dr.text, str(self.object.override_reason_info)), "quantity": 1, 'price_incl_tax': Decimal('0.00'), "oracle_code": oracle_code, 'line_status': 1}
                total_cost = self.object.override_price
 
-        lines.append({'ledger_description': 'Annual Admissions Fee for Vessel {}, {}m  ({} - {})'.format(details['vessel_rego'], details['vessel_length'],str(abg.start_time.strftime('%d/%m/%Y')), str(abg.finish_time.strftime('%d/%m/%Y'))), "quantity": 1, 'price_incl_tax': total_cost, "oracle_code": oracle_code, 'line_status': 1})
+        lines.append({'ledger_description': 'Annual Admission Fee for Vessel {}, {}m  ({} - {})'.format(details['vessel_rego'], details['vessel_length'],str(abg.start_time.strftime('%d/%m/%Y')), str(abg.finish_time.strftime('%d/%m/%Y'))), "quantity": 1, 'price_incl_tax': total_cost, "oracle_code": oracle_code, 'line_status': 1})
         if override_lines:
             lines.append(override_lines)
         if self.request.user.is_authenticated:
