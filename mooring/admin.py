@@ -31,6 +31,7 @@ class EmailUserAdmin(ledger_admin.EmailUserAdmin):
         
         if request.user.is_superuser:
             return fieldsets
+
         group = Group.objects.filter(name='Mooring Admin')
         if group and (group[0] in request.user.groups.all()):
             fieldsets = deepcopy(fieldsets)
@@ -41,38 +42,6 @@ class EmailUserAdmin(ledger_admin.EmailUserAdmin):
                     fieldset[1]['fields'].remove('is_superuser')
                     break
         return fieldsets
-
-    def add_view(self, request, form_url='', obj=None):
-        fieldsets = super(UserAdmin, self).get_fieldsets(request,obj)
-        fieldsets = deepcopy(fieldsets)
-        print ("ADD")
-        print (fieldsets)
-        #print (fieldsets[3])
-        #del  fieldsets['Permissions']['fields']['is_superuser']
-        for fieldset in fieldsets:
-        #    print (fieldset)
-            if 'is_superuser' in fieldset[1]['fields']:
-                print ('found')
-                print (fieldset[1]['fields'][2])
-                fieldset[1]['fields'] = list(fieldset[1]['fields'])
-                fieldset[1]['fields'].remove('is_superuser')
-                #for o in fieldset[1]['fields']:
-                     
-                    #fieldset[1]['fields'].remove(o)
-                #    del o
-                    #print (o)
-
-                print (fieldset)
-        print (fieldsets)
-        #        if type(fieldset[1]['fields']) == tuple:
-        #             fieldset[1]['fields'] = list(fieldset[1]['fields'])
-        #        fieldset[1]['fields'].remove('is_superuser')
-        #        break
-
-
-        
-        return super(UserAdmin, self).add_view(request, form_url,obj)
-
 
 @admin.register(models.MooringsiteClass)
 class MooringsiteClassAdmin(admin.ModelAdmin):
