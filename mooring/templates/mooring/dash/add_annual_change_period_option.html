@@ -17,7 +17,14 @@
 {% endblock %}
 
 {% block content %}
-    <script src="/static/common/js/bootstrap-datetimepicker.min.js?ver={{ GIT_COMMIT_HASH }}"></script>
+<script src="/static/common/js/bootstrap-datetimepicker.min.js?ver={{ GIT_COMMIT_HASH }}"></script>
+<style>
+.input-border-error {
+	border: 2px solid red; 
+	border-radius: 4px; 
+	position: absolute;
+}		
+</style>
 <div class="container" id="dashboard-table-container" iistyle='position: relative'>
 
 <a href='{% url 'dash-annual-bookingperiod-group-view' bp_group_id %}' type="button" class="btn btn-primary" style="">Go Back</a><BR><BR>
@@ -45,6 +52,58 @@
 	</div>
    </div>
 </div>
-   {% include "mooring/dash/annual_option_period_js.html" %}
+<script src="/static/common/js/oracle_refund.js?ver={{ GIT_COMMIT_HASH }}"></script>
+<script>
+
+      function check_oracle_codes() {
+            var allow_submit = true;
+            $('#id_annual_booking_periods_form input').each(
+                function(index) {
+                    var input = $(this);
+                    var id_input = input.attr('id');
+                    if (id_input) {
+                    var input_oracle_id = id_input.slice(0,26);
+                    var id_input_value = $('#'+id_input).val();
+                         if (input_oracle_id == 'id_vs_category_oracle_code') {
+
+                            console.log(input.attr('id')+' '+input_oracle_id);
+		            console.log(refund_booking.check_oracle_code(id_input_value));
+                            if (refund_booking.check_oracle_code(id_input_value) == false) {
+				   $('#'+id_input).addClass('input-border-error');
+                                   allow_submit = false;
+			    } else {
+                                   $('#'+id_input).removeClass('input-border-error');
+		            }
+                         }
+                    }
+                    // alert('Type: ' + input.attr('type') + 'Name: ' + input.attr('name') + 'Value: ' + input.val());
+                }
+	    );
+	    console.log('submit');
+	      console.log(allow_submit);
+            if (allow_submit == true) {
+                  $('#submit-id-update').attr('disabled', false);
+            } else {
+                  $('#submit-id-update').attr('disabled', true);
+            }
+            
+      }
+      window.onload= function() {
+	    // $('#submit-id-update').attr('disabled', true);
+            var startpicker = $('#id_start_time').datetimepicker({
+            	                format: 'DD/MM/YYYY HH:mm',
+            	            });
+            
+            var startpicker = $('#id_finish_time').datetimepicker({
+            	                  format: 'DD/MM/YYYY HH:mm',
+            	            });
+
+            check_oracle_codes();
+      }
+
+</script>
+
+
+
 
 {% endblock %}

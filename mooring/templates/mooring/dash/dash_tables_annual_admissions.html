@@ -88,6 +88,11 @@
                <input value="" id="sticker_no" class="form-control" type="text" placeholder="Sticker No">
 	       &nbsp;
 	</div>
+        <div class="col-lg-12">
+               <label for="">Comment</label>
+               <textarea class='form-control textarea' id='sticker_comment' rows='10'></textarea>
+               &nbsp;
+        </div>
 	<div class="col-lg-12 text-right">
 		<button type="button" class="btn btn-lg btn-primary" onclick="annual_bookings.save_sticker();">Update</button>
 	</div>
@@ -277,15 +282,17 @@
                 update_sticker: function(booking_id, sticker_no) { 
 			annual_bookings.var.selected_booking_id = booking_id;
 			$('#sticker_no').val(sticker_no);
+			$('#sticker_comment').val('');
                         $('#stickerUpdateModal').modal('show');
                 },
 		save_sticker: function() { 
 	                var booking_id = annual_bookings.var.selected_booking_id;
                         var sticker_no = $('#sticker_no').val();
+			var sticker_comment = $('#sticker_comment').val();
                         $.ajax({
                                   type: "GET",
                                   url: "/api/booking/update_sticker_admission_booking/",
-                                  data: {"booking_id": booking_id, 'sticker_no':  sticker_no },
+                                  data: {"booking_id": booking_id, 'sticker_no':  sticker_no, 'sticker_comment': sticker_comment },
                                   cache: false,
                                   success: function(data) {
 					  annual_bookings.get();
@@ -321,10 +328,14 @@
 		    if (d[19].length > 0) {
 		       sticker_table_history = '<h5  style="font-weight: bold;">Sticker Change History</h5>';
 	               sticker_table_history += '<table cellpadding="5" cellspacing="0" border="0" width="100%" style="padding-left:50px;">';
-	               sticker_table_history += '<tr style="background-color: #ececec;"><th>Value</th><th>Changed By</th><th>Change Date</th></tr>';
+	               sticker_table_history += '<tr style="background-color: #ececec;"><th>Value</th><th>Changed By</th><th>Change Date</th><th>Comment</th></tr>';
 	               for ( var s = 0, l = d[19].length; s < l; s++ ) {
                                 console.log(d[19][s]);
-		                sticker_table_history += "<tr style='background-color: #fffafa'><td style='padding: 5px;'>"+d[19][s]['value']+"</td><td>"+d[19][s]['first_name']+" "+d[19][s]['last_name']+"</td><td>"+d[19][s]['updated_friendly']+"</td></tr>";
+			        var sticker_comment = '';
+			        if (d[19][s]['sticker_comment'] != null) { 
+                                   sticker_comment = d[19][s]['sticker_comment'];
+				}
+			       sticker_table_history += "<tr style='background-color: #fffafa'><td style='padding: 5px;'>"+d[19][s]['value']+"</td><td>"+d[19][s]['first_name']+" "+d[19][s]['last_name']+"</td><td>"+d[19][s]['updated_friendly']+"</td><td>"+sticker_comment+"</td></tr>";
 	               }
 		       sticker_table_history += "</table>";
                     }
@@ -591,8 +602,6 @@
 
 
                 },
-
-
 
 	}
         //annual_bookings.var.datatables = $('#table-abb').DataTable();
