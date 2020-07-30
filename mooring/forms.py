@@ -101,7 +101,7 @@ class AnnualBookingPeriodOptionForm(forms.ModelForm):
         else:
             self.helper.add_input(Button('Create', 'Create', css_class='btn-primary btn-lg', style='margin-top: 15px;', onclick='check_oracle_codes();' ))
 
-        self.helper.layout = Layout('start_time','finish_time',vessel_category_pricing)
+        self.helper.layout = Layout('start_time','finish_time',vessel_category_pricing,HTML('<span id="loader-spinner"></span>'))
 
 class ChangeGroupForm(forms.ModelForm):
 

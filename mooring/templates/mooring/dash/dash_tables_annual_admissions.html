@@ -84,7 +84,7 @@
       </div>
       <div class="modal-body">
 	<div class="col-lg-12">
-               <label for="">Sticker No</label>
+		<label for="">Sticker No for Vessel <span id='sticker_rego_no'></span></label>
                <input value="" id="sticker_no" class="form-control" type="text" placeholder="Sticker No">
 	       &nbsp;
 	</div>
@@ -279,10 +279,11 @@
                         $('#cancelBookingModal').modal('hide');
 
                 },
-                update_sticker: function(booking_id, sticker_no) { 
+                update_sticker: function(booking_id, sticker_no, vessel_rego) { 
 			annual_bookings.var.selected_booking_id = booking_id;
 			$('#sticker_no').val(sticker_no);
 			$('#sticker_comment').val('');
+			$('#sticker_rego_no').html(vessel_rego);
                         $('#stickerUpdateModal').modal('show');
                 },
 		save_sticker: function() { 
@@ -540,6 +541,7 @@
                                                   var phones = '';
                                                   var phone = '';
 						  var vessel_info = '';
+						  var vessel_rego = '';
 						  if (data['data'][i]['details']) {
 					              fullname = data['data'][i]['details']['first_name']+' '+data['data'][i]['details']['last_name'];
 						      if (data['data'][i]['details']['phone'].length > 0) {
@@ -552,7 +554,9 @@
 
                                                       if (data['data'][i]['details']['vessel_rego'].length > 0) {
 							   vessel_info = vessel_info + data['data'][i]['details']['vessel_rego'];
+							   vessel_rego =  data['data'][i]['details']['vessel_rego'];
                                                       }
+						      
                                                       if (data['data'][i]['details']['vessel_length'].length > 0) {
                                                            vessel_info = vessel_info + " / "+data['data'][i]['details']['vessel_length'];
                                                       }
@@ -582,7 +586,7 @@
 						  if (data['data'][i]['status'] != 'cancelled') {
                                                      action_buttons = action_buttons + "<a href="+'"'+"javascript:annual_bookings.cancel_booking_confirm('"+data['data'][i]['id']+"');"+'"'+";>Cancel</a><br>";
 					          
-						  action_buttons = action_buttons + "<a href="+'"'+"javascript:annual_bookings.update_sticker('"+data['data'][i]['id']+"','"+data['data'][i]['sticker_no']+"');"+'"'+" >Update Sticker No</a><br>";
+						  action_buttons = action_buttons + "<a href="+'"'+"javascript:annual_bookings.update_sticker('"+data['data'][i]['id']+"','"+data['data'][i]['sticker_no']+"','"+vessel_rego+"');"+'"'+" >Update Sticker No</a><br>";
 
 					          }
 					         
