@@ -59,7 +59,8 @@ from mooring.models import (MooringArea,
                                 VesselSizeCategory,
                                 AnnualBookingPeriodOptionVesselCategoryPrice,
                                 BookingAnnualAdmission,
-                                BookingAnnualInvoice
+                                BookingAnnualInvoice,
+                                VesselDetail
                                 )
 
 from mooring.serialisers import AdmissionsBookingSerializer, AdmissionsLineSerializer
@@ -3141,6 +3142,18 @@ class AnnualAdmissionSuccessView(TemplateView):
                       'booking': booking,
                       'book_inv': [book_inv],
                     }
+
+                    try:
+
+                        if VesselDetail.objects.filter(rego_no=booking.details['vessel_rego']).count() > 0:
+                                vd = VesselDetail.objects.filter(rego_no=booking.details['vessel_rego'])
+                                p = vd[0]
+                                p.vessel_name=booking.details['vessel_name']
+                                p.save()
+                    except:
+                        print ("ERROR: create vesseldetails on booking success")
+
+
                     print ("COMPLETED SUCCESS")
                     return render(request, self.template_name, context)
 
@@ -3285,7 +3298,26 @@ class BookingSuccessView(TemplateView):
                     refund_failed = None
                     if RefundFailed.objects.filter(booking=booking).count() > 0:
                         refund_failed = RefundFailed.objects.filter(booking=booking)
+                    # Create/Update Vessel in VesselDetails Table
+                    try:
 
+                        if VesselDetail.objects.filter(rego_no=booking.details['vessel_rego']).count() > 0:
+                                vd = VesselDetail.objects.filter(rego_no=booking.details['vessel_rego'])
+                                p = vd[0]
+                                p.vessel_size=booking.details['vessel_size']
+                                p.vessel_draft=booking.details['vessel_draft']
+                                p.vessel_beam=booking.details['vessel_beam']
+                                p.vessel_weight=booking.details['vessel_weight']
+                                p.save()
+                        else:
+                                models.VesselDetail.objects.create(rego_no=booking.details['vessel_rego'],
+                                                               vessel_size=booking.details['vessel_size'],
+                                                               vessel_draft=booking.details['vessel_draft'],
+                                                               vessel_beam=booking.details['vessel_beam'],
+                                                               vessel_weight=booking.details['vessel_weight']
+                                                              )
+                    except:
+                        print ("ERROR: create vesseldetails on booking success")
                     
                     context = {
                       'booking': booking,
