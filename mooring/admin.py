@@ -557,6 +557,15 @@ class AnnualAdmissionEmailAdmin(admin.ModelAdmin):
     list_display = ('mooring_group','email','active')
     list_filter = ('mooring_group',)
 
+    def get_queryset(self, request):
+        """ Filter based on the mooring group of the user. """
+        qs = super(AnnualAdmissionEmailAdmin, self).get_queryset(request)
+        if request.user.is_superuser:
+            return qs
+        group = models.MooringAreaGroup.objects.filter(members__in=[request.user,])
+        return qs.filter(mooring_group__in=group)
+    
+
 @admin.register(models.VesselDetail)
 class VesselDetail(admin.ModelAdmin):
     list_display = ('rego_no', 'vessel_name', 'vessel_size', 'vessel_draft','vessel_beam','vessel_weight','created')
@@ -597,7 +606,17 @@ class GlobalSettings(admin.ModelAdmin):
 @admin.register(models.AdmissionsLocation)
 class AdmissionsLocation(admin.ModelAdmin):
     list_display = ('text', 'mooring_group')
-   
+
+
+    def get_queryset(self, request):
+        """ Filter based on the mooring group of the user. """
+        qs = super(AdmissionsLocation, self).get_queryset(request)
+        if request.user.is_superuser:
+            return qs
+        group = models.MooringAreaGroup.objects.filter(members__in=[request.user,])
+        return qs.filter(mooring_group__in=group)
+
+
 @admin.register(models.RefundFailed)
 class RefundFailed(admin.ModelAdmin):
     list_display = ('booking', 'invoice_reference','refund_amount','status','created','completed_date','completed_by')
