@@ -54,10 +54,14 @@
 </div>
 <script src="/static/common/js/oracle_refund.js?ver={{ GIT_COMMIT_HASH }}"></script>
 <script>
+      function sleep(time) {
+         return new Promise((resolve) => setTimeout(resolve, time));
+      }
 
       function check_oracle_codes() {
 	    $('#submit-id-update').attr('disabled', true);
 	    $('#loader-spinner').html('<img src="/static/common/img/ajax-loader-spinner.gif">&nbsp;&nbsp;<strong>Please Wait Loading</strong>');
+	    sleep(300).then(() => {
             var allow_submit = true;
             $('#id_annual_booking_periods_form input').each(
                 function(index) {
@@ -91,6 +95,7 @@
 
                   //$('#submit-id-update').attr('disabled', true);
             }
+            });
             
       }
       window.onload= function() {
