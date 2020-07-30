@@ -3,7 +3,7 @@ from ledger.address.models import Country
 from mooring import models
 from mooring import utils
 from crispy_forms.helper import FormHelper
-from crispy_forms.layout import Layout, Submit, HTML, Fieldset, MultiField, Div
+from crispy_forms.layout import Layout, Submit, HTML, Fieldset, MultiField, Div, Button
 from django.forms import Form, ModelForm, ChoiceField, FileField, CharField, Textarea, ClearableFileInput, HiddenInput, Field, RadioSelect, ModelChoiceField, Select, CheckboxInput
 
 class BaseFormHelper(FormHelper):
@@ -97,9 +97,9 @@ class AnnualBookingPeriodOptionForm(forms.ModelForm):
 
         self.helper.form_id = 'id_annual_booking_periods_form'
         if self.initial['action'] == 'edit':
-            self.helper.add_input(Submit('Update', 'Update', css_class='btn-lg', style='margin-top: 15px;', disabled='true' ))
+            self.helper.add_input(Button('Update', 'Update', css_class='btn-primary btn-lg', style='margin-top: 15px;', onclick='check_oracle_codes();' ))
         else:
-            self.helper.add_input(Submit('Create', 'Create', css_class='btn-lg', style='margin-top: 15px;', disabled='true'  ))
+            self.helper.add_input(Button('Create', 'Create', css_class='btn-primary btn-lg', style='margin-top: 15px;', onclick='check_oracle_codes();' ))
 
         self.helper.layout = Layout('start_time','finish_time',vessel_category_pricing)
 
