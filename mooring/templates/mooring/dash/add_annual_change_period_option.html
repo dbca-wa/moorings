@@ -71,9 +71,6 @@
                     var input_oracle_id = id_input.slice(0,26);
                     var id_input_value = $('#'+id_input).val();
                          if (input_oracle_id == 'id_vs_category_oracle_code') {
-
-                            console.log(input.attr('id')+' '+input_oracle_id);
-		            console.log(refund_booking.check_oracle_code(id_input_value));
                             if (refund_booking.check_oracle_code(id_input_value) == false) {
 				   $('#'+id_input).addClass('input-border-error');
                                    allow_submit = false;
