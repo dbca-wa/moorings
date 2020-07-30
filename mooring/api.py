@@ -4560,6 +4560,7 @@ def update_sticker_admission_booking(request):
     status_code = 200
     booking_id = request.GET.get('booking_id','')
     sticker_no = request.GET.get('sticker_no','')
+    sticker_comment = request.GET.get('sticker_comment','')
     try:
         if request.user.is_authenticated:
            pass
@@ -4571,8 +4572,8 @@ def update_sticker_admission_booking(request):
              nowdt = datetime.now()
              baa = models.BookingAnnualAdmission.objects.get(id=booking_id)
              sticker_no_history = baa.sticker_no_history
-             sticker_no_history.append({'value': sticker_no, 'user_id': request.user.id, 'first_name': request.user.first_name, 'last_name': request.user.last_name,'updated': nowdt.strftime('%Y-%m-%d %H:%M:%S')})
-             baa.sticker_no_history = sticker_no_history
+             sticker_no_history.append({'value': sticker_no, 'user_id': request.user.id, 'first_name': request.user.first_name, 'last_name': request.user.last_name,'updated': nowdt.strftime('%Y-%m-%d %H:%M:%S'),'sticker_comment': sticker_comment})
+             baa.sticker_no_history=sticker_no_history
              baa.sticker_no=sticker_no
              baa.save()
         else:
@@ -4707,7 +4708,6 @@ def get_annual_admission_booking(request):
            row['sticker_no'] = c.sticker_no
            row['sticker_no_history'] = []
            for j in c.sticker_no_history: 
-               print (j['updated'])
                j['updated_friendly'] = datetime.strptime(j['updated'], '%Y-%m-%d %H:%M:%S').strftime('%d/%m/%Y %H:%M %p')
                row['sticker_no_history'].append(j)
            if c.id in baainvoices_temp:
@@ -4752,6 +4752,12 @@ def get_annual_admission_booking(request):
                if keyword.lower() in row['customer_name'].lower():
                     appendrow = True
                if row['details']:
+
+                   fullname_details = ''
+                   if 'first_name' in row['details'] and 'last_name' in row['details']:
+                        fullname_details = row['details']['first_name']+' '+row['details']['last_name']
+                   if keyword.lower() in fullname_details.lower():
+                       appendrow = True
                    if keyword in row['details']['phone']:
                       appendrow = True
                    if keyword in row['details']['mobile']:

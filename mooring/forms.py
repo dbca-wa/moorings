@@ -97,9 +97,9 @@ class AnnualBookingPeriodOptionForm(forms.ModelForm):
 
         self.helper.form_id = 'id_annual_booking_periods_form'
         if self.initial['action'] == 'edit':
-           self.helper.add_input(Submit('Update', 'Update', css_class='btn-lg', style='margin-top: 15px;' ))
+            self.helper.add_input(Submit('Update', 'Update', css_class='btn-lg', style='margin-top: 15px;', disabled='true' ))
         else:
-           self.helper.add_input(Submit('Create', 'Create', css_class='btn-lg', style='margin-top: 15px;' ))
+            self.helper.add_input(Submit('Create', 'Create', css_class='btn-lg', style='margin-top: 15px;', disabled='true'  ))
 
         self.helper.layout = Layout('start_time','finish_time',vessel_category_pricing)
 
@@ -304,8 +304,6 @@ class AnnualBookingPeriodForm(forms.ModelForm):
            self.fields[f].widget.attrs.update({'class': 'form-control'})
         vessel_category_pricing = HTML('{% include "mooring/dash/add_edit_annual_vessel_category.html" %}')
 
-        print ("LETTER")
-        print (self.initial['action'])
         if self.initial['action'] == 'new':
             del self.fields['letter']
         #self.initial['letter'].url = '/private-media/'
