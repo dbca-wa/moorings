@@ -4454,16 +4454,16 @@ def get_vessel_info(request):
             pass
             rv = models.RegisteredVessels.objects.filter(rego_no=vessel_rego)
             vessel_info['vessel_size'] = str(rv[0].vessel_size)
-            #vessel_info['vessel_draft'] = str(rv[0].vessel_draft)
-            #vessel_info['vessel_beam'] = str(rv[0].vessel_beam)
-            #vessel_info['vessel_weight'] = str(rv[0].vessel_weight)
+            vessel_info['vessel_draft'] = str(rv[0].vessel_draft)
+            vessel_info['vessel_beam'] = str(rv[0].vessel_beam)
+            vessel_info['vessel_weight'] = str(rv[0].vessel_weight)
         else:
             if models.VesselDetail.objects.filter(rego_no=vessel_rego).count() > 0:
                 vd = models.VesselDetail.objects.filter(rego_no=vessel_rego)
                 vessel_info['vessel_size'] = str(vd[0].vessel_size)
-                #vessel_info['vessel_draft'] = str(vd[0].vessel_draft)
-                #vessel_info['vessel_beam'] = str(vd[0].vessel_beam)
-                #vessel_info['vessel_weight'] = str(vd[0].vessel_weight)
+                vessel_info['vessel_draft'] = str(vd[0].vessel_draft)
+                vessel_info['vessel_beam'] = str(vd[0].vessel_beam)
+                vessel_info['vessel_weight'] = str(vd[0].vessel_weight)
             else:
                 status = 'error'
                 response = 'No vessel information'

@@ -905,24 +905,25 @@ export default {
             
             var reg = vm.vesselRego;
             var data = {
-                'rego': reg
+                'vessel_rego': reg
             }
             if(reg){
                 $.ajax({
-                    url: process.env.PARKSTAY_URL + "/api/registeredVessels/",
+                    //url: process.env.PARKSTAY_URL + "/api/registeredVessels/",
+                    url: process.env.PARKSTAY_URL + "/api/get_vessel_info/",
                     dataType: 'json',
                     data: data,
                     method: 'GET',
                     success: function(data, stat, xhr) {
-                        if(data[0]){
-                            vm.vesselWeight =  parseFloat(data[0].vessel_weight);
-                            vm.vesselBeam = parseFloat(data[0].vessel_beam);
-                            vm.vesselSize = parseFloat(data[0].vessel_size);
-                            vm.vesselDraft = parseFloat(data[0].vessel_draft);
-                            $("#vesselSize").val(data[0].vessel_size);
-                            $("#vesselWeight").val(data[0].vessel_weight);
-                            $("#vesselBeam").val(data[0].vessel_beam);
-                            $("#vesselDraft").val(data[0].vessel_draft);
+                        if(data['vessel_info']){
+                            vm.vesselWeight =  parseFloat(data['vessel_info'].vessel_weight);
+                            vm.vesselBeam = parseFloat(data['vessel_info'].vessel_beam);
+                            vm.vesselSize = parseFloat(data['vessel_info'].vessel_size);
+                            vm.vesselDraft = parseFloat(data['vessel_info'].vessel_draft);
+                            $("#vesselSize").val(data['vessel_info'].vessel_size);
+                            $("#vesselWeight").val(data['vessel_info'].vessel_weight);
+                            $("#vesselBeam").val(data['vessel_info'].vessel_beam);
+                            $("#vesselDraft").val(data['vessel_info'].vessel_draft);
                             vm.removePinAnchors();
                             vm.removePinGroups();
 
