@@ -56,6 +56,8 @@
 <script>
 
       function check_oracle_codes() {
+	    $('#submit-id-update').attr('disabled', true);
+	    $('#loader-spinner').html('<img src="/static/common/img/ajax-loader-spinner.gif">&nbsp;&nbsp;<strong>Please Wait Loading</strong>');
             var allow_submit = true;
             $('#id_annual_booking_periods_form input').each(
                 function(index) {
@@ -84,6 +86,9 @@
 		   $('#id_annual_booking_periods_form').submit();
                   //$('#submit-id-update').attr('disabled', false);
             } else {
+                  $('#loader-spinner').html('');
+		  $('#submit-id-update').attr('disabled', false);
+
                   //$('#submit-id-update').attr('disabled', true);
             }
             
