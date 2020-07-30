@@ -79,12 +79,12 @@
                     // alert('Type: ' + input.attr('type') + 'Name: ' + input.attr('name') + 'Value: ' + input.val());
                 }
 	    );
-	    console.log('submit');
-	      console.log(allow_submit);
+
             if (allow_submit == true) {
-                  $('#submit-id-update').attr('disabled', false);
+		   $('#id_annual_booking_periods_form').submit();
+                  //$('#submit-id-update').attr('disabled', false);
             } else {
-                  $('#submit-id-update').attr('disabled', true);
+                  //$('#submit-id-update').attr('disabled', true);
             }
             
       }
@@ -98,7 +98,6 @@
             	                  format: 'DD/MM/YYYY HH:mm',
             	            });
 
-            check_oracle_codes();
       }
 
 </script>
