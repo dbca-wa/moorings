@@ -2369,6 +2369,7 @@ export default {
                             if (vm.loadingID == this.loadID) {
 	                            vm.mapLoading = false;
                             }
+                            if (err) {
                             swal({
                               title: 'Error',
                               text: "There was and error loading map data please try again.",
@@ -2378,6 +2379,7 @@ export default {
                               showLoaderOnConfirm: true,
                               allowOutsideClick: false
                             });
+                            }
 			},
                         dataType: 'json'
                     });
