@@ -463,6 +463,8 @@ class MooringAreaMapFilterViewSet(viewsets.ReadOnlyModelViewSet):
     permission_classes = []
 
     def list(self, request, *args, **kwargs):
+
+
         data = {
             "arrival" : request.GET.get('arrival', None),
             "departure" : request.GET.get('departure', None),
@@ -3019,6 +3021,7 @@ class BookingViewSet(viewsets.ModelViewSet):
     def list(self, request, *args, **kwargs):
         from django.db import connection, transaction
         try:
+
             print("MLINE 1.01", datetime.now().strftime("%d/%m/%Y %H:%M:%S"))
             #search = request.GET.get('search[value]')
             search = request.GET.get('search_keyword')
