@@ -1,3 +1,3 @@
 30 0 * * * root eval $(grep -v -e '^#' /etc/.cronenv | xargs -I {} echo export \'{}\') && python /app/manage_mo.py runcrons >> /app/logs/cronjob_mo.log 2>&1
 */30 * * * * root eval $(grep -v -e '^#' /etc/.cronenv | xargs -I {} echo export \'{}\') && python /app/manage_mo.py check_oracle_bpoint >> /app/logs/oracle_bpoint_checker.log 2>&1
-01 9 * * * root eval $(grep -v -e '^#' /etc/.cronenv | xargs -I {} echo export \'{}\') && python /app/manage_mo.py import_lotus_vessel_to_dbca_table >> /app/logs/import_lotus_vessel_to_dbca_table.log 2>&1
+03 11 * * * root eval $(grep -v -e '^#' /etc/.cronenv | xargs -I {} echo export \'{}\') && python /app/manage_mo.py import_lotus_vessel_to_dbca_table >> /app/logs/import_lotus_vessel_to_dbca_table.log 2>&1
