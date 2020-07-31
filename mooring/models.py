@@ -2012,7 +2012,7 @@ class AdmissionsBooking(models.Model):
     created = models.DateTimeField(default=timezone.now)
     location = models.ForeignKey(AdmissionsLocation, blank=True, null=True)    
     override_lines = JSONField(null=True, blank=True, default={})
-    mobile = models.CharField(max_length=50, blank=True)
+    mobile = models.CharField(max_length=50, blank=True, null=True)
 
     def __str__(self):
         email = ''
