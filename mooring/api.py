@@ -4653,8 +4653,10 @@ def get_annual_admission_booking(request):
        baainvoices_temp = {}
        context['annual_booking_period_group'] = models.AnnualBookingPeriodGroup.objects.all()
        baainvoices = models.BookingAnnualInvoice.objects.select_related('booking_annual_admission').values('booking_annual_admission__id','invoice_reference').filter(Q(booking_annual_admission__booking_type=1) | Q(booking_annual_admission__booking_type=4))
+
        for b in baainvoices:
-           baainvoices_temp[b['booking_annual_admission__id']] = []
+           if b['booking_annual_admission__id'] not in baainvoices_temp:
+                baainvoices_temp[b['booking_annual_admission__id']] = []
            baainvoices_temp[b['booking_annual_admission__id']].append(b['invoice_reference'])
        baa = []
        baarows = models.BookingAnnualAdmission.objects.filter(Q(booking_type=1) | Q(booking_type=4))
