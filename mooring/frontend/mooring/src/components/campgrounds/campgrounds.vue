@@ -163,7 +163,7 @@ module.exports = {
                 },{
                     "data": "park"
                 }, {
-                    data: 'editable',
+                    data: 'id',
                     mRender: function(data, type, full) {
                         var id = full.id;
 //                        var addBooking = "<br/><a href='#' class='addBooking' data-campground=\"__ID__\" >Add Booking</a>";
