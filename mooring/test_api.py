@@ -2003,49 +2003,49 @@ class RegionViewSetTestCase(TestSetup):
         response = self.client.post(self.url)
         self.assertEqual(response.status_code, 403)
 
-class RegisteredVesselsViewSetTestCase(TestSetup):
-    url = '/api/registeredVessels/'
+#class RegisteredVesselsViewSetTestCase(TestSetup):
+#    url = '/api/registeredVessels/'
+#
+#    def test_api_get_admin(self):
+#        """ Test the Registered Vessels View API endpoint GET response when logged in as admin.
+#        """
+#        self.client.login(email=self.adminUN, password='pass')
+#        response = self.client.get(self.url)
+#        self.assertEqual(response.status_code, 400)
+#
+#    def test_api_get_non_admin(self):
+#        """Test the Registered Vessels View API endpoint GET response when logged in as external user.
+#        """
+#        self.client.login(email=self.nonAdminUN, password='pass')
+#        response = self.client.get(self.url)
+#        self.assertEqual(response.status_code, 400)
+#
+#    def test_api_get_anon(self):
+#        """Test the Registered Vessels View API endpoint GET response when not logged in.
+#        """
+#        response = self.client.get(self.url)
+#        self.assertEqual(response.status_code, 400)
+#
+#    def test_api_post_admin(self):
+#        """Test the Registered Vessels View API endpoint POST response when logged in as admin user.
+#        """
+#        self.client.login(email=self.adminUN, password='pass')
+#        response = self.client.post(self.url)
+#        self.assertEqual(response.status_code, 400)
+#
+#    def test_api_post_non_admin(self):
+#        """Test the Registered Vessels View API endpoint POST response when logged in as external user.
+#        """
+#        self.client.login(email=self.nonAdminUN, password='pass')
+#        response = self.client.post(self.url)
+#        self.assertEqual(response.status_code, 403)
 
-    def test_api_get_admin(self):
-        """ Test the Registered Vessels View API endpoint GET response when logged in as admin.
-        """
-        self.client.login(email=self.adminUN, password='pass')
-        response = self.client.get(self.url)
-        self.assertEqual(response.status_code, 400)
-
-    def test_api_get_non_admin(self):
-        """Test the Registered Vessels View API endpoint GET response when logged in as external user.
-        """
-        self.client.login(email=self.nonAdminUN, password='pass')
-        response = self.client.get(self.url)
-        self.assertEqual(response.status_code, 400)
-
-    def test_api_get_anon(self):
-        """Test the Registered Vessels View API endpoint GET response when not logged in.
-        """
-        response = self.client.get(self.url)
-        self.assertEqual(response.status_code, 400)
-
-    def test_api_post_admin(self):
-        """Test the Registered Vessels View API endpoint POST response when logged in as admin user.
-        """
-        self.client.login(email=self.adminUN, password='pass')
-        response = self.client.post(self.url)
-        self.assertEqual(response.status_code, 400)
-
-    def test_api_post_non_admin(self):
-        """Test the Registered Vessels View API endpoint POST response when logged in as external user.
-        """
-        self.client.login(email=self.nonAdminUN, password='pass')
-        response = self.client.post(self.url)
-        self.assertEqual(response.status_code, 403)
-
-    def test_api_post_non_admin(self):
-        """Test the Registered Vessels View API endpoint POST response when logged in as external user.
-        """
-        self.client.login(email=self.nonAdminUN, password='pass')
-        response = self.client.post(self.url)
-        self.assertEqual(response.status_code, 400)
+#    def test_api_post_non_admin(self):
+#        """Test the Registered Vessels View API endpoint POST response when logged in as external user.
+#        """
+#        self.client.login(email=self.nonAdminUN, password='pass')
+#        response = self.client.post(self.url)
+#        self.assertEqual(response.status_code, 400)
 
 # class UpdateProfileAddressTestCase(TestSetup):
 #     url = 'api/profile/update_address'
