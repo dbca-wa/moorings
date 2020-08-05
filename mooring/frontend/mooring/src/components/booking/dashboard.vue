@@ -513,7 +513,17 @@ export default {
                     {
                         data: "mobile",
                         orderable:false,
-                        searchable:false
+                        searchable:false,
+                        mRender: function(data, type, full){
+                             if (full.mobile.length > 0) {
+                                  return full.mobile;
+                             } else {
+                                  return full.booking_phone;
+                             }
+  
+
+                        },
+
                     },
                     {
                         data: "vesselRegNo",
