@@ -2030,8 +2030,10 @@ class AnnualAdmissionsView(CreateView):
                self.object.overridden_by = self.request.user
                override_lines = {'ledger_description': '{} - {}'.format(dr.text, str(self.object.override_reason_info)), "quantity": 1, 'price_incl_tax': Decimal('0.00'), "oracle_code": oracle_code, 'line_status': 1}
                total_cost = self.object.override_price
+        start_time = abg.start_time + timedelta(hours=8)
+        finish_time = abg.finish_time + timedelta(hours=8)
 
-        lines.append({'ledger_description': 'Annual Admission Fee for Vessel {}, {}m  ({} - {})'.format(details['vessel_rego'], details['vessel_length'],str(abg.start_time.strftime('%d/%m/%Y')), str(abg.finish_time.strftime('%d/%m/%Y'))), "quantity": 1, 'price_incl_tax': total_cost, "oracle_code": oracle_code, 'line_status': 1})
+        lines.append({'ledger_description': 'Annual Admission Fee for Vessel {}, {}m  ({} - {})'.format(details['vessel_rego'], details['vessel_length'],str(start_time.strftime('%d/%m/%Y')), str(finish_time.strftime('%d/%m/%Y'))), "quantity": 1, 'price_incl_tax': total_cost, "oracle_code": oracle_code, 'line_status': 1})
         if override_lines:
             lines.append(override_lines)
         if self.request.user.is_authenticated:
@@ -2050,8 +2052,8 @@ class AnnualAdmissionsView(CreateView):
         booking = self.object
         reservation = u"Annual Admission for {} from {} to {} ".format(
                u'{} {}'.format(booking.customer.first_name, booking.customer.last_name),
-                str(abg.start_time.strftime('%d/%m/%Y')),
-                str(abg.finish_time.strftime('%d/%m/%Y')),
+                str(start_time.strftime('%d/%m/%Y')),
+                str(finish_time.strftime('%d/%m/%Y')),
         )
 
         logger.info('{} built annual admission booking {} and handing over to payment gateway'.format('User {} with id {}'.format(booking.customer.get_full_name(),booking.customer.id) if booking.customer else 'An anonymous user',booking.id))
