@@ -159,8 +159,29 @@ class AnnualAdmissionForm(forms.ModelForm):
             if 'confirm_email' in self.cleaned_data:
                 if (self.cleaned_data.get('email')) != (self.cleaned_data.get('confirm_email')):
                     raise forms.ValidationError('Your email and confirm email address do not match.')#+self.cleaned_data.get('terms'))
-        if len(self.cleaned_data.get('phone')) < 8 and len(self.cleaned_data.get('mobile')) < 8:
-                 raise forms.ValidationError('Please provide at least one valid phone or mobile number.')
+
+        if self.cleaned_data.get('mobile')[:2] == '04' or self.cleaned_data.get('mobile')[:3] == '+61':
+               mobile = self.cleaned_data.get('mobile')
+               mobile_cleaned = mobile.replace(" ","")
+               if mobile_cleaned[:2] == '04':
+                     if len(mobile_cleaned) == 10:
+                         pass
+                     else:
+                         raise forms.ValidationError('Mobile phone number starting with 04 must be 10 digits.')
+               if mobile_cleaned[:3] == '+61': 
+                   if len(mobile_cleaned) == 12:
+                       pass
+                   else:
+                       raise forms.ValidationError('Mobile phone number starting with +61 must be 12 digits.')
+        else:
+            if self.cleaned_data.get('mobile')[:1] == '+':
+                 raise forms.ValidationError('Only Australian mobile numbers excepted.')
+            else:
+                 raise forms.ValidationError('Please provide a valid mobile number.')
+
+        if len(self.cleaned_data.get('phone')) < 2 and len(self.cleaned_data.get('mobile')) < 2:
+             raise forms.ValidationError('Please provide at least one valid phone or mobile number.')
+
 
         if self.cleaned_data.get('terms') is not True:
             raise forms.ValidationError('Please check terms and conditions.')

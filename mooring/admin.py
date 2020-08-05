@@ -176,12 +176,11 @@ class BookingAnnualAdmissionAdmin(admin.ModelAdmin):
     ordering = ('-id',)
     search_fileds = ('customer','id',)
     list_filter = ('booking_type',)
-    readonly_fields=('created','sticker_no_history')
+    readonly_fields=('created','sticker_no_history','sticker_created')
     inlines = [BookingAnnualInvoiceInline,]
 
     def has_add_permission(self, request, obj=None):
         return False
-
 
 @admin.register(models.MooringsiteBooking)
 class MooringsiteBookingAdmin(admin.ModelAdmin):
