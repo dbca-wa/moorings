@@ -1999,7 +1999,7 @@ class AnnualAdmissionsView(CreateView):
         details['post_code'] = self.request.POST.get('postcode')
         details['suburb'] = self.request.POST.get('suburb')
         details['phone'] = self.request.POST.get('phone')
-        details['mobile'] = self.request.POST.get('mobile')
+        details['mobile'] = self.request.POST.get('mobile').replace(" ", "")
         details['email'] = self.request.POST.get('email')
         details['confirm_email'] = self.request.POST.get('confirm_email')
         details['vessel_rego'] = self.request.POST.get('vessel_rego')
