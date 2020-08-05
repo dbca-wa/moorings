@@ -4582,6 +4582,8 @@ def update_sticker_admission_booking(request):
              sticker_no_history.append({'value': sticker_no, 'user_id': request.user.id, 'first_name': request.user.first_name, 'last_name': request.user.last_name,'updated': nowdt.strftime('%Y-%m-%d %H:%M:%S'),'sticker_comment': sticker_comment})
              baa.sticker_no_history=sticker_no_history
              baa.sticker_no=sticker_no
+             if baa.sticker_created is None:
+                  baa.sticker_created = nowdt
              baa.save()
         else:
              raise ValidationError('Permission Denied updating Sticker')

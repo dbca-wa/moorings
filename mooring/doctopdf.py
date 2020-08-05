@@ -9,6 +9,7 @@ from reportlab.lib.utils import ImageReader
 import re
 from docx import Document
 from docxtpl import DocxTemplate
+from datetime import datetime, timedelta, date
 
 def docx_replace_regex(doc_obj, regex , replace, key, bold_font=False,italic_font=False, underline_font=False):
 
@@ -54,9 +55,14 @@ def create_annual_admission_letter(booking):
        address = '{}, {}'.format(booking.details.get('postal_address_line_1', ''), booking.details.get('postal_address_line_2', ''))
     else:
        address = '{}'.format(booking.details.get('postal_address_line_1', ''))
+    bookingdate = booking.created + timedelta(hours=8)
+    todaydate = datetime.utcnow() + timedelta(hours=8) 
+    stickercreated = ''
+    if booking.sticker_created:
+        sc= booking.sticker_created + timedelta(hours=8)
+        stickercreated = sc.strftime('%d %B %Y')
 
-
-    context = { 'customername' : '{} {}'.format(booking.details.get('first_name', ''), booking.details.get('last_name', '')), 'customeraddress': address, "customersuburb": booking.details.get('suburb', ''), "customerstate": booking.details.get('state', ''), 'customerpostcode': booking.details.get('post_code', ''),'bookingyear': '{}/{}'.format(booking.annual_booking_period_group.start_time.strftime('%Y'),booking.annual_booking_period_group.finish_time.strftime('%y')), 'admissionsexpiry': booking.annual_booking_period_group.finish_time.strftime('%d %B %Y'), 'vessel': booking.details.get('vessel_rego', ''), 'customerfirstname': booking.details.get('first_name', ''), 'bookingdate': booking.created.strftime('%d %B %Y')   }
+    context = { 'customername' : '{} {}'.format(booking.details.get('first_name', ''), booking.details.get('last_name', '')), 'customeraddress': address, "customersuburb": booking.details.get('suburb', ''), "customerstate": booking.details.get('state', ''), 'customerpostcode': booking.details.get('post_code', ''),'bookingyear': '{}/{}'.format(booking.annual_booking_period_group.start_time.strftime('%Y'),booking.annual_booking_period_group.finish_time.strftime('%y')), 'admissionsexpiry': booking.annual_booking_period_group.finish_time.strftime('%d %B %Y'), 'vessel': booking.details.get('vessel_rego', ''), 'customerfirstname': booking.details.get('first_name', ''), 'bookingdate': booking.created.strftime('%d %B %Y'), 'todaydate': todaydate.strftime('%d %B %Y'), 'stickercreated': stickercreated  }
     doc.render(context)
 
     try:
