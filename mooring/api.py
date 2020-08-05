@@ -2966,6 +2966,7 @@ class AdmissionsBookingViewSet(viewsets.ModelViewSet):
             #print (res)
             for r in res:
                 r['booking'] = ""
+                r['booking_phone'] = ''
                 ad = AdmissionsBooking.objects.get(pk=r['id'])
                 adLines = AdmissionsLine.objects.filter(admissionsBooking=ad)
                 lines = []
@@ -2975,6 +2976,9 @@ class AdmissionsBookingViewSet(viewsets.ModelViewSet):
                     r.update({'lines' : lines})
                 if Booking.objects.filter(admission_payment=ad).count() > 0:
                     booking = Booking.objects.filter(admission_payment=ad)[0]
+                    if booking.details:
+                        if 'phone' in booking.details:
+                             r['booking_phone'] = booking.details['phone']
                     #r.update({'booking': booking.id})
                     r['booking'] = booking.id
                     bi = BookingInvoice.objects.filter(booking=booking)
