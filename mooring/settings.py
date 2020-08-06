@@ -104,6 +104,21 @@ LOGGING['loggers']['booking_checkout'] = {
             'level': 'INFO'
         }
 
+
+# Additional logging for mooring
+LOGGING['handlers']['ledger_bpoint'] = {
+            'level': 'INFO',
+            'class': 'logging.handlers.RotatingFileHandler',
+            'filename': os.path.join(BASE_DIR, 'logs', 'ledger_bpoint.log'),
+            'formatter': 'verbose',
+            'maxBytes': 5242880
+        }
+LOGGING['loggers']['ledger_bpoint'] = {
+            'handlers': ['ledger_bpoint'],
+            'level': 'INFO'
+        }
+
+
 #PS_PAYMENT_SYSTEM_ID = env('PS_PAYMENT_SYSTEM_ID', 'S019')
 PS_PAYMENT_SYSTEM_ID = env('PS_PAYMENT_SYSTEM_ID', 'S516')
 if not VALID_SYSTEMS:
