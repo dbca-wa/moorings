@@ -48,7 +48,7 @@ def annual_admissions_booking_report(aadata):
         bookings = []
         today = datetime.date.today()
         strIO = StringIO()
-        fieldnames = ['ID','Fist Name','Last Name','Mobile','Phone','Vessel Rego','Vessel Length','Sticker No','Year','Status','Booking Period','Postal Address 1','Postal Address 2','Post Code','State','Country' ]
+        fieldnames = ['ID','Fist Name','Last Name','Mobile','Phone','Vessel Rego','Vessel Length','Sticker No','Year','Status','Booking Period','Postal Address 1','Postal Address 2','Suburb','Post Code','State','Country' ]
         writer = csv.writer(strIO)
         writer.writerow(fieldnames)
         for o in aadata:
@@ -64,6 +64,7 @@ def annual_admissions_booking_report(aadata):
             phone = ''
             mobile = ''
             sticker_no = ''
+            suburb = ''
             if o['sticker_no']:
                  sticker_no = o['sticker_no']
             if o['details']:
@@ -79,9 +80,10 @@ def annual_admissions_booking_report(aadata):
                 vessel_length = o['details']['vessel_length']
                 if 'postcode' in o['details']:
                    post_code = o['details']['post_code']         
-
+                if 'suburb' in o['details']:
+                   suburb = o['details']['suburb'] 
                         
-            writer.writerow(['AA'+str(o['id']),o['customer']['first_name'],o['customer']['last_name'],mobile,phone,vessel_rego,vessel_length,sticker_no,o['year'],o['status'],o['annual_booking_period_group_name'],postal_address_line_1,postal_address_line_2,post_code,state,country])
+            writer.writerow(['AA'+str(o['id']),o['customer']['first_name'],o['customer']['last_name'],mobile,phone,vessel_rego,vessel_length,sticker_no,o['year'],o['status'],o['annual_booking_period_group_name'],postal_address_line_1,postal_address_line_2,suburb,post_code,state,country])
 
         strIO.flush()
         strIO.seek(0)

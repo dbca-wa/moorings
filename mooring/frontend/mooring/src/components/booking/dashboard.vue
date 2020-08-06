@@ -515,11 +515,15 @@ export default {
                         orderable:false,
                         searchable:false,
                         mRender: function(data, type, full){
-                             if (full.mobile.length > 0) {
-                                  return full.mobile;
+                             if (full.mobile != null) { 
+                                 if (full.mobile.length > 0) {
+                                     return full.mobile;
+                                 } else {
+                                      return full.booking_phone;
+                                 }
                              } else {
-                                  return full.booking_phone;
-                             }
+                                      return full.booking_phone;
+		             }
   
 
                         },
