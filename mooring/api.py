@@ -4613,12 +4613,14 @@ def get_paid_admissions(request):
          if rv[0].admissionsPaid is False:
               baa = models.BookingAnnualAdmission.objects.filter(booking_type=1,start_dt__lte=dtarrival,expiry_dt__gte=dtarrival,rego_no=rego)
               if baa.count() > 0:
+                  response = []
                   response.append({'admissionsPaid': True, 'id': baa[0].id, 'rego_no': baa[0].rego_no})
 
     else:
         #baa = BookingAnnualAdmission.objects.filter(start_dt__lte=now_dt,expiry_dt__gte=now_dt,rego_no=rego)
         baa = models.BookingAnnualAdmission.objects.filter(booking_type=1,start_dt__lte=dtarrival,expiry_dt__gte=dtarrival,rego_no=rego)
         if baa.count() > 0:
+            response = []
             response.append({'admissionsPaid': True, 'id': baa[0].id, 'rego_no': baa[0].rego_no})
 
     return HttpResponse(geojson.dumps(
