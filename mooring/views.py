@@ -201,7 +201,7 @@ class DashboardAnnualAdmissionView(UserPassesTestMixin, ListView):
     model = RefundFailed
 
     def get(self, request, *args, **kwargs):
-        if is_payment_officer(request.user) == True:
+        if is_officer(request.user) == True:
             return super(DashboardAnnualAdmissionView, self).get(request, *args, **kwargs)
         else:
             return HttpResponseRedirect("/forbidden")
