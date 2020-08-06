@@ -48,7 +48,7 @@ def annual_admissions_booking_report(aadata):
         bookings = []
         today = datetime.date.today()
         strIO = StringIO()
-        fieldnames = ['ID','Fist Name','Last Name','Mobile','Phone','Vessel Rego','Vessel Length','Sticker No','Year','Status','Booking Period','Postal Address 1','Postal Address 2','Suburb','Post Code','State','Country' ]
+        fieldnames = ['ID','First Name','Last Name','Mobile','Phone','Vessel Rego','Vessel Length','Sticker No','Year','Status','Booking Period','Postal Address 1','Postal Address 2','Suburb','Post Code','State','Country' ]
         writer = csv.writer(strIO)
         writer.writerow(fieldnames)
         for o in aadata:
