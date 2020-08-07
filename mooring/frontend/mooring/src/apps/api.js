@@ -153,6 +153,9 @@ module.exports = {
         return process.env.PARKSTAY_URL + "/api/booking/"+id+".json";
     },
     booking_refunds:process.env.PARKSTAY_URL + "/api/reports/booking_refunds",
+    bookings_created_report: process.env.PARKSTAY_URL +"/api/reports/booking-mooring-created",
+    bookings_admission_created_report: process.env.PARKSTAY_URL +"/api/reports/booking-admission-created",
+    bookings_departure_report: process.env.PARKSTAY_URL +"/api/reports/booking-mooring-departure",
     //other
     countries: process.env.PARKSTAY_URL + "/api/countries.json",
     users: process.env.PARKSTAY_URL + "/api/users.json",

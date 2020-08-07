@@ -4153,6 +4153,94 @@ class BookingRefundsReportView(views.APIView):
         except Exception as e:
             traceback.print_exc()
 
+
+class BookingCreatedReportView(views.APIView):
+    renderer_classes = (JSONRenderer,)
+
+    def get(self,request,format=None):
+        try:
+            http_status = status.HTTP_200_OK
+            #parse and validate data
+            report = None
+            data = {
+                "start":request.GET.get('start'),
+                "end":request.GET.get('end'),
+            }
+            serializer = ReportSerializer(data=data)
+            serializer.is_valid(raise_exception=True)
+            filename = 'Mooring Booking Created Report-{}-{}'.format(str(serializer.validated_data['start']),str(serializer.validated_data['end']))
+            # Generate Report
+            report = reports.mooring_booking_created(serializer.validated_data['start'],serializer.validated_data['end'])
+
+            if report:
+                response = HttpResponse(FileWrapper(report), content_type='text/csv')
+                response['Content-Disposition'] = 'attachment; filename="{}.csv"'.format(filename)
+                return response
+            else:
+                raise serializers.ValidationError('No report was generated.')
+        except serializers.ValidationError:
+            raise
+        except Exception as e:
+            traceback.print_exc()
+
+class AdmissionBookingCreatedReportView(views.APIView):
+    renderer_classes = (JSONRenderer,)
+
+    def get(self,request,format=None):
+        try:
+            http_status = status.HTTP_200_OK
+            #parse and validate data
+            report = None
+            data = {
+                "start":request.GET.get('start'),
+                "end":request.GET.get('end'),
+            }
+            serializer = ReportSerializer(data=data)
+            serializer.is_valid(raise_exception=True)
+            filename = 'Admission Booking Created Report-{}-{}'.format(str(serializer.validated_data['start']),str(serializer.validated_data['end']))
+            # Generate Report
+            report = reports.admission_booking_created(serializer.validated_data['start'],serializer.validated_data['end'])
+
+            if report:
+                response = HttpResponse(FileWrapper(report), content_type='text/csv')
+                response['Content-Disposition'] = 'attachment; filename="{}.csv"'.format(filename)
+                return response
+            else:
+                raise serializers.ValidationError('No report was generated.')
+        except serializers.ValidationError:
+            raise
+        except Exception as e:
+            traceback.print_exc()
+
+class BookingDepartureReportView(views.APIView):
+    renderer_classes = (JSONRenderer,)
+
+    def get(self,request,format=None):
+        try:
+            http_status = status.HTTP_200_OK
+            #parse and validate data
+            report = None
+            data = {
+                "start":request.GET.get('start'),
+                "end":request.GET.get('end'),
+            }
+            serializer = ReportSerializer(data=data)
+            serializer.is_valid(raise_exception=True)
+            filename = 'Mooring Booking Departure Report-{}-{}'.format(str(serializer.validated_data['start']),str(serializer.validated_data['end']))
+            # Generate Report
+            report = reports.mooring_booking_departure(serializer.validated_data['start'],serializer.validated_data['end'])
+
+            if report:
+                response = HttpResponse(FileWrapper(report), content_type='text/csv')
+                response['Content-Disposition'] = 'attachment; filename="{}.csv"'.format(filename)
+                return response
+            else:
+                raise serializers.ValidationError('No report was generated.')
+        except serializers.ValidationError:
+            raise
+        except Exception as e:
+            traceback.print_exc()
+
 class BookingSettlementReportView(views.APIView):
     renderer_classes = (JSONRenderer,)
 
@@ -4660,7 +4748,7 @@ def get_annual_admission_booking(request):
        context['keyword'] = ''
        baainvoices_temp = {}
        context['annual_booking_period_group'] = models.AnnualBookingPeriodGroup.objects.all()
-       baainvoices = models.BookingAnnualInvoice.objects.select_related('booking_annual_admission').values('booking_annual_admission__id','invoice_reference').filter(Q(booking_annual_admission__booking_type=1) | Q(booking_annual_admission__booking_type=4))
+       baainvoices = models.BookingAnnualInvoice.objects.select_related('booking_annual_admission').values('booking_annual_admission__id','invoice_reference').filter(Q(Q(booking_annual_admission__booking_type=1) | Q(booking_annual_admission__booking_type=4)) & Q(system_invoice=False) )
 
        for b in baainvoices:
            if b['booking_annual_admission__id'] not in baainvoices_temp:
