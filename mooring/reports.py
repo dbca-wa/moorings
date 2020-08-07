@@ -8,7 +8,9 @@ from django.core.mail import EmailMessage
 from django.conf import settings
 from mooring.models import Booking, BookingInvoice, OutstandingBookingRecipient, BookingHistory, AdmissionsBooking, AdmissionsBookingInvoice
 from ledger.payments.models import OracleParser,OracleParserInvoice, CashTransaction, BpointTransaction, BpayTransaction,Invoice, TrackRefund
-
+from mooring import models
+from datetime import datetime, timedelta
+from django.db.models import Q, Min
 
 def outstanding_bookings():
     try:
@@ -92,6 +94,109 @@ def annual_admissions_booking_report(aadata):
     except:
         raise
 
+
+def mooring_booking_created(start,end):
+    try:
+
+        strIO = StringIO()
+        fieldnames = ['Booking ID', 'Arrival', 'Departure','Booking Type','Cost Total','Cancelled','Created','Customer ID','Phone','Mobile','First Name','Last Name','Admission Booking ID']
+        writer = csv.writer(strIO)
+        writer.writerow(fieldnames)
+        bookings = models.Booking.objects.filter(Q(created__gte=start, created__lte=end) & Q(Q(booking_type=1) | Q(booking_type=4) | Q(booking_type=5)))
+        for b in bookings:
+            admission_id = ''
+            customer_id = ''
+            first_name = ''
+            last_name = ''
+            created_nice = ''
+            phone = ''
+            mobile ='' 
+            if b.admission_payment:
+                admission_id = b.admission_payment.id
+            if b.customer:
+                customer_id = b.customer.id
+            if b.details:
+                if 'first_name' in b.details:
+                   first_name = b.details['first_name']
+                if 'last_name' in b.details:
+                   last_name = b.details['last_name']
+                if 'phone' in b.details:
+                    phone = b.details['phone']
+                if 'mobile' in b.details:
+                    mobile = b.details['mobile']
+
+                created = b.created + timedelta(hours=8)
+                created_nice = created.strftime('%d/%m/%Y %H:%M')
+            writer.writerow([b.id,b.arrival,b.departure,b.get_booking_type_display(),b.cost_total,b.is_canceled,created_nice,customer_id,phone,mobile,first_name,last_name,admission_id])
+
+        strIO.flush()
+        strIO.seek(0)
+        return strIO
+    except:
+        raise
+
+
+def admission_booking_created(start,end):
+    try:
+
+        strIO = StringIO()
+        fieldnames = ['Admission Booking ID','Booking Type','Cost Total','Created','Customer ID','Mobile','First Name','Last Name']
+        writer = csv.writer(strIO)
+        writer.writerow(fieldnames)
+        bookings = models.AdmissionsBooking.objects.filter(Q(created__gte=start, created__lte=end) & Q(Q(booking_type=1) | Q(booking_type=4) | Q(booking_type=5)))
+        for b in bookings:
+            admission_id = ''
+            customer_id = ''
+            first_name = ''
+            last_name = ''
+            created_nice = ''
+            if b.customer:
+                customer_id = b.customer.id
+                first_name = b.customer.first_name
+                last_name = b.customer.last_name
+                created = b.created + timedelta(hours=8)
+                created_nice = created.strftime('%d/%m/%Y %H:%M')
+
+            writer.writerow([b.id,b.get_booking_type_display(),b.totalCost,created_nice,customer_id,b.mobile,first_name,last_name])
+
+        strIO.flush()
+        strIO.seek(0)
+        return strIO
+    except:
+        raise
+
+def mooring_booking_departure(start,end):
+    try:
+
+        strIO = StringIO()
+        fieldnames = ['Booking ID', 'Arrival', 'Departure','Booking Type','Cost Total','Cancelled','Created','Customer ID','Phone','First Name','Last Name','Admission Booking ID']
+        writer = csv.writer(strIO)
+        writer.writerow(fieldnames)
+        bookings = models.Booking.objects.filter(Q(departure__gte=start, departure__lte=end) & Q(Q(booking_type=1) | Q(booking_type=4) | Q(booking_type=5)))
+        for b in bookings:
+            admission_id = ''
+            customer_id = ''
+            first_name = ''
+            last_name = ''
+            created_nice = ''
+            if b.admission_payment:
+                admission_id = b.admission_payment.id
+            if b.customer:
+                customer_id = b.customer.id
+            if b.details:
+                if 'first_name' in b.details:
+                   first_name = b.details['first_name']
+                if 'last_name' in b.details:
+                   last_name = b.details['last_name']
+                created = b.created + timedelta(hours=8)
+                created_nice = created.strftime('%d/%m/%Y %H:%M')
+            writer.writerow([b.id,b.arrival,b.departure,b.get_booking_type_display(),b.cost_total,b.is_canceled,created_nice,customer_id,first_name,last_name,admission_id])
+
+        strIO.flush()
+        strIO.seek(0)
+        return strIO
+    except:
+        raise
 
 
 def booking_refunds(start,end):

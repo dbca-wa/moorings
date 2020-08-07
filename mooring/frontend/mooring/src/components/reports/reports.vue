@@ -181,6 +181,137 @@
                     </div>
                 </div>
             </div>
+
+            <form id="booking_created_report">
+                <div class="well well-sm">
+                    <div class="row">
+                        <div class="col-lg-12">
+                            <div class="col-lg-12">
+                                <h3 style="margin-bottom:20px;">Mooring Booking Reports (By Created Date) </h3>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                  <label for="">Start Date</label>
+                                  <div class="input-group date"  ref="bookingCDStartPicker">
+                                      <input type="text" class="form-control" name="booking_cd_start_date" placeholder="DD/MM/YYYY">
+                                      <span class="input-group-addon">
+                                          <span class="glyphicon glyphicon-calendar"></span>
+                                      </span>
+                                  </div>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                  <label for="">End Date</label>
+                                  <div class="input-group date" ref="bookingCDEndPicker">
+                                      <input type="text" class="form-control" name="booking_cd_end_date"  placeholder="DD/MM/YYYY">
+                                      <span class="input-group-addon">
+                                          <span class="glyphicon glyphicon-calendar"></span>
+                                      </span>
+                                  </div>
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-lg-12">
+                                    <div class="col-sm-6">
+                                        <button @click.prevent="generateBookingCDReport()" class="btn btn-primary pull-left" >Generate Reports</button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </form>
+
+            <form id="booking_admission_created_report">
+                <div class="well well-sm">
+                    <div class="row">
+                        <div class="col-lg-12">
+                            <div class="col-lg-12">
+                                <h3 style="margin-bottom:20px;">Admission Booking Report (By Created Date) </h3>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                  <label for="">Start Date</label>
+                                  <div class="input-group date"  ref="bookingAStartPicker">
+                                      <input type="text" class="form-control" name="booking_admission_start_date" placeholder="DD/MM/YYYY">
+                                      <span class="input-group-addon">
+                                          <span class="glyphicon glyphicon-calendar"></span>
+                                      </span>
+                                  </div>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                  <label for="">End Date</label>
+                                  <div class="input-group date" ref="bookingAEndPicker">
+                                      <input type="text" class="form-control" name="booking_admission_end_date"  placeholder="DD/MM/YYYY">
+                                      <span class="input-group-addon">
+                                          <span class="glyphicon glyphicon-calendar"></span>
+                                      </span>
+                                  </div>
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-lg-12">
+                                    <div class="col-sm-6">
+                                        <button @click.prevent="generateBookingCDAdmissionReport()" class="btn btn-primary pull-left" >Generate Reports</button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </form>
+
+
+            <form id="booking_departure_report">
+                <div class="well well-sm">
+                    <div class="row">
+                        <div class="col-lg-12">
+                            <div class="col-lg-12">
+                                <h3 style="margin-bottom:20px;">Mooring Booking Reports (By Departure Date) </h3>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                  <label for="">Start Date</label>
+                                  <div class="input-group date" ref="bookingDepartStartPicker">
+                                      <input type="text" class="form-control" name="booking_departure_start_date" placeholder="DD/MM/YYYY">
+                                      <span class="input-group-addon">
+                                          <span class="glyphicon glyphicon-calendar"></span>
+                                      </span>
+                                  </div>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                  <label for="">End Date</label>
+                                  <div class="input-group date" ref="bookingDepartEndPicker">
+                                      <input type="text" class="form-control" name="booking_departure_end_date"  placeholder="DD/MM/YYYY">
+                                      <span class="input-group-addon">
+                                          <span class="glyphicon glyphicon-calendar"></span>
+                                      </span>
+                                  </div>
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-lg-12">
+                                    <div class="col-sm-6">
+                                        <button @click.prevent="generateBookingDepartureReport()" class="btn btn-primary pull-left" >Generate Reports</button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </form>
+
+
+
+
+
+
+
         <form ref="oracle_form">
             <div class="well well-sm">
                 <div class="row">
@@ -215,6 +346,13 @@
                 </div>
             </div>
         </form>
+
+
+
+
+
+
+
     </div>
 </template>
 
@@ -239,6 +377,12 @@ export default {
             flatDateEndPicker:null,
             refundsStartPicker:null,
             refundsEndPicker:null,
+            bookingCDStartPicker: null,
+            bookingCDEndPicker: null,
+            bookingAStartPicker: null,
+            bookingAEndPicker: null,
+            bookingDepartStartPicker: null,
+            bookingDepartEndPicker: null,
             datepickerOptions:{
                 format: 'DD/MM/YYYY',
                 showClear:true,
@@ -287,6 +431,12 @@ export default {
             vm.oracleDatePicker = $(vm.$refs.oracleDatePicker).datetimepicker(vm.datepickerOptions);
             vm.bookingSettlementsDatePicker = $(vm.$refs.bookingSettlementsDatePicker).datetimepicker(vm.datepickerOptions);
             vm.bookingsDatePicker = $(vm.$refs.bookingsDatePicker).datetimepicker(vm.datepickerOptions);
+            vm.bookingCDStartPicker = $(vm.$refs.bookingCDStartPicker).datetimepicker(vm.datepickerOptions);
+            vm.bookingCDEndPicker = $(vm.$refs.bookingCDEndPicker).datetimepicker(vm.datepickerOptions);
+            vm.bookingAStartPicker = $(vm.$refs.bookingAStartPicker).datetimepicker(vm.datepickerOptions);
+            vm.bookingAEndPicker = $(vm.$refs.bookingAEndPicker).datetimepicker(vm.datepickerOptions);
+            vm.bookingDepartStartPicker = $(vm.$refs.bookingDepartStartPicker).datetimepicker(vm.datepickerOptions);
+            vm.bookingDepartEndPicker = $(vm.$refs.bookingDepartEndPicker).datetimepicker(vm.datepickerOptions);
 
             vm.flatDateStartPicker.on('dp.hide',function (e) {
                 vm.flatDateEndPicker.data("DateTimePicker").date(null);
@@ -405,6 +555,39 @@ export default {
                 values.items = true;
                 vm.getReport(values);
             }
+
+        },
+        generateBookingCDReport:function () {
+            let vm =this;
+
+            var values = {
+                "start": vm.bookingCDStartPicker.data("DateTimePicker").date().format('DD/MM/YYYY'),
+                "end" :vm.bookingCDEndPicker.data("DateTimePicker").date().format('DD/MM/YYYY'),
+            }
+            var url = api_endpoints.bookings_created_report +"?"+ $.param(values);
+            window.location.assign(url);
+
+        },
+        generateBookingCDAdmissionReport: function () {
+            let vm =this;
+
+            var values = {
+                "start": vm.bookingAStartPicker.data("DateTimePicker").date().format('DD/MM/YYYY'),
+                "end" :vm.bookingAEndPicker.data("DateTimePicker").date().format('DD/MM/YYYY'),
+            }
+            var url = api_endpoints.bookings_admission_created_report +"?"+ $.param(values);
+            window.location.assign(url);
+
+        },
+        generateBookingDepartureReport: function () {
+            let vm =this;
+
+            var values = {
+                "start": vm.bookingDepartStartPicker.data("DateTimePicker").date().format('DD/MM/YYYY'),
+                "end" :vm.bookingDepartEndPicker.data("DateTimePicker").date().format('DD/MM/YYYY'),
+            }
+            var url = api_endpoints.bookings_departure_report +"?"+ $.param(values);
+            window.location.assign(url);
 
         },
         generateRefundReport:function () {
