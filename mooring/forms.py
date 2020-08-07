@@ -5,6 +5,7 @@ from mooring import utils
 from crispy_forms.helper import FormHelper
 from crispy_forms.layout import Layout, Submit, HTML, Fieldset, MultiField, Div, Button
 from django.forms import Form, ModelForm, ChoiceField, FileField, CharField, Textarea, ClearableFileInput, HiddenInput, Field, RadioSelect, ModelChoiceField, Select, CheckboxInput
+import re
 
 class BaseFormHelper(FormHelper):
     form_class = 'form-horizontal'
@@ -188,6 +189,23 @@ class AnnualAdmissionForm(forms.ModelForm):
 
         vessel_length = self.cleaned_data.get('vessel_length') 
         booking_period = self.cleaned_data.get('booking_period')
+        regex = r"([0-9]+\.[0-9][0-9]$)"
+        if re.match(regex, vessel_length) is None:
+            raise forms.ValidationError('Only digits and dot allowed in vessel length. eg (21.22, 9.50)')
+       
+
+        if float(self.cleaned_data.get('vessel_length')) > float(0.01):
+             vl = self.cleaned_data.get('vessel_length')
+             vl_split = vl.split('.')
+             if len(vl_split) > 1:
+                   if len(vl_split[1]) == 2:
+                       pass
+                   else:
+                       raise forms.ValidationError('Invalid decimal length,  please provide a valid vessel length in decimals 0.00.')
+             else:
+                 raise forms.ValidationError('Please provide a valid vessel length in decimals 0.00.')
+        else:
+            raise forms.ValidationError('Please provide a valid vessel length.')
 
         response = 'error'
         if models.AnnualBookingPeriodGroup.objects.filter(id=int(booking_period)).count() > 0:
@@ -216,19 +234,6 @@ class AnnualAdmissionForm(forms.ModelForm):
             else:
                 raise forms.ValidationError('Please select an override reason') 
              
-        if float(self.cleaned_data.get('vessel_length')) > float(0.01):
-             vl = self.cleaned_data.get('vessel_length')
-             vl_split = vl.split('.')
-             if len(vl_split) > 1:
-                   if len(vl_split[1]) == 2:
-                       pass
-                   else:
-                       raise forms.ValidationError('Invalid decimal length,  please provide a valid vessel length in decimals 0.00.')
-             else:
-                 raise forms.ValidationError('Please provide a valid vessel length in decimals 0.00.')
-        else:
-            raise forms.ValidationError('Please provide a valid vessel length.')
-
 
     def __init__(self, *args, **kwargs):
         # User must be passed in as a kwarg.
