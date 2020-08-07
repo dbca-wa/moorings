@@ -189,23 +189,29 @@ class AnnualAdmissionForm(forms.ModelForm):
 
         vessel_length = self.cleaned_data.get('vessel_length') 
         booking_period = self.cleaned_data.get('booking_period')
+        is_float_value = True
+        try:
+             float(self.cleaned_data.get('vessel_length'))
+        except:
+            is_float_value = False
+        if is_float_value is True:
+           if float(self.cleaned_data.get('vessel_length')) > float(0.01):
+                vl = self.cleaned_data.get('vessel_length')
+                vl_split = vl.split('.')
+                if len(vl_split) > 1:
+                      if len(vl_split[1]) == 2:
+                          pass
+                      else:
+                          raise forms.ValidationError('Invalid decimal length,  please provide a valid vessel length in decimals 0.00.')
+                else:
+                    raise forms.ValidationError('Please provide a valid vessel length in decimals 0.00.')
+           else:
+               raise forms.ValidationError('Please provide a valid vessel length.')
+
         regex = r"([0-9]+\.[0-9][0-9]$)"
         if re.match(regex, vessel_length) is None:
             raise forms.ValidationError('Only digits and dot allowed in vessel length. eg (21.22, 9.50)')
-       
 
-        if float(self.cleaned_data.get('vessel_length')) > float(0.01):
-             vl = self.cleaned_data.get('vessel_length')
-             vl_split = vl.split('.')
-             if len(vl_split) > 1:
-                   if len(vl_split[1]) == 2:
-                       pass
-                   else:
-                       raise forms.ValidationError('Invalid decimal length,  please provide a valid vessel length in decimals 0.00.')
-             else:
-                 raise forms.ValidationError('Please provide a valid vessel length in decimals 0.00.')
-        else:
-            raise forms.ValidationError('Please provide a valid vessel length.')
 
         response = 'error'
         if models.AnnualBookingPeriodGroup.objects.filter(id=int(booking_period)).count() > 0:
