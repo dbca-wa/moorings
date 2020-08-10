@@ -1279,7 +1279,7 @@ class MakeBookingsView(TemplateView):
             if vessel.admissionsPaid:
                 admissionLines = []
         if admissionsPaid is False:
-            baa = BookingAnnualAdmission.objects.filter(booking_type=1,start_dt__lte=booking.arrival,expiry_dt__gte=booking.arrival,rego_no=details['vessel_rego'])
+            baa = BookingAnnualAdmission.objects.filter(booking_type=1,start_dt__lte=booking.arrival,expiry_dt__gte=booking.arrival,rego_no=booking.details['vessel_rego'])
             if baa.count() > 0:
                  admissionsPaid = True
 
