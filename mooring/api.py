@@ -2771,7 +2771,8 @@ class AdmissionsBookingViewSet(viewsets.ModelViewSet):
             ad_details = AdmissionsBooking.objects.filter(booking_type__in=bt).values('id','customer__id','customer__first_name','customer__last_name')
 
             for cd in ad_details:
-                 ad_details_obj[cd['id']] = {'first': cd['customer__first_name'],'last': cd['customer__last_name']}
+                 print (str(cd['customer__first_name'])+' '+str(cd['customer__last_name']))
+                 ad_details_obj[cd['id']] = {'first': str(cd['customer__first_name']),'last': str(cd['customer__last_name'])}
 
             customer_details = AdmissionsBooking.objects.filter(booking_type__in=bt).values('customer__id','customer__first_name','customer__last_name', 'customer__email')
             for cd in customer_details:
@@ -2816,7 +2817,7 @@ class AdmissionsBookingViewSet(viewsets.ModelViewSet):
                     rec.customerID_cache = rec.id
                     rec.customerFirstName_cache = ad_details_obj[rec.id]['first']  #str(rec.customer.first_name.lower())
                     rec.customerLastName_cache =  ad_details_obj[rec.id]['last'] #str(rec.customer.last_name.lower())
-                    rec.refNo_cache = str('AD'+str(rec.id))
+                    rec.refNo_cache = str('AD'+str(rec.id)).encode('utf-8')
                     #print (rec.vesselRegNo_cache)
                     #print("LINE 1.1", datetime.now().strftime("%d/%m/%Y %H:%M:%S"))
 
@@ -2978,7 +2979,7 @@ class AdmissionsBookingViewSet(viewsets.ModelViewSet):
                     booking = Booking.objects.filter(admission_payment=ad)[0]
                     if booking.details:
                         if 'phone' in booking.details:
-                             r['booking_phone'] = booking.details['phone']
+                             r['booking_phone'] = booking.details['phone'].encode('utf-8')
                     #r.update({'booking': booking.id})
                     r['booking'] = booking.id
                     bi = BookingInvoice.objects.filter(booking=booking)
@@ -3003,7 +3004,7 @@ class AdmissionsBookingViewSet(viewsets.ModelViewSet):
                     #name = ad.customer.first_name + " " + ad.customer.last_name
                     name = customer_details_obj[r['customer']]['first'] + " "+ customer_details_obj[r['customer']]['last']#r.customerFirstName_cache
                     email = ad.customer.email
-                    r.update({'customerName': name, 'email': email})
+                    r.update({'customerName': str(name).encode('utf-8'), 'email': email})
                 else:
                     r.update({'customerName': 'No customer', 'email': "No customer"})
         except Exception as e:
