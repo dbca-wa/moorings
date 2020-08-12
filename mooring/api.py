@@ -2767,20 +2767,14 @@ class AdmissionsBookingViewSet(viewsets.ModelViewSet):
         ad_details_obj = {}
         brokenrow_id = 0
         brokenrow_section = "START"
-        broken_customer_id = 0
+        broken_booking_id = 0
         try:
-            brokenrow_section = "1"
             data_temp = AdmissionsBooking.objects.filter(booking_type__in=bt).order_by('-pk')
 
             ad_details = AdmissionsBooking.objects.filter(booking_type__in=bt).values('id','customer__id','customer__first_name','customer__last_name')
-            brokenrow_section = "2"
             for cd in ad_details:
-                 broken_customer_id = cd['id']
+                 broken_booking_id = cd['id']
                  if type(cd['customer__first_name']) == str and type(cd['customer__last_name']) == str:
-                     print (cd['id'])
-                     print (cd['customer__first_name'])
-                     last_name = cd['customer__last_name']
-                     print (cd['customer__last_name'].encode('utf-8'))
                      ad_details_obj[cd['id']] = {'first': cd['customer__first_name'].encode('utf-8'),'last': cd['customer__last_name'].encode('utf-8')}
                  else:
                      print ("Not a Str :"+str(cd['id']))
@@ -3037,7 +3031,7 @@ class AdmissionsBookingViewSet(viewsets.ModelViewSet):
                 "Error": str(e),
                 "row_id": str(brokenrow_id),
                 "row_section": brokenrow_section,
-                "broken_customer_id": str(broken_customer_id)
+                "broken_booking_id": str(broken_booking_id)
             }
 
         return Response(OrderedDict([
