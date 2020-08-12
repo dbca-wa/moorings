@@ -2774,8 +2774,12 @@ class AdmissionsBookingViewSet(viewsets.ModelViewSet):
             ad_details = AdmissionsBooking.objects.filter(booking_type__in=bt).values('id','customer__id','customer__first_name','customer__last_name')
             brokenrow_section = "2"
             for cd in ad_details:
-                 print (str(cd['customer__first_name'])+' '+str(cd['customer__last_name']))
-                 ad_details_obj[cd['id']] = {'first': str(cd['customer__first_name']),'last': str(cd['customer__last_name'])}
+                 if type(cd['customer__first_name']) == str and type(cd['customer__last_name']) == str:
+                     print (str(cd['customer__first_name'])+' '+str(cd['customer__last_name']))
+                     ad_details_obj[cd['id']] = {'first': cd['customer__first_name'],'last': cd['customer__last_name']}
+                 else:
+                     print ("Not a Str :"+str(cd['id']))
+                     ad_details_obj[cd['id']] = {'first': 'Not a String('+str(cd['id'])+')','last': 'Not a String('+str(cd['id'])+')'}
             brokenrow_section = "3"
             customer_details = AdmissionsBooking.objects.filter(booking_type__in=bt).values('customer__id','customer__first_name','customer__last_name', 'customer__email')
             for cd in customer_details:
