@@ -2965,7 +2965,9 @@ class AdmissionsBookingViewSet(viewsets.ModelViewSet):
             serializer = AdmissionsBookingSerializer(data,many=True)
             res = serializer.data
             #print (res)
+            brokenrow_id = 0
             for r in res:
+                brokenrow_id = r['id']
                 r['booking'] = ""
                 r['booking_phone'] = ''
                 ad = AdmissionsBooking.objects.get(pk=r['id'])
@@ -3009,7 +3011,8 @@ class AdmissionsBookingViewSet(viewsets.ModelViewSet):
                     r.update({'customerName': 'No customer', 'email': "No customer"})
         except Exception as e:
             res ={
-                "Error": str(e)
+                "Error": str(e),
+                "row_id": str(brokenrow_id)
             }
 
         return Response(OrderedDict([
