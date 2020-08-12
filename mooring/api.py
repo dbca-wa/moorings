@@ -2765,6 +2765,7 @@ class AdmissionsBookingViewSet(viewsets.ModelViewSet):
         user_mooring_groups = []
         customer_details_obj = {} 
         ad_details_obj = {}
+        brokenrow_id = 0
         try:
             data_temp = AdmissionsBooking.objects.filter(booking_type__in=bt).order_by('-pk')
 
@@ -2965,7 +2966,6 @@ class AdmissionsBookingViewSet(viewsets.ModelViewSet):
             serializer = AdmissionsBookingSerializer(data,many=True)
             res = serializer.data
             #print (res)
-            brokenrow_id = 0
             for r in res:
                 brokenrow_id = r['id']
                 r['booking'] = ""
