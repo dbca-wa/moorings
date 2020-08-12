@@ -2766,28 +2766,30 @@ class AdmissionsBookingViewSet(viewsets.ModelViewSet):
         customer_details_obj = {} 
         ad_details_obj = {}
         brokenrow_id = 0
+        brokenrow_section = "START"
         try:
+            brokenrow_section = "1"
             data_temp = AdmissionsBooking.objects.filter(booking_type__in=bt).order_by('-pk')
 
             ad_details = AdmissionsBooking.objects.filter(booking_type__in=bt).values('id','customer__id','customer__first_name','customer__last_name')
-
+            brokenrow_section = "2"
             for cd in ad_details:
                  print (str(cd['customer__first_name'])+' '+str(cd['customer__last_name']))
                  ad_details_obj[cd['id']] = {'first': str(cd['customer__first_name']),'last': str(cd['customer__last_name'])}
-
+            brokenrow_section = "3"
             customer_details = AdmissionsBooking.objects.filter(booking_type__in=bt).values('customer__id','customer__first_name','customer__last_name', 'customer__email')
             for cd in customer_details:
                   if cd['customer__id'] not in customer_details_obj:
                      customer_details_obj[cd['customer__id']] = {'first': cd['customer__first_name'],'last': cd['customer__last_name'], 'email': cd['customer__email'] } 
             #print (customer_details_obj)
-
+            brokenrow_section = "4"
 
             admission_line = AdmissionsLine.objects.all().values('admissionsBooking_id','location__mooring_group')
             for al in admission_line:
                   if al['admissionsBooking_id'] not in admission_line_obj:
                        admission_line_obj[al['admissionsBooking_id']] = al
                        
-
+            brokenrow_section = "5"
             groups = MooringAreaGroup.objects.filter(members__in=[request.user,])
             for group in groups:
                 if group.id not in mooring_group_access:
@@ -2803,6 +2805,7 @@ class AdmissionsBookingViewSet(viewsets.ModelViewSet):
             for ms in msb_obj:
                    mooring_site_booking[ms['booking__id']] = ms
             #print (mooring_site_booking)
+            brokenrow_section = "6"
             ap = Booking.objects.all().values('id','admission_payment__id').exclude(admission_payment=None)
             #print (ap)
             for a in ap:
@@ -2810,15 +2813,16 @@ class AdmissionsBookingViewSet(viewsets.ModelViewSet):
                 admission_booking_link[a['admission_payment__id']] = a['id']
             #print (admission_booking_link)
             # If groups then we need to filter data by groups.
+            brokenrow_section = "7"
             if groups.count() > 0:
                 filtered_ids = []
                 for rec in data_temp:
-                    rec.vesselRegNo_cache = str(rec.vesselRegNo.lower())
-                    rec.warningReferenceNo_cache  = str(rec.warningReferenceNo.lower())
+                    rec.vesselRegNo_cache = rec.vesselRegNo.lower()
+                    rec.warningReferenceNo_cache  = rec.warningReferenceNo.lower()
                     rec.customerID_cache = rec.id
                     rec.customerFirstName_cache = ad_details_obj[rec.id]['first']  #str(rec.customer.first_name.lower())
                     rec.customerLastName_cache =  ad_details_obj[rec.id]['last'] #str(rec.customer.last_name.lower())
-                    rec.refNo_cache = str('AD'+str(rec.id)).encode('utf-8')
+                    rec.refNo_cache = 'AD'+str(rec.id)
                     #print (rec.vesselRegNo_cache)
                     #print("LINE 1.1", datetime.now().strftime("%d/%m/%Y %H:%M:%S"))
 
@@ -2898,7 +2902,7 @@ class AdmissionsBookingViewSet(viewsets.ModelViewSet):
             else:
                 return Response("Error no group")
 
-            
+            brokenrow_section = "8"
 #            recordsTotal = len(data)
 #            recordsTotal = AdmissionsBooking.objects.filter(booking_type__in=[0,1,4],`
             #search = request.GET.get('search[value]') if request.GET.get('search[value]') else None
@@ -2909,6 +2913,7 @@ class AdmissionsBookingViewSet(viewsets.ModelViewSet):
             date_to = datetime.strptime(request.GET.get('departure'),'%d/%m/%Y').date() if request.GET.get('departure') else None
             data2 = []
             data_temp = []
+            brokenrow_section = "9"
             if search:
                 #if(search.upper().startswith('AD')):
                 #    try:
@@ -2916,15 +2921,18 @@ class AdmissionsBookingViewSet(viewsets.ModelViewSet):
                 #        search = search[2:]
                 #    except:
                 #        pass
+                brokenrow_section = "10"
                 for row in data:
                      print (row.customerLastName_cache)
                      if row.vesselRegNo_cache.find(search.lower()) >= 0  or row.warningReferenceNo_cache.find(search.lower()) >= 0 or row.customerFirstName_cache.lower().find(search.lower()) >= 0 or row.customerLastName_cache.lower().find(search.lower()) >= 0 or str(row.id) == search or str(row.customerFirstName_cache+' '+row.customerLastName_cache).find(search.lower()) >= 0 or row.refNo_cache == search: 
                      #if row.vesselRegNo.lower().find(search.lower()) >= 0 or row.warningReferenceNo.lower().find(search.lower()) >= 0 or row.customer.first_name.lower().find(search.lower()) >= 0 or row.customer.first_name.lower().find(search.lower()) >= 0 or str(row.id) == search or str(row.customer.first_name.lower()+' '+row.customer.last_name.lower()).find(search.lower()) >= 0 or 'AD'+str(row.id) == search:
                           data_temp.append(row)
                      data = data_temp
+                brokenrow_section = "11"
                 #data = data.filter(Q(warningReferenceNo__icontains=search) | Q(vesselRegNo__icontains=search) | Q(customer__first_name__icontains=search) | Q(customer__last_name__icontains=search) | Q(id__icontains=search))
             if date_from and date_to:
                 data_temp = []
+                brokenrow_section = "12.1"
                 for row in data:
                       date_match = False
                       for row_line in row.admissions_line:
@@ -2937,6 +2945,7 @@ class AdmissionsBookingViewSet(viewsets.ModelViewSet):
 #                data = data.distinct().filter(admissionsline__arrivalDate__gte=date_from, admissionsline__arrivalDate__lte=date_to)
             elif(date_from):
                 data_temp = []
+                brokenrow_section = "12.2"
                 for row in data:
                       date_match = False
                       for row_line in row.admissions_line:
@@ -2946,10 +2955,10 @@ class AdmissionsBookingViewSet(viewsets.ModelViewSet):
                       if date_match is True:
                            data_temp.append(row)
                 data = data_temp
-
             #    data = data.distinct().filter(admissionsline__arrivalDate__gte=date_from)
             elif(date_to):
                 data_temp = []
+                brokenrow_section = "12.3"
                 for row in data:
                       date_match = False
                       for row_line in row.admissions_line:
@@ -2961,6 +2970,7 @@ class AdmissionsBookingViewSet(viewsets.ModelViewSet):
                 data = data_temp
             #    data = data.distinct().filter(admissionsline__arrivalDate__lte=date_to)
             #print (data)
+            brokenrow_section = "13"
             recordsFiltered = int(len(data))
             data = data[int(start):int(length)+int(start)]
             serializer = AdmissionsBookingSerializer(data,many=True)
@@ -2995,6 +3005,7 @@ class AdmissionsBookingViewSet(viewsets.ModelViewSet):
                        inv.append(i.invoice_reference)
 #                    inv = AdmissionsBookingInvoice.objects.filter(admissions_booking=ad)
 #                    inv = [adi.invoice_reference,]
+                brokenrow_section = "14"
 
                 future_or_admin = False
                 if request.user.groups.filter(name__in=['Mooring Admin']).exists():
@@ -3002,17 +3013,21 @@ class AdmissionsBookingViewSet(viewsets.ModelViewSet):
                 else:
                     future_or_admin = ad.in_future
                 r.update({'invoice_ref': inv, 'in_future': future_or_admin, 'part_booking': ad.part_booking})
+                brokenrow_section = "15"
                 if(r['customer']):
+                    brokenrow_section = "16"
                     #name = ad.customer.first_name + " " + ad.customer.last_name
                     name = customer_details_obj[r['customer']]['first'] + " "+ customer_details_obj[r['customer']]['last']#r.customerFirstName_cache
                     email = ad.customer.email
                     r.update({'customerName': str(name).encode('utf-8'), 'email': email})
                 else:
                     r.update({'customerName': 'No customer', 'email': "No customer"})
+                brokenrow_section = "17"
         except Exception as e:
             res ={
                 "Error": str(e),
-                "row_id": str(brokenrow_id)
+                "row_id": str(brokenrow_id),
+                "row_section": brokenrow_section
             }
 
         return Response(OrderedDict([
