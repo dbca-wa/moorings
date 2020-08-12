@@ -2744,6 +2744,11 @@ class AdmissionsBookingViewSet(viewsets.ModelViewSet):
     queryset = AdmissionsBooking.objects.all()
     serializer_class = AdmissionsBookingSerializer
 
+    def find_value(self,value, search):
+        if search in value:
+            return True
+        return False
+
     def list(self, request, *args, **kwargs):
         http_status = status.HTTP_200_OK
         recordsTotal = None
@@ -2926,8 +2931,15 @@ class AdmissionsBookingViewSet(viewsets.ModelViewSet):
                 #        pass
                 brokenrow_section = "10"
                 for row in data:
-                     print (row.customerLastName_cache)
-                     if row.vesselRegNo_cache.find(search.lower()) >= 0  or row.warningReferenceNo_cache.find(search.lower()) >= 0 or row.customerFirstName_cache.lower().find(search.lower()) >= 0 or row.customerLastName_cache.lower().find(search.lower()) >= 0 or str(row.id) == search or str(row.customerFirstName_cache+' '+row.customerLastName_cache).find(search.lower()) >= 0 or row.refNo_cache == search: 
+                     if row.vesselRegNo_cache.find(search.lower()) >= 0 or row.warningReferenceNo_cache.find(search.lower()) >= 0 or row.refNo_cache == search or str(row.id) == search or self.find_value(row.customerFirstName_cache.lower(),search.encode('utf-8').lower()) is True or self.find_value(row.customerLastName_cache.lower(),search.encode('utf-8').lower()) is True or self.find_value(row.customerFirstName_cache.lower()+str(' ').encode('utf-8')+row.customerLastName_cache.lower(),search.encode('utf-8')) is True:
+
+                     #if row.vesselRegNo_cache.find(search.lower()) >= 0  or 
+                     #   row.warningReferenceNo_cache.find(search.lower()) >= 0 or
+                     #   row.customerFirstName_cache.lower().find(search.lower()) >= 0 or 
+                     #   row.customerLastName_cache.lower().find(search.lower()) >= 0 or 
+                     #   str(row.id) == search or 
+                     #   row.customerFirstName_cache+' '+row.customerLastName_cache.find(search.lower()) >= 0 or 
+                     #   row.refNo_cache == search: 
                      #if row.vesselRegNo.lower().find(search.lower()) >= 0 or row.warningReferenceNo.lower().find(search.lower()) >= 0 or row.customer.first_name.lower().find(search.lower()) >= 0 or row.customer.first_name.lower().find(search.lower()) >= 0 or str(row.id) == search or str(row.customer.first_name.lower()+' '+row.customer.last_name.lower()).find(search.lower()) >= 0 or 'AD'+str(row.id) == search:
                           data_temp.append(row)
                      data = data_temp
