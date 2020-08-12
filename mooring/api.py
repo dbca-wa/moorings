@@ -2779,8 +2779,9 @@ class AdmissionsBookingViewSet(viewsets.ModelViewSet):
                  if type(cd['customer__first_name']) == str and type(cd['customer__last_name']) == str:
                      print (cd['id'])
                      print (cd['customer__first_name'])
-                     print (cd['customer__last_name'])
-                     ad_details_obj[cd['id']] = {'first': cd['customer__first_name'],'last': cd['customer__last_name']}
+                     last_name = cd['customer__last_name']
+                     print (cd['customer__last_name'].encode('utf-8'))
+                     ad_details_obj[cd['id']] = {'first': cd['customer__first_name'].encode('utf-8'),'last': cd['customer__last_name'].encode('utf-8')}
                  else:
                      print ("Not a Str :"+str(cd['id']))
                      ad_details_obj[cd['id']] = {'first': 'Not a String('+str(cd['id'])+')','last': 'Not a String('+str(cd['id'])+')'}
