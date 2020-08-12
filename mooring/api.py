@@ -2777,7 +2777,9 @@ class AdmissionsBookingViewSet(viewsets.ModelViewSet):
             for cd in ad_details:
                  broken_customer_id = cd['id']
                  if type(cd['customer__first_name']) == str and type(cd['customer__last_name']) == str:
-                     print (str(cd['customer__first_name'])+' '+str(cd['customer__last_name']))
+                     print (cd['id'])
+                     print (cd['customer__first_name'])
+                     print (cd['customer__last_name'])
                      ad_details_obj[cd['id']] = {'first': cd['customer__first_name'],'last': cd['customer__last_name']}
                  else:
                      print ("Not a Str :"+str(cd['id']))
