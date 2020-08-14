@@ -3212,7 +3212,10 @@ class BookingViewSet(viewsets.ModelViewSet):
                 print("MLINE 1.08.001", datetime.now().strftime("%d/%m/%Y %H:%M:%S"))
                 if show_row is True:
                     bk_list={}
-
+                    get_property_cache = booking.get_property_cache()
+                    if 'active_invoices' not in get_property_cache or 'invoices' not in get_property_cache:
+                        get_property_cache = booking.update_property_cache()
+                    print("MLINE 1.08.01", datetime.now().strftime("%d/%m/%Y %H:%M:%S"))
                     booking_editable = False
                     if is_staff is True:
                         booking_editable = True
@@ -3222,17 +3225,13 @@ class BookingViewSet(viewsets.ModelViewSet):
                     print("MLINE 1.08.02", datetime.now().strftime("%d/%m/%Y %H:%M:%S"))
                     bk_list['editable'] = booking_editable
                     bk_list['id'] = booking.id
-
+                   
                     if booking.booking_type == 4:
                         bk_list['status'] = 'Cancelled'
                     else:
-                        bk_list['status'] = booking.status
+                        bk_list['status'] = get_property_cache['status']
                     #booking_invoices= booking.invoices.all()
                     print("MLINE 1.08.03", datetime.now().strftime("%d/%m/%Y %H:%M:%S"))
-                    get_property_cache = booking.get_property_cache()
-                    print("MLINE 1.08.1", datetime.now().strftime("%d/%m/%Y %H:%M:%S"))
-                    if 'active_invoices' not in get_property_cache or 'invoices' not in get_property_cache:
-                          get_property_cache = booking.update_property_cache()
 
                     bk_list['booking_type'] = booking.booking_type
                     bk_list['has_history'] = 0 #booking.has_history
