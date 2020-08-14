@@ -1398,7 +1398,7 @@ class Booking(models.Model):
         self.property_cache['cancellation_reason'] = self.cancellation_reason
         self.property_cache['paid'] = self.paid
         self.property_cache['invoices'] = [i.invoice_reference for i in self.invoices.all()]
-
+        self.property_cache['active_invoices'] = [i.invoice_reference for i in self.invoices.all() if i.active]
         if save is True:
            self.save()
         return self.property_cache
