@@ -163,7 +163,7 @@ class BookingAdmin(admin.ModelAdmin):
     ordering = ('-id',)
     search_fileds = ('arrival','departure')
     list_filter = ('id','arrival','departure','mooringarea')
-    readonly_fields=('created',)
+    readonly_fields=('created','property_cache',)
     inlines = [BookingInvoiceInline,MooringsiteBookingInline]
 
     def has_add_permission(self, request, obj=None):
