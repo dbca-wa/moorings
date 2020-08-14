@@ -1375,6 +1375,33 @@ class Booking(models.Model):
     old_booking = models.ForeignKey('Booking', null=True, blank=True)
     admission_payment = models.ForeignKey('AdmissionsBooking', null=True, blank=True)
     override_lines = JSONField(null=True, blank=True, default={})
+    property_cache = JSONField(null=True, blank=True, default={})
+
+
+    def save(self, *args,**kwargs):
+        self.update_property_cache(False)
+        super(Booking,self).save(*args,**kwargs)
+
+    def get_property_cache(self):
+        if len(self.property_cache) == 0:
+            self.update_property_cache()
+        return self.property_cache
+
+    def update_property_cache(self, save=True):
+        self.property_cache['amount_paid'] = str(self.amount_paid)
+        self.property_cache['refund_status'] = self.refund_status
+        self.property_cache['outstanding'] = str(self.outstanding)
+        self.property_cache['status'] = self.status
+        self.property_cache['invoice_status'] = self.invoice_status
+        self.property_cache['has_history'] = self.has_history
+        self.property_cache['vehicle_payment_status'] = self.vehicle_payment_status
+        self.property_cache['cancellation_reason'] = self.cancellation_reason
+        self.property_cache['paid'] = self.paid
+        self.property_cache['invoices'] = [i.invoice_reference for i in self.invoices.all()]
+
+        if save is True:
+           self.save()
+        return self.property_cache
 
     # Properties
     # =================================
@@ -1766,6 +1793,13 @@ class BookingInvoice(models.Model):
  
     def __str__(self):
         return 'Booking {} : Invoice #{}'.format(self.id,self.invoice_reference)
+
+    def save(self, *args,**kwargs):
+        super(BookingInvoice,self).save(*args,**kwargs)
+        print ("COMPLETED POST CREATE")
+        self.booking.update_property_cache()
+
+
 
     # Properties
     # ==================
