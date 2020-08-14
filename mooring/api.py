@@ -3225,18 +3225,19 @@ class BookingViewSet(viewsets.ModelViewSet):
                     else:
                         bk_list['status'] = booking.status
                     booking_invoices= booking.invoices.all()
+                    get_property_cache = booking.get_property_cache()
                     bk_list['booking_type'] = booking.booking_type
                     bk_list['has_history'] = 0 #booking.has_history
                     bk_list['cost_total'] = booking.cost_total
-                    bk_list['amount_paid'] = booking.amount_paid
-                    bk_list['invoice_status'] = booking.invoice_status
-                    bk_list['vehicle_payment_status'] = booking.vehicle_payment_status
-                    bk_list['refund_status'] = booking.refund_status
+                    bk_list['amount_paid'] = get_property_cache['amount_paid'] #booking.amount_paid
+                    bk_list['invoice_status'] = get_property_cache['invoice_status'] #booking.invoice_status
+                    bk_list['vehicle_payment_status'] = get_property_cache['vehicle_payment_status'] #booking.vehicle_payment_status
+                    bk_list['refund_status'] = get_property_cache['refund_status'] #booking.refund_status
                     bk_list['is_canceled'] = 'Yes' if booking.is_canceled else 'No'
                     bk_list['cancelation_reason'] = booking.cancellation_reason
                     bk_list['canceled_by'] = booking.canceled_by.get_full_name() if booking.canceled_by else ''
                     bk_list['cancelation_time'] = booking.cancelation_time if booking.cancelation_time else ''
-                    bk_list['paid'] = booking.paid
+                    bk_list['paid'] = get_property_cache['paid'] #booking.paid
                     bk_list['invoices'] = [i.invoice_reference for i in booking_invoices]
                     bk_list['active_invoices'] = [ i.invoice_reference for i in booking_invoices if i.active]
                     bk_list['guests'] = booking.guests
