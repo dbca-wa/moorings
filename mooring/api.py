@@ -3118,6 +3118,7 @@ class BookingViewSet(viewsets.ModelViewSet):
             if length != 'all': 
                 rowcountend = int(start) + int(length)
             for booking in booking_query:
+                print("LINE 1.06.1", datetime.now().strftime("%d/%m/%Y %H:%M:%S"))
                 msb_list = []
                 in_mg = False
                 skip_row = False
@@ -3152,7 +3153,7 @@ class BookingViewSet(viewsets.ModelViewSet):
                             if int(mug['moorings']) == int(bitem['mooringarea_id']):
                                 in_mg = True 
 
-                #print("MLINE 1.07", datetime.now().strftime("%d/%m/%Y %H:%M:%S"))
+                print("MLINE 1.07", datetime.now().strftime("%d/%m/%Y %H:%M:%S"))
                 # If user not in mooring group than skip
                 if in_mg is False:
                    continue
@@ -3193,7 +3194,7 @@ class BookingViewSet(viewsets.ModelViewSet):
                           else:
                                skip_row = True
 
-                #print("MLINE 1.08", datetime.now().strftime("%d/%m/%Y %H:%M:%S"))
+                print("MLINE 1.08", datetime.now().strftime("%d/%m/%Y %H:%M:%S"))
                 if skip_row is True:
                     continue
                 recordFilteredCount = recordFilteredCount + 1
@@ -3226,7 +3227,7 @@ class BookingViewSet(viewsets.ModelViewSet):
                         bk_list['status'] = booking.status
                     #booking_invoices= booking.invoices.all()
                     get_property_cache = booking.get_property_cache()
-
+                    print("MLINE 1.08.1", datetime.now().strftime("%d/%m/%Y %H:%M:%S"))
                     if 'active_invoices' not in get_property_cache or 'invoices' not in get_property_cache:
                           get_property_cache = booking.update_property_cache()
 
@@ -3251,7 +3252,7 @@ class BookingViewSet(viewsets.ModelViewSet):
                     vessel_weight = 0
                     vessel_size = 0
                     vessel_draft = 0
-
+                    print("MLINE 1.08.2", datetime.now().strftime("%d/%m/%Y %H:%M:%S")
                     if 'vessel_beam' in booking.details:
                          vessel_beam = booking.details['vessel_beam']
                     if 'vessel_weight' in booking.details:
@@ -3265,13 +3266,14 @@ class BookingViewSet(viewsets.ModelViewSet):
 
  
                     bk_list['vessel_details'] = { 'vessel_beam': vessel_beam, 'vessel_weight': vessel_weight, 'vessel_size': vessel_size, 'vessel_draft': vessel_draft, } 
-
+                    print("MLINE 1.08.3", datetime.now().strftime("%d/%m/%Y %H:%M:%S")
                     #bk_list['campsite_names'] = booking.campsite_name_list
                     bk_list['regos'] = [{'vessel':''}] 
                     for r in booking.regos.all():
                           if r.type == 'vessel':
                              bk_list['regos']=  [{r.type: r.rego}]
                     bk_list['booking_phone_number'] = ''
+                    print("MLINE 1.08.4", datetime.now().strftime("%d/%m/%Y %H:%M:%S")
                     if booking.details: 
                          bk_list['firstname'] = booking.details.get('first_name','')
                          bk_list['lastname'] = booking.details.get('last_name','')
