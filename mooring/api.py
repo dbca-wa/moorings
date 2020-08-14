@@ -3209,7 +3209,7 @@ class BookingViewSet(viewsets.ModelViewSet):
                         show_row = True
                     if rowcount > rowcountend:
                         show_row = False
- 
+                print("MLINE 1.08.001", datetime.now().strftime("%d/%m/%Y %H:%M:%S"))
                 if show_row is True:
                     bk_list={}
 
@@ -3219,7 +3219,7 @@ class BookingViewSet(viewsets.ModelViewSet):
                     if is_superuser is True:
                         booking_editable = True
 
-
+                    print("MLINE 1.08.02", datetime.now().strftime("%d/%m/%Y %H:%M:%S"))
                     bk_list['editable'] = booking_editable
                     bk_list['id'] = booking.id
 
@@ -3228,6 +3228,7 @@ class BookingViewSet(viewsets.ModelViewSet):
                     else:
                         bk_list['status'] = booking.status
                     #booking_invoices= booking.invoices.all()
+                    print("MLINE 1.08.03", datetime.now().strftime("%d/%m/%Y %H:%M:%S"))
                     get_property_cache = booking.get_property_cache()
                     print("MLINE 1.08.1", datetime.now().strftime("%d/%m/%Y %H:%M:%S"))
                     if 'active_invoices' not in get_property_cache or 'invoices' not in get_property_cache:
