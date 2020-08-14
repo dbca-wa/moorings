@@ -3252,7 +3252,7 @@ class BookingViewSet(viewsets.ModelViewSet):
                     vessel_weight = 0
                     vessel_size = 0
                     vessel_draft = 0
-                    print("MLINE 1.08.2", datetime.now().strftime("%d/%m/%Y %H:%M:%S")
+                    print("MLINE 1.08.2", datetime.now().strftime("%d/%m/%Y %H:%M:%S"))
                     if 'vessel_beam' in booking.details:
                          vessel_beam = booking.details['vessel_beam']
                     if 'vessel_weight' in booking.details:
@@ -3266,14 +3266,14 @@ class BookingViewSet(viewsets.ModelViewSet):
 
  
                     bk_list['vessel_details'] = { 'vessel_beam': vessel_beam, 'vessel_weight': vessel_weight, 'vessel_size': vessel_size, 'vessel_draft': vessel_draft, } 
-                    print("MLINE 1.08.3", datetime.now().strftime("%d/%m/%Y %H:%M:%S")
+                    print("MLINE 1.08.3", datetime.now().strftime("%d/%m/%Y %H:%M:%S"))
                     #bk_list['campsite_names'] = booking.campsite_name_list
                     bk_list['regos'] = [{'vessel':''}] 
                     for r in booking.regos.all():
                           if r.type == 'vessel':
                              bk_list['regos']=  [{r.type: r.rego}]
                     bk_list['booking_phone_number'] = ''
-                    print("MLINE 1.08.4", datetime.now().strftime("%d/%m/%Y %H:%M:%S")
+                    print("MLINE 1.08.4", datetime.now().strftime("%d/%m/%Y %H:%M:%S"))
                     if booking.details: 
                          bk_list['firstname'] = booking.details.get('first_name','')
                          bk_list['lastname'] = booking.details.get('last_name','')
