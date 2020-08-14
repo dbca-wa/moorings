@@ -3060,8 +3060,10 @@ class BookingViewSet(viewsets.ModelViewSet):
     def list(self, request, *args, **kwargs):
         from django.db import connection, transaction
         try:
-
+            
             print("MLINE 1.01", datetime.now().strftime("%d/%m/%Y %H:%M:%S"))
+            is_staff = request.user.is_staff
+            is_superuser = request.user.is_superuser
             #search = request.GET.get('search[value]')
             search = request.GET.get('search_keyword')
             draw = request.GET.get('draw') if request.GET.get('draw') else None
@@ -3153,7 +3155,7 @@ class BookingViewSet(viewsets.ModelViewSet):
                             if int(mug['moorings']) == int(bitem['mooringarea_id']):
                                 in_mg = True 
 
-                print("MLINE 1.07", datetime.now().strftime("%d/%m/%Y %H:%M:%S"))
+                #print("MLINE 1.07", datetime.now().strftime("%d/%m/%Y %H:%M:%S"))
                 # If user not in mooring group than skip
                 if in_mg is False:
                    continue
@@ -3212,9 +3214,9 @@ class BookingViewSet(viewsets.ModelViewSet):
                     bk_list={}
 
                     booking_editable = False
-                    if request.user.is_staff is True:
+                    if is_staff is True:
                         booking_editable = True
-                    if request.user.is_superuser is True:
+                    if is_superuser is True:
                         booking_editable = True
 
 
