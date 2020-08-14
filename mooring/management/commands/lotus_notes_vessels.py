@@ -120,13 +120,13 @@ class Command(BaseCommand):
                 # If a vessel is already existing with the same rego, do some comparisons and update those values.
                 # Otherwise just create a new vessel object and save it.
                 if exists:
-                    if exists[0].vessel_size < record[fields[1]]:
+                    if float(exists[0].vessel_size) != float(record[fields[1]]):
                         exists[0].vessel_size = record[fields[1]]
-                    if exists[0].vessel_draft < record[fields[2]]:
+                    if float(exists[0].vessel_draft) != float(record[fields[2]]):
                         exists[0].vessel_draft = record[fields[2]]
-                    if exists[0].vessel_beam < record[fields[3]]:
+                    if float(exists[0].vessel_beam) != float(record[fields[3]]):
                         exists[0].vessel_beam = record[fields[3]]
-                    if exists[0].vessel_weight < record[fields[4]]:
+                    if float(exists[0].vessel_weight) != float(record[fields[4]]):
                         exists[0].vessel_weight = record[fields[4]]
                     exists[0].sticker_l = record[fields[5]]    
                     exists[0].sticker_au = record[fields[6]]
