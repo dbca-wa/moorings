@@ -9,7 +9,7 @@ from django.conf import settings
 from mooring.models import Booking, BookingInvoice, OutstandingBookingRecipient, BookingHistory, AdmissionsBooking, AdmissionsBookingInvoice
 from ledger.payments.models import OracleParser,OracleParserInvoice, CashTransaction, BpointTransaction, BpayTransaction,Invoice, TrackRefund
 from mooring import models
-from datetime import datetime, timedelta
+from datetime import timedelta
 from django.db.models import Q, Min
 
 def outstanding_bookings():
