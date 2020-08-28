@@ -239,6 +239,7 @@ class MooringArea(models.Model):
     def save(self,*args,**kwargs):
         cache.delete('marina')
         cache.delete('marina_dt')
+        cache.delete('MooringAreaMapViewSet')
         super(MooringArea,self).save(*args,**kwargs)
 
     class Meta:

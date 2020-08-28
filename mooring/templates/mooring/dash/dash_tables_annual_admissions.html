@@ -84,8 +84,14 @@
       </div>
       <div class="modal-body">
 	<div class="col-lg-12">
+                <div id='sticker-error'>
+
+	            </div>
+
+        </div>
+	<div class="col-lg-12">
 		<label for="">Sticker No for Vessel <span id='sticker_rego_no'></span></label>
-               <input value="" id="sticker_no" class="form-control" type="text" placeholder="Sticker No">
+               <input value="" id="sticker_no" class="form-control" type="text" placeholder="Sticker No" minlength='7' maxlength='7'>
 	       &nbsp;
 	</div>
         <div class="col-lg-12">
@@ -290,6 +296,14 @@
 	                var booking_id = annual_bookings.var.selected_booking_id;
                         var sticker_no = $('#sticker_no').val();
 			var sticker_comment = $('#sticker_comment').val();
+			if (sticker_no.length != 7) {
+			      $('#sticker-error').html("<div class='alert alert-error'>ERROR: Sticker number must be 7 digits</div>");
+			      return false;
+			}
+			if (/\D/g.test(sticker_no)) {
+                              $('#sticker-error').html("<div class='alert alert-error'>ERROR: Sticker number can only contain numbers and be 7 digits in length.</div>");
+			      return false;
+			}
                         $.ajax({
                                   type: "GET",
                                   url: "/api/booking/update_sticker_admission_booking/",

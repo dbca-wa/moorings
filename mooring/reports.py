@@ -50,7 +50,7 @@ def annual_admissions_booking_report(aadata):
         bookings = []
         today = datetime.date.today()
         strIO = StringIO()
-        fieldnames = ['ID','First Name','Last Name','Mobile','Phone','Vessel Rego','Vessel Length','Sticker No','Year','Status','Booking Period','Postal Address 1','Postal Address 2','Suburb','Post Code','State','Country' ]
+        fieldnames = ['ID','First Name','Last Name','Email','Mobile','Phone','Vessel Rego','Vessel Length','Sticker No','Year','Status','Booking Period','Postal Address 1','Postal Address 2','Suburb','Post Code','State','Country' ]
         writer = csv.writer(strIO)
         writer.writerow(fieldnames)
         for o in aadata:
@@ -67,11 +67,15 @@ def annual_admissions_booking_report(aadata):
             mobile = ''
             sticker_no = ''
             suburb = ''
+            first_name = ''
+            last_name  = ''
+            email = ''
             if o['sticker_no']:
                  sticker_no = o['sticker_no']
             if o['details']:
                 phone = o['details']['phone']
                 mobile = o['details']['mobile']
+                email = o['details']['email']
                 vessel_length = o['details']['vessel_length']
                 vessel_name = o['details']['vessel_name']
                 vessel_rego = o['details']['vessel_rego']
@@ -84,8 +88,17 @@ def annual_admissions_booking_report(aadata):
                    post_code = o['details']['post_code']         
                 if 'suburb' in o['details']:
                    suburb = o['details']['suburb'] 
+                if 'first_name' in  o['details']:
+                   first_name = o['details']['first_name']
+                else:
+                   first_name = o['customer']['first_name']
+
+                if 'last_name' in o['details']:
+                   last_name = o['details']['last_name']
+                else:
+                   last_name = o['customer']['last_name']
                         
-            writer.writerow(['AA'+str(o['id']),o['customer']['first_name'],o['customer']['last_name'],mobile,phone,vessel_rego,vessel_length,sticker_no,o['year'],o['status'],o['annual_booking_period_group_name'],postal_address_line_1,postal_address_line_2,suburb,post_code,state,country])
+            writer.writerow(['AA'+str(o['id']),first_name,last_name,email,mobile,phone,vessel_rego,vessel_length,sticker_no,o['year'],o['status'],o['annual_booking_period_group_name'],postal_address_line_1,postal_address_line_2,suburb,post_code,state,country])
 
         strIO.flush()
         strIO.seek(0)

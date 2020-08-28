@@ -445,6 +445,20 @@ class MooringAreaMapViewSet(viewsets.ReadOnlyModelViewSet):
     serializer_class = MooringAreaMapSerializer
     permission_classes = []
 
+
+def mooring_map_view(request, *args, **kwargs):
+     from django.core import serializers
+     dumped_data = cache.get('MooringAreaMapViewSet')
+     if dumped_data is None:
+         print ("Recreating Campground Cache")
+         queryset = MooringArea.objects.exclude(mooring_type=3)
+         queryset_obj = serializers.serialize('json', queryset)
+         serializer_camp = MooringAreaMapSerializer(data=queryset, many=True)
+         serializer_camp.is_valid()
+         dumped_data = geojson.dumps(serializer_camp.data)
+         cache.set('MooringAreaMapViewSet', dumped_data,  3600)
+     return HttpResponse(dumped_data, content_type='application/json')
+
 class MarineParksRegionMapViewSet(viewsets.ReadOnlyModelViewSet):
 #    queryset = MooringArea.objects.values('park_id__name','park_id__wkb_geometry').annotate(total=Count('park'))
     queryset = MooringArea.objects.values('park__district__region','park__district__region__name','park__district__region__wkb_geometry').annotate(total=Count('park__district__region'))
@@ -464,7 +478,6 @@ class MooringAreaMapFilterViewSet(viewsets.ReadOnlyModelViewSet):
 
     def list(self, request, *args, **kwargs):
 
-
         data = {
             "arrival" : request.GET.get('arrival', None),
             "departure" : request.GET.get('departure', None),
@@ -475,114 +488,119 @@ class MooringAreaMapFilterViewSet(viewsets.ReadOnlyModelViewSet):
             "avail": request.GET.get('gear_type', 'all'),
             "pen_type": request.GET.get('pen_type', 'all')
         }
- 
-        serializer = MooringAreaMooringsiteFilterSerializer(data=data)
+        data_hash = hashlib.md5(str(data).encode('utf-8')).hexdigest()
+        dumped_data = cache.get('MooringAreaMapFilterViewSet'+data_hash)
+        if dumped_data is None:
+             serializer = MooringAreaMooringsiteFilterSerializer(data=data)
 
-        serializer.is_valid(raise_exception=True)
+             serializer.is_valid(raise_exception=True)
 
-        scrubbed = serializer.validated_data
-        context = {}
-        ground_ids = []
-        open_marinas = [] 
-        #Removed from parkstay
-        # filter to the campsites by gear allowed (if specified), else show the lot
-        # if scrubbed['gear_type'] != 'all':
-        #     context = {scrubbed['gear_type']: True}
+             scrubbed = serializer.validated_data
+             context = {}
+             ground_ids = []
+             open_marinas = [] 
+             #Removed from parkstay
+             # filter to the campsites by gear allowed (if specified), else show the lot
+             # if scrubbed['gear_type'] != 'all':
+             #     context = {scrubbed['gear_type']: True}
 
-        # if a date range is set, filter out campgrounds that are unavailable for the whole stretch
-        if scrubbed['arrival'] and scrubbed['departure'] and (scrubbed['arrival'] < scrubbed['departure']):
-            sites = Mooringsite.objects.filter(**context)
-            #ground_ids = utils.get_open_marinas(sites, scrubbed['arrival'], scrubbed['departure'])
+             # if a date range is set, filter out campgrounds that are unavailable for the whole stretch
+             if scrubbed['arrival'] and scrubbed['departure'] and (scrubbed['arrival'] < scrubbed['departure']):
+                 sites = Mooringsite.objects.filter(**context)
+                 #ground_ids = utils.get_open_marinas(sites, scrubbed['arrival'], scrubbed['departure'])
 
-            open_marinas = utils.get_open_marinas(sites, scrubbed['arrival'], scrubbed['departure'])
-            for i in open_marinas:
-                 ground_ids.append(i) 
+                 open_marinas = utils.get_open_marinas(sites, scrubbed['arrival'], scrubbed['departure'])
+                 for i in open_marinas:
+                      ground_ids.append(i) 
+             else:
+                 # show all of the campgrounds with campsites
+                 ground_ids = set((x[0] for x in Mooringsite.objects.filter(**context).values_list('mooringarea')))
+                 # we need to be tricky here. for the default search (all, no timestamps),
+                 # we want to include all of the "campgrounds" that don't have any campsites in the model! (e.g. third party)
+                 if scrubbed['avail'] == 'all':
+                     ground_ids.update((x[0] for x in MooringArea.objects.filter(campsites__isnull=True).values_list('id')))
 
-        else:
-            # show all of the campgrounds with campsites
-            ground_ids = set((x[0] for x in Mooringsite.objects.filter(**context).values_list('mooringarea')))
-            # we need to be tricky here. for the default search (all, no timestamps),
-            # we want to include all of the "campgrounds" that don't have any campsites in the model! (e.g. third party)
-            if scrubbed['avail'] == 'all':
-                ground_ids.update((x[0] for x in MooringArea.objects.filter(campsites__isnull=True).values_list('id')))
+             # If the pen type has been included in filtering and is not 'all' then loop through the sites selected.
+             if scrubbed['pen_type'] != 'all':
+                 sites = Mooringsite.objects.filter(pk__in=ground_ids)
+                 for s in sites:           
+                 # When looping through, if the pen type is not correct, remove it from the list.
+                     i = s.mooringarea
+                     if i.mooring_physical_type != scrubbed['pen_type']:
+                         ground_ids.remove(s.id)
 
-        # If the pen type has been included in filtering and is not 'all' then loop through the sites selected.
-        if scrubbed['pen_type'] != 'all':
-            sites = Mooringsite.objects.filter(pk__in=ground_ids)
-            for s in sites:           
-            # When looping through, if the pen type is not correct, remove it from the list.
-                i = s.mooringarea
-                if i.mooring_physical_type != scrubbed['pen_type']:
-                    ground_ids.remove(s.id)
+             # Filter out for the max period
+             today = date.today()
+             if scrubbed['arrival']:
+                 start_date = scrubbed['arrival']
+             else:
+                 start_date = today
+             if scrubbed['departure']:
+                 end_date = scrubbed['departure']
+             else:
+                 end_date = today + timedelta(days=1)
+             
+             temp_queryset = Mooringsite.objects.filter(id__in=ground_ids).order_by('name')
 
-        # Filter out for the max period
-        today = date.today()
-        if scrubbed['arrival']:
-            start_date = scrubbed['arrival']
-        else:
-            start_date = today
-        if scrubbed['departure']:
-            end_date = scrubbed['departure']
-        else:
-            end_date = today + timedelta(days=1)
-        
-        temp_queryset = Mooringsite.objects.filter(id__in=ground_ids).order_by('name')
-
-        queryset = []
-        for q in temp_queryset:
-            # Get the current stay history
-            stay_history = MooringAreaStayHistory.objects.filter(
-                            Q(range_start__lte=start_date,range_end__gte=start_date)|# filter start date is within period
-                            Q(range_start__lte=end_date,range_end__gte=end_date)|# filter end date is within period
-                            Q(Q(range_start__gt=start_date,range_end__lt=end_date)&Q(range_end__gt=today)) #filter start date is before and end date after period
-                            ,mooringarea=q.mooringarea)
+             queryset = []
+             for q in temp_queryset:
+                 # Get the current stay history
+                 stay_history = MooringAreaStayHistory.objects.filter(
+                                 Q(range_start__lte=start_date,range_end__gte=start_date)|# filter start date is within period
+                                 Q(range_start__lte=end_date,range_end__gte=end_date)|# filter end date is within period
+                                 Q(Q(range_start__gt=start_date,range_end__lt=end_date)&Q(range_end__gt=today)) #filter start date is before and end date after period
+                                 ,mooringarea=q.mooringarea)
 
 
-            if stay_history:
-                max_days = min([x.max_days for x in stay_history])
-            else:
-                max_days = settings.PS_MAX_BOOKING_LENGTH
-            if (end_date - start_date).days <= max_days:         
-                row = {}
-                row['id'] = q.mooringarea.id
-                if q.id in open_marinas:
-                    row['avail2'] = open_marinas[q.id]
-                #row['avail'] = 'full'
-                if q.mooringarea.mooring_type == 1:
-                        row['avail'] = 'full'
-                else:
+                 if stay_history:
+                     max_days = min([x.max_days for x in stay_history])
+                 else:
+                     max_days = settings.PS_MAX_BOOKING_LENGTH
+                 if (end_date - start_date).days <= max_days:         
+                     row = {}
+                     row['id'] = q.mooringarea.id
                      if q.id in open_marinas:
+                         row['avail2'] = open_marinas[q.id]
+                     #row['avail'] = 'full'
+                     if q.mooringarea.mooring_type == 1:
+                             row['avail'] = 'full'
+                     else:
+                          if q.id in open_marinas:
 
-                         if int(open_marinas[q.id]['closed_periods']) == 0 and int(open_marinas[q.id]['open_periods']) > 0:
-                            row['avail'] = 'free'
-                         elif int(open_marinas[q.id]['open_periods']) == 0:
-                            row['avail'] = 'full'
-                         elif int(open_marinas[q.id]['closed_periods']) > 0 and int(open_marinas[q.id]['open_periods']) > 0:
-                            row['avail'] = 'partial'
+                              if int(open_marinas[q.id]['closed_periods']) == 0 and int(open_marinas[q.id]['open_periods']) > 0:
+                                 row['avail'] = 'free'
+                              elif int(open_marinas[q.id]['open_periods']) == 0:
+                                 row['avail'] = 'full'
+                              elif int(open_marinas[q.id]['closed_periods']) > 0 and int(open_marinas[q.id]['open_periods']) > 0:
+                                 row['avail'] = 'partial'
 
-                queryset.append(row)
-        
-        # Filter based on the availability
-        query = []
-        if scrubbed['avail'] != 'all':
-            for q in queryset:
-                mooring_type = MooringArea.objects.get(id=q['id']).mooring_type
-                if scrubbed['avail'] == 'rental-available' and q['avail'] not in ['free', 'partial']:
-                    pass
-                elif scrubbed['avail'] == 'rental-notavailable' and (q['avail'] not in ['full'] or mooring_type == 2):
-                        pass
-                elif scrubbed['avail'] == 'public-notbookable':
-                    if mooring_type != 2:
-                        pass
-                    else:
-                        query.append(q)
-                else:
-                    query.append(q)
-        else:
-            query = queryset
-                
+                     queryset.append(row)
+             
+             # Filter based on the availability
+             query = []
+             if scrubbed['avail'] != 'all':
+                 for q in queryset:
+                     mooring_type = MooringArea.objects.get(id=q['id']).mooring_type
+                     if scrubbed['avail'] == 'rental-available' and q['avail'] not in ['free', 'partial']:
+                         pass
+                     elif scrubbed['avail'] == 'rental-notavailable' and (q['avail'] not in ['full'] or mooring_type == 2):
+                             pass
+                     elif scrubbed['avail'] == 'public-notbookable':
+                         if mooring_type != 2:
+                             pass
+                         else:
+                             query.append(q)
+                     else:
+                         query.append(q)
+             else:
+                 query = queryset
+             serializer = self.get_serializer(queryset, many=True)
+             dumped_data = serializer.data
+             cache.set('MooringAreaMapFilterViewSet'+data_hash, dumped_data, 3600)
+
 #        serializer = self.get_serializer(queryset, many=True)
-        return HttpResponse(json.dumps(query), content_type='application/json')
+        return Response(dumped_data)
+        return HttpResponse(dumped_data, content_type='application/json')
 #        return Response(serializer.data)
 
 def current_booking(request, *args, **kwargs):
@@ -4781,6 +4799,9 @@ def get_annual_admission_booking(request):
        else:
            raise ValidationError('Permission Denied')
        mooring_groups = MooringAreaGroup.objects.filter(members__in=[request.user,])
+       mg = []
+       for m in mooring_groups:
+            mg.append(m.id)
 
        status = 'success'
        booking_period = request.GET.get('booking_period','')
@@ -4799,80 +4820,81 @@ def get_annual_admission_booking(request):
                 baainvoices_temp[b['booking_annual_admission__id']] = []
            baainvoices_temp[b['booking_annual_admission__id']].append(b['invoice_reference'])
        baa = []
-       baarows = models.BookingAnnualAdmission.objects.filter(Q(booking_type=1) | Q(booking_type=4))
+       baarows = models.BookingAnnualAdmission.objects.filter(Q(booking_type=1) | Q(booking_type=4)).values('id','customer','customer__first_name','customer__last_name','start_dt','expiry_dt','details','booking_type','annual_booking_period_group__id','annual_booking_period_group','annual_booking_period_group__name','override_price','override_reason','override_reason__text','override_reason_info','overridden_by','overridden_by__first_name','overridden_by__last_name','is_canceled','send_invoice','cancellation_reason','cancelation_time','confirmation_sent','created','created_by__first_name','created_by__last_name','canceled_by','canceled_by__first_name','canceled_by__last_name','override_lines','sticker_no','sticker_no_history','booking_type','sticker_no','override_lines','annual_booking_period_group__mooring_group','cost_total')
        for c in baarows:
            appendrow = False
-           start_dt = datetime.strptime(str(c.start_dt.strftime('%Y-%m-%d %H:%M:%S')), '%Y-%m-%d %H:%M:%S')
-           expiry_dt = datetime.strptime(str(c.expiry_dt.strftime('%Y-%m-%d %H:%M:%S')), '%Y-%m-%d %H:%M:%S')
+           start_dt = datetime.strptime(str(c['start_dt'].strftime('%Y-%m-%d %H:%M:%S')), '%Y-%m-%d %H:%M:%S')
+           expiry_dt = datetime.strptime(str(c['expiry_dt'].strftime('%Y-%m-%d %H:%M:%S')), '%Y-%m-%d %H:%M:%S')
 
            row = {}
-           row['id'] = c.id
-           row['customer_name'] = c.customer.first_name+' '+c.customer.last_name
+           row['id'] = c['id']
+           row['customer_name'] = c['customer__first_name']+' '+c['customer__last_name']
            row['customer'] = {}
-           if c.customer:
-              row['customer'] = {"fullname": c.customer.first_name+' '+c.customer.last_name, 'first_name' : c.customer.first_name, 'last_name' : c.customer.last_name}
-           row['start_dt'] = c.start_dt.strftime('%d/%m/%Y %H:%M %p')
-           row['expiry_dt'] = c.expiry_dt.strftime('%d/%m/%Y %H:%M %p')
-           row['details'] = c.details
-           row['booking_type'] = c.booking_type
-           row['annual_booking_period_group'] = c.annual_booking_period_group.id
+           if c['customer']:
+              row['customer'] = {"fullname": c['customer__first_name']+' '+c['customer__last_name'], 'first_name' : c['customer__first_name'], 'last_name' : c['customer__last_name']}
+           row['start_dt'] = c['start_dt'].strftime('%d/%m/%Y %H:%M %p')
+           row['expiry_dt'] = c['expiry_dt'].strftime('%d/%m/%Y %H:%M %p')
+           row['details'] = c['details']
+
+           row['booking_type'] = c['booking_type']
+           row['annual_booking_period_group'] = c['annual_booking_period_group__id']
            row['annual_booking_period_group_name'] = ''
-           if c.annual_booking_period_group:
-               row['annual_booking_period_group_name'] = c.annual_booking_period_group.name
-           row['cost_total'] = str(c.cost_total)
-           row['year'] = c.start_dt.strftime('%Y')+'/'+c.expiry_dt.strftime('%y')
+           if c['annual_booking_period_group']:
+               row['annual_booking_period_group_name'] = c['annual_booking_period_group__name']
+           row['cost_total'] = str(c['cost_total'])
+           row['year'] = c['start_dt'].strftime('%Y')+'/'+c['expiry_dt'].strftime('%y')
            row['override_price'] = ''
-           if c.override_price is not None:
-              row['override_price'] = str(c.override_price)
+           if c['override_price'] is not None:
+              row['override_price'] = str(c['override_price'])
            row['override_reason'] = ''
-           if c.override_reason:
-               row['override_reason'] = c.override_reason.text
+           if c['override_reason']:
+               row['override_reason'] = c['override_reason__text']
            row['override_reason_info'] = ''
-           if c.override_reason_info is not None:
-               row['override_reason_info'] = c.override_reason_info
+           if c['override_reason_info'] is not None:
+               row['override_reason_info'] = c['override_reason_info']
            row['overridden_by'] = {"fullname":'', 'first_name' : '', 'last_name' : ''}
-           if c.overridden_by:
-               row['overridden_by'] = {"fullname": c.overridden_by.first_name+' '+c.overridden_by.last_name, 'first_name' : c.overridden_by.first_name, 'last_name' : c.overridden_by.last_name}
-           row['is_canceled'] = c.is_canceled
-           row['send_invoice'] = c.send_invoice
+           if c['overridden_by']:
+               row['overridden_by'] = {"fullname": c['overridden_by__first_name']+' '+c['overridden_by__last_name'], 'first_name' : c['overridden_by__first_name'], 'last_name' : c['overridden_by__last_name']}
+           row['is_canceled'] = c['is_canceled']
+           row['send_invoice'] = c['send_invoice']
            row['cancellation_reason'] =  ''
-           if c.cancellation_reason is not None:
-               row['cancellation_reason'] = c.cancellation_reason
+           if c['cancellation_reason'] is not None:
+               row['cancellation_reason'] = c['cancellation_reason']
            row['cancelation_time'] = ''
-           if c.cancelation_time:
-               cancelation_time = c.cancelation_time+timedelta(hours=8)
+           if c['cancelation_time']:
+               cancelation_time = c['cancelation_time']+timedelta(hours=8)
                row['cancelation_time'] = cancelation_time.strftime('%d/%m/%Y %H:%M %p')
-           row['confirmation_sent'] = c.confirmation_sent
-           created= c.created+timedelta(hours=8)
+           row['confirmation_sent'] = c['confirmation_sent']
+           created= c['created']+timedelta(hours=8)
            row['created'] = created.strftime('%d/%m/%Y %H:%M %p')
-           row['created_by'] = {"fullname": c.created_by.first_name+' '+c.created_by.last_name, 'first_name' : c.created_by.first_name, 'last_name' : c.created_by.last_name} 
+           row['created_by'] = {"fullname": c['created_by__first_name']+' '+c['created_by__last_name'], 'first_name' : c['created_by__first_name'], 'last_name' : c['created_by__last_name']} 
            row['canceled_by'] = {"fullname":'', 'first_name' : '', 'last_name' : ''}
-           if c.canceled_by:
-               row['canceled_by'] = {"fullname": c.canceled_by.first_name+' '+c.canceled_by.last_name, 'first_name' : c.canceled_by.first_name, 'last_name' : c.canceled_by.last_name}
-           row['override_lines'] = c.override_lines
-           row['sticker_no'] = c.sticker_no
+           if c['canceled_by']:
+               row['canceled_by'] = {"fullname": c['canceled_by__first_name']+' '+c['canceled_by__last_name'], 'first_name' : c['canceled_by__first_name'], 'last_name' : c['canceled_by__last_name']}
+           row['override_lines'] = c['override_lines']
+           row['sticker_no'] = c['sticker_no']
            row['sticker_no_history'] = []
-           for j in c.sticker_no_history: 
+           for j in c['sticker_no_history']: 
                j['updated_friendly'] = datetime.strptime(j['updated'], '%Y-%m-%d %H:%M:%S').strftime('%d/%m/%Y %H:%M %p')
                row['sticker_no_history'].append(j)
-           if c.id in baainvoices_temp:
-               row['invoices'] = baainvoices_temp[c.id]
-           if c.booking_type == 1:
+           if c['id'] in baainvoices_temp:
+               row['invoices'] = baainvoices_temp[c['id']]
+           if c['booking_type'] == 1:
                row['status'] = 'current'
                if expiry_dt < nowdt:
                    row['status'] = 'expired'
                if start_dt > nowdt:
                    row['status'] = 'future'
 
-               if c.sticker_no is not None:
+               if c['sticker_no'] is not None:
 
-                  if len(c.sticker_no) > 0:
+                  if len(c['sticker_no']) > 0:
                      pass
                   else:
                      row['status'] = 'awaiting sticker'
                else:
                    row['status'] = 'awaiting sticker'
-           if c.booking_type == 4:
+           if c['booking_type'] == 4:
                row['status'] = 'cancelled'
 
                 
@@ -4880,7 +4902,7 @@ def get_annual_admission_booking(request):
            if booking_period == 'ALL':
                appendrow = True
            else:
-                if c.annual_booking_period_group.id == int(booking_period):
+                if c['annual_booking_period_group__id'] == int(booking_period):
                      appendrow = True
            # booking status filter
            if appendrow is True:
@@ -4913,16 +4935,16 @@ def get_annual_admission_booking(request):
                        if 'value' in sh:
                            if keyword.lower() in sh['value'].lower():
                                appendrow = True
-               if keyword == str(c.id):
+               if keyword == str(c['id']):
                    appendrow = True
-               if keyword.lower() == 'aa'+str(c.id):
+               if keyword.lower() == 'aa'+str(c['id']):
                    appendrow = True
-               if c.sticker_no:
-                   if keyword.lower() in c.sticker_no.lower():
+               if c['sticker_no']:
+                   if keyword.lower() in c['sticker_no'].lower():
                       appendrow = True
 
            if appendrow is True:
-                if c.annual_booking_period_group.mooring_group in mooring_groups:
+                if c['annual_booking_period_group__mooring_group'] in mg:
                      baa.append(row)
        data = baa
 
