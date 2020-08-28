@@ -2002,7 +2002,7 @@ class AnnualAdmissionsView(CreateView):
         details['mobile'] = self.request.POST.get('mobile').replace(" ", "")
         details['email'] = self.request.POST.get('email')
         details['confirm_email'] = self.request.POST.get('confirm_email')
-        details['vessel_rego'] = self.request.POST.get('vessel_rego')
+        details['vessel_rego'] = self.request.POST.get('vessel_rego').replace(" ","")
         details['vessel_name'] = self.request.POST.get('vessel_name')
         details['vessel_length'] = self.request.POST.get('vessel_length')
         details['terms'] = self.request.POST.get('terms')
@@ -2016,7 +2016,7 @@ class AnnualAdmissionsView(CreateView):
         self.object.booking_type = 3
         self.object.annual_booking_period_group = abg
         self.object.cost_total = total_cost
-        self.object.rego_no = self.request.POST.get('vessel_rego')
+        self.object.rego_no = self.request.POST.get('vessel_rego').replace(" ","")
         self.object.details = details
         override_lines = None
 

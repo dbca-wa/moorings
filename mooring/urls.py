@@ -9,7 +9,7 @@ from ledger.urls import urlpatterns as ledger_patterns
 
 # API patterns
 router = routers.DefaultRouter()
-router.register(r'mooring_map', api.MooringAreaMapViewSet)
+#router.register(r'mooring_map', api.MooringAreaMapViewSet)
 #router.register(r'current_booking', api.CurrentBookingViewSet)
 router.register(r'mooring_map_filter', api.MooringAreaMapFilterViewSet)
 router.register(r'marine_parks_map', api.MarineParksMapViewSet)
@@ -69,6 +69,7 @@ api_patterns = [
     url(r'^api/booking/update_sticker_admission_booking/', api.update_sticker_admission_booking, name='update_sticker_admission_booking'),
     url(r'^api/get_vessel_info/', api.get_vessel_info, name='get_vessel_info'),
     url(r'^api/create_booking', api.create_booking, name='create_booking'),
+    url(r'^api/mooring_map/', api.mooring_map_view, name='mooring_map_api'),
     url(r'^api/create_admissions_booking', api.create_admissions_booking, name="create_admissions_booking"),
     url(r'api/get_confirmation/(?P<booking_id>[0-9]+)/$', api.get_confirmation, name='get_confirmation'),
     url(r'^api/get_aa_letter/(?P<booking_id>[0-9]+)/$', api.get_annual_admission_letter, name='get_aa_letter'),
