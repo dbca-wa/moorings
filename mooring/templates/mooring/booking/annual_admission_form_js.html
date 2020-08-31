@@ -62,9 +62,22 @@
 
                         $("#id_vessel_rego").change(function() {
 			     console.log('rego');
+ 		             var vessel_rego = $('#id_vessel_rego').val();
+		             vessel_rego = vessel_rego.toUpperCase();
+		             vessel_rego = vessel_rego.replace(/\s/g,"");
+			     vessel_rego = vessel_rego.replace(/\W/g,"");
+			     $('#id_vessel_rego').val(vessel_rego);
                              var vessel_rego = $('#id_vessel_rego').val();
                              iform.get_vessel_info(vessel_rego);
 			});
+                        $('#id_vessel_rego_confirm').change(function() {
+                                var vessel_rego = $('#id_vessel_rego_confirm').val();
+				vessel_rego = vessel_rego.toUpperCase();
+				vessel_rego = vessel_rego.replace(/\s/g,"");
+				vessel_rego = vessel_rego.replace(/\W/g,"");
+			        $('#id_vessel_rego_confirm').val(vessel_rego);
+			})
+
                         $("#id_booking_period").change(function() {
                               var annual_booking_period_id =$('#id_booking_period').val();
                               var vessel_size = $('#id_vessel_length').val();
