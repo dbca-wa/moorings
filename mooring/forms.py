@@ -139,7 +139,7 @@ class AnnualAdmissionForm(forms.ModelForm):
 
     vessel_rego = forms.CharField(label="Vessel Registration", widget=forms.TextInput(attrs={'class': "form-control"}))
     vessel_rego_confirm = forms.CharField(label="Confirm Vessel Registration", widget=forms.TextInput(attrs={'class': "form-control"}))
-    vessel_name = forms.CharField(label="Vessel Name", widget=forms.TextInput(attrs={'class': "form-control"}))
+    vessel_name = forms.CharField(label="Vessel Name", widget=forms.TextInput(attrs={'required':False, 'class': "form-control"}) , required=False)
     vessel_length = forms.CharField(label="Registered Vessel Length (meters)", widget=forms.TextInput(attrs={'class': "form-control"}))
 
     booking_period = forms.ChoiceField(widget=forms.Select(attrs={'class': "form-control" }))
