@@ -594,8 +594,9 @@ class MooringAreaMapFilterViewSet(viewsets.ReadOnlyModelViewSet):
                          query.append(q)
              else:
                  query = queryset
-             serializer = self.get_serializer(queryset, many=True)
-             dumped_data = serializer.data
+             #serializer = self.get_serializer(queryset, many=True)
+             #dumped_data = serializer.data
+             dumped_data = query
              cache.set('MooringAreaMapFilterViewSet'+data_hash, dumped_data, 3600)
 
 #        serializer = self.get_serializer(queryset, many=True)
