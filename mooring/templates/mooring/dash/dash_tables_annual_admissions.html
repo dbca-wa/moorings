@@ -42,6 +42,10 @@
 
 {% block content %}
 
+<div id='letter-pdf-iframe' style='display:none'>
+
+</div>
+
 <div class="modal" tabindex="-1" role="dialog" id='cancelBookingModal' >
   <div class="modal-dialog" role="document">
     <div class="modal-content">
@@ -100,7 +104,7 @@
                &nbsp;
         </div>
 	<div class="col-lg-12 text-right">
-		<button type="button" class="btn btn-lg btn-primary" onclick="annual_bookings.save_sticker();">Update</button>
+		<button type="button" class="btn btn-lg btn-primary" onclick="annual_bookings.save_sticker(false);">Update</button> <button type="button" class="btn btn-lg btn-primary" onclick="annual_bookings.save_sticker(true);">Update & PDF</button>
 	</div>
 	&nbsp;
       </div>
@@ -293,7 +297,7 @@
                         $('#stickerUpdateModal').modal('show');
 			$('#sticker-error').html('');
                 },
-		save_sticker: function() { 
+		save_sticker: function(download_pdf) { 
 	                var booking_id = annual_bookings.var.selected_booking_id;
                         var sticker_no = $('#sticker_no').val();
 			var sticker_comment = $('#sticker_comment').val();
@@ -313,6 +317,9 @@
                                   success: function(data) {
 					  annual_bookings.get();
 					  $('#errors').html("<div class='alert alert-success'>Successfully Updated</div>");
+					  if (download_pdf == true) {
+					      $('#letter-pdf-iframe').html('<iframe width="560" height="315" src="/api/get_aa_letter/'+annual_bookings.var.selected_booking_id+'" frameborder="0" allowfullscreen></iframe>');
+				          }
                                   },
                                   error: function(data) {
 					  if (data.hasOwnProperty("responseJSON")) { 
