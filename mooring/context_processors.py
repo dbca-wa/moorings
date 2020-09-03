@@ -35,14 +35,24 @@ def mooring_url(request):
     else:
        template_group = 'pvs'
        mooring_group = 'pvs'
-       al= models.AdmissionsLocation.objects.filter(key=mooring_group)
 
-       if al.count() > 0:
-           alr = al[0]
-           TERMS = al['mooring_booking_terms']
-           DAILY_TERMS_URL = alr['daily_admissions_terms']
-           DAILY_FEES_URL = alr['daily_admissions_more_price_info_url']
-                   
+       alr = None
+       dumped_data = cache.get('AdmissionsLocation:'+mooring_group)
+
+       if dumped_data is None:
+           al= models.AdmissionsLocation.objects.filter(key=mooring_group).values('mooring_booking_terms','daily_admissions_terms','daily_admissions_more_price_info_url')
+           if al.count() > 0:
+              dumped_data = json.dumps(al[0])
+              alr = al[0]
+              cache.set('AdmissionsLocation:'+mooring_group,dumped_data,  3600)
+       else:
+           alr = json.loads(dumped_data)
+           pass
+       if alr:
+          TERMS = alr['mooring_booking_terms']
+          DAILY_TERMS_URL = alr['daily_admissions_terms']
+          DAILY_FEES_URL = alr['daily_admissions_more_price_info_url']
+
        #TERMS = "/know/online-mooring-site-booking-terms-and-conditions"
        PUBLIC_URL='https://mooring.dbca.wa.gov.au'
 
