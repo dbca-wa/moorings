@@ -1,20 +1,50 @@
 from django.conf import settings
+from django.core.cache import cache
 from mooring import models
 from mooring import helpers
+import json
 
 def mooring_url(request):
     #web_url = request.META['HTTP_HOST']
     web_url = request.META.get('HTTP_HOST', None)
+    TERMS = ''
+    DAILY_TERMS_URL = ''
+    DAILY_FEES_URL = ''
     if web_url in settings.ROTTNEST_ISLAND_URL:
-       template_group = 'rottnest'
-       TERMS  = "https://www.rottnestisland.com/~/media/Files/boating-documents/marine-hire-facilities-tcs.pdf?la=en"
-       PUBLIC_URL='https://mooring-ria.dbca.wa.gov.au/'
        mooring_group = 'ria'
+       template_group = 'rottnest'
+       alr = None
+       dumped_data = cache.get('AdmissionsLocation:'+mooring_group)
+
+       if dumped_data is None:
+           al= models.AdmissionsLocation.objects.filter(key=mooring_group).values('mooring_booking_terms','daily_admissions_terms','daily_admissions_more_price_info_url')
+           if al.count() > 0:
+              dumped_data = json.dumps(al[0])
+              alr = al[0]
+              cache.set('AdmissionsLocation:'+mooring_group,dumped_data,  3600)
+       else:
+           alr = json.loads(dumped_data)
+           pass
+       if alr:
+          TERMS = alr['mooring_booking_terms']
+          DAILY_TERMS_URL = alr['daily_admissions_terms']
+          DAILY_FEES_URL = alr['daily_admissions_more_price_info_url']
+          #DAILY_TERMS = al[0].daily_admissions_term
+          #TERMS  = "https://www.rottnestisland.com/~/media/Files/boating-documents/marine-hire-facilities-tcs.pdf?la=en"
+       PUBLIC_URL='https://mooring-ria.dbca.wa.gov.au/'
     else:
        template_group = 'pvs'
-       TERMS = "/know/online-mooring-site-booking-terms-and-conditions"
-       PUBLIC_URL='https://mooring.dbca.wa.gov.au'
        mooring_group = 'pvs'
+       al= models.AdmissionsLocation.objects.filter(key=mooring_group)
+
+       if al.count() > 0:
+           alr = al[0]
+           TERMS = al['mooring_booking_terms']
+           DAILY_TERMS_URL = alr['daily_admissions_terms']
+           DAILY_FEES_URL = alr['daily_admissions_more_price_info_url']
+                   
+       #TERMS = "/know/online-mooring-site-booking-terms-and-conditions"
+       PUBLIC_URL='https://mooring.dbca.wa.gov.au'
 
 
     is_officer = False
@@ -40,6 +70,8 @@ def mooring_url(request):
         'EXPLORE_PARKS_PEAK_PERIODS': '/know/when-visit',
         'EXPLORE_PARKS_ENTRY_FEES': '/know/entry-fees',
         'EXPLORE_PARKS_TERMS': TERMS,
+        'DAILY_TERMS_URL': DAILY_TERMS_URL,
+        'DAILY_FEES_URL': DAILY_FEES_URL,
         'PARKSTAY_EXTERNAL_URL': settings.PARKSTAY_EXTERNAL_URL,
         'DEV_STATIC': settings.DEV_STATIC,
         'DEV_STATIC_URL': settings.DEV_STATIC_URL,

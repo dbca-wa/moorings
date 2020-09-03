@@ -2021,6 +2021,14 @@ class AdmissionsLocation(models.Model):
     mooring_group = models.ForeignKey(MooringAreaGroup, blank=False, null=False)
     annual_admissions_terms = models.CharField(max_length=1024, blank=False, null=False, default ='')
     annual_admissions_more_price_info_url = models.CharField(max_length=1024, blank=False, null=False, default ='')
+    daily_admissions_terms = models.CharField(max_length=1024, blank=False, null=False, default ='')
+    daily_admissions_more_price_info_url = models.CharField(max_length=1024, blank=False, null=False, default ='')
+    mooring_booking_terms = models.CharField(max_length=1024, blank=False, null=False, default ='')
+
+    def save(self,*args,**kwargs):
+        cache.delete('AdmissionsLocation:'+self.key)
+        super(AdmissionsLocation,self).save(*args,**kwargs)
+
 
     def __str__(self):
         return self.text
