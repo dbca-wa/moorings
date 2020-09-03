@@ -4822,6 +4822,7 @@ def get_annual_admission_booking(request):
            baainvoices_temp[b['booking_annual_admission__id']].append(b['invoice_reference'])
        baa = []
        baarows = models.BookingAnnualAdmission.objects.filter(Q(booking_type=1) | Q(booking_type=4)).values('id','customer','customer__first_name','customer__last_name','start_dt','expiry_dt','details','booking_type','annual_booking_period_group__id','annual_booking_period_group','annual_booking_period_group__name','override_price','override_reason','override_reason__text','override_reason_info','overridden_by','overridden_by__first_name','overridden_by__last_name','is_canceled','send_invoice','cancellation_reason','cancelation_time','confirmation_sent','created','created_by__first_name','created_by__last_name','canceled_by','canceled_by__first_name','canceled_by__last_name','override_lines','sticker_no','sticker_no_history','booking_type','sticker_no','override_lines','annual_booking_period_group__mooring_group','cost_total')
+       
        for c in baarows:
            appendrow = False
            start_dt = datetime.strptime(str(c['start_dt'].strftime('%Y-%m-%d %H:%M:%S')), '%Y-%m-%d %H:%M:%S')

@@ -161,7 +161,7 @@
                             <div class="row">
                                 <div class="col-md-6">
                                     <div class="small-12 medium-12 large-4 columns">
-                                        <label class="label-plain" style="width:250px;">Click <a href="http://ria.wa.gov.au/about-us/Fees-and-charges" taget="_blank">here</a> for price information.</label>                                        </div>
+                                        <label class="label-plain" style="width:250px;">Click <a v-on:click="loadFeeUrl();" id='daily-fees-link' href="javascript:void(0);" taget="_blank">here</a> for price information.</label>                                        </div>
                                     </div>
                                 <div class="col-md-6">
                                     <div class="row"> 
@@ -665,8 +665,12 @@ export default {
            var terms = $('#terms').val();
            console.log(terms);
            window.open(terms,'_terms');
-
 	},
+        loadFeeUrl: function() {
+           var daily_terms_url = $('#daily_terms_url').val();
+           console.log(daily_terms_url);
+           window.open(daily_terms_url,'_daily_terms_url');
+        },
         calculateTotal: function(){
             var date = new Date(this.arrivalDate);
             var temp = date.toISOString().substring(0,10);
