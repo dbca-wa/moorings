@@ -161,13 +161,13 @@
                             <div class="row">
                                 <div class="col-md-6">
                                     <div class="small-12 medium-12 large-4 columns">
-                                        <label class="label-plain" style="width:250px;">Click <a v-on:click="loadFeeUrl();" id='daily-fees-link' href="javascript:void(0);" taget="_blank">here</a> for price information.</label>                                        </div>
+                                        <label class="label-plain" style="width:250px;">Click <a v-on:click="loadFeeUrl();" id='daily-fees-link' href="javascript:void(0);">here</a> for price information.</label>                                        </div>
                                     </div>
                                 <div class="col-md-6">
                                     <div class="row"> 
                                         <div class="col-md-8 col-md-offset-5">
                                             <div class="checkbox">
-                                                <label><input type="checkbox" value="" v-model="toc">I agree to the <a target="_blank" id='terms-link' href="javascript:void(0);" v-on:click="loadTerms();">terms and conditions</a></label>
+                                                <label><input type="checkbox" value="" v-model="toc">I agree to the <a id='terms-link' href="javascript:void(0);" v-on:click="loadTerms();">terms and conditions</a></label>
                                             </div>
                                             <button :disabled="!validToProceed" type="submit" class="btn btn-primary" style="width:180px;background-color:#4286f4;font-weight:bold;">Proceed to Payment</button>
                                         </div>
