@@ -518,7 +518,11 @@ export default {
         },
         validateVesselReg: function() {
             let vm = this;
-            vm.vesselReg = vm.vesselReg.replace(/ /g, ""); 
+            vm.vesselReg = vm.vesselReg.toUpperCase();
+            vm.vesselReg = vm.vesselReg.replace(/\s/g,"");
+            vm.vesselReg = vm.vesselReg.replace(/\W/g,"");
+
+
             var reg = vm.vesselReg;
 	    var dateArrival = $('#dateArrival').val();
             var data = {
@@ -534,7 +538,7 @@ export default {
                     method: 'GET',
                     success: function(data, stat, xhr) {
                         if(data[0]){
-                            if(data[0].admissionsPaid){
+                            if(data[0].admissionsPaid) {
                                 vm.message = "Admission Fees for this vessel are already paid.";
                                 vm.noPayment = true;
                                 vm.$modal.show('messageModal');
