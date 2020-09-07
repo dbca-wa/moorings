@@ -49,7 +49,7 @@
                 </div>
                 <div class="row">
                     <div class="small-12 medium-12 large-6 columns">
-                    <label>Vessel Registration  <input v-model="vesselRego" id="vesselRego" name="vessel_rego" type="text" placeholder="REGO134" style="text-transform:uppercase" :disabled="current_booking.length > 0" step='0.01' /></label>
+                    <label>Vessel Registration  <input v-model="vesselRego" id="vesselRego" name="vessel_rego" type="text" placeholder="REGO134" :disabled="current_booking.length > 0" step='0.01' /></label>
                     </div>
                     <div class="small-12 medium-12 large-6 columns">
                     <label>Vessel Size (Meters) <input v-model="vesselSize" id="vesselSize" name="vessel_size" type="number" placeholder="35" :disabled="current_booking.length > 0" step='0.01' /></label>
@@ -902,7 +902,11 @@ export default {
         searchRego: function(){
             let vm = this;
             vm.vesselRego = vm.vesselRego.replace(/ /g, "");
+            vm.vesselRego = vm.vesselRego.toUpperCase();
+            vm.vesselRego = vm.vesselRego.replace(/\s/g,"");
+            vm.vesselRego = vm.vesselRego.replace(/\W/g,"");
             
+
             var reg = vm.vesselRego;
             var data = {
                 'vessel_rego': reg

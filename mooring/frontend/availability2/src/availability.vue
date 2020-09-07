@@ -154,7 +154,7 @@
                         <div class="small-6 columns">
                             <label for="vesselRego" class="text-left">Vessel Rego</label>
                         </div><div class="small-6 columns">
-                            <input type="text" id="vesselRego" ref="vesselRego" name="vessel_rego" @blur="searchRego()" v-model="vesselRego" style="text-transform:uppercase" :disabled="current_booking.length > 0" />
+                            <input type="text" id="vesselRego" ref="vesselRego" name="vessel_rego" @blur="searchRego()" v-model="vesselRego" :disabled="current_booking.length > 0" />
                         </div>
                     </div>
                     <div class="row">
@@ -911,6 +911,11 @@ export default {
         },
         searchRego: function(rego){
             let vm = this;
+            vm.vesselRego = vm.vesselRego.replace(/ /g, "");
+            vm.vesselRego = vm.vesselRego.toUpperCase();
+            vm.vesselRego = vm.vesselRego.replace(/\s/g,"");
+            vm.vesselRego = vm.vesselRego.replace(/\W/g,"");
+
             if (rego){
                 var reg = rego;
             } else {
