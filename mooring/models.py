@@ -2189,7 +2189,8 @@ class GlobalSettings(models.Model):
         (14, 'Max Weight Large'),
         (15, 'URL - Internal'),
         (16, 'URL - External'),
-        (17, 'Non Online Booking Oracle Code')
+        (17, 'Non Online Booking Oracle Code'),
+        (18, 'Max Advance Booking (Open Time)')
     )
     mooring_group = models.ForeignKey('MooringAreaGroup', blank=False, null=False)
     key = models.SmallIntegerField(choices=keys, blank=False, null=False)
@@ -2199,12 +2200,30 @@ class GlobalSettings(models.Model):
         unique_together = ('mooring_group', 'key',)
         verbose_name_plural = "Global Settings"
 
+    def clean(self):
+        if self.key == 18:
+            import re
+            r = re.compile('^\d\d:\d\d$')
+            print ("MATCH")
+            print (r.match(self.value))
+            if r.match(self.value) is None:
+                print ("NOT VA")
+                raise ValidationError("Invalid time. Must be 24 hour format, example:15:00")
+            else:
+                v = self.value.split(":")
+                if int(v[0]) > 23:
+                     raise ValidationError("Hour can not be greater than 23")
+                if int(v[1]) > 59:
+                     raise ValidationError("Minute can not be greater than 59")
+
     def save(self, *args, **kwargs):
         try:
             if self.key < 15:
                 int(self.value)
+
         except Exception as e:
             pass
+
         self.full_clean()
         super(GlobalSettings,self).save(*args,**kwargs)
 

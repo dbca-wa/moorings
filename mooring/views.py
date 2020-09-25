@@ -452,6 +452,7 @@ class CancelBookingView(TemplateView):
             'vouchers': [],
             'system': settings.PS_PAYMENT_SYSTEM_ID,
             'custom_basket': True,
+            'booking_reference': 'PS-'+str(booking.id)
         }
 
         basket, basket_hash = create_basket_session(request, basket_params)
@@ -627,6 +628,7 @@ class CancelAdmissionsBookingView(TemplateView):
             'vouchers': [],
             'system': settings.PS_PAYMENT_SYSTEM_ID,
             'custom_basket': True,
+            'booking_reference': 'AD-'+str(booking.id)
         }
         basket, basket_hash = create_basket_session(request, basket_params)
 
