@@ -36,6 +36,7 @@ class Command(BaseCommand):
             print (system)
             try:
                  for settlement_date in dates_to_check:
+                     print ("Settlement Date: "+str(settlement_date.strftime("%d/%m/%Y")))
                      bpoint_total = Decimal('0.00')
                      oracle_total = Decimal('0.00')
                      invoice_total = Decimal('0.00')
