@@ -456,7 +456,7 @@ def mooring_map_view(request, *args, **kwargs):
          serializer_camp = MooringAreaMapSerializer(data=queryset, many=True)
          serializer_camp.is_valid()
          dumped_data = geojson.dumps(serializer_camp.data)
-         cache.set('MooringAreaMapViewSet', dumped_data,  3600)
+         cache.set('MooringAreaMapViewSet', dumped_data,  900)
      return HttpResponse(dumped_data, content_type='application/json')
 
 class MarineParksRegionMapViewSet(viewsets.ReadOnlyModelViewSet):
@@ -597,7 +597,7 @@ class MooringAreaMapFilterViewSet(viewsets.ReadOnlyModelViewSet):
              #serializer = self.get_serializer(queryset, many=True)
              #dumped_data = serializer.data
              dumped_data = query
-             cache.set('MooringAreaMapFilterViewSet'+data_hash, dumped_data, 3600)
+             cache.set('MooringAreaMapFilterViewSet'+data_hash, dumped_data, 600)
 
 #        serializer = self.get_serializer(queryset, many=True)
         return Response(dumped_data)

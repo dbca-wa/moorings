@@ -1,0 +1,44 @@
+Hello,<br> 
+<br>
+There appears to be and issue with the bpoint totals matching the oracle totals:<br>
+<br>
+Please investigate for date: {{ settlement_date|date:"d/M/Y" }}.<br>
+<br>
+<b>Details:</b><br>
+<br>
+{{ error_report|safe }}
+
+<h3>Mismatch Bpoint</h3>
+<table>
+	{% for a in mismatch_bpoint %}
+	<tr><td>{{ a }}</td></tr>
+	{% endfor %}
+</table>
+
+<h3>Mismatch Invoices</h3>
+<table>
+	        {% for a in mismatch_invoice %}
+		        <tr><td>{{ a }}</td></tr>
+               {% endfor %}
+</table>
+
+
+
+<h3>Missing Bpoint</h3>
+<table>
+        {% for a in ba_missing %}
+        <tr><td>{{ a }}</td></tr>
+        {% endfor %}
+</table>
+
+<h3>Missing Invoices</h3>
+<table>
+	        {% for a in ia_missing %}
+                 <tr><td>{{ a }}</td></tr>
+	        {% endfor %}
+</table>
+
+
+<br><br>
+Kind Regards<br>
+Auto Generated<br>

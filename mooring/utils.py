@@ -606,15 +606,34 @@ def get_campsite_availability(campsites_qs, start_date, end_date, ongoing_bookin
                  
     mooring_map = {cg[0]: [cs.pk for cs in campsites_qs if cs.mooringarea.pk == cg[0]] for cg in campsites_qs.distinct('mooringarea').values_list('mooringarea')}
     today = date.today()
-
+    print ("GLOBA 1")
     # strike out days after the max_advance_booking
     for site in campsites_qs:
+        max_advance = None
+        max_advance_open_time = '00:00'
         try:
             group = MooringAreaGroup.objects.get(moorings__in=[site.mooringarea])
         except:
             group = None
         if group:
-            max_advance = int(GlobalSettings.objects.get(key=2, mooring_group__in=[group,]).value)
+            print ("GLOBAL SETTINGS")
+            globalsettings = GlobalSettings.objects.filter(mooring_group__in=[group,])
+            print (globalsettings)
+            for gs in globalsettings:
+                if gs.key == 2:
+                    print ("YES KEY")
+                    #max_advance = int(GlobalSettings.objects.get(key=2, mooring_group__in=[group,]).value)
+                    max_advance = int(gs.value)
+                if gs.key == 18:
+                    max_advance_open_time = gs.value 
+            print ("MAX")
+            print (max_advance)
+            print (max_advance_open_time)
+
+            #max_advance = int(GlobalSettings.objects.get(key=2, mooring_group__in=[group,]).value)
+            #if GlobalSettings.objects.filter(key=18, mooring_group__in=[group,]).count():
+            #     max_advance_open_time = GlobalSettings.objects.get(key=18, mooring_group__in=[group,]).value
+
         else:
             qs = GlobalSettings.objects.filter(key=2)
             highest_val = 0
@@ -622,6 +641,18 @@ def get_campsite_availability(campsites_qs, start_date, end_date, ongoing_bookin
                 if int(q.value) > highest_val:
                     highest_val = int(q.value)
             max_advance = highest_val       
+        print ("NOWTIME")
+        print (nowtime)
+        print (today)  
+        max_advance_open_time_dt = datetime.strptime(str(today)+' '+str(max_advance_open_time), '%Y-%m-%d %H:%M')
+        print (max_advance_open_time_dt)
+        if nowtime > max_advance_open_time_dt:
+            print ("MAX OPEN")
+            pass
+        else:
+            print ("NOT OPEN")
+            max_advance = max_advance - 1
+
 
         stop = today + timedelta(days=max_advance)
         stop_mark = min(max(stop, start_date), end_date)
@@ -1648,6 +1679,7 @@ def admissionsCheckout(request, admissionsBooking, lines, invoice_text=None, vou
         'vouchers': vouchers,
         'system': settings.PS_PAYMENT_SYSTEM_ID,
         'custom_basket': True,
+        'booking_reference': 'AD-'+str(admissionsBooking.id)
     }
     
     basket, basket_hash = create_basket_session(request, basket_params)
@@ -1691,6 +1723,7 @@ def annual_admission_checkout(request, booking, lines, invoice_text=None, vouche
         'vouchers': vouchers,
         'system': settings.PS_PAYMENT_SYSTEM_ID,
         'custom_basket': True,
+        'booking_reference': 'AA-'+str(booking.id)
     }
     basket, basket_hash = create_basket_session(request, basket_params)
     checkout_params = {
@@ -1746,6 +1779,7 @@ def checkout(request, booking, lines, invoice_text=None, vouchers=[], internal=F
         'vouchers': vouchers,
         'system': settings.PS_PAYMENT_SYSTEM_ID,
         'custom_basket': True,
+        'booking_reference': 'PS-'+str(booking.id)
     }
  
     basket, basket_hash = create_basket_session(request, basket_params)
@@ -1800,11 +1834,20 @@ def checkout(request, booking, lines, invoice_text=None, vouchers=[], internal=F
 
 
 def allocate_failedrefund_to_unallocated(request, booking, lines, invoice_text=None, internal=False, order_total='0.00',user=None):
+        booking_reference = None
+        if booking.__class__.__name__ == 'AdmissionsBooking':
+             booking_reference = 'AD-'+str(booking.id)
+        elif booking.__class__.__name__ == 'BookingAnnualAdmission':
+             booking_reference = 'AA-'+str(booking.id)
+        else:
+             booking_reference = 'PS-'+str(booking.id)
+
         basket_params = {
             'products': lines,
             'vouchers': [],
             'system': settings.PS_PAYMENT_SYSTEM_ID,
             'custom_basket': True,
+            'booking_reference': booking_reference
         }
 
         basket, basket_hash = create_basket_session(request, basket_params)
@@ -1818,18 +1861,29 @@ def allocate_failedrefund_to_unallocated(request, booking, lines, invoice_text=N
         if booking.__class__.__name__ == 'AdmissionsBooking':
             print ("AdmissionsBooking")
             book_inv, created = AdmissionsBookingInvoice.objects.get_or_create(admissions_booking=booking, invoice_reference=new_invoice.reference, system_invoice=True)
+        elif booking.__class__.__name__ == 'BookingAnnualAdmission':
+            print ("BookingAnnualAdmission")
+            book_inv, created = models.BookingAnnualInvoice.objects.get_or_create(booking_annual_admission=booking, invoice_reference=new_invoice.reference, system_invoice=True)
         else:
             book_inv, created = BookingInvoice.objects.get_or_create(booking=booking, invoice_reference=new_invoice.reference, system_invoice=True)
 
         return order
 
 def allocate_refund_to_invoice(request, booking, lines, invoice_text=None, internal=False, order_total='0.00',user=None):
+        booking_reference = None
+        if booking.__class__.__name__ == 'AdmissionsBooking':
+             booking_reference = 'AD-'+str(booking.id)
+        elif booking.__class__.__name__ == 'BookingAnnualAdmission':
+             booking_reference = 'AA-'+str(booking.id)
+        else:
+             booking_reference = 'PS-'+str(booking.id)
 
         basket_params = {
             'products': lines,
             'vouchers': [],
             'system': settings.PS_PAYMENT_SYSTEM_ID,
             'custom_basket': True,
+            'booking_reference': booking_reference
         }
 
         basket, basket_hash = create_basket_session(request, basket_params)

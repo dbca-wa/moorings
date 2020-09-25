@@ -161,8 +161,8 @@ class BookingAdmin(admin.ModelAdmin):
     raw_id_fields = ('customer','created_by','overridden_by','canceled_by','old_booking','admission_payment',)
     list_display = ('id','arrival','departure','booking_type','mooringarea','legacy_id','legacy_name','status','cost_total')
     ordering = ('-id',)
-    search_fileds = ('arrival','departure')
-    list_filter = ('id','arrival','departure','mooringarea')
+    search_fields = ('customer','id','admission_payment','cost_total')
+    list_filter = ('booking_type','mooringarea')
     readonly_fields=('created','property_cache',)
     inlines = [BookingInvoiceInline,MooringsiteBookingInline]
 
@@ -174,7 +174,7 @@ class BookingAnnualAdmissionAdmin(admin.ModelAdmin):
     raw_id_fields = ('customer','created_by','overridden_by','canceled_by',)
     list_display = ('id','customer','start_dt','expiry_dt','rego_no','booking_type','cost_total','created_by','created')
     ordering = ('-id',)
-    search_fileds = ('customer','id',)
+    search_fields = ('customer','id',)
     list_filter = ('booking_type',)
     readonly_fields=('created','sticker_no_history','sticker_created')
     inlines = [BookingAnnualInvoiceInline,]
@@ -586,6 +586,7 @@ class MooringAreaBookingRange(admin.ModelAdmin):
 @admin.register(models.GlobalSettings)
 class GlobalSettings(admin.ModelAdmin):
     list_display = ('key', 'value', 'mooring_group')
+    list_filter = ('mooring_group',)
 
     def get_queryset(self, request):
         """ Filter based on the mooring group of the user. """
