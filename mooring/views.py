@@ -2979,54 +2979,65 @@ class AdmissionsBookingSuccessView(TemplateView):
         try:
             context_processor = template_context(self.request)
             booking = utils.get_session_admissions_booking(request.session)
-            arrival = AdmissionsLine.objects.filter(admissionsBooking=booking)[0].arrivalDate
-            overnight = AdmissionsLine.objects.filter(admissionsBooking=booking)[0].overnightStay
-            invoice_ref = request.GET.get('invoice')
+            booking_reference = "AD-"+str(booking.id)
+            basket = Basket.objects.filter(status='Submitted', booking_reference=booking_reference).order_by('-id')[:1]
+            context = utils.booking_admission_success(basket, booking, context_processor)
+            request.session['ad_last_booking'] = booking.id
+            utils.delete_session_admissions_booking(request.session)
+            return render(request, self.template_name, context)
 
-            if booking.booking_type == 3:
-                try:
-                    inv = Invoice.objects.get(reference=invoice_ref)
-                    order = Order.objects.get(number=inv.order_number)
-                    order.user = booking.customer
-                    order.save()
-                except Invoice.DoesNotExist:
-                    logger.error('{} tried making a booking with an incorrect invoice'.format('User {} with id {}'.format(booking.customer.get_full_name(),booking.customer.id) if booking.customer else 'An anonymous user'))
-                    return redirect('admissions', args=(booking.location.key,))
+            #arrival = AdmissionsLine.objects.filter(admissionsBooking=booking)[0].arrivalDate
+            #overnight = AdmissionsLine.objects.filter(admissionsBooking=booking)[0].overnightStay
+            #
+            #booking_reference = "AD-"+str(booking.id)
+            #basket = Basket.objects.filter(status='Submitted', booking_reference=booking_reference).order_by('-id')[:1]
 
-                if inv.system not in ['0516']:
-                    logger.error('{} tried making a booking with an invoice from another system with reference number {}'.format('User {} with id {}'.format(booking.customer.get_full_name(),booking.customer.id) if booking.customer else 'An anonymous user',inv.reference))
-                    return redirect('admissions', args=(booking.location.key,))
+            #invoice_ref = request.GET.get('invoice')
 
-                try:
-                    b = AdmissionsBookingInvoice.objects.get(invoice_reference=invoice_ref)
-                    logger.error('{} tried making an admission booking with an already used invoice with reference number {}'.format('User {} with id {}'.format(booking.customer.get_full_name(),booking.customer.id) if booking.customer else 'An anonymous user',inv.reference))
-                    return redirect('admissions',  args=(booking.location.key,))
-                except AdmissionsBookingInvoice.DoesNotExist:
-                    logger.info('{} finished temporary booking {}, creating new AdmissionBookingInvoice with reference {}'.format('User {} with id {}'.format(booking.customer.get_full_name(),booking.customer.id) if booking.customer else 'An anonymous user',booking.id, invoice_ref))
-                    # FIXME: replace with server side notify_url callback
-                    admissionsInvoice = AdmissionsBookingInvoice.objects.get_or_create(admissions_booking=booking, invoice_reference=invoice_ref)
-                    if request.user.__class__.__name__ == 'EmailUser':
-                        booking.created_by = request.user
+            #if booking.booking_type == 3:
+            #    try:
+            #        inv = Invoice.objects.get(reference=invoice_ref)
+            #        order = Order.objects.get(number=inv.order_number)
+            #        order.user = booking.customer
+            #        order.save()
+            #    except Invoice.DoesNotExist:
+            #        logger.error('{} tried making a booking with an incorrect invoice'.format('User {} with id {}'.format(booking.customer.get_full_name(),booking.customer.id) if booking.customer else 'An anonymous user'))
+            #        return redirect('admissions', args=(booking.location.key,))
 
-                    # set booking to be permanent fixture
-                    booking.booking_type = 1  # internet booking
-                    booking.save()
-                    request.session['ad_last_booking'] = booking.id
-                    utils.delete_session_admissions_booking(request.session)
+            #    if inv.system not in ['0516']:
+            #        logger.error('{} tried making a booking with an invoice from another system with reference number {}'.format('User {} with id {}'.format(booking.customer.get_full_name(),booking.customer.id) if booking.customer else 'An anonymous user',inv.reference))
+            #        return redirect('admissions', args=(booking.location.key,))
 
-                    # send out the invoice before the confirmation is sent
-                    emails.send_admissions_booking_invoice(booking, request, context_processor)
-                    # for fully paid bookings, fire off confirmation email
-                    emails.send_admissions_booking_confirmation(booking,request, context_processor)
+            #    try:
+            #        b = AdmissionsBookingInvoice.objects.get(invoice_reference=invoice_ref)
+            #        logger.error('{} tried making an admission booking with an already used invoice with reference number {}'.format('User {} with id {}'.format(booking.customer.get_full_name(),booking.customer.id) if booking.customer else 'An anonymous user',inv.reference))
+            #        return redirect('admissions',  args=(booking.location.key,))
+            #    except AdmissionsBookingInvoice.DoesNotExist:
+            #        logger.info('{} finished temporary booking {}, creating new AdmissionBookingInvoice with reference {}'.format('User {} with id {}'.format(booking.customer.get_full_name(),booking.customer.id) if booking.customer else 'An anonymous user',booking.id, invoice_ref))
+            #        # FIXME: replace with server side notify_url callback
+            #        admissionsInvoice = AdmissionsBookingInvoice.objects.get_or_create(admissions_booking=booking, invoice_reference=invoice_ref)
+            #        #if request.user.__class__.__name__ == 'EmailUser':
+            #        #    booking.created_by = request.user
+
+            #        # set booking to be permanent fixture
+            #        booking.booking_type = 1  # internet booking
+            #        booking.save()
+            #        request.session['ad_last_booking'] = booking.id
+            #        utils.delete_session_admissions_booking(request.session)
+
+            #        # send out the invoice before the confirmation is sent
+            #        emails.send_admissions_booking_invoice(booking, request, context_processor)
+            #        # for fully paid bookings, fire off confirmation email
+            #        emails.send_admissions_booking_confirmation(booking,request, context_processor)
 
 
-                    context = {
-                       'admissionsBooking': booking,
-                       'arrival' : arrival,
-                       'overnight': overnight,
-                       'admissionsInvoice': [invoice_ref]
-                    }
-                    return render(request, self.template_name, context)
+            #        context = {
+            #           'admissionsBooking': booking,
+            #           'arrival' : arrival,
+            #           'overnight': overnight,
+            #           'admissionsInvoice': [invoice_ref]
+            #        }
+            #        return render(request, self.template_name, context)
 
         except Exception as e:
             if ('ad_last_booking' in request.session) and AdmissionsBooking.objects.filter(id=request.session['ad_last_booking']).exists():
@@ -3101,68 +3112,75 @@ class AnnualAdmissionSuccessView(TemplateView):
                 basket = Basket.objects.filter(status='Submitted', owner=request.user).order_by('-id')[:1]
             else:
                 basket = Basket.objects.filter(status='Submitted', owner=booking.customer).order_by('-id')[:1]
-            order = Order.objects.get(basket=basket[0])
-            invoice = Invoice.objects.get(order_number=order.number)
-            invoice_ref = invoice.reference
-            book_inv, created = BookingAnnualInvoice.objects.get_or_create(booking_annual_admission=booking, invoice_reference=invoice_ref)
 
-            
+            context = utils.booking_annual_admission_success(basket, booking, context_processor)
+            utils.delete_annual_admission_session_booking(request.session)
+            request.session['annual_admission_last_booking'] = booking.id
+            return render(request, self.template_name, context)
+            #order = Order.objects.get(basket=basket[0])
+            #invoice = Invoice.objects.get(order_number=order.number)
+            #invoice_ref = invoice.reference
+            #book_inv, created = BookingAnnualInvoice.objects.get_or_create(booking_annual_admission=booking, invoice_reference=invoice_ref)
 
-            #invoice_ref = request.GET.get('invoice')
-            if booking.booking_type == 3:
-                try:
-                    inv = Invoice.objects.get(reference=invoice_ref)
-                    order = Order.objects.get(number=inv.order_number)
-                    order.user = booking.customer
-                    order.save()
-                except Invoice.DoesNotExist:
-                    print ("INVOICE ERROR")
-                    logger.error('{} tried making a booking with an incorrect invoice'.format('User {} with id {}'.format(booking.customer.get_full_name(),booking.customer.id) if booking.customer else 'An anonymous user'))
-                    return redirect('public_make_booking')
-                if inv.system not in ['0516']:
-                    print ("SYSTEM ERROR")
-                    logger.error('{} tried making a booking with an invoice from another system with reference number {}'.format('User {} with id {}'.format(booking.customer.get_full_name(),booking.customer.id) if booking.customer else 'An anonymous user',inv.reference))
-                    return redirect('public_make_booking')
+            #
 
-                if book_inv:
-                    # set booking to be permanent fixture
-                    booking.booking_type = 1  # internet booking
-                    booking.expiry_time = None
-                    update_payments(invoice_ref)
-                    #Calculate Admissions and create object
-                    booking.save()
-                    #if not request.user.is_staff:
-                    #    print "USER IS NOT STAFF."
-                    utils.delete_annual_admission_session_booking(request.session)
-                    # send out the invoice before the confirmation is sent if total is greater than zero
-                    #if booking.cost_total > 0:
-                    print ("SEND EMAIL")
-                    emails.send_annual_admission_booking_invoice(booking,request,context_processor)
-                    emails.send_new_annual_admission_booking_internal(booking,request,context_processor)
-                    # for fully paid bookings, fire off confirmation emaili
-                    #if booking.invoice_status == 'paid':
-                    request.session['annual_admission_last_booking'] = booking.id
-                    context = {
-                      'booking': booking,
-                      'book_inv': [book_inv],
-                    }
+            ##invoice_ref = request.GET.get('invoice')
+            #if booking.booking_type == 3:
+            #    try:
+            #        inv = Invoice.objects.get(reference=invoice_ref)
+            #        order = Order.objects.get(number=inv.order_number)
+            #        order.user = booking.customer
+            #        order.save()
+            #    except Invoice.DoesNotExist:
+            #        print ("INVOICE ERROR")
+            #        logger.error('{} tried making a booking with an incorrect invoice'.format('User {} with id {}'.format(booking.customer.get_full_name(),booking.customer.id) if booking.customer else 'An anonymous user'))
+            #        return redirect('public_make_booking')
+            #    if inv.system not in ['0516']:
+            #        print ("SYSTEM ERROR")
+            #        logger.error('{} tried making a booking with an invoice from another system with reference number {}'.format('User {} with id {}'.format(booking.customer.get_full_name(),booking.customer.id) if booking.customer else 'An anonymous user',inv.reference))
+            #        return redirect('public_make_booking')
 
-                    try:
+            #    if book_inv:
+            #        # set booking to be permanent fixture
+            #        booking.booking_type = 1  # internet booking
+            #        booking.expiry_time = None
+            #        update_payments(invoice_ref)
+            #        #Calculate Admissions and create object
+            #        booking.save()
+            #        #if not request.user.is_staff:
+            #        #    print "USER IS NOT STAFF."
+            #        utils.delete_annual_admission_session_booking(request.session)
+            #        # send out the invoice before the confirmation is sent if total is greater than zero
+            #        #if booking.cost_total > 0:
+            #        print ("SEND EMAIL")
+            #        emails.send_annual_admission_booking_invoice(booking,request,context_processor)
+            #        emails.send_new_annual_admission_booking_internal(booking,request,context_processor)
+            #        # for fully paid bookings, fire off confirmation emaili
+            #        #if booking.invoice_status == 'paid':
+            #        request.session['annual_admission_last_booking'] = booking.id
+            #        context = {
+            #          'booking': booking,
+            #          'book_inv': [book_inv],
+            #        }
 
-                        if VesselDetail.objects.filter(rego_no=booking.details['vessel_rego']).count() > 0:
-                                vd = VesselDetail.objects.filter(rego_no=booking.details['vessel_rego'])
-                                p = vd[0]
-                                p.vessel_name=booking.details['vessel_name']
-                                p.save()
-                    except:
-                        print ("ERROR: create vesseldetails on booking success")
+            #        try:
+
+            #            if VesselDetail.objects.filter(rego_no=booking.details['vessel_rego']).count() > 0:
+            #                    vd = VesselDetail.objects.filter(rego_no=booking.details['vessel_rego'])
+            #                    p = vd[0]
+            #                    p.vessel_name=booking.details['vessel_name']
+            #                    p.save()
+            #        except:
+            #            print ("ERROR: create vesseldetails on booking success")
 
 
-                    print ("COMPLETED SUCCESS")
-                    return render(request, self.template_name, context)
+            #        print ("COMPLETED SUCCESS")
+            #        return render(request, self.template_name, context)
 
         except Exception as e:
-            print ("EXCEPTION")
+            print ("START EXCEPTION")
+            print (str(e))
+            print ("END EXCEPTION")
 #            if 'ps_booking_internal' in request.COOKIES:
 #                print "INTERNAL REDIRECT"
 #                return redirect('dash-bookings')
@@ -3201,134 +3219,141 @@ class BookingSuccessView(TemplateView):
                 basket = Basket.objects.filter(status='Submitted', owner=request.user).order_by('-id')[:1]
             else:
                 basket = Basket.objects.filter(status='Submitted', owner=booking.customer).order_by('-id')[:1]
-            order = Order.objects.get(basket=basket[0]) 
-            invoice = Invoice.objects.get(order_number=order.number)
-            invoice_ref = invoice.reference
-            book_inv, created = BookingInvoice.objects.get_or_create(booking=booking, invoice_reference=invoice_ref)
-            #invoice_ref = request.GET.get('invoice')
-            if booking.booking_type == 3:
-                try:
-                    inv = Invoice.objects.get(reference=invoice_ref)
-                    order = Order.objects.get(number=inv.order_number)
-                    order.user = booking.customer
-                    order.save()
-                except Invoice.DoesNotExist:
-                    print ("INVOICE ERROR")
-                    logger.error('{} tried making a booking with an incorrect invoice'.format('User {} with id {}'.format(booking.customer.get_full_name(),booking.customer.id) if booking.customer else 'An anonymous user'))
-                    return redirect('public_make_booking')
-                if inv.system not in ['0516']:
-                    print ("SYSTEM ERROR")
-                    logger.error('{} tried making a booking with an invoice from another system with reference number {}'.format('User {} with id {}'.format(booking.customer.get_full_name(),booking.customer.id) if booking.customer else 'An anonymous user',inv.reference))
-                    return redirect('public_make_booking')
-#                try:
-#                    print ("BOOKING INVOICE")
-#                    b = BookingInvoice.objects.get(invoice_reference=invoice_ref)
-#                    print (b)
-#                    logger.error('{} tried making a booking with an already used invoice with reference number {}'.format('User {} with id {}'.format(booking.customer.get_full_name(),booking.customer.id) if booking.customer else 'An anonymous user',inv.reference))
-#                    return redirect('public_make_booking')
-#                except BookingInvoice.DoesNotExist:
-#                    print ("BOOKING DOES NOT EXIST")
-#                    logger.info('{} finished temporary booking {}, creating new BookingInvoice with reference {}'.format('User {} with id {}'.format(booking.customer.get_full_name(),booking.customer.id) if booking.customer else 'An anonymous user',booking.id, invoice_ref))
-#                    # FIXME: replace with server side notify_url callback
-#                    book_inv, created = BookingInvoice.objects.get_or_create(booking=booking, invoice_reference=invoice_ref)
-#                    book_inv, created = BookingInvoice.objects.get(booking=booking, invoice_reference=invoice_ref) 
-                if book_inv:
-                    if booking.old_booking:
-                        old_booking = Booking.objects.get(id=booking.old_booking.id)
-                        old_booking.booking_type = 4
-                        old_booking.cancelation_time = datetime.now()
-                        old_booking.canceled_by = request.user
-                        old_booking.save()
-                        booking_items = MooringsiteBooking.objects.filter(booking=old_booking)
-                        # Find admissions booking for old booking
-                        if old_booking.admission_payment:
-                            old_booking.admission_payment.booking_type = 4
-                            old_booking.admission_payment.cancelation_time = datetime.now()
-                            old_booking.admission_payment.canceled_by = request.user
+            
+            context = utils.booking_success(basket,booking,context_processor)
 
-                            old_booking.admission_payment.save()
-                        for bi in booking_items:
-                            bi.booking_type = 4
-                            bi.save()
-                    
-                    booking_items_current = MooringsiteBooking.objects.filter(booking=booking)
-                    for bi in booking_items_current:
-                       if str(bi.id) in booking.override_lines:
-                          bi.amount = Decimal(booking.override_lines[str(bi.id)])
-                       bi.save()
+            request.session['ps_last_booking'] = booking.id
+            utils.delete_session_booking(request.session)
 
-                    msb = MooringsiteBooking.objects.filter(booking=booking).order_by('from_dt')
-                    from_date = msb[0].from_dt
-                    to_date = msb[msb.count()-1].to_dt
-                    timestamp = calendar.timegm(from_date.timetuple())
-                    local_dt = datetime.fromtimestamp(timestamp)
-                    from_dt = local_dt.replace(microsecond=from_date.microsecond)
-                    from_date_converted = from_dt.date()
-                    timestamp = calendar.timegm(to_date.timetuple())
-                    local_dt = datetime.fromtimestamp(timestamp)
-                    to_dt = local_dt.replace(microsecond=to_date.microsecond)
-                    to_date_converted = to_dt.date()
-                    booking.arrival = from_date_converted
-                    booking.departure = to_date_converted
-                    # set booking to be permanent fixture
-                    booking.booking_type = 1  # internet booking
-                    booking.expiry_time = None
-                    update_payments(invoice_ref)
-                    #Calculate Admissions and create object
-                    if booking.admission_payment:
-                         ad_booking = AdmissionsBooking.objects.get(pk=booking.admission_payment.pk)
-                         if request.user.__class__.__name__ == 'EmailUser':
-                              ad_booking.created_by = request.user
-                         ad_booking.booking_type=1
-                         ad_booking.save()
-                         ad_invoice = AdmissionsBookingInvoice.objects.get_or_create(admissions_booking=ad_booking, invoice_reference=invoice_ref)
+            return render(request, self.template_name, context)
+            #order = Order.objects.get(basket=basket[0]) 
+            #invoice = Invoice.objects.get(order_number=order.number)
+            #invoice_ref = invoice.reference
+            #book_inv, created = BookingInvoice.objects.get_or_create(booking=booking, invoice_reference=invoice_ref)
+            ##invoice_ref = request.GET.get('invoice')
+            #if booking.booking_type == 3:
+            #    try:
+            #        inv = Invoice.objects.get(reference=invoice_ref)
+            #        order = Order.objects.get(number=inv.order_number)
+            #        order.user = booking.customer
+            #        order.save()
+            #    except Invoice.DoesNotExist:
+            #        print ("INVOICE ERROR")
+            #        logger.error('{} tried making a booking with an incorrect invoice'.format('User {} with id {}'.format(booking.customer.get_full_name(),booking.customer.id) if booking.customer else 'An anonymous user'))
+            #        return redirect('public_make_booking')
+            #    if inv.system not in ['0516']:
+            #        print ("SYSTEM ERROR")
+            #        logger.error('{} tried making a booking with an invoice from another system with reference number {}'.format('User {} with id {}'.format(booking.customer.get_full_name(),booking.customer.id) if booking.customer else 'An anonymous user',inv.reference))
+            #        return redirect('public_make_booking')
+#           #     try:
+#           #         print ("BOOKING INVOICE")
+#           #         b = BookingInvoice.objects.get(invoice_reference=invoice_ref)
+#           #         print (b)
+#           #         logger.error('{} tried making a booking with an already used invoice with reference number {}'.format('User {} with id {}'.format(booking.customer.get_full_name(),booking.customer.id) if booking.customer else 'An anonymous user',inv.reference))
+#           #         return redirect('public_make_booking')
+#           #     except BookingInvoice.DoesNotExist:
+#           #         print ("BOOKING DOES NOT EXIST")
+#           #         logger.info('{} finished temporary booking {}, creating new BookingInvoice with reference {}'.format('User {} with id {}'.format(booking.customer.get_full_name(),booking.customer.id) if booking.customer else 'An anonymous user',booking.id, invoice_ref))
+#           #         # FIXME: replace with server side notify_url callback
+#           #         book_inv, created = BookingInvoice.objects.get_or_create(booking=booking, invoice_reference=invoice_ref)
+#           #         book_inv, created = BookingInvoice.objects.get(booking=booking, invoice_reference=invoice_ref) 
+            #    if book_inv:
+            #        if booking.old_booking:
+            #            old_booking = Booking.objects.get(id=booking.old_booking.id)
+            #            old_booking.booking_type = 4
+            #            old_booking.cancelation_time = datetime.now()
+            #            old_booking.canceled_by = request.user
+            #            old_booking.save()
+            #            booking_items = MooringsiteBooking.objects.filter(booking=old_booking)
+            #            # Find admissions booking for old booking
+            #            if old_booking.admission_payment:
+            #                old_booking.admission_payment.booking_type = 4
+            #                old_booking.admission_payment.cancelation_time = datetime.now()
+            #                old_booking.admission_payment.canceled_by = request.user
 
-                         for al in ad_booking.override_lines.keys():
-                             ad_line = AdmissionsLine.objects.get(id=int(al))
-                             ad_line.cost = ad_booking.override_lines[str(al)]
-                             ad_line.save()
-                        # booking.admission_payment = ad_booking
-                    booking.save()
-                    #if not request.user.is_staff:
-                    #    print "USER IS NOT STAFF."
-                    request.session['ps_last_booking'] = booking.id
-                    utils.delete_session_booking(request.session)
-                    # send out the invoice before the confirmation is sent if total is greater than zero
-                    #if booking.cost_total > 0: 
-                    emails.send_booking_invoice(booking,request,context_processor)
-                    # for fully paid bookings, fire off confirmation emaili
-                    #if booking.invoice_status == 'paid':
-                    emails.send_booking_confirmation(booking,request, context_processor)
-                    refund_failed = None
-                    if RefundFailed.objects.filter(booking=booking).count() > 0:
-                        refund_failed = RefundFailed.objects.filter(booking=booking)
-                    # Create/Update Vessel in VesselDetails Table
-                    try:
+            #                old_booking.admission_payment.save()
+            #            for bi in booking_items:
+            #                bi.booking_type = 4
+            #                bi.save()
+            #        
+            #        booking_items_current = MooringsiteBooking.objects.filter(booking=booking)
+            #        for bi in booking_items_current:
+            #           if str(bi.id) in booking.override_lines:
+            #              bi.amount = Decimal(booking.override_lines[str(bi.id)])
+            #           bi.save()
 
-                        if VesselDetail.objects.filter(rego_no=booking.details['vessel_rego']).count() > 0:
-                                vd = VesselDetail.objects.filter(rego_no=booking.details['vessel_rego'])
-                                p = vd[0]
-                                p.vessel_size=booking.details['vessel_size']
-                                p.vessel_draft=booking.details['vessel_draft']
-                                p.vessel_beam=booking.details['vessel_beam']
-                                p.vessel_weight=booking.details['vessel_weight']
-                                p.save()
-                        else:
-                                models.VesselDetail.objects.create(rego_no=booking.details['vessel_rego'],
-                                                               vessel_size=booking.details['vessel_size'],
-                                                               vessel_draft=booking.details['vessel_draft'],
-                                                               vessel_beam=booking.details['vessel_beam'],
-                                                               vessel_weight=booking.details['vessel_weight']
-                                                              )
-                    except:
-                        print ("ERROR: create vesseldetails on booking success")
-                    
-                    context = {
-                      'booking': booking,
-                      'book_inv': [book_inv],
-                      'refund_failed' : refund_failed
-                    }
-                    return render(request, self.template_name, context)
+            #        msb = MooringsiteBooking.objects.filter(booking=booking).order_by('from_dt')
+            #        from_date = msb[0].from_dt
+            #        to_date = msb[msb.count()-1].to_dt
+            #        timestamp = calendar.timegm(from_date.timetuple())
+            #        local_dt = datetime.fromtimestamp(timestamp)
+            #        from_dt = local_dt.replace(microsecond=from_date.microsecond)
+            #        from_date_converted = from_dt.date()
+            #        timestamp = calendar.timegm(to_date.timetuple())
+            #        local_dt = datetime.fromtimestamp(timestamp)
+            #        to_dt = local_dt.replace(microsecond=to_date.microsecond)
+            #        to_date_converted = to_dt.date()
+            #        booking.arrival = from_date_converted
+            #        booking.departure = to_date_converted
+            #        # set booking to be permanent fixture
+            #        booking.booking_type = 1  # internet booking
+            #        booking.expiry_time = None
+            #        update_payments(invoice_ref)
+            #        #Calculate Admissions and create object
+            #        if booking.admission_payment:
+            #             ad_booking = AdmissionsBooking.objects.get(pk=booking.admission_payment.pk)
+            #             if request.user.__class__.__name__ == 'EmailUser':
+            #                  ad_booking.created_by = request.user
+            #             ad_booking.booking_type=1
+            #             ad_booking.save()
+            #             ad_invoice = AdmissionsBookingInvoice.objects.get_or_create(admissions_booking=ad_booking, invoice_reference=invoice_ref)
+
+            #             for al in ad_booking.override_lines.keys():
+            #                 ad_line = AdmissionsLine.objects.get(id=int(al))
+            #                 ad_line.cost = ad_booking.override_lines[str(al)]
+            #                 ad_line.save()
+            #            # booking.admission_payment = ad_booking
+            #        booking.save()
+            #        #if not request.user.is_staff:
+            #        #    print "USER IS NOT STAFF."
+            #        request.session['ps_last_booking'] = booking.id
+            #        utils.delete_session_booking(request.session)
+            #        # send out the invoice before the confirmation is sent if total is greater than zero
+            #        #if booking.cost_total > 0: 
+            #        emails.send_booking_invoice(booking,request,context_processor)
+            #        # for fully paid bookings, fire off confirmation emaili
+            #        #if booking.invoice_status == 'paid':
+            #        emails.send_booking_confirmation(booking,request, context_processor)
+            #        refund_failed = None
+            #        if RefundFailed.objects.filter(booking=booking).count() > 0:
+            #            refund_failed = RefundFailed.objects.filter(booking=booking)
+            #        # Create/Update Vessel in VesselDetails Table
+            #        try:
+
+            #            if VesselDetail.objects.filter(rego_no=booking.details['vessel_rego']).count() > 0:
+            #                    vd = VesselDetail.objects.filter(rego_no=booking.details['vessel_rego'])
+            #                    p = vd[0]
+            #                    p.vessel_size=booking.details['vessel_size']
+            #                    p.vessel_draft=booking.details['vessel_draft']
+            #                    p.vessel_beam=booking.details['vessel_beam']
+            #                    p.vessel_weight=booking.details['vessel_weight']
+            #                    p.save()
+            #            else:
+            #                    models.VesselDetail.objects.create(rego_no=booking.details['vessel_rego'],
+            #                                                   vessel_size=booking.details['vessel_size'],
+            #                                                   vessel_draft=booking.details['vessel_draft'],
+            #                                                   vessel_beam=booking.details['vessel_beam'],
+            #                                                   vessel_weight=booking.details['vessel_weight']
+            #                                                  )
+            #        except:
+            #            print ("ERROR: create vesseldetails on booking success")
+            #        
+            #        context = {
+            #          'booking': booking,
+            #          'book_inv': [book_inv],
+            #          'refund_failed' : refund_failed
+            #        }
+            #        return render(request, self.template_name, context)
  
         except Exception as e:
 #            if 'ps_booking_internal' in request.COOKIES:

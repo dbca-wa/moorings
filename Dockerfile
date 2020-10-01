@@ -10,7 +10,7 @@ RUN apt-get update
 RUN apt-get upgrade -y
 RUN apt-get install --no-install-recommends -y wget git libmagic-dev gcc binutils libproj-dev gdal-bin python3 python3-setuptools python3-dev python3-pip tzdata cron rsyslog gunicorn3 libreoffice
 RUN apt-get install --no-install-recommends -y libpq-dev
-RUN apt-get install --no-install-recommends -y postgresql-client mtr
+RUN apt-get install --no-install-recommends -y postgresql-client mtr htop vim ssh
 RUN ln -s /usr/bin/python3 /usr/bin/python && \
     ln -s /usr/bin/pip3 /usr/bin/pip
 RUN pip install --upgrade pip
@@ -52,5 +52,4 @@ RUN chmod 755 /startup.sh
 EXPOSE 8080
 HEALTHCHECK --interval=1m --timeout=5s --start-period=10s --retries=3 CMD ["wget", "-q", "-O", "-", "http://localhost:8080/"]
 CMD ["/startup.sh"]
-#CMD ["gunicorn", "mooring.wsgi", "--bind", ":8080", "--config", "gunicorn.ini"]
-
+#CMD ["gunicorn", "mooring.wsgi", "--bind", ":8080", "--config",
