@@ -19,7 +19,7 @@ class Command(BaseCommand):
            rows = []
            system = settings.PS_PAYMENT_SYSTEM_ID
            system = system.replace('S','0')
-           rows = bpoint_integrity_checks(system,100,10)
+           rows = bpoint_integrity_checks(system,2,10)
 
            for r in rows:
                print (r['booking_reference'])
