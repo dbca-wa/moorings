@@ -522,7 +522,25 @@ class AnnualAdmissionEmail(models.Model):
     def __str__(self):
         return self.email
 
-    
+
+
+class EmailGroup(models.Model):
+
+    EMAIL_GROUP = (
+        (0, 'Mooring Booking Checks'),
+        (1, 'Annual Admission Booking Checks'),
+        (2, 'Daily Admission Booking Checks'),
+    )
+
+    mooring_group = models.ForeignKey('MooringAreaGroup', blank=False, null=False)
+    email_group = models.SmallIntegerField(choices=EMAIL_GROUP, default=0)
+    email = models.CharField(max_length=300)
+    active = models.BooleanField(default=True)
+
+    def __str__(self):
+        return self.email
+
+
 class AnnualBookingPeriodGroup(models.Model):
 
     STATUS = (

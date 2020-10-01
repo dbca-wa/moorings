@@ -128,7 +128,7 @@ def sendHtmlEmail(to,subject,context,template,cc,bcc,from_email,template_group,a
 
 
 
-def send_admissions_booking_invoice(admissionsBooking, request, context_processor):
+def send_admissions_booking_invoice(admissionsBooking, context_processor):
     email_obj = TemplateEmailBase()
     admissionsLine = AdmissionsLine.objects.get(admissionsBooking=admissionsBooking)
     template = 'mooring/email/admissions_invoice.html'
@@ -153,7 +153,7 @@ def send_admissions_booking_invoice(admissionsBooking, request, context_processo
     references = [b.invoice_reference for b in admissionsBooking.invoices.all()]
     invoice = Invoice.objects.filter(reference__in=references).order_by('-created')[0]
 #    invoice_pdf = create_invoice_pdf_bytes(filename,invoice)
-    invoice_pdf = create_invoice_pdf_bytes(filename,invoice, request, context_processor)
+    invoice_pdf = create_invoice_pdf_bytes(filename,invoice, context_processor)
 #    rottnest_email = default_rottnest_email
 #    rottnest_email = default_from_email
     template_group = context_processor['TEMPLATE_GROUP']
@@ -162,7 +162,7 @@ def send_admissions_booking_invoice(admissionsBooking, request, context_processo
 #    email_obj.send([email], from_address=rottnest_email, context=context, attachments=[(filename, invoice_pdf, 'application/pdf')])
 
 
-def send_annual_admission_booking_invoice(booking,request, context_processor):
+def send_annual_admission_booking_invoice(booking,context_processor):
     subject = 'Your booking invoice'
     template = 'mooring/email/booking_invoice_annual_admissions.html'
     cc = None
@@ -173,11 +173,11 @@ def send_annual_admission_booking_invoice(booking,request, context_processor):
     filename = 'invoice-annual_admission-{}.pdf'.format(booking.id)
     references = [b.invoice_reference for b in BookingAnnualInvoice.objects.filter(booking_annual_admission=booking)]
     invoice = Invoice.objects.filter(reference__in=references).order_by('-created')[0]
-    invoice_pdf = create_invoice_pdf_bytes(filename,invoice, request, context_processor)
+    invoice_pdf = create_invoice_pdf_bytes(filename,invoice, context_processor)
     template_group = context_processor['TEMPLATE_GROUP']
     sendHtmlEmail([to],subject,context,template,cc,bcc,from_email,template_group,attachments=[(filename, invoice_pdf, 'application/pdf')])
 
-def send_booking_invoice(booking,request, context_processor):
+def send_booking_invoice(booking, context_processor):
     subject = 'Your booking invoice'
     template = 'mooring/email/booking_invoice.html'
     cc = None
@@ -188,7 +188,7 @@ def send_booking_invoice(booking,request, context_processor):
     filename = 'invoice-{}({}-{}).pdf'.format(booking.mooringarea.name,booking.arrival,booking.departure)
     references = [b.invoice_reference for b in booking.invoices.all()]
     invoice = Invoice.objects.filter(reference__in=references).order_by('-created')[0]
-    invoice_pdf = create_invoice_pdf_bytes(filename,invoice, request, context_processor)
+    invoice_pdf = create_invoice_pdf_bytes(filename,invoice, context_processor)
     template_group = context_processor['TEMPLATE_GROUP']
     sendHtmlEmail([to],subject,context,template,cc,bcc,from_email,template_group,attachments=[(filename, invoice_pdf, 'application/pdf')])
 
@@ -215,7 +215,7 @@ def send_booking_invoice_old(booking, request, context_processor):
     campground_email = default_from_email 
     email_obj.send([email], from_address=campground_email, context=context, attachments=[(filename, invoice_pdf, 'application/pdf')])
 
-def send_admissions_booking_confirmation(admissionsBooking, request, context_processor):
+def send_admissions_booking_confirmation(admissionsBooking, context_processor):
     email_obj = TemplateEmailBase()
 
     admissionsLine = AdmissionsLine.objects.get(admissionsBooking=admissionsBooking)
@@ -249,7 +249,7 @@ def send_admissions_booking_confirmation(admissionsBooking, request, context_pro
     sendHtmlEmail([email],subject,context,template,cc,bcc,from_email,template_group,attachments=[('confirmation-AD{}.pdf'.format(admissionsBooking.id), att.read(), 'application/pdf')])
 
 
-def send_new_annual_admission_booking_internal(booking, request, context_processor):
+def send_new_annual_admission_booking_internal(booking, context_processor):
     email_obj = TemplateEmailBase()
 
     subject = 'New Annual Admission booking for {} with AA{}'.format(booking.details['first_name']+' '+booking.details['last_name'],str(booking.id))
@@ -272,7 +272,7 @@ def send_new_annual_admission_booking_internal(booking, request, context_process
         sendHtmlEmail([b.email],subject,context,template,cc,bcc,from_email,template_group,attachments=[])
 
 
-def send_booking_confirmation(booking,request,context_processor):
+def send_booking_confirmation(booking,context_processor):
     email_obj = TemplateEmailBase()
     email_obj.subject = 'Your booking {} at {} is confirmed'.format(booking.confirmation_number,booking.mooringarea.name)
     email_obj.html_template = 'mooring/email/confirmation.html'

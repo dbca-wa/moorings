@@ -550,6 +550,18 @@ class PromoArea(admin.GeoModelAdmin):
                 obj.mooring_group = groups[0]
         super(PromoArea, self).save_model(request, obj, form, change)
 
+@admin.register(models.EmailGroup)
+class EmailGroupAdmin(admin.ModelAdmin):
+    list_display = ('mooring_group','email','email_group','active')
+    list_filter = ('mooring_group','email_group',)
+
+    def get_queryset(self, request):
+        """ Filter based on the mooring group of the user. """
+        qs = super(EmailGroupAdmin, self).get_queryset(request)
+        if request.user.is_superuser:
+            return qs
+        group = models.MooringAreaGroup.objects.filter(members__in=[request.user,])
+        return qs.filter(mooring_group__in=group)
 
 @admin.register(models.AnnualAdmissionEmail)
 class AnnualAdmissionEmailAdmin(admin.ModelAdmin):

@@ -230,7 +230,7 @@ def _create_header(canvas, doc, draw_page_number=True):
     canvas.drawString(current_x + invoice_details_offset, current_y - (SMALL_FONTSIZE + HEADER_SMALL_BUFFER) * 7, currency(invoice.balance))
     canvas.restoreState()
     
-def _create_invoice(invoice_buffer, invoice, request,mooring_var):
+def _create_invoice(invoice_buffer, invoice, mooring_var):
 
     global DPAW_HEADER_LOGO 
     if  mooring_var["TEMPLATE_GROUP"] == 'rottnest':
@@ -337,9 +337,9 @@ def _create_invoice(invoice_buffer, invoice, request,mooring_var):
     
     return invoice_buffer
 
-def create_invoice_pdf_bytes(filename, invoice,request,mooring_var):
+def create_invoice_pdf_bytes(filename, invoice,mooring_var):
     invoice_buffer = BytesIO()
-    _create_invoice(invoice_buffer, invoice, request,mooring_var)
+    _create_invoice(invoice_buffer, invoice, mooring_var)
 
     # Get the value of the BytesIO buffer
     value = invoice_buffer.getvalue()
