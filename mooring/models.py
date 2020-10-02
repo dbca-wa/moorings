@@ -6,6 +6,7 @@ import base64
 import binascii
 import hashlib
 import calendar
+import json
 from decimal import Decimal as D
 from django.core.files.base import ContentFile
 from django.core.exceptions import ValidationError
@@ -25,7 +26,7 @@ from django.core.cache import cache
 from ledger.payments.models import Invoice
 from ledger.accounts.models import EmailUser
 from django.core.files.storage import FileSystemStorage
-
+from django.core import serializers
 #today = datetime.now()
 #today_path = today.strftime("%Y/%m/%d/%H")
 private_storage = FileSystemStorage(location=settings.BASE_DIR+"/private-media/", base_url='/private-media/')
@@ -240,6 +241,11 @@ class MooringArea(models.Model):
         cache.delete('marina')
         cache.delete('marina_dt')
         cache.delete('MooringAreaMapViewSet')
+        cache.delete('MooringArea:_is_open:'+str(self.id))
+        cache.delete('MooringArea:_get_current_closure:'+str(self.id))
+        cache.delete('MooringAreaViewSet:datatable_list:row:'+str(self.id))
+        cache.delete('mooringareas'+str(bool(False)))
+        
         super(MooringArea,self).save(*args,**kwargs)
 
     class Meta:
@@ -265,13 +271,16 @@ class MooringArea(models.Model):
     def current_closure(self):
         closure = self._get_current_closure()
         if closure:
-            start = closure.range_start
+            start = datetime.fromisoformat(closure['fields']['range_start'][:-1])
+            range_end = datetime.fromisoformat(closure['fields']['range_end'][:-1])
+            #datetime.strptime(,'%Y-%m-%d ')
+            #print (datetime.fromisoformat(start[:-1]))
             timestamp = calendar.timegm(start.timetuple())
             local_dt = datetime.fromtimestamp(timestamp)
             start = local_dt.replace(microsecond=start.microsecond)
             start = start.strftime('%d/%m/%Y %H:%M')
-            if closure.range_end:
-                end = closure.range_end if closure.range_end else ""
+            if range_end:
+                end = range_end if range_end else ""
                 timestamp = calendar.timegm(end.timetuple())
                 local_dt = datetime.fromtimestamp(timestamp)
                 end = local_dt.replace(microsecond=end.microsecond)
@@ -281,6 +290,28 @@ class MooringArea(models.Model):
             strTime = 'Start: {} Reopen: {}'.format(start, end)
             return strTime
         return ''
+
+
+#    @property
+#    def current_closure(self):
+#        closure = self._get_current_closure()
+#        if closure:
+#            start = closure.range_start
+#            timestamp = calendar.timegm(start.timetuple())
+#            local_dt = datetime.fromtimestamp(timestamp)
+#            start = local_dt.replace(microsecond=start.microsecond)
+#            start = start.strftime('%d/%m/%Y %H:%M')
+#            if closure.range_end:
+#                end = closure.range_end if closure.range_end else ""
+#                timestamp = calendar.timegm(end.timetuple())
+#                local_dt = datetime.fromtimestamp(timestamp)
+#                end = local_dt.replace(microsecond=end.microsecond)
+#                end = end.strftime('%d/%m/%Y %H:%M')
+#            else:
+#                end = ""
+#            strTime = 'Start: {} Reopen: {}'.format(start, end)
+#            return strTime
+#        return ''
 
     @property
     def dog_permitted(self):
@@ -326,24 +357,30 @@ class MooringArea(models.Model):
     def _is_open(self,period):
         '''Check if the campground is open on a specified datetime
         '''
+        json_data = cache.get('MooringArea:_is_open:'+str(self.id))
+        
         is_open = False
-        open_ranges, closed_ranges = None, None
-        # Get all booking ranges
-        try:
-            open_ranges = self.booking_ranges.filter(Q(status=0),Q(range_start__lte=period), Q(range_end__gte=period) | Q(range_end__isnull=True) ).latest('updated_on')
-            is_open = True
-        except MooringAreaBookingRange.DoesNotExist:
-            pass
-        try:
-            closed_ranges = self.booking_ranges.filter(Q(range_start__lte=period),Q(status=1),Q(range_end__gte=period)).latest('updated_on')
-            #is_open = False
-        except MooringAreaBookingRange.DoesNotExist:
-            pass
-            #return True if open_ranges else False
-        if open_ranges:
-             is_open = True
-        if closed_ranges:
-             is_open = False
+        if json_data is None:
+            open_ranges, closed_ranges = None, None
+            # Get all booking ranges
+            try:
+                open_ranges = self.booking_ranges.filter(Q(status=0),Q(range_start__lte=period), Q(range_end__gte=period) | Q(range_end__isnull=True) ).latest('updated_on')
+                is_open = True
+            except MooringAreaBookingRange.DoesNotExist:
+                pass
+            try:
+                closed_ranges = self.booking_ranges.filter(Q(range_start__lte=period),Q(status=1),Q(range_end__gte=period)).latest('updated_on')
+                #is_open = False
+            except MooringAreaBookingRange.DoesNotExist:
+                pass
+                #return True if open_ranges else False
+            if open_ranges:
+                 is_open = True
+            if closed_ranges:
+                 is_open = False
+            cache.set('MooringArea:_is_open:'+str(self.id),is_open,60)
+        else:
+            is_open = json_data
         #if not open_ranges:
         #    return False
         #if open_ranges.updated_on > closed_ranges.updated_on:
@@ -355,9 +392,18 @@ class MooringArea(models.Model):
         closure_period = None
         period = timezone.now()
         if not self.active:
-            closure = self.booking_ranges.filter(Q(range_start__lte=period),Q(status=1),Q(range_end__gte=period)).order_by('updated_on')
-            if closure:
-                closure_period = closure[0]
+            json_data = cache.get('MooringArea:_get_current_closure:'+str(self.id))
+            closure = None
+            if json_data is None:
+                closure = self.booking_ranges.filter(Q(range_start__lte=period),Q(status=1),Q(range_end__gte=period)).order_by('updated_on')
+                closure_json_text = serializers.serialize("json", closure)
+                cache.set('MooringArea:_get_current_closure:'+str(self.id),closure_json_text,60)
+            else:
+                closure_json_text = json_data
+
+            closure_json= json.loads(closure_json_text)
+            if closure_json:
+                closure_period = closure_json[0]
         return closure_period
 
     def open(self, data):
