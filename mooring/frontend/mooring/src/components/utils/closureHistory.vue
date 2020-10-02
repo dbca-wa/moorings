@@ -113,6 +113,7 @@ export default {
                     orderable: false
 
                 }, {
+                    data: 'reason',
                     mRender: function(data,type, full){
                         return full.reason ? full.reason: '';
                     },
