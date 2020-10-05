@@ -837,30 +837,28 @@ class MooringAreaViewSet(viewsets.ModelViewSet):
         #MooringArea.objects.filter(id=c.id).annotate(mooring_group=Value(None,output_field=ManyToManyField(MooringAreaGroup,blank=True)))
 
 
-
+        
         mooring_groups = MooringAreaGroup.objects.filter(members__in=[self.request.user,])
         cache_append=""
         for mg in mooring_groups:
              cache_append=cache_append+str(mg.id)+"-"
-             print (mg.moorings.all())
         
-        if data is None:
-            queryset = self.get_queryset()
-            #for c in queryset.all():
-            for mg in mooring_groups:
-                mgm = mg.moorings.all()
-                for c in mgm:
-                   d = MooringArea.objects.filter(id=c.id).annotate(mooring_group=Value(None,output_field=ManyToManyField(MooringAreaGroup,blank=True)))
-                   maobj = cache.get('mooringareas-object:'+str(c.id))
-                   if maobj is None:
-                       rows= self.get_serializer(d, formatted=formatted, many=True, method='get').data
-                       maobj=json.dumps(rows)
-                       cache.set('mooringareas-object:'+str(c.id),maobj,3600)
-                   else:
-                       rows=json.loads(maobj)
-            
-                   response_rows.append(rows[0])
-            data = response_rows
+        #queryset = self.get_queryset()
+        #for c in queryset.all():
+        for mg in mooring_groups:
+            mgm = mg.moorings.all()
+            for c in mgm:
+               d = MooringArea.objects.filter(id=c.id).annotate(mooring_group=Value(None,output_field=ManyToManyField(MooringAreaGroup,blank=True)))
+               maobj = cache.get('mooringareas-object:'+str(c.id))
+               if maobj is None:
+                   rows= self.get_serializer(d, formatted=formatted, many=True, method='get').data
+                   maobj=json.dumps(rows)
+                   cache.set('mooringareas-object:'+str(c.id),maobj,86400)
+               else:
+                   rows=json.loads(maobj)
+        
+               response_rows.append(rows[0])
+        data = response_rows
 
         return Response(data)
 
