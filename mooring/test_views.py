@@ -24,8 +24,6 @@ class AccountTestCase(TestSetup):
         url = '/account/'
         self.client.login(username=self.adminUN, password="pass")
         response = self.client.get(url, HTTP_HOST="website.domain")
-        print ("LOGIN: test_logged_in_admin")
-        print (response.content)
         self.assertEqual(response.status_code, 200)
 
     def test_logged_in_non_admin(self):
@@ -34,8 +32,6 @@ class AccountTestCase(TestSetup):
         url = '/account/'
         self.client.login(username=self.nonAdminUN, password="pass")
         response = self.client.get(url, HTTP_HOST="website.domain")
-        print ("LOGIN: test_logged_in_non_admin")
-        print (response.content)
         self.assertEqual(response.status_code, 200)
 
 class AdminTestCase(TestSetup):
