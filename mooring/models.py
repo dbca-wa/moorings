@@ -244,6 +244,7 @@ class MooringArea(models.Model):
         cache.delete('MooringArea:_is_open:'+str(self.id))
         cache.delete('MooringArea:_get_current_closure:'+str(self.id))
         cache.delete('MooringAreaViewSet:datatable_list:row:'+str(self.id))
+        cache.delete('mooringareas-object:'+str(self.id))
         cache.delete('mooringareas'+str(bool(False)))
         
         super(MooringArea,self).save(*args,**kwargs)
