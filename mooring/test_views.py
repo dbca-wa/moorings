@@ -281,7 +281,7 @@ class CreatedBasketTestCase(TestSetup):
         url = '/createdbasket/'
         self.client.login(username=self.nonAdminUN, password="pass")
         response = self.client.get(url, HTTP_HOST="website.domain")
-        self.assertEqual(response.status_code, 302)
+        self.assertEqual(response.status_code, 400)
 
     #Need to add tests including basket items.
 
@@ -484,7 +484,7 @@ class MyBookingsTestCase(TestSetup):
         """
         url = '/mybookings/'
         response = self.client.get(url, HTTP_HOST="website.domain")
-        self.assertEqual(response.status_code, 302)
+        self.assertEqual(response.status_code, 400)
 
     def test_logged_in_admin(self):
         """Test that the mybookings view will load whilst logged in as admin.
@@ -492,7 +492,7 @@ class MyBookingsTestCase(TestSetup):
         url = '/mybookings/'
         self.client.login(username=self.adminUN, password="pass")
         response = self.client.get(url, HTTP_HOST="website.domain")
-        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.status_code, 400)
 
     def test_logged_in_non_admin(self):
         """Test that the mybookings view will load whilst logged in as non-admin.
@@ -500,7 +500,7 @@ class MyBookingsTestCase(TestSetup):
         url = '/mybookings/'
         self.client.login(username=self.nonAdminUN, password="pass")
         response = self.client.get(url, HTTP_HOST="website.domain")
-        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.status_code, 400)
 
 class SuccessTestCase(TestSetup):
     def test_not_logged_in(self):
@@ -508,7 +508,7 @@ class SuccessTestCase(TestSetup):
         """
         url = '/success/'
         response = self.client.get(url, HTTP_HOST="website.domain")
-        self.assertEqual(response.status_code, 302)
+        self.assertEqual(response.status_code, 400)
 
     def test_logged_in_admin(self):
         """Test that the success view will redirect whilst logged in as admin and no booking made.
@@ -516,7 +516,7 @@ class SuccessTestCase(TestSetup):
         url = '/success/'
         self.client.login(username=self.adminUN, password="pass")
         response = self.client.get(url, HTTP_HOST="website.domain")
-        self.assertEqual(response.status_code, 302)
+        self.assertEqual(response.status_code, 400)
 
     def test_logged_in_non_admin(self):
         """Test that the success view will redirect whilst logged in as non-admin and no booking made.
@@ -524,7 +524,7 @@ class SuccessTestCase(TestSetup):
         url = '/success/'
         self.client.login(username=self.nonAdminUN, password="pass")
         response = self.client.get(url, HTTP_HOST="website.domain")
-        self.assertEqual(response.status_code, 302)
+        self.assertEqual(response.status_code, 400)
 
     #Will need to test with booking made.
 
@@ -534,7 +534,7 @@ class SuccessAdmissionsTestCase(TestSetup):
         """
         url = '/success_admissions/'
         response = self.client.get(url, HTTP_HOST="website.domain")
-        self.assertEqual(response.status_code, 302)
+        self.assertEqual(response.status_code, 400)
 
     def test_logged_in_admin(self):
         """Test that the success admissions view will redirect whilst logged in as admin and no payment made.

@@ -645,16 +645,10 @@ def get_campsite_availability(campsites_qs, start_date, end_date, ongoing_bookin
                 if int(q.value) > highest_val:
                     highest_val = int(q.value)
             max_advance = highest_val       
-        print ("NOWTIME")
-        print (nowtime)
-        print (today)  
         max_advance_open_time_dt = datetime.strptime(str(today)+' '+str(max_advance_open_time), '%Y-%m-%d %H:%M')
-        print (max_advance_open_time_dt)
         if nowtime > max_advance_open_time_dt:
-            print ("MAX OPEN")
             pass
         else:
-            print ("NOT OPEN")
             max_advance = max_advance - 1
 
 
