@@ -174,7 +174,7 @@ class BookingAnnualAdmissionAdmin(admin.ModelAdmin):
     raw_id_fields = ('customer','created_by','overridden_by','canceled_by',)
     list_display = ('id','customer','start_dt','expiry_dt','rego_no','booking_type','cost_total','created_by','created')
     ordering = ('-id',)
-    search_fields = ('customer','id',)
+    search_fields = ('customer__first_name','customer__last_name','id',)
     list_filter = ('booking_type',)
     readonly_fields=('created','sticker_no_history','sticker_created')
     inlines = [BookingAnnualInvoiceInline,]
