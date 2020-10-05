@@ -23,6 +23,7 @@ from django.views.decorators.csrf import csrf_exempt
 from django.utils import timezone
 from pytz import timezone as pytimezone
 from rest_framework import viewsets, serializers, status, generics, views
+from django.core import serializers as djangoserializers
 from rest_framework.decorators import detail_route, list_route,renderer_classes,authentication_classes,permission_classes
 from rest_framework.response import Response
 from rest_framework.renderers import JSONRenderer
@@ -39,6 +40,7 @@ from mooring import utils
 from mooring.helpers import can_view_campground, is_inventory, is_admin, is_payment_officer
 from datetime import datetime,timedelta, date
 from decimal import Decimal
+from django.db.models import Value, ManyToManyField
 from ledger.payments.utils import systemid_check, update_payments
 from mooring.context_processors import mooring_url, template_context
 from mooring import doctopdf
@@ -776,35 +778,88 @@ def add_booking(request, *args, **kwargs):
 
     return HttpResponse(json.dumps(response_data), content_type='application/json')
 
+def queryset_MooringArea():
+    query=  MooringArea.objects.all().annotate(mooring_group=Value(None,output_field=ManyToManyField(MooringAreaGroup,blank=True)))
+    return query
+ 
 class MooringAreaViewSet(viewsets.ModelViewSet):
-    from django.db.models import Value, ManyToManyField
-    queryset = MooringArea.objects.all().annotate(mooring_group=Value(None,output_field=ManyToManyField(MooringAreaGroup,blank=True)))
+    #queryset = MooringArea.objects.all().annotate(mooring_group=Value(None,output_field=ManyToManyField(MooringAreaGroup,blank=True)))
+    queryset = queryset_MooringArea()
     serializer_class = MooringAreaSerializer
 
     @list_route(methods=['GET',])
     @renderer_classes((JSONRenderer,))
     def datatable_list(self,request,format=None):
-        queryset = cache.get('moorings_dt')
-        queryset = None
-        if queryset is None:
-            queryset = self.get_queryset()
-            cache.set('moorings_dt',queryset,3600)
-        qs = [c for c in queryset.all() if can_view_campground(request.user,c)]
-        serializer = MooringAreaDatatableSerializer(qs,many=True)
-        data = serializer.data
-        return Response(data)
+        mooring_groups = MooringAreaGroup.objects.filter(members__in=[self.request.user,])
+        cache_append=""
+        for mg in mooring_groups:
+            cache_append=cache_append+str(mg.id)+":"
+           
+        #json_data = cache.get('MooringAreaViewSet:datatable_list:jsondata:'+cache_append)
+        json_data = None
+        if json_data is None:
+           qs = []
+           mooring_json = []
+           for mg in mooring_groups:
+               moorings_in_group = mg.moorings.all()
+               for mig in moorings_in_group:
+                   #qs.append(mig)
+                   row_json_data = cache.get('MooringAreaViewSet:datatable_list:row:'+str(mig.id))
+                   if row_json_data is None:
+                      row = {}
+                      row['active'] = mig.active 
+                      row['current_closure'] = mig.current_closure 
+                      row['district'] =  mig.district
+                      row['id'] = mig.id
+                      row['mooring_physical_type'] = mig.mooring_physical_type
+                      row['mooring_type'] = mig.mooring_type
+                      row['name'] = mig.name
+                      row['park'] = mig.park.name
+                      row['ratis_id'] = mig.ratis_id
+                      row['region'] = mig.region
+                      row_json_data = geojson.dumps(row)
+                      cache.set('MooringAreaViewSet:datatable_list:row:'+str(mig.id),row_json_data,600)
+                   else:
+                      row = geojson.loads(row_json_data)    
+                   mooring_json.append(row)
+
+           json_data = geojson.dumps(mooring_json)
+           #cache.set('MooringAreaViewSet:datatable_list:jsondata:'+cache_append,json_data,600)
+        return HttpResponse(json_data, content_type='application/json')
+
+        #return Response(data)
 
     @renderer_classes((JSONRenderer,))
     def list(self, request, format=None):
-        queryset = cache.get('mooringareas')
+        response_rows = []
         formatted = bool(request.GET.get("formatted", False))
-        if queryset is None:
-            queryset = self.get_queryset()
-            cache.set('mooringareas',queryset,3600)
-        queryset = self.get_queryset()
-        qs = [c for c in queryset.all() if can_view_campground(request.user,c)]
-        serializer = self.get_serializer(qs, formatted=formatted, many=True, method='get')
-        data = serializer.data
+      
+        #MooringArea.objects.filter(id=c.id).annotate(mooring_group=Value(None,output_field=ManyToManyField(MooringAreaGroup,blank=True)))
+
+
+        
+        mooring_groups = MooringAreaGroup.objects.filter(members__in=[self.request.user,])
+        cache_append=""
+        for mg in mooring_groups:
+             cache_append=cache_append+str(mg.id)+"-"
+        
+        #queryset = self.get_queryset()
+        #for c in queryset.all():
+        for mg in mooring_groups:
+            mgm = mg.moorings.all()
+            for c in mgm:
+               d = MooringArea.objects.filter(id=c.id).annotate(mooring_group=Value(None,output_field=ManyToManyField(MooringAreaGroup,blank=True)))
+               maobj = cache.get('mooringareas-object:'+str(c.id))
+               if maobj is None:
+                   rows= self.get_serializer(d, formatted=formatted, many=True, method='get').data
+                   maobj=json.dumps(rows)
+                   cache.set('mooringareas-object:'+str(c.id),maobj,86400)
+               else:
+                   rows=json.loads(maobj)
+        
+               response_rows.append(rows[0])
+        data = response_rows
+
         return Response(data)
 
     def retrieve(self, request, *args, **kwargs):

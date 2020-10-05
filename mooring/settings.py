@@ -57,20 +57,20 @@ if not DEBUG:
 else:
     REST_FRAMEWORK['DEFAULT_RENDERER_CLASSES']=('rest_framework.renderers.JSONRenderer','rest_framework_csv.renderers.CSVRenderer')
 
-
+del BOOTSTRAP3['css_url'] 
 TEMPLATES[0]['DIRS'].append(os.path.join(BASE_DIR, 'mooring', 'templates'))
 TEMPLATES[0]['OPTIONS']['context_processors'].append('mooring.context_processors.mooring_url')
-'''BOOTSTRAP3 = {
-    'jquery_url': '/static/common/css/jquery.min.js',
-    'base_url': '/static/common/css//twitter-bootstrap/3.3.6/',
-    'css_url': None,
-    'theme_url': None,
-    'javascript_url': None,
-    'javascript_in_head': False,
-    'include_jquery': False,
-    'required_css_class': 'required-form-field',
-    'set_placeholder': False,
-}'''
+#'''BOOTSTRAP3 = {
+#    'jquery_url': '/static/common/css/jquery.min.js',
+#    'base_url': '/static/common/css//twitter-bootstrap/3.3.6/',
+#    'css_url': None,
+#    'theme_url': None,
+#    'javascript_url': None,
+#    'javascript_in_head': False,
+#    'include_jquery': False,
+#    'required_css_class': 'required-form-field',
+#    'set_placeholder': False,
+#}'''
 CACHES = {
     'default': {
         'BACKEND': 'django.core.cache.backends.filebased.FileBasedCache',

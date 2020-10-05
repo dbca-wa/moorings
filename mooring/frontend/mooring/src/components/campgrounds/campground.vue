@@ -406,6 +406,7 @@ export default {
                 deferRender: true,
                 order: [],
                 ajax: {
+                    data: 'id',
                     url: api_endpoints.campground_price_history(this.$route.params.id),
                     dataSrc: ''
                 },
