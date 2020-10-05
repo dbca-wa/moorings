@@ -1232,14 +1232,14 @@ class MooringAreaMapFilterViewSetTestCase(TestSetup):
         """
         self.client.login(email=self.adminUN, password='pass')
         response = self.client.post(self.url)
-        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.status_code, 405)
 
     def test_api_post_non_admin(self):
         """Test the Mooring Area Map Filter View API endpoint POST response when logged in as external user.
         """
         self.client.login(email=self.nonAdminUN, password='pass')
         response = self.client.post(self.url)
-        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.status_code, 405)
 
     def test_api_post_anon(self):
         """Test the Mooring Area Map Filter View API endpoint POST response when not logged in.
@@ -1282,7 +1282,7 @@ class MooringAreaMapViewSetTestCase(TestSetup):
         """
         self.client.login(email=self.nonAdminUN, password='pass')
         response = self.client.post(self.url)
-        self.assertEqual(response.status_code, 405)
+        self.assertEqual(response.status_code, 200)
 
     def test_api_post_anon(self):
         """Test the Mooring Area Map View API endpoint POST response when not logged in.
