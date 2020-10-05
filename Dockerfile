@@ -30,7 +30,8 @@ RUN rm /app/libgeos.py.patch
 
 # Install the project (ensure that frontend projects have been built prior to this step).
 FROM python_libs_moorings
-RUN cp .git/refs/heads/master /app/git_hash > /dev/null 2>&1 
+ONBUILD COPY .git/refs/heads/master /app/git_hash 
+
 COPY gunicorn.ini manage_mo.py ./
 #COPY ledger ./ledger
 COPY timezone /etc/timezone
