@@ -620,19 +620,13 @@ def get_campsite_availability(campsites_qs, start_date, end_date, ongoing_bookin
         except:
             group = None
         if group:
-            print ("GLOBAL SETTINGS")
             globalsettings = GlobalSettings.objects.filter(mooring_group__in=[group,])
-            print (globalsettings)
             for gs in globalsettings:
                 if gs.key == 2:
-                    print ("YES KEY")
                     #max_advance = int(GlobalSettings.objects.get(key=2, mooring_group__in=[group,]).value)
                     max_advance = int(gs.value)
                 if gs.key == 18:
                     max_advance_open_time = gs.value 
-            print ("MAX")
-            print (max_advance)
-            print (max_advance_open_time)
 
             #max_advance = int(GlobalSettings.objects.get(key=2, mooring_group__in=[group,]).value)
             #if GlobalSettings.objects.filter(key=18, mooring_group__in=[group,]).count():
