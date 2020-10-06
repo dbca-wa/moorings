@@ -3135,7 +3135,7 @@ class BookingViewSet(viewsets.ModelViewSet):
         from django.db import connection, transaction
         try:
             
-            print("MLINE 1.01", datetime.now().strftime("%d/%m/%Y %H:%M:%S"))
+            #print("MLINE 1.01", datetime.now().strftime("%d/%m/%Y %H:%M:%S"))
             is_staff = request.user.is_staff
             is_superuser = request.user.is_superuser
             #search = request.GET.get('search[value]')
@@ -3155,7 +3155,7 @@ class BookingViewSet(viewsets.ModelViewSet):
 
 
             moorings_user_groups = MooringAreaGroup.objects.filter(members__in=[request.user]).values('id','moorings')
-            print("MLINE 1.02", datetime.now().strftime("%d/%m/%Y %H:%M:%S"))
+            #print("MLINE 1.02", datetime.now().strftime("%d/%m/%Y %H:%M:%S"))
             filter_query = Q()
             if canceled == 't':
                 filter_query &= Q(booking_type=4)
@@ -3165,27 +3165,44 @@ class BookingViewSet(viewsets.ModelViewSet):
                  filter_query &= Q(arrival__lte=departure)
             if arrival:
                  filter_query &= Q(departure__gt=arrival)
-
-            print("MLINE 1.03", datetime.now().strftime("%d/%m/%Y %H:%M:%S"))
+            if search:
+                if search[:2] == 'PS':
+                    booking_id_search = search.replace('PS','')
+                    filter_query &= Q(id=int(booking_id_search))
+            #print("MLINE 1.03", datetime.now().strftime("%d/%m/%Y %H:%M:%S"))
             booking_query = Booking.objects.filter(filter_query).order_by('-id')
             recordsTotal = Booking.objects.filter(Q(Q(booking_type=1) | Q(booking_type=4))).count()
             recordsFiltered = booking_query.count()
-            print("MLINE 1.04", datetime.now().strftime("%d/%m/%Y %H:%M:%S"))
+
+            #print ("COUNT:"+str(recordsFiltered))
+            #print("MLINE 1.04", datetime.now().strftime("%d/%m/%Y %H:%M:%S"))
             # build predata
             booking_items = {}
             booking_item_query = Q()
             mooring_name_list = {}
+            rego_cache = {}
             for booking in booking_query: 
                   booking_item_query |= Q(booking_id=booking.id)
                   booking_items[booking.id] = []
-            print("MLINE 1.05", datetime.now().strftime("%d/%m/%Y %H:%M:%S"))
+            #print("MLINE 1.05", datetime.now().strftime("%d/%m/%Y %H:%M:%S"))
 
             if len(booking_items) > 0:
-                booking_items_object = MooringsiteBooking.objects.filter(booking_item_query).values('campsite__mooringarea__name','campsite__mooringarea__id','campsite_id','id','to_dt','from_dt','amount','booking_type','booking_period_option','booking_id','booking','date','campsite__mooringarea__park__district__region__name','campsite__mooringarea__park__district__region__id','campsite__name')
+                booking_items_object = MooringsiteBooking.objects.filter(booking_item_query).values('campsite__mooringarea__name','campsite__mooringarea__id','campsite_id','id','to_dt','from_dt','amount','booking_period_option','booking_id','booking','date','campsite__mooringarea__park__district__region__name','campsite__mooringarea__park__district__region__id','campsite__name','booking__customer__email','booking__customer_id','booking_id','booking__customer__phone_number','booking__customer__mobile_number','booking__details','booking__booking_type','booking__canceled_by__first_name','booking__canceled_by__last_name')
+                #bvr = BookingVehicleRego.objects.filter(rego__icontains=search.lower()).values('booking_id','rego','type')
+                bvr = BookingVehicleRego.objects.filter(booking_item_query).values('booking_id','rego','type')
+                for v in bvr:
+                    if v['booking_id'] not in rego_cache:
+                       rego_cache[v['booking_id']] = []
+                    rego_cache[v['booking_id']].append({'rego':v['rego'], 'type': v['type']})
+
                 
-                for bi in booking_items_object: 
-                      booking_items[bi['booking_id']].append({'id':bi['id'], 'campsite_id': bi['campsite_id'] , 'date' : bi['date'], 'from_dt': bi['from_dt'], 'to_dt': bi['to_dt'], 'amount': bi['amount'], 'booking_type' : bi['booking_type'], 'booking_period_option' :bi['booking_period_option'], 'campsite_name': bi['campsite__name'], 'region_name': bi['campsite__mooringarea__park__district__region__name'],'mooring_name': bi['campsite__mooringarea__name'], 'region_id': bi['campsite__mooringarea__park__district__region__id'], 'mooringarea_id': bi['campsite__mooringarea__id'] })
-            print("LINE 1.06", datetime.now().strftime("%d/%m/%Y %H:%M:%S"))
+                for bi in booking_items_object:
+                    if bi['booking__canceled_by__first_name']:
+                       cancelled_by = bi['booking__canceled_by__first_name']+' '+bi['booking__canceled_by__last_name']
+                    else:
+                       cancelled_by = '' 
+                    booking_items[bi['booking_id']].append({'id':bi['id'], 'campsite_id': bi['campsite_id'] , 'date' : bi['date'], 'from_dt': bi['from_dt'], 'to_dt': bi['to_dt'], 'amount': bi['amount'], 'booking_type' : bi['booking__booking_type'], 'booking_period_option' :bi['booking_period_option'], 'campsite_name': bi['campsite__name'], 'region_name': bi['campsite__mooringarea__park__district__region__name'],'mooring_name': bi['campsite__mooringarea__name'], 'region_id': bi['campsite__mooringarea__park__district__region__id'], 'mooringarea_id': bi['campsite__mooringarea__id'],'email': bi['booking__customer__email'], 'customer_id': bi['booking__customer_id'],'booking_id': bi['booking_id'],'phone_number': bi['booking__customer__phone_number'],'mobile_number': bi['booking__customer__mobile_number'], 'details': bi['booking__details'],'cancelled_by': cancelled_by})
+            #print("LINE 1.06", datetime.now().strftime("%d/%m/%Y %H:%M:%S"))
             clean_data = []
             booking_data = []
             recordFilteredCount = 0
@@ -3194,7 +3211,7 @@ class BookingViewSet(viewsets.ModelViewSet):
             if length != 'all': 
                 rowcountend = int(start) + int(length)
             for booking in booking_query:
-                print("LINE 1.06.1", datetime.now().strftime("%d/%m/%Y %H:%M:%S"))
+                #print("LINE 1.06.1", datetime.now().strftime("%d/%m/%Y %H:%M:%S"))
                 msb_list = []
                 in_mg = False
                 skip_row = False
@@ -3238,12 +3255,12 @@ class BookingViewSet(viewsets.ModelViewSet):
                 if search:
                      if skip_row is False:
                           string_found = False
-                          if search == str(booking.id):
+                          if search == str(bitem['booking_id']):
                                string_found = True
-                          if search == 'PS'+str(booking.id):
+                          if search == 'PS'+str(bitem['booking_id']):
                                string_found = True
-                          if booking.customer:
-                                customer_email = booking.customer.email if booking.customer and booking.customer.email else ""
+                          if bitem['customer_id']:
+                                customer_email = bitem['email'] if bitem['customer_id'] and bitem['email'] else ""
                                 if search.lower() in customer_email.lower():
                                      string_found = True
  
@@ -3253,11 +3270,16 @@ class BookingViewSet(viewsets.ModelViewSet):
                           phone_number = booking.details.get('phone','')
                           if search.lower() in phone_number.lower():
                                  string_found = True
+                          #for rc in rego_cache:
 
-                          for r in booking.regos.all():
-                             if r.type == 'vessel':
-                                 if search.lower() in r.rego.lower():
-                                     string_found = True
+                          if bitem['booking_id'] in rego_cache:
+                               for rc in rego_cache[bitem['booking_id']]:
+                                   if search.lower() in rc['rego'].lower():
+                                        string_found = True
+                          #for r in booking.regos.all():
+                          #   if r.type == 'vessel':
+                          #       if search.lower() in r.rego.lower():
+                          #           string_found = True
  
                           for m_items in msb_list:
                               if search.lower() in m_items[0].lower():
@@ -3270,7 +3292,7 @@ class BookingViewSet(viewsets.ModelViewSet):
                           else:
                                skip_row = True
 
-                print("MLINE 1.08", datetime.now().strftime("%d/%m/%Y %H:%M:%S"))
+                #print("MLINE 1.08", datetime.now().strftime("%d/%m/%Y %H:%M:%S"))
                 if skip_row is True:
                     continue
                 recordFilteredCount = recordFilteredCount + 1
@@ -3283,31 +3305,31 @@ class BookingViewSet(viewsets.ModelViewSet):
                         show_row = True
                     if rowcount > rowcountend:
                         show_row = False
-                print("MLINE 1.08.001", datetime.now().strftime("%d/%m/%Y %H:%M:%S"))
+                #print("MLINE 1.08.001", datetime.now().strftime("%d/%m/%Y %H:%M:%S"))
                 if show_row is True:
                     bk_list={}
                     get_property_cache = booking.get_property_cache()
                     if 'active_invoices' not in get_property_cache or 'invoices' not in get_property_cache:
                         get_property_cache = booking.update_property_cache()
-                    print("MLINE 1.08.01", datetime.now().strftime("%d/%m/%Y %H:%M:%S"))
+                    #print("MLINE 1.08.01", datetime.now().strftime("%d/%m/%Y %H:%M:%S"))
                     booking_editable = False
                     if is_staff is True:
                         booking_editable = True
                     if is_superuser is True:
                         booking_editable = True
 
-                    print("MLINE 1.08.02", datetime.now().strftime("%d/%m/%Y %H:%M:%S"))
+                    #print("MLINE 1.08.02", datetime.now().strftime("%d/%m/%Y %H:%M:%S"))
                     bk_list['editable'] = booking_editable
-                    bk_list['id'] = booking.id
+                    bk_list['id'] = bitem['booking_id'] 
                    
-                    if booking.booking_type == 4:
+                    if bitem['booking_type'] == 4:
                         bk_list['status'] = 'Cancelled'
                     else:
                         bk_list['status'] = get_property_cache['status']
                     #booking_invoices= booking.invoices.all()
-                    print("MLINE 1.08.03", datetime.now().strftime("%d/%m/%Y %H:%M:%S"))
+                    #print("MLINE 1.08.03", datetime.now().strftime("%d/%m/%Y %H:%M:%S"))
 
-                    bk_list['booking_type'] = booking.booking_type
+                    bk_list['booking_type'] = bitem['booking_type']
                     bk_list['has_history'] = 0 #booking.has_history
                     bk_list['cost_total'] = booking.cost_total
                     bk_list['amount_paid'] = get_property_cache['amount_paid'] #booking.amount_paid
@@ -3316,7 +3338,7 @@ class BookingViewSet(viewsets.ModelViewSet):
                     bk_list['refund_status'] = get_property_cache['refund_status'] #booking.refund_status
                     bk_list['is_canceled'] = 'Yes' if booking.is_canceled else 'No'
                     bk_list['cancelation_reason'] = booking.cancellation_reason
-                    bk_list['canceled_by'] = booking.canceled_by.get_full_name() if booking.canceled_by else ''
+                    bk_list['canceled_by'] = bitem['cancelled_by'] 
                     bk_list['cancelation_time'] = booking.cancelation_time if booking.cancelation_time else ''
                     bk_list['paid'] = get_property_cache['paid'] #booking.paid
                     bk_list['invoices'] = get_property_cache['invoices'] #[i.invoice_reference for i in booking_invoices]
@@ -3328,7 +3350,7 @@ class BookingViewSet(viewsets.ModelViewSet):
                     vessel_weight = 0
                     vessel_size = 0
                     vessel_draft = 0
-                    print("MLINE 1.08.2", datetime.now().strftime("%d/%m/%Y %H:%M:%S"))
+                    #print("MLINE 1.08.2", datetime.now().strftime("%d/%m/%Y %H:%M:%S"))
                     if 'vessel_beam' in booking.details:
                          vessel_beam = booking.details['vessel_beam']
                     if 'vessel_weight' in booking.details:
@@ -3342,35 +3364,39 @@ class BookingViewSet(viewsets.ModelViewSet):
 
  
                     bk_list['vessel_details'] = { 'vessel_beam': vessel_beam, 'vessel_weight': vessel_weight, 'vessel_size': vessel_size, 'vessel_draft': vessel_draft, } 
-                    print("MLINE 1.08.3", datetime.now().strftime("%d/%m/%Y %H:%M:%S"))
+                    #print("MLINE 1.08.3", datetime.now().strftime("%d/%m/%Y %H:%M:%S"))
                     #bk_list['campsite_names'] = booking.campsite_name_list
                     bk_list['regos'] = [{'vessel':''}] 
-                    for r in booking.regos.all():
-                          if r.type == 'vessel':
-                             bk_list['regos']=  [{r.type: r.rego}]
+                    if bitem['booking_id'] in rego_cache:
+                        if rego_cache[bitem['booking_id']][0]['type'] == 'vessel':
+                            bk_list['regos']=  [{rego_cache[bitem['booking_id']][0]['type']: rego_cache[bitem['booking_id']][0]['rego']}]
+                    #for r in booking.regos.all():
+                    #      if r.type == 'vessel':
+                    #         bk_list['regos']=  [{r.type: r.rego}]
                     bk_list['booking_phone_number'] = ''
-                    print("MLINE 1.08.4", datetime.now().strftime("%d/%m/%Y %H:%M:%S"))
-                    if booking.details: 
-                         bk_list['firstname'] = booking.details.get('first_name','')
-                         bk_list['lastname'] = booking.details.get('last_name','')
-                         if "phone" in booking.details:
+                    #print("MLINE 1.08.4", datetime.now().strftime("%d/%m/%Y %H:%M:%S"))
+                    if bitem['details']: 
+                         bk_list['firstname'] = bitem['details'].get('first_name','')
+                         bk_list['lastname'] = bitem['details'].get('last_name','')
+                         if "phone" in bitem['details']:
                              bk_list['booking_phone_number'] = booking.details['phone']
 
-                    if booking.customer:
-                        bk_list['email'] = booking.customer.email if booking.customer and booking.customer.email else ""
-                        if booking.customer.phone_number:
-                           bk_list['phone'] = booking.customer.phone_number
-                        elif booking.customer.mobile_number:
-                            bk_list['phone'] = booking.customer.mobile_number
+                    if bitem['customer_id']:
+                        bk_list['email'] = bitem['email'] if bitem['customer_id'] and bitem['email'] else ""
+                        if bitem['phone_number']:
+                           bk_list['phone'] = bitem['phone_number']
+                        elif bitem['mobile_number']:
+                            bk_list['phone'] = bitem['mobile_number']
                         else:
                             bk_list['phone'] = ''
                         if booking.is_canceled:
                             bk_list['campground_site_type'] = ""
                         else:
-                            first_campsite = booking.first_campsite
-                            bk_list['campground_site_type'] = first_campsite.type if first_campsite else ""
-                            if booking.mooringarea.site_type != 2:
-                                bk_list['campground_site_type'] = '{}{}'.format('{} - '.format(first_campsite.name if first_campsite else ""),'({})'.format(bk_list['campground_site_type'] if bk_list['campground_site_type'] else ""))
+                            pass
+                            #first_campsite = None #booking.first_campsite
+                            #bk_list['campground_site_type'] = first_campsite.type if first_campsite else ""
+                            #if booking.mooringarea.site_type != 2:
+                            #    bk_list['campground_site_type'] = '{}{}'.format('{} - '.format(first_campsite.name if first_campsite else ""),'({})'.format(bk_list['campground_site_type'] if bk_list['campground_site_type'] else ""))
                     else:
                         bk['campground_site_type'] = ""
 
@@ -3381,7 +3407,7 @@ class BookingViewSet(viewsets.ModelViewSet):
                     booking_data.append(bk_list)
                 rowcount = rowcount + 1
             recordsFiltered = recordFilteredCount 
-            print("MLINE 1.09", datetime.now().strftime("%d/%m/%Y %H:%M:%S"))
+            #print("MLINE 1.09", datetime.now().strftime("%d/%m/%Y %H:%M:%S"))
             return Response(OrderedDict([
                 ('recordsTotal', recordsTotal),
                 ('recordsFiltered',recordsFiltered),
