@@ -187,6 +187,7 @@ class BookingAbortTestCase(TestSetup):
         url = '/booking/abort/'
         response = self.client.get(url, HTTP_HOST="website.domain")
         self.assertEqual(response.status_code, 302)
+
 #        self.assertContains(response, "Your session has expired");
 
     # def test_not_logged_in_with_booking(self):

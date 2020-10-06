@@ -8,8 +8,8 @@ ENV SECRET_KEY="ThisisNotRealKey"
 RUN apt-get clean
 RUN apt-get update
 RUN apt-get upgrade -y
-RUN apt-get install --no-install-recommends -y wget git libmagic-dev gcc binutils libproj-dev gdal-bin python3 python3-setuptools python3-dev python3-pip tzdata cron rsyslog gunicorn3 libreoffice
-RUN apt-get install --no-install-recommends -y libpq-dev
+RUN apt-get install --no-install-recommends -y wget git libmagic-dev gcc binutils libproj-dev gdal-bin python3 python3-setuptools python3-dev python3-pip tzdata cron rsyslog gunicorn libreoffice
+RUN apt-get install --no-install-recommends -y libpq-dev patch
 RUN apt-get install --no-install-recommends -y postgresql-client mtr htop vim ssh
 RUN ln -s /usr/bin/python3 /usr/bin/python && \
     ln -s /usr/bin/pip3 /usr/bin/pip
@@ -30,7 +30,8 @@ RUN rm /app/libgeos.py.patch
 
 # Install the project (ensure that frontend projects have been built prior to this step).
 FROM python_libs_moorings
-COPY .git/refs/heads/master /app/git_hash
+ONBUILD COPY .git/refs/heads/master /app/git_hash 
+
 COPY gunicorn.ini manage_mo.py ./
 #COPY ledger ./ledger
 COPY timezone /etc/timezone
