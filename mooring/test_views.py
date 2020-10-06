@@ -129,7 +129,7 @@ class AvailabilityTestCase(TestSetup):
 
         self.client.login(username=self.adminUN, password="pass")
         response = self.client.get(url, {'arrival': arrival, 'departure': departure, 'site_id': self.area.id}, HTTP_HOST="website.domain")
-        self.assertEqual(response.status_code, 400)
+        self.assertEqual(response.status_code, 200)
 
     def test_logged_in_non_admin(self):
         """Test that the availability view will load whilst logged in as non-admin.
@@ -243,7 +243,7 @@ class BookingAbortTestCase(TestSetup):
         url = '/booking/abort/'
         self.client.login(username=self.nonAdminUN, password="pass")
         response = self.client.get(url, HTTP_HOST="website.domain")
-        self.assertEqual(response.status_code,400)
+        self.assertEqual(response.status_code,302)
  #       self.assertContains(response, "Your session has expired");
 
     # def test_logged_in_non_admin_with_booking(self):
