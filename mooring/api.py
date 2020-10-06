@@ -3219,9 +3219,8 @@ class BookingViewSet(viewsets.ModelViewSet):
                     skip_row = True
                 else:
                     skip_row = False
-
-                for bitem in booking_items[booking.id]:
-
+                if booking.id in booking_items:
+                   bitem = booking_items[booking.id][0]
                    msb_list.append([bitem['mooring_name'], bitem['region_name'], bitem['from_dt'], bitem['to_dt']])
                    if region:
                        if int(region) == int(bitem['region_id']):
@@ -3305,7 +3304,6 @@ class BookingViewSet(viewsets.ModelViewSet):
                         show_row = True
                     if rowcount > rowcountend:
                         show_row = False
-                #print("MLINE 1.08.001", datetime.now().strftime("%d/%m/%Y %H:%M:%S"))
                 if show_row is True:
                     bk_list={}
                     get_property_cache = booking.get_property_cache()
