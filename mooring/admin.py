@@ -162,7 +162,7 @@ class BookingAdmin(admin.ModelAdmin):
     list_display = ('id','arrival','departure','booking_type','mooringarea','legacy_id','legacy_name','status','cost_total')
     ordering = ('-id',)
     search_fields = ('customer','id','admission_payment','cost_total')
-    list_filter = ('booking_type','mooringarea')
+    list_filter = ('booking_type',)
     readonly_fields=('created','property_cache',)
     inlines = [BookingInvoiceInline,MooringsiteBookingInline]
 
