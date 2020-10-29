@@ -84,7 +84,7 @@ def annual_admissions_booking_report(aadata):
                 postal_address_line_2 = o['details']['postal_address_line_2']
                 state = o['details']['state']
                 vessel_length = o['details']['vessel_length']
-                if 'postcode' in o['details']:
+                if 'post_code' in o['details']:
                    post_code = o['details']['post_code']         
                 if 'suburb' in o['details']:
                    suburb = o['details']['suburb'] 

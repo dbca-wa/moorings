@@ -18,6 +18,7 @@ RUN pip install --upgrade pip
 FROM builder_base_moorings as python_libs_moorings
 WORKDIR /app
 COPY requirements.txt ./
+RUN touch /app/git_hash
 RUN pip3 install --no-cache-dir -r requirements.txt \
   # Update the Django <1.11 bug in django/contrib/gis/geos/libgeos.py
   # Reference: https://stackoverflow.com/questions/18643998/geodjango-geosexception-error
@@ -30,7 +31,6 @@ RUN rm /app/libgeos.py.patch
 
 # Install the project (ensure that frontend projects have been built prior to this step).
 FROM python_libs_moorings
-ONBUILD COPY .git/refs/heads/master /app/git_hash 
 
 COPY gunicorn.ini manage_mo.py ./
 #COPY ledger ./ledger
