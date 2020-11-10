@@ -15,7 +15,7 @@ from django.core.mail import EmailMessage, EmailMultiAlternatives
 from ledger.emails.emails import EmailBase
 from django.template.loader import render_to_string, get_template
 from confy import env
-from django.template import Context
+#from django.template import Context
 from ledger.accounts.models import Document
 from django.contrib.auth.models import Group
 from ledger.accounts.models import EmailUser
@@ -59,14 +59,14 @@ def sendHtmlEmail(to,subject,context,template,cc,bcc,from_email,template_group,a
 
     context['version'] = settings.VERSION_NO
     # Custom Email Body Template
-    context['body'] = get_template(template).render(Context(context))
+    context['body'] = get_template(template).render(context)
     # Main Email Template Style ( body template is populated in the center
     if template_group == 'rottnest':
-        main_template = get_template('mooring/email/base_email-rottnest.html').render(Context(context))
+        main_template = get_template('mooring/email/base_email-rottnest.html').render(context)
     elif template_group == 'system-oim':
-        main_template = get_template('mooring/email/base_email-oim.html').render(Context(context))
+        main_template = get_template('mooring/email/base_email-oim.html').render(context)
     else:
-        main_template = get_template('mooring/email/base_email2.html').render(Context(context))
+        main_template = get_template('mooring/email/base_email2.html').render(context)
    
     reply_to=None
 
