@@ -619,7 +619,7 @@ def current_booking(request, *args, **kwargs):
 @require_http_methods(['GET'])
 def search_suggest(request, *args, **kwargs):
     entries = []
-    for x in MooringArea.objects.filter(wkb_geometry__isnull=False).values_list('id', 'name', 'wkb_geometry','park__name','park__district__region__name'):
+    for x in MooringArea.objects.filter(wkb_geometry__isnull=False).exclude(mooring_type=3).values_list('id', 'name', 'wkb_geometry','park__name','park__district__region__name'):
         entries.append(geojson.Point((x[2].x, x[2].y), properties={'type': 'MooringArea', 'id': x[0], 'name': x[1]+' - '+x[3]+' - '+x[4]}))
     for x in MarinePark.objects.filter(wkb_geometry__isnull=False).values_list('id', 'name', 'wkb_geometry','zoom_level','district__region__name'):
         entries.append(geojson.Point((x[2].x, x[2].y), properties={'type': 'Marina', 'id': x[0], 'name': x[1]+' - '+x[4], 'zoom_level': x[3]}))
@@ -1943,7 +1943,7 @@ class BaseAvailabilityViewSet2(viewsets.ReadOnlyModelViewSet):
 #
         sites_qs = Mooringsite.objects.filter(mooringarea__vessel_size_limit__gte=vessel_size,
                                               mooringarea__vessel_draft_limit__gte=vessel_draft,
-                                              mooringarea__wkb_geometry__distance_lt=(ground.wkb_geometry, Distance(km=radius)))
+                                              mooringarea__wkb_geometry__distance_lt=(ground.wkb_geometry, Distance(km=radius))).exclude(mooringarea__mooring_type=3)
 
         #.filter(**context)
 
