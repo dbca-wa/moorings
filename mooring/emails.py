@@ -185,9 +185,10 @@ def send_booking_invoice(booking, context_processor):
     from_email = None
     context= {'booking': booking, 'context_processor': context_processor}
     to = booking.customer.email
-    filename = 'invoice-{}({}-{}).pdf'.format(booking.mooringarea.name,booking.arrival,booking.departure)
+    #filename = 'invoice-{}({}-{}).pdf'.format(booking.mooringarea.name,booking.arrival,booking.departure)
     references = [b.invoice_reference for b in booking.invoices.all()]
     invoice = Invoice.objects.filter(reference__in=references).order_by('-created')[0]
+    filename = 'invoice-{}-({}-{}).pdf'.format(invoice.reference,booking.arrival,booking.departure)
     invoice_pdf = create_invoice_pdf_bytes(filename,invoice, context_processor)
     template_group = context_processor['TEMPLATE_GROUP']
     sendHtmlEmail([to],subject,context,template,cc,bcc,from_email,template_group,attachments=[(filename, invoice_pdf, 'application/pdf')])
