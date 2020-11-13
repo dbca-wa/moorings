@@ -3370,10 +3370,10 @@ class BookingSuccessView(TemplateView):
 
         #if request.user.is_staff:
         #    return redirect('dash-bookings')
-        context = {
-            'booking': booking,
-            'book_inv': [book_inv]
-        }
+            context = {
+               'booking': booking,
+               'book_inv': [book_inv]
+            }
         return render(request, self.template_name, context)
 
 
