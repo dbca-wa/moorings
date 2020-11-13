@@ -1789,8 +1789,12 @@ def checkout(request, booking, lines, invoice_text=None, vouchers=[], internal=F
     if internal or request.user.is_anonymous():
         checkout_params['basket_owner'] = booking.customer.id
 
+    print ("BOOKING ID 3")
+    print (request.session['ps_booking'])
 
     create_checkout_session(request, checkout_params)
+    print ("BOOKING ID 4")
+    print (request.session['ps_booking'])
 
 
 
@@ -2220,26 +2224,23 @@ def booking_success(basket, booking, context_processor):
                 old_booking = Booking.objects.get(id=booking.old_booking.id)
                 old_booking.booking_type = 4
                 old_booking.cancelation_time = datetime.now()
-                old_booking.canceled_by = request.user
+                old_booking.canceled_by = booking.created_by #request.user
                 old_booking.save()
                 booking_items = MooringsiteBooking.objects.filter(booking=old_booking)
                 # Find admissions booking for old booking
                 if old_booking.admission_payment:
                     old_booking.admission_payment.booking_type = 4
                     old_booking.admission_payment.cancelation_time = datetime.now()
-                    old_booking.admission_payment.canceled_by = request.user
-
+                    old_booking.admission_payment.canceled_by = booking.created_by #request.user
                     old_booking.admission_payment.save()
                 for bi in booking_items:
                     bi.booking_type = 4
                     bi.save()
-
             booking_items_current = MooringsiteBooking.objects.filter(booking=booking)
             for bi in booking_items_current:
                if str(bi.id) in booking.override_lines:
                   bi.amount = Decimal(booking.override_lines[str(bi.id)])
                bi.save()
-
             msb = MooringsiteBooking.objects.filter(booking=booking).order_by('from_dt')
             from_date = msb[0].from_dt
             to_date = msb[msb.count()-1].to_dt
