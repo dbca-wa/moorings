@@ -3855,7 +3855,7 @@ class InvoicePDFView(InvoiceOwnerMixin,View):
         invoice = get_object_or_404(Invoice, reference=self.kwargs['reference'])
         response = HttpResponse(content_type='application/pdf')
         mooring_var = mooring_url(request)
-        response.write(create_invoice_pdf_bytes('invoice.pdf',invoice, request, mooring_var))
+        response.write(create_invoice_pdf_bytes('invoice.pdf',invoice, mooring_var))
         return response
 
     def get_object(self):
