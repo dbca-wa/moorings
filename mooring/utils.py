@@ -2199,12 +2199,16 @@ def get_provinces(country_code):
 
 def booking_success(basket, booking, context_processor):
 
+    print("MLINE 1.01", datetime.now().strftime("%d/%m/%Y %H:%M:%S"))
     order = Order.objects.get(basket=basket[0])
     invoice = Invoice.objects.get(order_number=order.number)
+    print("MLINE 1.02", datetime.now().strftime("%d/%m/%Y %H:%M:%S"))
     invoice_ref = invoice.reference
     book_inv, created = BookingInvoice.objects.get_or_create(booking=booking, invoice_reference=invoice_ref)
+    print("MLINE 1.03", datetime.now().strftime("%d/%m/%Y %H:%M:%S"))
     #invoice_ref = request.GET.get('invoice')
     if booking.booking_type == 3:
+        print("MLINE 2.01", datetime.now().strftime("%d/%m/%Y %H:%M:%S"))
         try:
             inv = Invoice.objects.get(reference=invoice_ref)
             order = Order.objects.get(number=inv.order_number)
@@ -2218,8 +2222,9 @@ def booking_success(basket, booking, context_processor):
             print ("SYSTEM ERROR")
             logger.error('{} tried making a booking with an invoice from another system with reference number {}'.format('User {} with id {}'.format(booking.customer.get_full_name(),booking.customer.id) if booking.customer else 'An anonymous user',inv.reference))
             return redirect('public_make_booking')
-
+        print("MLINE 3.01", datetime.now().strftime("%d/%m/%Y %H:%M:%S"))
         if book_inv:
+            print("MLINE 4.01", datetime.now().strftime("%d/%m/%Y %H:%M:%S"))
             if booking.old_booking:
                 old_booking = Booking.objects.get(id=booking.old_booking.id)
                 old_booking.booking_type = 4
@@ -2236,11 +2241,13 @@ def booking_success(basket, booking, context_processor):
                 for bi in booking_items:
                     bi.booking_type = 4
                     bi.save()
+            print("MLINE 5.01", datetime.now().strftime("%d/%m/%Y %H:%M:%S"))
             booking_items_current = MooringsiteBooking.objects.filter(booking=booking)
             for bi in booking_items_current:
                if str(bi.id) in booking.override_lines:
                   bi.amount = Decimal(booking.override_lines[str(bi.id)])
                bi.save()
+            print("MLINE 6.01", datetime.now().strftime("%d/%m/%Y %H:%M:%S"))
             msb = MooringsiteBooking.objects.filter(booking=booking).order_by('from_dt')
             from_date = msb[0].from_dt
             to_date = msb[msb.count()-1].to_dt
@@ -2257,42 +2264,53 @@ def booking_success(basket, booking, context_processor):
             # set booking to be permanent fixture
             booking.booking_type = 1  # internet booking
             booking.expiry_time = None
+            print("MLINE 7.01", datetime.now().strftime("%d/%m/%Y %H:%M:%S"))
             update_payments(invoice_ref)
+            print("MLINE 8.01", datetime.now().strftime("%d/%m/%Y %H:%M:%S"))
             #Calculate Admissions and create object
             if booking.admission_payment:
                  ad_booking = AdmissionsBooking.objects.get(pk=booking.admission_payment.pk)
                  #if request.user.__class__.__name__ == 'EmailUser':
                  ad_booking.created_by = booking.created_by
                  ad_booking.booking_type=1
+                 print("MLINE 8.02", datetime.now().strftime("%d/%m/%Y %H:%M:%S"))
                  ad_booking.save()
+                 print("MLINE 8.03", datetime.now().strftime("%d/%m/%Y %H:%M:%S"))
                  ad_invoice = AdmissionsBookingInvoice.objects.get_or_create(admissions_booking=ad_booking, invoice_reference=invoice_ref)
+                 print("MLINE 8.04", datetime.now().strftime("%d/%m/%Y %H:%M:%S"))
 
                  for al in ad_booking.override_lines.keys():
                      ad_line = AdmissionsLine.objects.get(id=int(al))
                      ad_line.cost = ad_booking.override_lines[str(al)]
                      ad_line.save()
+                 print("MLINE 8.05", datetime.now().strftime("%d/%m/%Y %H:%M:%S"))
                 # booking.admission_payment = ad_booking
             booking.save()
+            print("MLINE 9.01", datetime.now().strftime("%d/%m/%Y %H:%M:%S"))
             #if not request.user.is_staff:
             #    print "USER IS NOT STAFF."
             #request.session['ps_last_booking'] = booking.id
             #utils.delete_session_booking(request.session)
             # send out the invoice before the confirmation is sent if total is greater than zero
             #if booking.cost_total > 0:
+            print("MLINE 10.01", datetime.now().strftime("%d/%m/%Y %H:%M:%S"))
             try:
                 emails.send_booking_invoice(booking,context_processor)
             except Exception as e:
                 print ("Error Sending Invoice ("+str(booking.id)+") :"+str(e))
             # for fully paid bookings, fire off confirmation emaili
             #if booking.invoice_status == 'paid':
+            print("MLINE 11.01", datetime.now().strftime("%d/%m/%Y %H:%M:%S"))
             try:
                 emails.send_booking_confirmation(booking,context_processor)
             except Exception as e:
                 print ("Error Sending Booking Confirmation ("+str(booking.id)+") :"+str(e))
+            print("MLINE 12.01", datetime.now().strftime("%d/%m/%Y %H:%M:%S"))
             refund_failed = None
             if models.RefundFailed.objects.filter(booking=booking).count() > 0:
                 refund_failed = models.RefundFailed.objects.filter(booking=booking)
             # Create/Update Vessel in VesselDetails Table
+            print("MLINE 13.01", datetime.now().strftime("%d/%m/%Y %H:%M:%S"))
             try:
 
                 if models.VesselDetail.objects.filter(rego_no=booking.details['vessel_rego']).count() > 0:
@@ -2310,6 +2328,7 @@ def booking_success(basket, booking, context_processor):
                                                        vessel_beam=booking.details['vessel_beam'],
                                                        vessel_weight=booking.details['vessel_weight']
                                                       )
+                print("MLINE 14.01", datetime.now().strftime("%d/%m/%Y %H:%M:%S"))
             except:
                 print ("ERROR: create vesseldetails on booking success")
 
@@ -2318,6 +2337,7 @@ def booking_success(basket, booking, context_processor):
               'book_inv': [book_inv],
               'refund_failed' : refund_failed
             }
+            print("MLINE 15.01", datetime.now().strftime("%d/%m/%Y %H:%M:%S"))
             return context
 
 

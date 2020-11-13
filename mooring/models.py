@@ -1435,6 +1435,7 @@ class Booking(models.Model):
     cancellation_reason = models.TextField(null=True,blank=True)
     cancelation_time = models.DateTimeField(null=True,blank=True)
     confirmation_sent = models.BooleanField(default=False)
+    updated = models.DateTimeField(default=timezone.now)
     created = models.DateTimeField(default=timezone.now)
     created_by = models.ForeignKey(settings.AUTH_USER_MODEL,on_delete=models.PROTECT, blank=True, null=True,related_name='created_by_booking')
     canceled_by = models.ForeignKey(settings.AUTH_USER_MODEL,on_delete=models.PROTECT, blank=True, null=True,related_name='canceled_bookings')
@@ -1442,11 +1443,22 @@ class Booking(models.Model):
     admission_payment = models.ForeignKey('AdmissionsBooking', null=True, blank=True)
     override_lines = JSONField(null=True, blank=True, default={})
     property_cache = JSONField(null=True, blank=True, default={})
+    property_cache_version = models.CharField(max_length=10, blank=True, null=True)
+    property_cache_stale = models.BooleanField(default=True)
 
 
     def save(self, *args,**kwargs):
-        self.update_property_cache(False)
+        self.updated = datetime.now()
+        self.property_cache_stale = True
+        if 'cache_updated' in kwargs:
+            if kwargs['cache_updated'] is True:
+                self.property_cache_stale = False
+                del kwargs['cache_updated']
         super(Booking,self).save(*args,**kwargs)
+
+    #def save(self, *args,**kwargs):
+    #    self.update_property_cache(False)
+    #    super(Booking,self).save(*args,**kwargs)
 
     def get_property_cache(self):
         if len(self.property_cache) == 0:
@@ -1454,6 +1466,7 @@ class Booking(models.Model):
         return self.property_cache
 
     def update_property_cache(self, save=True):
+        self.property_cache['cache_version'] = settings.BOOKING_PROPERTY_CACHE_VERSION
         self.property_cache['amount_paid'] = str(self.amount_paid)
         self.property_cache['refund_status'] = self.refund_status
         self.property_cache['outstanding'] = str(self.outstanding)
@@ -1863,7 +1876,8 @@ class BookingInvoice(models.Model):
     def save(self, *args,**kwargs):
         super(BookingInvoice,self).save(*args,**kwargs)
         print ("COMPLETED POST CREATE")
-        self.booking.update_property_cache()
+        self.booking.save()
+        #self.booking.update_property_cache()
 
 
 
