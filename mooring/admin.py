@@ -159,7 +159,7 @@ class CancelPricePeriodAdmin(admin.ModelAdmin):
 @admin.register(models.Booking)
 class BookingAdmin(admin.ModelAdmin):
     raw_id_fields = ('customer','created_by','overridden_by','canceled_by','old_booking','admission_payment',)
-    list_display = ('id','arrival','departure','booking_type','mooringarea','legacy_id','legacy_name','status','cost_total')
+    list_display = ('id','arrival','departure','booking_type','mooringarea','legacy_id','legacy_name','status','cost_total','property_cache_version','property_cache_stale')
     ordering = ('-id',)
     search_fields = ('customer','id','admission_payment','cost_total')
     list_filter = ('booking_type',)

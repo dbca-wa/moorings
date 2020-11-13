@@ -1137,7 +1137,6 @@ class MakeBookingsView(TemplateView):
 
 
     def post(self, request, *args, **kwargs):
-        
         booking = Booking.objects.get(pk=request.session['ps_booking']) if 'ps_booking' in request.session else None
         if booking is None:
            messages.error(self.request, 'Sorry your booking has expired')
@@ -3211,6 +3210,7 @@ class BookingSuccessView(TemplateView):
 
     def get(self, request, *args, **kwargs):
         print (" BOOKING SUCCESS ")
+
         try:
             context_processor = template_context(self.request)
             basket = None
@@ -3226,6 +3226,7 @@ class BookingSuccessView(TemplateView):
             utils.delete_session_booking(request.session)
 
             return render(request, self.template_name, context)
+
             #order = Order.objects.get(basket=basket[0]) 
             #invoice = Invoice.objects.get(order_number=order.number)
             #invoice_ref = invoice.reference
