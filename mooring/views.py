@@ -646,6 +646,16 @@ class CancelAdmissionsBookingView(TemplateView):
         # END PLACE IN UTILS
 
         order_response = place_order_submission(request)
+        if Order.objects.filter(basket=basket).count() > 0:
+            pass
+        else:
+            result =  HttpResponse(
+                content="ERROR: Cannot find a order for the basket.",
+                status=200,
+            )
+            return result
+
+            
         new_order = Order.objects.get(basket=basket)
         new_invoice = Invoice.objects.get(order_number=new_order.number)
         book_inv, created = AdmissionsBookingInvoice.objects.get_or_create(admissions_booking=booking, invoice_reference=new_invoice.reference)
