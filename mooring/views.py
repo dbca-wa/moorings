@@ -400,11 +400,12 @@ class CancelBookingView(TemplateView):
         print ("CANCELLATION FEES")
         print (booking_cancellation_fees)
 
-        return render(request, self.template_name, {'booking': booking,'basket': basket, 'booking_fees': booking_cancellation_fees, 'booking_total': booking_total, 'booking_total_positive': booking_total - booking_total - booking_total, 'occ': occ, 'payments_officer_group': payments_officer_group})
+        return render(request, self.template_name, {'booking': booking,'basket': basket, 'booking_fees': booking_cancellation_fees, 'booking_total': booking_total, 'booking_total_positive': booking_total - booking_total - booking_total, 'occ': occ, 'payments_officer_group': payments_officer_group, 'is_staff': request.user.is_staff})
 
     def post(self, request, *args, **kwargs):
         overide_cancel_fees = False
         occ = request.POST.get('occ', 'false')
+        cancellation_reason = request.POST.get('cancellation_reason','')
         payments_officer_group = request.user.groups.filter(name__in=['Payments Officers']).exists()
         failed_refund = False
 
@@ -534,6 +535,7 @@ class CancelBookingView(TemplateView):
         booking.booking_type = 4
         booking.cancelation_time = datetime.now() 
         booking.canceled_by = request.user
+        booking.cancellation_reason = cancellation_reason
         booking.save()
         emails.send_booking_cancellation_email_customer(booking, context_processor)
 
@@ -541,6 +543,7 @@ class CancelBookingView(TemplateView):
             booking_admission.booking_type = 4
             booking_admission.cancelation_time = datetime.now()
             booking_admission.canceled_by = request.user
+            booking_admission.cancellation_reason = cancellation_reason
             booking_admission.save()
 
         update_payments(invoice.reference)
@@ -589,10 +592,12 @@ class CancelAdmissionsBookingView(TemplateView):
         booking_cancellation_fees = utils.calculate_price_admissions_cancel(booking, [], overide_cancel_fees)
         booking_total = booking_total + sum(Decimal(i['amount']) for i in booking_cancellation_fees)
         basket = {}
-        return render(request, self.template_name, {'booking': booking,'basket': basket, 'booking_fees': booking_cancellation_fees, 'booking_total': booking_total, 'booking_total_positive': booking_total - booking_total - booking_total })
+        return render(request, self.template_name, {'booking': booking,'basket': basket, 'booking_fees': booking_cancellation_fees, 'booking_total': booking_total, 'booking_total_positive': booking_total - booking_total - booking_total ,'is_staff': request.user.is_staff})
 
     def post(self, request, *args, **kwargs):
         context_processor = template_context(request)
+        cancellation_reason = request.POST.get('cancellation_reason','')
+
         booking_id = kwargs['pk']
         booking_total = Decimal('0.00')
         basket_total = Decimal('0.00')
@@ -614,6 +619,7 @@ class CancelAdmissionsBookingView(TemplateView):
         bpoint_id = self.get_booking_info(self, request, *args, **kwargs)
         booking_cancellation_fees = utils.calculate_price_admissions_cancel(booking, [], overide_cancel_fees)
         booking_total = booking_total + sum(Decimal(i['amount']) for i in booking_cancellation_fees)
+
 #        booking_total =  Decimal('{:.2f}'.format(float(booking_total - booking_total - booking_total)))
 
 
@@ -642,10 +648,20 @@ class CancelAdmissionsBookingView(TemplateView):
             'invoice_text': "Cancellation of Admissions",
             'basket_owner': booking.customer.id
         }
-        create_checkout_session(request, checkout_params)
-        # END PLACE IN UTILS
 
+        create_checkout_session(request, checkout_params)
+
+        # END PLACE IN UTILS
         order_response = place_order_submission(request)
+        print ("BASKET")
+        print (basket)
+        print (basket.id)
+        print (Order.objects.filter(basket_id=basket.id).count())
+        print (Order.objects.all()[0].id)
+        print (order_response)
+
+
+
         if Order.objects.filter(basket=basket).count() > 0:
             pass
         else:
@@ -703,6 +719,7 @@ class CancelAdmissionsBookingView(TemplateView):
         booking.booking_type = 4
         booking.cancelation_time = datetime.now()
         booking.canceled_by = request.user
+        booking.cancellation_reason = cancellation_reason
         booking.save()
         return HttpResponseRedirect(reverse('public_admission_booking_cancelled', args=(booking.id,)))
 
