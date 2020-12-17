@@ -65,14 +65,16 @@ Admissions Booking information below and refund or fees to pay in order to cance
 		<BR><BR>
 
                 {% if is_staff == True %}
-                <div class="col-sm-12 col-md-6 col-lg-12" >
-                    <div class="col-sm-12 col-md-6 col-lg-4 " style='padding: 0px; margin: 0px;'>
-                       <label>Cancellation Reason</label>
+                <div class='col-sm-12 col-md-6 col-lg-12 well well-lg'>
+                    <div class="col-sm-12 col-md-6 col-lg-12" >
+                        <div class="col-sm-12 col-md-6 col-lg-4 " style='padding: 0px; margin: 0px;'>
+                           <label>Cancellation Reason</label>
+                        </div>
                     </div>
-                </div>
-                <div class="col-sm-12 col-md-6 col-lg-12" >
-                    <div class="col-sm-12 col-md-6 col-lg-4 " style='padding: 0px; margin: 0px;'>
-                       <textarea name="cancellation_reason" id="cancellation_reason" rows='10' class="form-control" style="width: 100%;" ></textarea>
+                    <div class="col-sm-12 col-md-6 col-lg-12" >
+                        <div class="col-sm-12 col-md-6 col-lg-4 " style='padding: 0px; margin: 0px;'>
+                           <textarea name="cancellation_reason" id="cancellation_reason" rows='10' class="form-control" style="width: 100%;" ></textarea>
+                        </div>
                     </div>
                 </div>
                 {% endif %}

@@ -3111,6 +3111,21 @@ class AdmissionsBookingViewSet(viewsets.ModelViewSet):
                     r.update({'customerName': str(name).encode('utf-8'), 'email': email})
                 else:
                     r.update({'customerName': 'No customer', 'email': "No customer"})
+                if ad.created_by is None:
+                     r['created_by'] = ""          
+                else:
+                     r['created_by'] = ad.created_by.first_name + ' '+ ad.created_by.last_name
+
+
+                if ad.canceled_by is None:
+                     r['canceled_by'] = ""
+                else:
+                     r['canceled_by'] = ad.canceled_by.first_name + ' '+ ad.canceled_by.last_name
+                if ad.cancellation_reason is None:
+                     r['cancellation_reason'] = ""           
+                else: 
+                     r['cancellation_reason'] = ad.cancellation_reason
+
                 brokenrow_section = "17"
         except Exception as e:
             res ={
@@ -3396,7 +3411,7 @@ class BookingViewSet(viewsets.ModelViewSet):
                             #if booking.mooringarea.site_type != 2:
                             #    bk_list['campground_site_type'] = '{}{}'.format('{} - '.format(first_campsite.name if first_campsite else ""),'({})'.format(bk_list['campground_site_type'] if bk_list['campground_site_type'] else ""))
                     else:
-                        bk['campground_site_type'] = ""
+                        bk_list['campground_site_type'] = ""
 
 
                     #msb_list.sort(key=lambda item: item[2])

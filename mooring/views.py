@@ -397,10 +397,10 @@ class CancelBookingView(TemplateView):
         booking_cancellation_fees = utils.calculate_price_admissions_cancel(booking.admission_payment, booking_cancellation_fees, overide_cancel_fees)
         booking_total = Decimal('{0:.2f}'.format(booking_total + Decimal(sum(Decimal(i['amount']) for i in booking_cancellation_fees))))
         basket = {}
-        print ("CANCELLATION FEES")
-        print (booking_cancellation_fees)
 
-        return render(request, self.template_name, {'booking': booking,'basket': basket, 'booking_fees': booking_cancellation_fees, 'booking_total': booking_total, 'booking_total_positive': booking_total - booking_total - booking_total, 'occ': occ, 'payments_officer_group': payments_officer_group, 'is_staff': request.user.is_staff})
+        response = render(request, self.template_name, {'booking': booking,'basket': basket, 'booking_fees': booking_cancellation_fees, 'booking_total': booking_total, 'booking_total_positive': booking_total - booking_total - booking_total, 'occ': occ, 'payments_officer_group': payments_officer_group, 'is_staff': request.user.is_staff})
+        response.delete_cookie(settings.OSCAR_BASKET_COOKIE_OPEN)
+        return response
 
     def post(self, request, *args, **kwargs):
         overide_cancel_fees = False
@@ -592,7 +592,9 @@ class CancelAdmissionsBookingView(TemplateView):
         booking_cancellation_fees = utils.calculate_price_admissions_cancel(booking, [], overide_cancel_fees)
         booking_total = booking_total + sum(Decimal(i['amount']) for i in booking_cancellation_fees)
         basket = {}
-        return render(request, self.template_name, {'booking': booking,'basket': basket, 'booking_fees': booking_cancellation_fees, 'booking_total': booking_total, 'booking_total_positive': booking_total - booking_total - booking_total ,'is_staff': request.user.is_staff})
+        response = render(request, self.template_name, {'booking': booking,'basket': basket, 'booking_fees': booking_cancellation_fees, 'booking_total': booking_total, 'booking_total_positive': booking_total - booking_total - booking_total ,'is_staff': request.user.is_staff})
+        response.delete_cookie(settings.OSCAR_BASKET_COOKIE_OPEN)
+        return response
 
     def post(self, request, *args, **kwargs):
         context_processor = template_context(request)
@@ -653,14 +655,6 @@ class CancelAdmissionsBookingView(TemplateView):
 
         # END PLACE IN UTILS
         order_response = place_order_submission(request)
-        print ("BASKET")
-        print (basket)
-        print (basket.id)
-        print (Order.objects.filter(basket_id=basket.id).count())
-        print (Order.objects.all()[0].id)
-        print (order_response)
-
-
 
         if Order.objects.filter(basket=basket).count() > 0:
             pass
@@ -670,7 +664,6 @@ class CancelAdmissionsBookingView(TemplateView):
                 status=200,
             )
             return result
-
             
         new_order = Order.objects.get(basket=basket)
         new_invoice = Invoice.objects.get(order_number=new_order.number)
@@ -797,9 +790,6 @@ class RefundPaymentView(TemplateView):
              new_invoice = Invoice.objects.get(order_number=new_order.number)
              new_invoice.settlement_date = None
              new_invoice.save()
-             print ("INVOICE NEW")
-             print (new_invoice)
-             print (new_invoice.settlement_date)
               
 #             book_inv, created = BookingInvoice.objects.create(booking=booking, invoice_reference=invoice.reference)
 
@@ -807,9 +797,6 @@ class RefundPaymentView(TemplateView):
              if refund:
                  invoice.voided = True
                  invoice.save()
-                 print ("REFUND")
-                 print (refund)
-                 print (refund.txn_number)
                  bpoint_refund = BpointTransaction.objects.get(txn_number=refund.txn_number)
                  bpoint_refund.crn1 = new_invoice.reference
                  bpoint_refund.save()
@@ -3251,9 +3238,9 @@ class BookingSuccessView(TemplateView):
 
             request.session['ps_last_booking'] = booking.id
             utils.delete_session_booking(request.session)
-
-            return render(request, self.template_name, context)
-
+            response = render(request, self.template_name, context)
+            response.delete_cookie(settings.OSCAR_BASKET_COOKIE_OPEN)
+            return response
             #order = Order.objects.get(basket=basket[0]) 
             #invoice = Invoice.objects.get(order_number=order.number)
             #invoice_ref = invoice.reference
@@ -3830,7 +3817,12 @@ class ChangeBookingView(LoginRequiredMixin, TemplateView):
                      request.session['ps_booking'] = booking_temp.id
                      #request.session['ps_booking_old'] =  booking.id
                      request.session.modified = True
-                     return HttpResponseRedirect(reverse('mooring_availaiblity2_selector')+'?site_id='+str(booking.mooringarea_id)+'&arrival='+str(booking.arrival.strftime('%Y/%m/%d'))+'&departure='+str(booking.departure.strftime('%Y/%m/%d'))+'&vessel_size='+str(booking.details['vessel_size'])+'&vessel_draft='+str(booking.details['vessel_draft'])+'&vessel_beam='+str(booking.details['vessel_beam'])+'&vessel_weight='+str(booking.details['vessel_weight'])+'&vessel_rego='+str(booking.details['vessel_rego'])+'&num_adult='+str(booking.details['num_adults'])+'&num_children='+str(booking.details['num_children'])+'&num_infants='+str(booking.details['num_infants'])+'&distance_radius='+str(booking.mooringarea.park.distance_radius)  )
+                     change_booking_url_redirect = reverse('mooring_availaiblity2_selector')+'?site_id='+str(booking.mooringarea_id)+'&arrival='+str(booking.arrival.strftime('%Y/%m/%d'))+'&departure='+str(booking.departure.strftime('%Y/%m/%d'))+'&vessel_size='+str(booking.details['vessel_size'])+'&vessel_draft='+str(booking.details['vessel_draft'])+'&vessel_beam='+str(booking.details['vessel_beam'])+'&vessel_weight='+str(booking.details['vessel_weight'])+'&vessel_rego='+str(booking.details['vessel_rego'])+'&num_adult='+str(booking.details['num_adults'])+'&num_children='+str(booking.details['num_children'])+'&num_infants='+str(booking.details['num_infants'])+'&distance_radius='+str(booking.mooringarea.park.distance_radius)
+
+                     response = HttpResponse("<script> window.location='"+change_booking_url_redirect+"';</script> <a href='"+change_booking_url_redirect+"'> Redirecting please wait </a>")
+                     response.delete_cookie(settings.OSCAR_BASKET_COOKIE_OPEN)
+                     return response
+                     #return HttpResponseRedirect(reverse('mooring_availaiblity2_selector')+'?site_id='+str(booking.mooringarea_id)+'&arrival='+str(booking.arrival.strftime('%Y/%m/%d'))+'&departure='+str(booking.departure.strftime('%Y/%m/%d'))+'&vessel_size='+str(booking.details['vessel_size'])+'&vessel_draft='+str(booking.details['vessel_draft'])+'&vessel_beam='+str(booking.details['vessel_beam'])+'&vessel_weight='+str(booking.details['vessel_weight'])+'&vessel_rego='+str(booking.details['vessel_rego'])+'&num_adult='+str(booking.details['num_adults'])+'&num_children='+str(booking.details['num_children'])+'&num_infants='+str(booking.details['num_infants'])+'&distance_radius='+str(booking.mooringarea.park.distance_radius)  )
                  else:
                       print ("BOOKING NOT ACTIVE")
                       messages.error(self.request, 'Sorry this booking is not longer a current active booking.')
