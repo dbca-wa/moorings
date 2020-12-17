@@ -93,7 +93,7 @@ $( "#cancel-booking" ).click(function() {
   var cancellation_reason = $('#cancellation_reason').val();
   if (cancellation_reason != undefined) {
          if (cancellation_reason.length > 10) {
-
+              $( "#cancellation_reason" ).attr("disabled", "disabled");
          } else {
                 alert('Please provide a valid cancellation reason');
                 return;
