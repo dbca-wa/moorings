@@ -2132,6 +2132,7 @@ class AdmissionsBooking(models.Model):
     created_by = models.ForeignKey(settings.AUTH_USER_MODEL,on_delete=models.PROTECT, blank=True, null=True,related_name='created_by_admissions')
     canceled_by = models.ForeignKey(settings.AUTH_USER_MODEL,on_delete=models.PROTECT, blank=True, null=True,related_name='canceled_bookings_admissions')
     cancelation_time = models.DateTimeField(null=True,blank=True)
+    cancellation_reason = models.TextField(null=True,blank=True)
     created = models.DateTimeField(default=timezone.now)
     location = models.ForeignKey(AdmissionsLocation, blank=True, null=True)    
     override_lines = JSONField(null=True, blank=True, default={})

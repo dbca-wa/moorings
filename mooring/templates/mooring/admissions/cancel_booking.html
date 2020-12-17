@@ -63,6 +63,23 @@ Admissions Booking information below and refund or fees to pay in order to cance
 		<form method="post" action="{% url 'public_cancel_admissions_booking' booking.id %}" id="place_order_form">
 		{% csrf_token %}
 		<BR><BR>
+
+                {% if is_staff == True %}
+                <div class='col-sm-12 col-md-6 col-lg-12 well well-lg'>
+                    <div class="col-sm-12 col-md-6 col-lg-12" >
+                        <div class="col-sm-12 col-md-6 col-lg-4 " style='padding: 0px; margin: 0px;'>
+                           <label>Cancellation Reason</label>
+                        </div>
+                    </div>
+                    <div class="col-sm-12 col-md-6 col-lg-12" >
+                        <div class="col-sm-12 col-md-6 col-lg-4 " style='padding: 0px; margin: 0px;'>
+                           <textarea name="cancellation_reason" id="cancellation_reason" rows='10' class="form-control" style="width: 100%;" ></textarea>
+                        </div>
+                    </div>
+                </div>
+                {% endif %}
+
+
 		<button id='cancel-booking' type='button' class="btn btn-info btn-lg" target="_blank" >Proceed with Cancellation</button>
                 </div>
 
@@ -73,6 +90,17 @@ Admissions Booking information below and refund or fees to pay in order to cance
 <script>
 window.onload=function() {
 $( "#cancel-booking" ).click(function() {
+  var cancellation_reason = $('#cancellation_reason').val();
+  if (cancellation_reason != undefined) {
+         if (cancellation_reason.length > 10) {
+
+         } else {
+                alert('Please provide a valid cancellation reason');
+                return;
+         }
+  }
+
+
   console.log('button clicked');
   $( "#cancel-booking" ).html("Submitting....");
   $( "#cancel-booking" ).attr("disabled", "disabled");
