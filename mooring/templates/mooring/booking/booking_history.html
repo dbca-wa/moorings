@@ -44,7 +44,7 @@
                   <th>Booking Date<br>
                   Booked By 
                   </th>
-                  <th>Cancel Date<br>Cancelled By</th>
+                  <th>Cancel Date<br>Cancelled By<br>Cancellation Reason</th>
                   <th width='125px'>Invoices#</th>
                   <th>Ledger Payment</th>
 		</tr>
@@ -63,7 +63,8 @@
                       </td>
                       <td>
                           {% if bh.booking.cancelation_time %}{{ bh.booking.cancelation_time }}{% endif %}<BR>
-			  {% if bh.booking.canceled_by  %}{{ bh.booking.canceled_by }}{% endif %}
+			  {% if bh.booking.canceled_by  %}{{ bh.booking.canceled_by }}{% endif %}<br>
+                          {% if bh.booking.cancellation_reason  %}<div style='border: solid 1px #dedede; background-color: #FFFFFF; width: 100%; padding: 2px;'>{{ bh.booking.cancellation_reason }}</div>{% endif %}
                       </td>
 
                       <td>{% for bi in bh.invoices %}
