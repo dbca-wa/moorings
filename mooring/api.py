@@ -3235,30 +3235,31 @@ class BookingViewSet(viewsets.ModelViewSet):
                 else:
                     skip_row = False
                 if booking.id in booking_items:
-                   bitem = booking_items[booking.id][0]
-                   msb_list.append([bitem['mooring_name'], bitem['region_name'], bitem['from_dt'], bitem['to_dt']])
-                   if region:
-                       if int(region) == int(bitem['region_id']):
-                          skip_row = False
-                   if campground:
+                   #bitem = booking_items[booking.id][0]
+                   for bitem in booking_items[booking.id]:
+                       msb_list.append([bitem['mooring_name'], bitem['region_name'], bitem['from_dt'], bitem['to_dt']])
                        if region:
-                          if skip_row is False:
-                            if int(campground) == int(bitem['mooringarea_id']):
-                                skip_row = False
-                            else:
-                                skip_row = True
-                       else:
-                            if int(campground) == int(bitem['mooringarea_id']):
-                                skip_row = False 
-                            pass
+                           if int(region) == int(bitem['region_id']):
+                              skip_row = False
+                       if campground:
+                           if region:
+                               if skip_row is False:
+                                   if int(campground) == int(bitem['mooringarea_id']):
+                                       skip_row = False
+                                   else:
+                                       skip_row = True
+                           else:
+                               if int(campground) == int(bitem['mooringarea_id']):
+                                   skip_row = False 
+                               pass
 
-                   # If user not in mooring group than skip
-                   for mug in moorings_user_groups:
-                        if mug['moorings'] == None:
-                            pass
-                        else:
-                            if int(mug['moorings']) == int(bitem['mooringarea_id']):
-                                in_mg = True 
+                       # If user not in mooring group than skip
+                       for mug in moorings_user_groups:
+                           if mug['moorings'] == None:
+                               pass
+                           else:
+                                if int(mug['moorings']) == int(bitem['mooringarea_id']):
+                                    in_mg = True 
 
                 #print("MLINE 1.07", datetime.now().strftime("%d/%m/%Y %H:%M:%S"))
                 # If user not in mooring group than skip
