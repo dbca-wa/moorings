@@ -12,7 +12,7 @@ from mooring import settings
 from mooring.helpers import is_inventory, is_admin
 from django.core.mail import EmailMessage, EmailMultiAlternatives
 
-from ledger.emails.emails import EmailBase
+from ledger.emails.emails import EmailBase2
 from django.template.loader import render_to_string, get_template
 from confy import env
 #from django.template import Context
@@ -27,7 +27,7 @@ default_from_email = settings.DEFAULT_FROM_EMAIL
 default_campground_email = settings.CAMPGROUNDS_EMAIL
 default_rottnest_email = settings.ROTTNEST_EMAIL
 
-class TemplateEmailBase(EmailBase):
+class TemplateEmailBase(EmailBase2):
     subject = ''
     html_template = 'mooring/email/base_email.html'
     # txt_template can be None, in this case a 'tag-stripped' version of the html will be sent. (see send)
@@ -36,6 +36,7 @@ class TemplateEmailBase(EmailBase):
 def sendHtmlEmail(to,subject,context,template,cc,bcc,from_email,template_group,attachments=None):
     email_delivery = env('EMAIL_DELIVERY', 'off')
     override_email = env('OVERRIDE_EMAIL', None)
+    email_instance = env('EMAIL_INSTANCE','DEV')
     context['default_url'] = env('DEFAULT_HOST', '')
     context['default_url_internal'] = env('DEFAULT_URL_INTERNAL', '')
     log_hash = int(hashlib.sha1(str(datetime.datetime.now()).encode('utf-8')).hexdigest(), 16) % (10 ** 8)
@@ -93,7 +94,7 @@ def sendHtmlEmail(to,subject,context,template,cc,bcc,from_email,template_group,a
             bcc = override_email.split(",")
 
     if len(to) > 1:
-        msg = EmailMultiAlternatives(subject, "Please open with a compatible html email client.", from_email=from_email, to=to, attachments=_attachments, cc=cc, bcc=bcc, reply_to=reply_to)
+        msg = EmailMultiAlternatives(subject, "Please open with a compatible html email client.", from_email=from_email, to=to, attachments=_attachments, cc=cc, bcc=bcc, reply_to=reply_to, headers={'System-Environment': email_instance})
         msg.attach_alternative(main_template, 'text/html')
 
         #msg = EmailMessage(subject, main_template, to=[to_email],cc=cc, from_email=from_email)
@@ -108,7 +109,7 @@ def sendHtmlEmail(to,subject,context,template,cc,bcc,from_email,template_group,a
         except Exception as e:
                 email_log(str(log_hash)+' Error Sending - '+str(e)) 
     else:
-          msg = EmailMultiAlternatives(subject, "Please open with a compatible html email client.", from_email=from_email, to=to, attachments=_attachments, cc=cc, bcc=bcc, reply_to=reply_to)
+          msg = EmailMultiAlternatives(subject, "Please open with a compatible html email client.", from_email=from_email, to=to, attachments=_attachments, cc=cc, bcc=bcc, reply_to=reply_to, headers={'System-Environment': email_instance})
           msg.attach_alternative(main_template, 'text/html')
 
           #msg = EmailMessage(subject, main_template, to=to,cc=cc, from_email=from_email)
