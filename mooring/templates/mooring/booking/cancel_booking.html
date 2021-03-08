@@ -17,69 +17,91 @@
 
     </div>
 
-
-
-
 {% endblock %}
+
 {% block content %}
 
     <div class="container">
         <div class="row">
+        <div class="col-sm-12 col-md-12 col-lg-12"> 
 
-        <div class="col-sm-12">
-            <h2>Cancel Booking {{ booking.id }}</h2>
-	</div>
-        <div class="col-sm-12 col-md-12 col-lg-12">
+             <div class="col-sm-12">
+                 <h2>Cancel Booking {{ booking.id }}</h2>
+	     </div>
+             <div class="col-sm-12 col-md-12 col-lg-12">
 
-Booking information below and refund or fees to pay in order to cancel booking.  Please click the button below to complete the booking cancellation.
-<br>
-<BR>
-<div class="row"><div class="col-sm-12">
-     <div class='pull-right'>
-     {% if payments_officer_group is True %}
-     {% if occ == 'true' %}
-         <a href='?occ=false' class='btn btn-danger'>Remove Override</a>
-     {% else %}
-         <a href='?occ=true' class='btn btn-danger'>Override Cancellations Fees</a>
-     {% endif %}
-     {% endif %}
-     </div>
-     <div class='col-lg-12'>
-     &nbsp;
-     <br>
-     </div>
-     <table cellspacing="0" width="100%" id="bookings-table" class="hover table table-striped table-bordered dt-responsive nowrap dataTable no-footer dtr-inline" role="grid" aria-describedby="bookings-table_info">
-     <thead>
-          <tr role="row"><th data-class="expand" class="expand sorting_asc" rowspan="1" colspan="1" aria-label=" Confirmation #"> Description</th><th class="sorting_disabled" rowspan="1" colspan="1" aria-label=" Amount"> Amount</th></tr>
-     </thead>
-     <tbody>
-          {% cycle 'odd' 'even' as rowcolors silent %}
-          {% for line in booking_fees %}
-          {% cycle rowcolors %}
-       	  <tr role="row" class="{{ rowcolors }}">
-               	<td class="expand sorting_1" tabindex="0">{{ line.description }}</td>
-                <td>${{ line.amount }}</td>
-          </tr>
-	  {% endfor %}
+                     Booking information below and refund or fees to pay in order to cancel booking.  Please click the button below to complete the booking cancellation.
 
-      </table>
-      {% if booking_total < 0 %}  
-       <h2>Refund Total : ${{ booking_total_positive }} </h2>
-      {% else %}
-        <h2>Total to Pay  : ${{ booking_total }} </h2>
-      {% endif %}
+                     <br>
+                     <BR>
+                     <div class="row">
+                          <div class="col-sm-12">
+                          <div class='pull-right'>
+                          {% if payments_officer_group is True %}
+                          {% if occ == 'true' %}
+                              <a href='?occ=false' class='btn btn-danger'>Remove Override</a>
+                          {% else %}
+                              <a href='?occ=true' class='btn btn-danger'>Override Cancellations Fees</a>
+                          {% endif %}
+                          {% endif %}
+                          </div>
+                          <div class='col-lg-12'>
+                          &nbsp;
+                          <br>
+                          </div>
+                          <table cellspacing="0" width="100%" id="bookings-table" class="hover table table-striped table-bordered dt-responsive nowrap dataTable no-footer dtr-inline" role="grid" aria-describedby="bookings-table_info">
+                          <thead>
+                               <tr role="row"><th data-class="expand" class="expand sorting_asc" rowspan="1" colspan="1" aria-label=" Confirmation #"> Description</th><th class="sorting_disabled" rowspan="1" colspan="1" aria-label=" Amount"> Amount</th></tr>
+                          </thead>
+                          <tbody>
+                               {% cycle 'odd' 'even' as rowcolors silent %}
+                               {% for line in booking_fees %}
+                               {% cycle rowcolors %}
+                            	  <tr role="row" class="{{ rowcolors }}">
+                                    	<td class="expand sorting_1" tabindex="0">{{ line.description }}</td>
+                                     <td>${{ line.amount }}</td>
+                               </tr>
+                     	  {% endfor %}
+                     
+                           </table>
+                           {% if booking_total < 0 %}  
+                            <h2>Refund Total : ${{ booking_total_positive }} </h2>
+                           {% else %}
+                             <h2>Total to Pay  : ${{ booking_total }} </h2>
+                           {% endif %}
+                      
+                     </div>
+                </div>
  
-</div>
- 
+        </div>
         </div>
         <div class="col-sm-12 col-md-12 col-lg-12">
 		<form method="post" action="{% url 'public_cancel_booking' booking.id %}" id="place_order_form">
                 <input type='hidden' value='{{ occ }}' name='occ'>
-		{% csrf_token %}
-		<BR><BR>
-		<button id='cancel-booking' type='button' class="btn btn-info btn-lg" target="_blank" >Proceed with Cancellation</button>
-                </div>
 
+		{% csrf_token %}
+                {% if is_staff == True %}
+                <div class='col-sm-12 col-md-6 col-lg-12 well well-lg'>
+                    <div class="col-sm-12 col-md-6 col-lg-12" >
+                        <div class="col-sm-12 col-md-6 col-lg-4 " style='padding: 0px; margin: 0px;'>
+                           <label>Cancellation Reason</label>
+                        </div>
+                    </div>
+                    <div class="col-sm-12 col-md-6 col-lg-12" >
+                        <div class="col-sm-12 col-md-6 col-lg-4 " style='padding: 0px; margin: 0px;'>
+                           <textarea name="cancellation_reason" id="cancellation_reason" rows='10' class="form-control" style="width: 100%;" ></textarea> 
+                        </div>
+                    </div>
+                </div>
+                {% endif %}
+
+                <div class="col-sm-12 col-md-6 col-lg-12"> 
+                  <div class="col-sm-12 col-md-6 col-lg-4" style='padding: 0px; margin: 0px;'>
+                      <BR><BR>
+                      <button id='cancel-booking' type='button' class="btn btn-info btn-lg" target="_blank" >Proceed with Cancellation</button>
+                  </div>
+                </div>
+                </div>
 		</form>	
 	</div>
 
@@ -87,10 +109,19 @@ Booking information below and refund or fees to pay in order to cancel booking. 
 <script>
 window.onload=function() {
 $( "#cancel-booking" ).click(function() {
+  var cancellation_reason = $('#cancellation_reason').val();
+  if (cancellation_reason != undefined) { 
+         if (cancellation_reason.length > 10) {
+	 } else {
+		alert('Please provide a valid cancellation reason');
+                return;
+         }
+  }
   console.log('button clicked');
   $( "#cancel-booking" ).html("Submitting....");
   $( "#cancel-booking" ).attr("disabled", "disabled");
   $( "#place_order_form" ).submit();
+  $( "#cancellation_reason" ).attr("disabled", "disabled");
 });
 };
 

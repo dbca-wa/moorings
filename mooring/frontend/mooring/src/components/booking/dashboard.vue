@@ -912,7 +912,7 @@ export default {
                 //var fields = [...vm.dtHeaders];
                 var fields = [...fields,...vm.dtHeaders];
                 fields.splice(vm.dtHeaders.length-1,1);
-                fields = ['Created', 'Confirmation No', 'Person', 'Email', 'Phone', 'Vessel Rego', 'Amount Due', 'Amount Paid',"Status", "Mooring", "Region", "Arrival", "Departure", "Adults","Concession","Children","Infants",'Booking Type','Invoices','Admission Ref#', 'Admission Amount','Vessel Size','Vessel Draft','Vessel Beam','Vessel Weight']
+                fields = ['Created', 'Confirmation No', 'Person', 'Email', 'Phone', 'Vessel Rego', 'Amount Due', 'Amount Paid',"Status", "Mooring", "Region", "Arrival", "Departure", "Adults","Concession","Children","Infants",'Booking Type','Invoices','Admission Ref#', 'Admission Amount','Vessel Size','Vessel Draft','Vessel Beam','Vessel Weight','Cancelled By','Cancellation Reason']
                 //fields = ['Created', 'Confirmation No', 'Person', 'Email', 'Phone', 'Vessel Rego', 'Amount Due', 'Amount Paid',"Status", "Mooring", "Region", "Arrival", "Departure", "Adults","Concession","Children","Infants","Cancelled","Cancellation Reason","Cancelation Date","Cancelled By", 'Booking Type','Invoices']
                 // fields = [...fields,"Adults","Concession","Children","Infants","Regos","Cancelled","Cancellation Reason","Cancelation Date","Cancelled By"]
                 // fields.splice(4,0,"Email");
@@ -1078,6 +1078,22 @@ export default {
                                         bk[field] = '';
                                 }
                             break;
+                            case 25:
+                                if (booking.vessel_details) {
+                                        bk[field] = booking.canceled_by;
+                                } else {
+                                        bk[field] = '';
+                                }
+                            break;
+                            case 26:
+                                if (booking.vessel_details) {
+                                        bk[field] = booking.cancelation_reason;
+                                } else {
+                                        bk[field] = '';
+                                }
+                            break;
+
+
 
                         }
                     });
@@ -1122,7 +1138,7 @@ export default {
                 var data = res.body.results;
 
                 var json2csv = require('json2csv');
-                var fields = ["Confirmation No", "Customer", "Email", "Mobile", "Overnight Stay", "Arrival Date", "Total Attendees", "Adults","Children","Infants", "Vessel Reg No", "Warning Reference", "Invoice Reference",'Vessel Size','Vessel Draft','Vessel Beam','Vessel Weight']
+                var fields = ["Confirmation No", "Customer", "Email", "Mobile", "Overnight Stay", "Arrival Date", "Total Attendees", "Adults","Children","Infants", "Vessel Reg No", "Warning Reference", "Invoice Reference",'Cancelled By','Cancellation Reason']
                 
                 var bookings = [];
                 $.each(data,function (i,booking) {
@@ -1192,6 +1208,13 @@ export default {
                             case 12:
                                 bk[field] = booking.invoice_ref;
                             break;
+                            case 13:
+                                bk[field] = booking.canceled_by;
+                            break;
+                            case 14:
+                                bk[field] = booking.cancellation_reason;
+                            break;
+
                         }
                     });
                     bookings.push(bk);
