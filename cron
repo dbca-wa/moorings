@@ -6,3 +6,6 @@
 #*/1 * * * * root eval $(grep -v '^#' /etc/.cronenv | xargs -d "\n" -I {} echo export \"{}\" ) && python /app/manage_mo.py rebuild_mooing_booking_pc >> /app/logs/rebuild_mooing_booking_pc.log 2>&1
 
 */2 * * * * root eval $(grep -v '^#' /etc/.cronenv | xargs -d "\n" -I {} echo export \"{}\" ) && python /app/manage_mo.py rebuild_mooring_changed_booking >> /app/logs/rebuild_mooring_changed_booking.log 2>&1
+
+15 9 * * * root eval $(grep -v '^#' /etc/.cronenv | xargs -d "\n" -I {} echo export \"{}\" ) && python3 /app/manage.py bpoint_ledger_payment_audit_report >> /app/logs/bpoint_ledger_payment_audit_report.log 2>&1
+
