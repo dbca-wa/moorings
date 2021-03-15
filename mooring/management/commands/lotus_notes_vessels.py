@@ -93,14 +93,14 @@ class Command(BaseCommand):
                             # Therefore update the values if they are larger/exist.
                             index = next((index for (index, d) in enumerate(rego_info_from_dump) if d[fields[0]] == record[reg]), None)
                             if index is not None:
-                                if rego_info_from_dump[index][fields[1]] < record[size]:
-                                    rego_info_from_dump[index][fields[1]] = record[size]
-                                if rego_info_from_dump[index][fields[2]] < record[draft]:
-                                    rego_info_from_dump[index][fields[2]] = record[draft]
-                                if rego_info_from_dump[index][fields[3]] < record[beam]:
-                                    rego_info_from_dump[index][fields[3]] = record[beam]
-                                if rego_info_from_dump[index][fields[4]] < record[weight]:
-                                    rego_info_from_dump[index][fields[4]] = record[weight]
+                                if float(rego_info_from_dump[index][fields[1]]) < float(record[size]):
+                                    rego_info_from_dump[index][fields[1]] = float(record[size])
+                                if float(rego_info_from_dump[index][fields[2]]) < float(record[draft]):
+                                    rego_info_from_dump[index][fields[2]] = float(record[draft])
+                                if float(rego_info_from_dump[index][fields[3]]) < float(record[beam]):
+                                    rego_info_from_dump[index][fields[3]] = float(record[beam])
+                                if float(rego_info_from_dump[index][fields[4]]) < float(record[weight]):
+                                    rego_info_from_dump[index][fields[4]] = float(record[weight])
                                 if not rego_info_from_dump[index][fields[5]] and record[stickerl]:
                                     rego_info_from_dump[index][fields[5]] = record[stickerl]
                                 if not rego_info_from_dump[index][fields[6]] and record[stickerau]:
