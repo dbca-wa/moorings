@@ -14,6 +14,7 @@ class Command(BaseCommand):
         parser.add_argument('path')
 
     def handle(self, *args, **options):
+        errors = False
         try:
             # Get all the new vessels information from JSON file.
             if options['path']:
@@ -146,9 +147,10 @@ class Command(BaseCommand):
             total = RegisteredVessels.objects.all().count()
             time = datetime.now()
             content = "Extract has completed successfully.\n{} vessels total.\nFinished run at {}.".format(total, time)
-            send_registered_vessels_email(content)
+            send_registered_vessels_email(content, errors)
         except Exception as e:
             print (e)
+            errors = True 
             #Send fail email
             content = "Extract has failed.\nError message: {}".format(e)
-            send_registered_vessels_email(content)
+            send_registered_vessels_email(content, errors)

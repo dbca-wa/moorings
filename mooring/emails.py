@@ -556,9 +556,13 @@ def send_refund_failure_email_old(booking):
           email = u.email
           email_obj.send([email], from_address=default_from_email, context=context)
 
-def send_registered_vessels_email(content):
+def send_registered_vessels_email(content, errors):
     email_obj = TemplateEmailBase()
-    email_obj.subject = 'Lotus notes extract run.'
+    if errors is True:
+        email_obj.subject = 'ERROR - Lotus notes extract run.'
+    else:
+        email_obj.subject = 'Lotus notes extract run.'
+
     email_obj.html_template = 'mooring/email/reg_ves.html'
     email_obj.txt_template = 'mooring/email/reg_ves.txt'
 
