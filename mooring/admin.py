@@ -636,3 +636,8 @@ class RefundFailed(admin.ModelAdmin):
     list_filter = ('status',)
     ordering = ('id',)
 
+
+@admin.register(models.API)
+class APIAdmin(admin.ModelAdmin):
+    list_display = ('id','system_name','active')
+

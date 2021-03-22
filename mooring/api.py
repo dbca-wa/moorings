@@ -44,6 +44,7 @@ from django.db.models import Value, ManyToManyField
 from ledger.payments.utils import systemid_check, update_payments
 from mooring.context_processors import mooring_url, template_context
 from mooring import doctopdf
+from mooring import common_iplookup
 from mooring import models
 from mooring.models import (MooringArea,
                                 District,
@@ -5430,4 +5431,127 @@ class RefundOracleView(views.APIView):
            raise
 
 
+def ip_check(request):
+    ledger_json  = {}
+    ipaddress = common_iplookup.get_client_ip(request)
+    jsondata = {'status': 200, 'ipaddress': str(ipaddress)}
+    return HttpResponse(json.dumps(jsondata), content_type='application/json')
+
+
+# external application API's.
+
+@csrf_exempt
+def licence_create_update(request, apikey):
+
+    jsondata = {'status': 404, 'message': 'API Key Not Found'}
+    ledger_user_json  = {}
+
+    if models.API.objects.filter(api_key=apikey,active=1).count():
+        if common_iplookup.api_allow(common_iplookup.get_client_ip(request),apikey) is True:
+            vessel_rego = request.POST.get('vessel_rego', '')
+            licence_id = request.POST.get('licence_id','')
+            licence_type = request.POST.get('licence_type','')
+            start_date = request.POST.get('start_date','')
+            expiry_date = request.POST.get('expiry_date','')
+            status = request.POST.get('status','')
+
+            vessel_licence  = models.VesselLicence.objects.filter(licence_id=licence_id)
+            if vessel_licence.count():
+                vl = vessel_licence[0]
+                vl.licence_id=licence_id
+                vl.licence_type=licence_type
+                vl.start_date=start_date
+                vl.expiry_date=expiry_date
+                vl.status=status
+                vl.save()
+            else:
+                models.VesselLicence.objects.create(licence_id=licence_id,
+                                                    licence_type=licence_type,
+                                                    start_date=start_date,
+                                                    expiry_date=expiry_date,
+                                                    status=status
+                                                   )
+
+
+            jsondata = {'status': 200, 'message': 'No Results'}
+            jsondata['users'] = []
+        else:
+            jsondata['status'] = 403
+            jsondata['message'] = 'Access Forbidden'
+    else:
+        pass
+
+    return HttpResponse(json.dumps(jsondata), content_type='application/json')
+
+@csrf_exempt
+def marine_parks(request, apikey):
+
+    jsondata = {'status': 404, 'message': 'API Key Not Found'}
+    ledger_user_json  = {}
+    
+    if models.API.objects.filter(api_key=apikey,active=1).count():
+        if common_iplookup.api_allow(common_iplookup.get_client_ip(request),apikey) is True:
+            items = []
+            marinepark = MarinePark.objects.all()
+            for mp in marinepark:
+                items.append({'id': mp.id, 'name': mp.name, 'district_id': mp.district.id})
+
+            jsondata['status'] = 200
+            jsondata['message'] = 'Results'
+            jsondata['data'] = items
+
+        else:
+            jsondata['status'] = 403
+            jsondata['message'] = 'Access Forbidden'
+    else:
+        pass
+    return HttpResponse(json.dumps(jsondata), content_type='application/json')
+
+
+@csrf_exempt
+def mooring_groups(request, apikey):
+
+    jsondata = {'status': 404, 'message': 'API Key Not Found'}
+    ledger_user_json  = {}
+
+    if models.API.objects.filter(api_key=apikey,active=1).count():
+        if common_iplookup.api_allow(common_iplookup.get_client_ip(request),apikey) is True:
+            items = []
+            mooring_groups = models.MooringAreaGroup.objects.all()
+            for mg in mooring_groups:
+                 items.append({'id': mg.id, 'name': mg.name})
+
+            jsondata['data'] = items
+            jsondata['status'] = 200
+            jsondata['message'] = 'Results'
+        else:
+            jsondata['status'] = 403
+            jsondata['message'] = 'Access Forbidden'
+    else:
+        pass
+    return HttpResponse(json.dumps(jsondata), content_type='application/json')
+
+
+@csrf_exempt
+def get_mooring(request, apikey):
+
+    jsondata = {'status': 404, 'message': 'API Key Not Found'}
+    ledger_user_json  = {}
+
+    if models.API.objects.filter(api_key=apikey,active=1).count():
+        if common_iplookup.api_allow(common_iplookup.get_client_ip(request),apikey) is True:
+            items = []
+            mooring_groups = models.MooringArea.objects.all()
+            for mg in mooring_groups:
+                items.append({'id': mg.id, 'name': mg.name, 'marine_park_name': mg.park.name,'vessel_size_limit': mg.vessel_size_limit, 'vessel_draft_limit' : mg.vessel_draft_limit, 'vessel_beam_limit' : mg.vessel_beam_limit, 'vessel_weight_limit' : mg.vessel_weight_limit})
+
+            jsondata['data'] = items
+            jsondata['status'] = 200
+            jsondata['message'] = 'Results'
+        else:
+            jsondata['status'] = 403
+            jsondata['message'] = 'Access Forbidden'
+    else:
+        pass
+    return HttpResponse(json.dumps(jsondata), content_type='application/json')
 

@@ -87,7 +87,15 @@ api_patterns = [
     url(r'^api/check_oracle_code$', api.CheckOracleCodeView.as_view(), name='check_oracle_code'),
     url(r'^api/refund_oracle$', api.RefundOracleView.as_view(), name='refund_oracle'),
     url(r'^api/annual_admissions_refund_oracle$', api.AnnualAdmissionRefundOracleView.as_view(), name='annual_admissions_refund_oracle'),
-#    url(r'^api/admissions_key$', api.AdmissionsKeyFromURLView.as_view(), name='admissions_key'),
+    url(r'^api/ip-check/', api.ip_check),
+    # External System API's - START
+    url(r'^api/external/licence-create-update/(?P<apikey>.+)/', api.licence_create_update),
+    url(r'^api/external/marine-parks/(?P<apikey>.+)/', api.marine_parks),
+    url(r'^api/external/mooring-groups/(?P<apikey>.+)/', api.mooring_groups), 
+    url(r'^api/external/all-mooring/(?P<apikey>.+)/', api.get_mooring),
+   
+    # External System API's - END
+    #    url(r'^api/admissions_key$', api.AdmissionsKeyFromURLView.as_view(), name='admissions_key'),
     url(r'^api/',include(router.urls))
 ]
 # URL Patterns
