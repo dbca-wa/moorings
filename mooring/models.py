@@ -196,6 +196,12 @@ class MooringArea(models.Model):
         ('large','Large')
     )
 
+    MOORING_SPECIFICATION = (
+         (1, 'Rental Mooring'),
+         (2, 'Private Mooring'),
+    )
+
+
     name = models.CharField(max_length=255, null=True)
     park = models.ForeignKey('MarinePark', on_delete=models.PROTECT, related_name='marineparks')
     ratis_id = models.IntegerField(default=-1)
@@ -232,6 +238,7 @@ class MooringArea(models.Model):
     vessel_weight_limit = models.FloatField(default=0)
     mooring_physical_type = models.SmallIntegerField(choices=MOORING_PHYSICAL_TYPE_CHOICES, default=0)
     mooring_class = models.CharField(choices=MOORING_CLASS_CHOICES, default=0, max_length=20)
+    mooring_specification = models.SmallIntegerField(choices=MOORING_SPECIFICATION, default=1)
 
     def __str__(self):
         return self.name

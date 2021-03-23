@@ -19,7 +19,7 @@
 									<div class="row">
 										<div class="col-md-3">
 											<div class="form-group">
-												<label class="control-label" >Mooring Name</label>
+												<label class="control-label" >iii Mooring Name</label>
 												<input type="text" name="name" id="name" class="form-control" v-model="campground.name" required/>
 											</div>
 										</div>

@@ -81,7 +81,7 @@ class MarinaAdmin(admin.GeoModelAdmin):
 
 @admin.register(models.MooringArea)
 class MooringAreaAdmin(admin.GeoModelAdmin):
-    list_display = ('name','park','promo_area','mooring_type','max_advance_booking')
+    list_display = ('name','park','promo_area','mooring_type','max_advance_booking','mooring_specification')
     ordering = ('name',)
     search_fields = ('name',)
     list_filter = ('mooring_type','site_type')
