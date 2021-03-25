@@ -61,6 +61,7 @@ api_patterns = [
     url(r'^api/bulkPricing', api.BulkPricingView.as_view(),name='bulkpricing-api'),
     url(r'^api/registeredVessels/', api.get_paid_admissions,name='get_vessel_info'),
     url(r'^api/search_suggest', api.search_suggest, name='search_suggest'),
+    url(r'^api/mooring_specification', api.mooring_specification, name='mooring_specification'),
     url(r'^api/get_country_provinces/(?P<country_code>[A-Z]+)/', api.get_provinces_by_country, name='get_country_provinces'),
     url(r'^api/get_annual_admission_pricing/(?P<annual_booking_period_id>[0-9]+)/(?P<vessel_size>[0-9]+.[0-9]+)/', api.get_annual_admission_pricing, name='get_annual_admission_pricing_float'),
     url(r'^api/get_annual_admission_pricing/(?P<annual_booking_period_id>[0-9]+)/(?P<vessel_size>[0-9]+)/', api.get_annual_admission_pricing, name='get_annual_admission_pricing'),

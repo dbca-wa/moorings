@@ -297,9 +297,10 @@ class MooringArea(models.Model):
                 end = end.strftime('%d/%m/%Y %H:%M')
             else:
                 end = ""
-            strTime = 'Start: {} Reopen: {}'.format(start, end)
+            strTime = 'Start: {} - Reopen: {}'.format(start, end)
             return strTime
         return ''
+
 
 
 #    @property

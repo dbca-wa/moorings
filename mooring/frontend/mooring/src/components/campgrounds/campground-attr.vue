@@ -293,6 +293,7 @@ export default {
             isLoading: false,
             reload : false,
             contacts:[],
+            mooring_specification: [],
             mooring_groups: [],
             MooringGroups: [{ id: 1, name: 'Principal' }, { id: 2, name: 'Dessert' }, { id: 3, name: 'Drink' }],
         }

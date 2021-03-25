@@ -793,9 +793,12 @@ class MooringAreaViewSet(viewsets.ModelViewSet):
     def datatable_list(self,request,format=None):
         mooring_groups = MooringAreaGroup.objects.filter(members__in=[self.request.user,])
         cache_append=""
+        specification = {}
         for mg in mooring_groups:
             cache_append=cache_append+str(mg.id)+":"
-           
+        for ms in MooringArea.MOORING_SPECIFICATION:
+            specification[ms[0]] = ms[1]
+        print (specification)
         #json_data = cache.get('MooringAreaViewSet:datatable_list:jsondata:'+cache_append)
         json_data = None
         if json_data is None:
@@ -806,6 +809,7 @@ class MooringAreaViewSet(viewsets.ModelViewSet):
                for mig in moorings_in_group:
                    #qs.append(mig)
                    row_json_data = cache.get('MooringAreaViewSet:datatable_list:row:'+str(mig.id))
+                   row_json_data = None
                    if row_json_data is None:
                       row = {}
                       row['active'] = mig.active 
@@ -818,6 +822,7 @@ class MooringAreaViewSet(viewsets.ModelViewSet):
                       row['park'] = mig.park.name
                       row['ratis_id'] = mig.ratis_id
                       row['region'] = mig.region
+                      row['mooring_specification'] = specification[mig.mooring_specification]
                       row_json_data = geojson.dumps(row)
                       cache.set('MooringAreaViewSet:datatable_list:row:'+str(mig.id),row_json_data,600)
                    else:
@@ -896,6 +901,18 @@ class MooringAreaViewSet(viewsets.ModelViewSet):
                 images_data = request.data.pop("images")
             serializer = self.get_serializer(data=request.data)
             serializer.is_valid(raise_exception=True)
+
+            mooring_specification = request.data.pop("mooring_specification")
+            if int(mooring_specification) == 2:
+                pass
+                #oracle code not required for private moorings
+            else:
+                if "oracle_code" in request.data:
+                      oracle_code = request.data.pop("oracle_code")
+                      if OracleAccountCode.objects.filter(active_receivables_activities=oracle_code).count() == 0:
+                          raise serializers.ValidationError("Oracle Code does not exist")
+
+
             instance =serializer.save()
             instance.mooring_group = None
 
@@ -923,10 +940,10 @@ class MooringAreaViewSet(viewsets.ModelViewSet):
                     for image_serializer in image_serializers:
                         image_serializer.save()
 
-            if "oracle_code" in request.data:
-                  oracle_code = request.data.pop("oracle_code")
-                  if OracleAccountCode.objects.filter(active_receivables_activities=oracle_code).count() == 0:
-                      raise serializers.ValidationError("Oracle Code does not exist")
+            #if "oracle_code" in request.data:
+            #      oracle_code = request.data.pop("oracle_code")
+            #      if OracleAccountCode.objects.filter(active_receivables_activities=oracle_code).count() == 0:
+            #          raise serializers.ValidationError("Oracle Code does not exist")
 
             if "mooring_group" in request.data:
                 mooring_group = request.data.pop("mooring_group")
@@ -953,7 +970,6 @@ class MooringAreaViewSet(viewsets.ModelViewSet):
                                       name=instance.name,
                                       mooringsite_class=mooringsite_class,
                                       description=None)
-
             return Response(serializer.data)
         except serializers.ValidationError:
             print(traceback.print_exc())
@@ -972,6 +988,11 @@ class MooringAreaViewSet(viewsets.ModelViewSet):
             instance = self.get_object()
             post = request.data
             instance.mooring_group = None
+            contact = request.data.pop("contact")
+            if contact == 'undefined' or contact is None:
+                  instance.contact = None
+            else:
+                instance.contact =  Contact.objects.get(id=int(contact)) 
             if "mooring_group" in request.data:
                 mooring_group = request.data.pop("mooring_group")
                 
@@ -992,11 +1013,16 @@ class MooringAreaViewSet(viewsets.ModelViewSet):
                            if instance.id == b.id:
                               i.moorings.remove(b)
 
-                
-            if "oracle_code" in request.data:
-                  oracle_code = request.data.pop("oracle_code")
-                  if OracleAccountCode.objects.filter(active_receivables_activities=oracle_code).count() == 0:
-                      raise serializers.ValidationError("Oracle Code does not exist") 
+
+            mooring_specification = request.data.pop("mooring_specification")
+            if int(mooring_specification) == 2:
+                 pass
+                 #oracle code not required for private moorings          
+            else:
+                  if "oracle_code" in request.data:
+                        oracle_code = request.data.pop("oracle_code")
+                        if OracleAccountCode.objects.filter(active_receivables_activities=oracle_code).count() == 0:
+                            raise serializers.ValidationError("Oracle Code does not exist") 
             if "images" in request.data:
                 images_data = request.data.pop("images")
             serializer = self.get_serializer(instance,data=request.data,partial=True)
@@ -1043,7 +1069,9 @@ class MooringAreaViewSet(viewsets.ModelViewSet):
                 if current_images:
                     current_images.delete()
             self.perform_update(serializer)
+            instance.mooring_specification = mooring_specification
             instance.mooring_group = MooringAreaGroup.objects.filter(moorings__in=[instance.id])[0].id
+            instance.save()
             return Response(serializer.data)
         except serializers.ValidationError:
             print(traceback.print_exc())
@@ -5506,6 +5534,15 @@ def marine_parks(request, apikey):
     else:
         pass
     return HttpResponse(json.dumps(jsondata), content_type='application/json')
+
+
+def mooring_specification(request):
+    mooring_specification_array = []
+    mooring_specification = models.MooringArea.MOORING_SPECIFICATION
+    #mooring_specification_array.append({'id': '', 'name': 'Not Selected'})
+    for ms in mooring_specification:
+        mooring_specification_array.append({'id': ms[0], 'name': ms[1]})
+    return HttpResponse(json.dumps(mooring_specification_array), content_type='application/json')
 
 
 @csrf_exempt

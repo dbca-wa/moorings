@@ -164,6 +164,7 @@ module.exports = {
     },
     profile: process.env.PARKSTAY_URL + "/api/profile",
     contacts:process.env.PARKSTAY_URL + "/api/contacts.json",
+    mooring_specification: process.env.PARKSTAY_URL + "/api/mooring_specification/",
     //Must end .json otherwise will effect other urls generated based on removing the .json.
     booking_period_options: process.env.PARKSTAY_URL + "/api/bookingPeriodOptions.json",
     booking_period : process.env.PARKSTAY_URL + "/api/bookingPeriod.json",
