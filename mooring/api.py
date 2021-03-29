@@ -44,6 +44,7 @@ from django.db.models import Value, ManyToManyField
 from ledger.payments.utils import systemid_check, update_payments
 from mooring.context_processors import mooring_url, template_context
 from mooring import doctopdf
+from mooring import common_iplookup
 from mooring import models
 from mooring.models import (MooringArea,
                                 District,
@@ -792,9 +793,12 @@ class MooringAreaViewSet(viewsets.ModelViewSet):
     def datatable_list(self,request,format=None):
         mooring_groups = MooringAreaGroup.objects.filter(members__in=[self.request.user,])
         cache_append=""
+        specification = {}
         for mg in mooring_groups:
             cache_append=cache_append+str(mg.id)+":"
-           
+        for ms in MooringArea.MOORING_SPECIFICATION:
+            specification[ms[0]] = ms[1]
+        print (specification)
         #json_data = cache.get('MooringAreaViewSet:datatable_list:jsondata:'+cache_append)
         json_data = None
         if json_data is None:
@@ -805,6 +809,7 @@ class MooringAreaViewSet(viewsets.ModelViewSet):
                for mig in moorings_in_group:
                    #qs.append(mig)
                    row_json_data = cache.get('MooringAreaViewSet:datatable_list:row:'+str(mig.id))
+                   row_json_data = None
                    if row_json_data is None:
                       row = {}
                       row['active'] = mig.active 
@@ -817,6 +822,7 @@ class MooringAreaViewSet(viewsets.ModelViewSet):
                       row['park'] = mig.park.name
                       row['ratis_id'] = mig.ratis_id
                       row['region'] = mig.region
+                      row['mooring_specification'] = specification[mig.mooring_specification]
                       row_json_data = geojson.dumps(row)
                       cache.set('MooringAreaViewSet:datatable_list:row:'+str(mig.id),row_json_data,600)
                    else:
@@ -895,6 +901,18 @@ class MooringAreaViewSet(viewsets.ModelViewSet):
                 images_data = request.data.pop("images")
             serializer = self.get_serializer(data=request.data)
             serializer.is_valid(raise_exception=True)
+
+            mooring_specification = request.data.pop("mooring_specification")
+            if int(mooring_specification) == 2:
+                pass
+                #oracle code not required for private moorings
+            else:
+                if "oracle_code" in request.data:
+                      oracle_code = request.data.pop("oracle_code")
+                      if OracleAccountCode.objects.filter(active_receivables_activities=oracle_code).count() == 0:
+                          raise serializers.ValidationError("Oracle Code does not exist")
+
+
             instance =serializer.save()
             instance.mooring_group = None
 
@@ -922,10 +940,10 @@ class MooringAreaViewSet(viewsets.ModelViewSet):
                     for image_serializer in image_serializers:
                         image_serializer.save()
 
-            if "oracle_code" in request.data:
-                  oracle_code = request.data.pop("oracle_code")
-                  if OracleAccountCode.objects.filter(active_receivables_activities=oracle_code).count() == 0:
-                      raise serializers.ValidationError("Oracle Code does not exist")
+            #if "oracle_code" in request.data:
+            #      oracle_code = request.data.pop("oracle_code")
+            #      if OracleAccountCode.objects.filter(active_receivables_activities=oracle_code).count() == 0:
+            #          raise serializers.ValidationError("Oracle Code does not exist")
 
             if "mooring_group" in request.data:
                 mooring_group = request.data.pop("mooring_group")
@@ -952,7 +970,6 @@ class MooringAreaViewSet(viewsets.ModelViewSet):
                                       name=instance.name,
                                       mooringsite_class=mooringsite_class,
                                       description=None)
-
             return Response(serializer.data)
         except serializers.ValidationError:
             print(traceback.print_exc())
@@ -971,6 +988,11 @@ class MooringAreaViewSet(viewsets.ModelViewSet):
             instance = self.get_object()
             post = request.data
             instance.mooring_group = None
+            contact = request.data.pop("contact")
+            if contact == 'undefined' or contact is None:
+                  instance.contact = None
+            else:
+                instance.contact =  Contact.objects.get(id=int(contact)) 
             if "mooring_group" in request.data:
                 mooring_group = request.data.pop("mooring_group")
                 
@@ -991,11 +1013,16 @@ class MooringAreaViewSet(viewsets.ModelViewSet):
                            if instance.id == b.id:
                               i.moorings.remove(b)
 
-                
-            if "oracle_code" in request.data:
-                  oracle_code = request.data.pop("oracle_code")
-                  if OracleAccountCode.objects.filter(active_receivables_activities=oracle_code).count() == 0:
-                      raise serializers.ValidationError("Oracle Code does not exist") 
+
+            mooring_specification = request.data.pop("mooring_specification")
+            if int(mooring_specification) == 2:
+                 pass
+                 #oracle code not required for private moorings          
+            else:
+                  if "oracle_code" in request.data:
+                        oracle_code = request.data.pop("oracle_code")
+                        if OracleAccountCode.objects.filter(active_receivables_activities=oracle_code).count() == 0:
+                            raise serializers.ValidationError("Oracle Code does not exist") 
             if "images" in request.data:
                 images_data = request.data.pop("images")
             serializer = self.get_serializer(instance,data=request.data,partial=True)
@@ -1042,7 +1069,9 @@ class MooringAreaViewSet(viewsets.ModelViewSet):
                 if current_images:
                     current_images.delete()
             self.perform_update(serializer)
+            instance.mooring_specification = mooring_specification
             instance.mooring_group = MooringAreaGroup.objects.filter(moorings__in=[instance.id])[0].id
+            instance.save()
             return Response(serializer.data)
         except serializers.ValidationError:
             print(traceback.print_exc())
@@ -5431,4 +5460,218 @@ class RefundOracleView(views.APIView):
            raise
 
 
+def ip_check(request):
+    ledger_json  = {}
+    ipaddress = common_iplookup.get_client_ip(request)
+    jsondata = {'status': 200, 'ipaddress': str(ipaddress)}
+    return HttpResponse(json.dumps(jsondata), content_type='application/json')
+
+
+# external application API's.
+@csrf_exempt
+def vessel_create_update(request, apikey):
+    jsondata = {'status': 404, 'message': 'API Key Not Found'}
+
+    rego_no = request.POST.get('rego_no', '')
+    vessel_size = request.POST.get('vessel_size','')
+    vessel_draft = request.POST.get('vessel_draft','')
+    vessel_beam  =  request.POST.get('vessel_beam','')
+    vessel_weight = request.POST.get('vessel_weight','')
+
+    if models.API.objects.filter(api_key=apikey,active=1).count():
+        if common_iplookup.api_allow(common_iplookup.get_client_ip(request),apikey) is True:
+            update = True
+
+            if update is True:
+                 registered_vessel = models.RegisteredVesselsMooringLicensing.objects.filter(rego_no=rego_no)
+
+                 try: 
+                     if registered_vessel.count():
+                         rv = registered_vessel[0]
+                         rv.rego_no=rego_no
+                         rv.vessel_size=vessel_size
+                         rv.vessel_draft=vessel_draft
+                         rv.vessel_beam=vessel_beam
+                         rv.vessel_weight=vessel_weight
+                         rv.save()
+                         jsondata = {'status': 200, 'message': 'updated'}
+                     else:
+                         models.RegisteredVesselsMooringLicensing.objects.create(
+                                                             rego_no=rego_no,
+                                                             vessel_size=vessel_size,
+                                                             vessel_draft=vessel_draft,
+                                                             vessel_beam=vessel_beam,
+                                                             vessel_weight=vessel_weight
+                                                            )
+                         jsondata = {'status': 200, 'message': 'created'}
+                 except:
+                        jsondata = {'status': 500, 'message': 'error creating or updated vessel'}
+        else:
+            jsondata['status'] = 403
+            jsondata['message'] = 'Access Forbidden'
+    else:
+        pass
+
+    return HttpResponse(json.dumps(jsondata), content_type='application/json')
+
+
+
+@csrf_exempt
+def licence_create_update(request, apikey):
+
+    jsondata = {'status': 404, 'message': 'API Key Not Found'}
+    ledger_user_json  = {}
+
+    if models.API.objects.filter(api_key=apikey,active=1).count():
+        if common_iplookup.api_allow(common_iplookup.get_client_ip(request),apikey) is True:
+            update = True
+            vessel_rego = request.POST.get('vessel_rego', '')
+            licence_id = request.POST.get('licence_id','')
+            licence_type = request.POST.get('licence_type','')
+            start_date = request.POST.get('start_date','')
+            expiry_date = request.POST.get('expiry_date','')
+            status_word = request.POST.get('status','')
+            status = None
+            if status_word == 'active':
+                status = 1
+            elif status_word == 'cancelled':
+                status = 0
+            else:
+                update = False
+                jsondata = {'status': 500, 'message': 'active or cancelled only accepted'}
+
+            try:
+               datetime.strptime(start_date, '%Y-%m-%d')
+               datetime.strptime(expiry_date, '%Y-%m-%d')
+            except ValueError:
+               update = False
+               jsondata = {'status': 500, 'message': 'Incorrect date format, should be YYYY-MM-DD'}
+
+            if update is True:
+                 try:
+                     vessel_licence  = models.VesselLicence.objects.filter(licence_id=licence_id, licence_type=licence_type)
+                     if vessel_licence.count():
+                         vl = vessel_licence[0]
+                         vl.vessel_rego=vessel_rego
+                         vl.licence_id=licence_id
+                         vl.licence_type=licence_type
+                         vl.start_date=start_date
+                         vl.expiry_date=expiry_date
+                         vl.status=status
+                         vl.save()
+                         jsondata = {'status': 200, 'message': 'updated'}
+                     else:
+                         models.VesselLicence.objects.create(vessel_rego=vessel_rego,
+                                                             licence_id=licence_id,
+                                                             licence_type=licence_type,
+                                                             start_date=start_date,
+                                                             expiry_date=expiry_date,
+                                                             status=status
+                                                            )
+                         jsondata = {'status': 200, 'message': 'created'}
+                 except:
+                     jsondata = {'status': 500, 'message': 'error creating or updating licence'}
+        else:
+            jsondata['status'] = 403
+            jsondata['message'] = 'Access Forbidden'
+    else:
+        pass
+
+    return HttpResponse(json.dumps(jsondata), content_type='application/json')
+
+@csrf_exempt
+def marine_parks(request, apikey):
+
+    jsondata = {'status': 404, 'message': 'API Key Not Found'}
+    ledger_user_json  = {}
+    
+    if models.API.objects.filter(api_key=apikey,active=1).count():
+        if common_iplookup.api_allow(common_iplookup.get_client_ip(request),apikey) is True:
+            items = []
+            marinepark = MarinePark.objects.all()
+            for mp in marinepark:
+                items.append({'id': mp.id, 'name': mp.name, 'district_id': mp.district.id})
+
+            jsondata['status'] = 200
+            jsondata['message'] = 'Results'
+            jsondata['data'] = items
+
+        else:
+            jsondata['status'] = 403
+            jsondata['message'] = 'Access Forbidden'
+    else:
+        pass
+    return HttpResponse(json.dumps(jsondata), content_type='application/json')
+
+
+def mooring_specification(request):
+    mooring_specification_array = []
+    mooring_specification = models.MooringArea.MOORING_SPECIFICATION
+    #mooring_specification_array.append({'id': '', 'name': 'Not Selected'})
+    for ms in mooring_specification:
+        mooring_specification_array.append({'id': ms[0], 'name': ms[1]})
+    return HttpResponse(json.dumps(mooring_specification_array), content_type='application/json')
+
+
+@csrf_exempt
+def mooring_groups(request, apikey):
+
+    jsondata = {'status': 404, 'message': 'API Key Not Found'}
+    ledger_user_json  = {}
+
+    if models.API.objects.filter(api_key=apikey,active=1).count():
+        if common_iplookup.api_allow(common_iplookup.get_client_ip(request),apikey) is True:
+            items = []
+            mooring_groups = models.MooringAreaGroup.objects.all()
+            for mg in mooring_groups:
+                 items.append({'id': mg.id, 'name': mg.name})
+
+            jsondata['data'] = items
+            jsondata['status'] = 200
+            jsondata['message'] = 'Results'
+        else:
+            jsondata['status'] = 403
+            jsondata['message'] = 'Access Forbidden'
+    else:
+        pass
+    return HttpResponse(json.dumps(jsondata), content_type='application/json')
+
+
+@csrf_exempt
+def get_mooring(request, apikey):
+
+    jsondata = {'status': 404, 'message': 'API Key Not Found'}
+    ledger_user_json  = {}
+    mooring_specification_filter = None
+    mooring_specification = request.GET.get('mooring_specification',None)
+
+    if models.API.objects.filter(api_key=apikey,active=1).count():
+        if common_iplookup.api_allow(common_iplookup.get_client_ip(request),apikey) is True:
+            items = []
+            mooring_groups = models.MooringArea.objects.all()
+            for mg in mooring_groups:
+                append_row = True
+                if mooring_specification:
+                    append_row = False
+                    if mooring_specification == 'rental':
+                        if mg.mooring_specification == 1:
+                              append_row = True
+                    if mooring_specification == 'private':
+                        if mg.mooring_specification == 2:
+                              append_row = True
+
+                            
+                if append_row is True:
+                     items.append({'id': mg.id, 'name': mg.name, 'marine_park_name': mg.park.name,'marine_park_id': mg.park.id ,'vessel_size_limit': mg.vessel_size_limit, 'vessel_draft_limit' : mg.vessel_draft_limit, 'vessel_beam_limit' : mg.vessel_beam_limit, 'vessel_weight_limit' : mg.vessel_weight_limit, 'mooring_specification': mg.mooring_specification})
+
+
+            jsondata['data'] = items
+            jsondata['status'] = 200
+            jsondata['message'] = 'Results'
+        else:
+            jsondata['status'] = 403
+            jsondata['message'] = 'Access Forbidden'
+    else:
+        pass
+    return HttpResponse(json.dumps(jsondata), content_type='application/json')
 

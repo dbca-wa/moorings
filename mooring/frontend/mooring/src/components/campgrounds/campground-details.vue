@@ -10,7 +10,20 @@
 				<p>{{errorString}}<p/>
 			</alert>
 			<div class="row">
-			<div class="col-lg-12">
+                        <div class="col-lg-12">
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <div class="form-group ">
+                                        <label class="control-label">Mooring Specification</label>
+                                        <select class="form-control form-control-input" ref="mooring_specification" v-model="campground.mooring_specification" id='mooring_specification' name='mooring_specification'>
+                                            <option value="">Not Selected</option>
+                                            <option v-for="m in mooring_specification" :value="m.id" >{{m.name}}</option>
+                                        </select>
+                                    </div>
+                                </div>
+			    </div>
+			</div>
+			<div class="col-lg-12" id='mooring_details'>
                             <div class="row">
                                 <div class="col-md-4">
                                     <div class="form-group">
@@ -164,6 +177,7 @@ export default {
             reload : false,
             mooring_groups: [],
             MooringGroups: [{ id: 1, name: 'Principal' }, { id: 2, name: 'Dessert' }, { id: 3, name: 'Drink' }],
+            mooring_specification: [],
         }
     },
     props: {
@@ -433,7 +447,18 @@ export default {
             var selected = $(e.currentTarget);
             vm.campground.features = selected.val();
         });
+
+
+        vm.$http.get(api_endpoints.mooring_specification).then((response) => {
+                vm.mooring_specification = response.body
+        }, (error) => {
+                console.log(error);
+        });
+
         vm.isLoading = false;       
+        
+
+
     },
 }
 

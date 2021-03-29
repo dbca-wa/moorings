@@ -19,7 +19,7 @@
 									<div class="row">
 										<div class="col-md-3">
 											<div class="form-group">
-												<label class="control-label" >Mooring Name</label>
+												<label class="control-label" >iii Mooring Name</label>
 												<input type="text" name="name" id="name" class="form-control" v-model="campground.name" required/>
 											</div>
 										</div>
@@ -293,6 +293,7 @@ export default {
             isLoading: false,
             reload : false,
             contacts:[],
+            mooring_specification: [],
             mooring_groups: [],
             MooringGroups: [{ id: 1, name: 'Principal' }, { id: 2, name: 'Dessert' }, { id: 3, name: 'Drink' }],
         }

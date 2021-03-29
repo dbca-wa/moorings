@@ -61,6 +61,7 @@ api_patterns = [
     url(r'^api/bulkPricing', api.BulkPricingView.as_view(),name='bulkpricing-api'),
     url(r'^api/registeredVessels/', api.get_paid_admissions,name='get_vessel_info'),
     url(r'^api/search_suggest', api.search_suggest, name='search_suggest'),
+    url(r'^api/mooring_specification', api.mooring_specification, name='mooring_specification'),
     url(r'^api/get_country_provinces/(?P<country_code>[A-Z]+)/', api.get_provinces_by_country, name='get_country_provinces'),
     url(r'^api/get_annual_admission_pricing/(?P<annual_booking_period_id>[0-9]+)/(?P<vessel_size>[0-9]+.[0-9]+)/', api.get_annual_admission_pricing, name='get_annual_admission_pricing_float'),
     url(r'^api/get_annual_admission_pricing/(?P<annual_booking_period_id>[0-9]+)/(?P<vessel_size>[0-9]+)/', api.get_annual_admission_pricing, name='get_annual_admission_pricing'),
@@ -87,7 +88,16 @@ api_patterns = [
     url(r'^api/check_oracle_code$', api.CheckOracleCodeView.as_view(), name='check_oracle_code'),
     url(r'^api/refund_oracle$', api.RefundOracleView.as_view(), name='refund_oracle'),
     url(r'^api/annual_admissions_refund_oracle$', api.AnnualAdmissionRefundOracleView.as_view(), name='annual_admissions_refund_oracle'),
-#    url(r'^api/admissions_key$', api.AdmissionsKeyFromURLView.as_view(), name='admissions_key'),
+    url(r'^api/ip-check/', api.ip_check),
+    # External System API's - START
+    url(r'^api/external/vessel-create-update/(?P<apikey>.+)/', api.vessel_create_update),
+    url(r'^api/external/licence-create-update/(?P<apikey>.+)/', api.licence_create_update),
+    url(r'^api/external/marine-parks/(?P<apikey>.+)/', api.marine_parks),
+    url(r'^api/external/mooring-groups/(?P<apikey>.+)/', api.mooring_groups), 
+    url(r'^api/external/all-mooring/(?P<apikey>.+)/', api.get_mooring),
+   
+    # External System API's - END
+    #    url(r'^api/admissions_key$', api.AdmissionsKeyFromURLView.as_view(), name='admissions_key'),
     url(r'^api/',include(router.urls))
 ]
 # URL Patterns

@@ -21,7 +21,7 @@
                         <div id="groundsList">
                             <form class="form" id="campgrounds-filter-form">
                                 <div class="col-md-8">
-                                    <div class="col-md-3">
+                                    <div class="col-md-2">
                                         <div class="form-group">
                                             <label for="campgrounds-filter-status">Status: </label>
                                             <select v-model="selected_status" class="form-control" name="status" id="campgrounds-filter-status">
@@ -31,7 +31,7 @@
                                         </select>
                                         </div>
                                     </div>
-                                    <div class="col-md-3">
+                                    <div class="col-md-2">
                                         <div class="form-group">
                                             <label for="applications-filter-region">Region: </label>
                                             <select class="form-control" v-model="selected_region">
@@ -40,7 +40,7 @@
                                             </select>
                                         </div>
                                     </div>
-                                    <div class="col-md-3">
+                                    <div class="col-md-2">
                                         <div class="form-group">
                                             <label for="applications-filter-region">District: </label>
                                             <select class="form-control" v-model="selected_district">
@@ -49,7 +49,7 @@
                                             </select>
                                         </div>
                                     </div>
-                                    <div class="col-md-3">
+                                    <div class="col-md-2">
                                         <div class="form-group">
                                             <label for="applications-filter-region">Park: </label>
                                             <select class="form-control" v-model="selected_park">
@@ -58,6 +58,19 @@
                                             </select>
                                         </div>
                                     </div>
+
+                                    <div class="col-md-2">
+                                        <div class="form-group">
+                                            <label for="applications-filter-region">Specification: </label>
+                                            <select class="form-control" v-model="selected_specification">
+                                                <option value="All">All</option>
+                                                <option v-for="m in mooring_specification" :value="m.name" >{{m.name}}</option>
+
+                                            </select>
+                                        </div>
+                                    </div>
+
+
                                 </div>
                                 <div class="col-md-4">
                                     <div class="form-group pull-right">
@@ -67,7 +80,7 @@
                                     </div>
                                 </div>
                             </form>
-                            <datatable :dtHeaders="['Mooring','Type', 'Status','Region','District','Park','Action']" :dtOptions="dtoptions" ref="dtGrounds" id="campground-table" ></datatable>
+                            <datatable :dtHeaders="['Mooring','Type', 'Status','Region','District','Park','Specification','Action']" :dtOptions="dtoptions" ref="dtGrounds" id="campground-table" ></datatable>
                         </div>
                     </div>
                 </div>
@@ -99,10 +112,12 @@ module.exports = {
         return {
             grounds: [],
             rows: [],
+            mooring_specification: [],
             title: 'Moorings',
             selected_status: 'All',
             selected_region: 'All',
             selected_park: 'All',
+            selected_specification: 'All', 
             selected_district: 'All',
             isOpenAddCampground: false,
             isOpenOpenCG: false,
@@ -151,18 +166,27 @@ module.exports = {
                 }, {
                     "data": "active",
                     "mRender": function(data, type, full) {
+                        var current_closure_split =full.current_closure.split("-")
+                        var current_closure_text  ='';
+                        if (current_closure_split.length > 1) {
+                               current_closure_text = current_closure_split[0] + "<BR>"+current_closure_split[1];
+			}
                         var status = (data == true) ? "Open" : "Temporarily Closed";
                         var column = "<td >__Status__</td>";
-                        column += data ? "" : "<br/><br/>"+full.current_closure  ;
+                        column += data ? "" : "<br/><br/>"+current_closure_text;
                         return column.replace('__Status__', status);
                     }
-                }, {
+                },{
                     "data": "region"
                 },{
                     "data": "district"
                 },{
                     "data": "park"
-                }, {
+                },{ "data": "park",
+                     "mRender": function(data, type, full){
+                              return full.mooring_specification;
+                      }
+                },{
                     data: 'id',
                     mRender: function(data, type, full) {
                         var id = full.id;
@@ -250,7 +274,16 @@ module.exports = {
             } else {
                 vm.$refs.dtGrounds.vmDataTable.columns(5).search('').draw();
             }
+        },
+        selected_specification: function() {
+            let vm = this;
+            if (vm.selected_specification != 'All') {
+                vm.$refs.dtGrounds.vmDataTable.columns(6).search(vm.selected_specification).draw();
+            } else {
+                vm.$refs.dtGrounds.vmDataTable.columns(6).search('').draw();
+            }
         }
+
     },
     methods: {
         flagFormat: function(flag) {
@@ -314,6 +347,16 @@ module.exports = {
             if (vm.regions.length == 0) {
                 vm.$store.dispatch("fetchRegions");
             }
+        },
+        fetchSpecifications: function() {
+           let vm = this;
+
+           vm.$http.get(api_endpoints.mooring_specification).then((response) => {
+                   vm.mooring_specification = response.body
+           }, (error) => {
+                   console.log(error);
+           });
+
         },
         fetchParks: function() {
             let vm = this;
@@ -388,6 +431,7 @@ module.exports = {
         vm.fetchRegions();
         vm.fetchParks();
         vm.fetchDistricts();
+        vm.fetchSpecifications();
 
         $('#returns-collapse').on('shown.bs.collapse', function(){
             $('#collapse_returns_span').removeClass("glyphicon glyphicon-menu-down");

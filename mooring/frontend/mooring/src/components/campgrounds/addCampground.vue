@@ -57,7 +57,11 @@ export default {
         return {
             campground:{
                 address: {},
-                images:[]
+                images:[],
+                mooring_specification: '',
+                mooring_group: [],
+                name: '',
+                features: []
             },
             loadingDetails: false,
             title:'',
@@ -66,6 +70,19 @@ export default {
         }
     },
     methods: {
+       mooringSpecificationCheck: function() {
+        let vm = this;
+        console.log('mooringSpecificationCheck');
+        var mooring_specification = $('#mooring_specification').val();
+        if (mooring_specification) {
+              $('#mooring_details').show();
+        } else {
+              $('#mooring_details').hide();
+        }
+        vm.addFormValidations();
+
+       },
+ 
        updateCampground: function(value){
             var vm = this;
             vm.campground = value;
@@ -83,49 +100,133 @@ export default {
         },
         addFormValidations: function() {
             console.log("validating");
-            $('#attForm').validate({
-                rules: {
-                    name: "required",
-                    park: "required",
-                    campground_type: "required",
-                    campground_type_physical: "required",
-                    campground_class: "required",
-                    oracle_code: "required",
-                },
-                messages: {
-                    name: "Enter a mooring name",
-                    park: "Select a park from the options",
-                    campground_type: "Select a booking type from the options",
-                    campground_type_physical: "Select a mooring type from the options",
-                    campground_class: "Select a mooring class from the options",
-                    oracle_code: "Enter a valid oracle code",
-                },
-                showErrors: function(errorMap, errorList) {
-                    $.each(this.validElements(), function(index, element) {
-                        var $element = $(element);
-                        $element.attr("data-original-title", "").parents('.form-group').removeClass('has-error');
-                    });
 
-                    // destroy tooltips on valid elements
-                    $("." + this.settings.validClass).tooltip("destroy");
+            var mooring_specification = $('#mooring_specification').val();
+            console.log(mooring_specification);
+            if (mooring_specification == '2') {
+                console.log("VALIDATE PRUCVA");
 
-                    // add or update tooltips
-                    for (var i = 0; i < errorList.length; i++) {
-                        var error = errorList[i];
-                        $('#' + error.element.id).focus();
-                        $(error.element)
-                            .tooltip({
-                                trigger: "focus"
-                            })
-                            .attr("data-original-title", error.message)
-                            .parents('.form-group').addClass('has-error');
-                    }
-                }
-            });
+                 $('#attForm').validate({
+                     rules: {
+                         name: "required",
+                         park: "required",
+                         campground_type: "required",
+                         campground_type_physical: "required",
+                         campground_class: "required",
+                     },
+                     messages: {
+                         name: "Enter a mooring name",
+                         park: "Select a park from the options",
+                         campground_type: "Select a booking type from the options",
+                         campground_type_physical: "Select a mooring type from the options",
+                         campground_class: "Select a mooring class from the options",
+                     },
+                     showErrors: function(errorMap, errorList) {
+                         $.each(this.validElements(), function(index, element) {
+                             var $element = $(element);
+                             $element.attr("data-original-title", "").parents('.form-group').removeClass('has-error');
+                         });
+
+                         // destroy tooltips on valid elements
+                         $("." + this.settings.validClass).tooltip("destroy");
+
+                         // add or update tooltips
+                         for (var i = 0; i < errorList.length; i++) {
+                             var error = errorList[i];
+                             $('#' + error.element.id).focus();
+                             $(error.element)
+                                 .tooltip({
+                                     trigger: "focus"
+                                 })
+                                 .attr("data-original-title", error.message)
+                                 .parents('.form-group').addClass('has-error');
+                         }
+                     }
+                 });
+
+         
+            } else { 
+                 $('#attForm').validate({
+                     rules: {
+                         name: "required",
+                         park: "required",
+                         campground_type: "required",
+                         campground_type_physical: "required",
+                         campground_class: "required",
+                     },
+                     messages: {
+                         name: "Enter a mooring name",
+                         park: "Select a park from the options",
+                         campground_type: "Select a booking type from the options",
+                         campground_type_physical: "Select a mooring type from the options",
+                         campground_class: "Select a mooring class from the options",
+                     },
+                     showErrors: function(errorMap, errorList) {
+                         $.each(this.validElements(), function(index, element) {
+                             var $element = $(element);
+                             $element.attr("data-original-title", "").parents('.form-group').removeClass('has-error');
+                         });
+
+                         // destroy tooltips on valid elements
+                         $("." + this.settings.validClass).tooltip("destroy");
+
+                         // add or update tooltips
+                         for (var i = 0; i < errorList.length; i++) {
+                             var error = errorList[i];
+                             $('#' + error.element.id).focus();
+                             $(error.element)
+                                 .tooltip({
+                                     trigger: "focus"
+                                 })
+                                 .attr("data-original-title", error.message)
+                                 .parents('.form-group').addClass('has-error');
+                         }
+                     }
+                 });
+            }
         },
+        validateName: function(){
+            let vm = this;
+            var isValid = true;
+            console.log('validateMooringGroups');
+            console.log(vm.campground.name);
+            if (vm.campground.name.length == 0){
+                isValid = false;
+                var error = {
+                    title: "Invalid Mooring Name",
+                    text: "Please enter a valid mooring name (min characters 4)",
+                    type: "warning"
+                }
+                $('#name').focus();
+                vm.swalMessage(error);
+            }
+
+            return isValid;
+        },
+
+        validateMooringFeatures: function(){
+            let vm = this;
+            var isValid = true;
+            if (vm.campground.features.length == 0){
+                isValid = false;
+                var error = {
+                    title: "No Features",
+                    text: "Please select at least 1 mooring feature.",
+                    type: "warning"
+                }
+                $('#mooring_groups').focus();
+                vm.swalMessage(error);
+            }
+
+            return isValid;
+        },
+
+
         validateMooringGroups: function(){
             let vm = this;
             var isValid = true;
+            console.log('validateMooringGroups');
+            console.log(vm.campground.mooring_group);
             if (vm.campground.mooring_group.length == 0){
                 isValid = false;
                 var error = {
@@ -139,10 +240,17 @@ export default {
 
             return isValid;
         },
-        validateForm: function(){
+        validateForm: function() {
             let vm = this;
             var isValid = true;
-            isValid = vm.validateMooringGroups();
+            isValid = vm.validateName();
+ 
+            if (isValid) {
+               isValid = vm.validateMooringFeatures();
+	    }
+            if (isValid) {
+               isValid = vm.validateMooringGroups();
+            }
             if (isValid){
                 $('form').each(function(){
                     if (!$(this).valid()){
@@ -218,6 +326,10 @@ export default {
     },
     mounted:function () {
         let vm = this;
+        vm.mooringSpecificationCheck();
+        $( "#mooring_specification" ).change(function() {
+          vm.mooringSpecificationCheck();
+        });
         setTimeout(function(){
             vm.addFormValidations();
         }, 50);

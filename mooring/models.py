@@ -27,6 +27,8 @@ from ledger.payments.models import Invoice
 from ledger.accounts.models import EmailUser
 from django.core.files.storage import FileSystemStorage
 from django.core import serializers
+from django.utils.crypto import get_random_string
+
 #today = datetime.now()
 #today_path = today.strftime("%Y/%m/%d/%H")
 private_storage = FileSystemStorage(location=settings.BASE_DIR+"/private-media/", base_url='/private-media/')
@@ -194,6 +196,12 @@ class MooringArea(models.Model):
         ('large','Large')
     )
 
+    MOORING_SPECIFICATION = (
+         (1, 'Rental Mooring'),
+         (2, 'Private Mooring'),
+    )
+
+
     name = models.CharField(max_length=255, null=True)
     park = models.ForeignKey('MarinePark', on_delete=models.PROTECT, related_name='marineparks')
     ratis_id = models.IntegerField(default=-1)
@@ -230,6 +238,7 @@ class MooringArea(models.Model):
     vessel_weight_limit = models.FloatField(default=0)
     mooring_physical_type = models.SmallIntegerField(choices=MOORING_PHYSICAL_TYPE_CHOICES, default=0)
     mooring_class = models.CharField(choices=MOORING_CLASS_CHOICES, default=0, max_length=20)
+    mooring_specification = models.SmallIntegerField(choices=MOORING_SPECIFICATION, default=1)
 
     def __str__(self):
         return self.name
@@ -288,9 +297,10 @@ class MooringArea(models.Model):
                 end = end.strftime('%d/%m/%Y %H:%M')
             else:
                 end = ""
-            strTime = 'Start: {} Reopen: {}'.format(start, end)
+            strTime = 'Start: {} - Reopen: {}'.format(start, end)
             return strTime
         return ''
+
 
 
 #    @property
@@ -1951,8 +1961,26 @@ class VesselDetail(models.Model):
         return self.rego_no
 
 
-class RegisteredVessels(models.Model):
+class RegisteredVesselsMooringLicensing(models.Model):
     rego_no = models.CharField(max_length=200)
+    vessel_size = models.DecimalField(max_digits=8, decimal_places=2, default='0.00')
+    vessel_draft = models.DecimalField(max_digits=8, decimal_places=2, default='0.00')
+    vessel_beam = models.DecimalField(max_digits=8, decimal_places=2, default='0.00')
+    vessel_weight = models.DecimalField(max_digits=8, decimal_places=2, default='0.00')
+    updated = models.DateTimeField(default=timezone.now, editable=False)
+    created = models.DateTimeField(default=timezone.now, editable=False)
+
+    def save(self, *args,**kwargs):
+        self.updated = datetime.now()
+        UpdateLog.objects.create(model_name='RegisteredVesselsMooringLicensing', json_context={'rego_no':self.rego_no,'vessel_size': self.vessel_size, 'vessel_draft': self.vessel_draft, 'vessel_beam': self.vessel_beam, 'vessel_weight':self.vessel_weight,})
+        super(RegisteredVesselsMooringLicensing,self).save(*args,**kwargs)
+
+    class Meta:
+        verbose_name = "Registered Vessel (Mooring Licensing)"
+        verbose_name_plural = "Registered Vessels (Mooring Licensing)"
+
+class RegisteredVessels(models.Model):
+    rego_no = models.CharField(max_length=200, unique=True)
     vessel_size = models.DecimalField(max_digits=8, decimal_places=2, default='0.00')
     vessel_draft = models.DecimalField(max_digits=8, decimal_places=2, default='0.00')
     vessel_beam = models.DecimalField(max_digits=8, decimal_places=2, default='0.00')
@@ -2779,4 +2807,71 @@ class AdmissionsRateListener(object):
             price_before.period_end = None
             price_before.save()
 
+
+
+class API(models.Model):
+    STATUS = (
+       (0, 'Inactive'),
+       (1, 'Active'),
+    )
+
+
+    system_name = models.CharField(max_length=512)
+    api_key = models.CharField(max_length=512,null=True, blank=True, default='', help_text="Key is auto generated,  Leave blank or blank out to create a new key")
+    allowed_ips = models.TextField(null=True, blank=True, default='', help_text="Use network ranges format: eg 1 ip = 10.1.1.1/32 or for a c class block of ips use 192.168.1.0/24 etc")
+    active = models.SmallIntegerField(choices=STATUS, default=0)
+
+    def save(self, *args, **kwargs):
+        if self.api_key is not None:
+
+             if len(self.api_key) > 1:
+                  pass
+             else:
+                  self.api_key = self.get_random_key(100)
+        else:
+            self.api_key = self.get_random_key(100)
+        super(API,self).save(*args,**kwargs)
+
+
+    def get_random_key(self,key_length=100):
+        return get_random_string(length=key_length, allowed_chars=u'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789')
+
+
+
+
+class VesselLicence(models.Model): 
+
+    STATUS = (
+       (0, 'Cancelled'),
+       (1, 'Active'),
+    )
+
+    LICENCE_TYPE = (
+       (1, 'Licence'),
+       (2, 'Authorised User'),
+       (3, 'Annual Admission'),
+    )
+
+    vessel_rego = models.CharField(max_length=100)
+    licence_id = models.IntegerField(null=True, blank=True)
+    licence_type= models.IntegerField(choices=LICENCE_TYPE, default=None, null=True)
+    start_date = models.DateField(default=None, null=True)
+    expiry_date = models.DateField(default=None, null=True)
+    status = models.SmallIntegerField(choices=STATUS, default=1) 
+    updated = models.DateTimeField(default=timezone.now, editable=False)
+    created = models.DateTimeField(default=timezone.now, editable=False)
+
+    def save(self, *args,**kwargs):
+        self.updated = datetime.now()
+        UpdateLog.objects.create(model_name='VesselLicence', json_context={'vessel_rego':self.vessel_rego,'licence_id': self.licence_id, 'licence_type': dict(self.LICENCE_TYPE).get(self.licence_type), 'licence_type_id': self.licence_type,'start_date': self.start_date, 'expiry_date':self.expiry_date,'status': dict(self.STATUS).get(self.status), 'status_id': self.status  })
+        super(VesselLicence, self).save(*args,**kwargs)
+
+
+
+class UpdateLog(models.Model):
+
+    model_name = models.CharField(max_length=200)
+    json_context = JSONField(null=True,blank=True, default={})
+    created = models.DateTimeField(default=timezone.now, editable=False)
+    
 

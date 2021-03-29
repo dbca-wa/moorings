@@ -393,6 +393,7 @@ export default {
             loadingAdditional: false,
             features_selected: [],
             campsites: [],
+            mooring_specification: [],
             editor: null,
             isOpenOpenCS: false,
             isOpenCloseCS: false,
@@ -562,6 +563,61 @@ export default {
         }
     },
     methods: {
+       mooringSpecificationCheck: function() {
+        let vm = this;
+        console.log('mooringSpecificationCheck');
+        var mooring_specification = vm.campground.mooring_specification;
+        //$('#mooring_specification').val();
+        if (mooring_specification) {
+              $('#mooring_details').show();
+               if (mooring_specification == '2') {
+                   $('#mooring_details').show();
+                   $('#contact').hide();
+                   $('#limits').show();
+                   $('#images').hide();
+                   $('#mappanel').hide();
+                   $('#additional').hide();
+                   $('#stayhistory').hide();
+                   $('#bookingperiod').hide();
+                   $('#closures').hide();
+               } else if (mooring_specification == '1') { 
+                   $('#mooring_details').show();
+                   $('#contact').show();
+                   $('#limits').show();
+                   $('#images').show();
+                   $('#mappanel').show();
+                   $('#additional').show();
+                   $('#stayhistory').show();
+                   $('#bookingperiod').show();
+               } else {
+           
+                   $('#mooring_details').hide();
+                   $('#contact').hide();
+                   $('#limits').hide();
+                   $('#images').hide();
+                   $('#mappanel').hide();
+                   $('#additional').hide();
+                   $('#stayhistory').hide();
+                   $('#bookingperiod').hide();
+                   $('#closures').hide();
+               }
+            
+        } else {
+
+              $('#mooring_details').hide();
+              $('#contact').hide();
+              $('#limits').hide();
+              $('#images').hide();
+              $('#mappanel').hide();
+              $('#additional').hide();
+              $('#stayhistory').hide();
+              $('#bookingperiod').hide();
+              $('#closures').hide();
+              
+        }
+        vm.addFormValidations();
+
+        },
         updateCampground: function(value){
             var vm = this;
             vm.campground = value;
@@ -670,6 +726,7 @@ export default {
                         vm.features_selected.push(data.features[i].id);
                     }
                     vm.campground.features = vm.features_selected;
+                    vm.mooringSpecificationCheck()
                     console.log("Features updated");
                 }
             });
@@ -737,67 +794,66 @@ export default {
             });
         },
         addFormValidations: function() {
-            $('form').each(function(){
-                $(this).validate({
-                    ignore:'div.ql-editor',
-                    rules: {
-                        name: "required",
-                        park: "required",
-                        campground_type: "required",
-                        campground_type_physical: "required",
-                        campground_class: "required",
-                        contact: "required",
-                        email: {
-                            required: true,
-                            email: true
-                        },
-                        telephone: "required",
-                        vessel_size_limit: "required",
-                        vessel_draft_limit: "required",
-                        longitude: "required",
-                        latitude: "required",
-                        editor: "required",
-                        oracle_code: "required",
-                    },
-                    messages: {
-                        name: "Enter a mooring name",
-                        park: "Select a park from the options",
-                        campground_type: "Select a booking type from the options",
-                        campground_type_physical: "Select a mooring type from the options",
-                        campground_class: "Select a mooring class from the options",
-                        contact: "Select a contact",
-                        email: "Please select a contact",
-                        telephone: "Please select a contact",
-                        vessel_size_limit: "Please set a size limit greater than 0",
-                        vessel_draft_limit: "Please set a draft limit greater than 0",
-                        longitude: "Please set a longitude",
-                        latitude: "Please set a latitude",
-                        editor : "Please enter a valid description",
-                        oracle_code: "Enter a valid oracle code",
-                    },
-                    showErrors: function(errorMap, errorList) {
-                        $.each(this.validElements(), function(index, element) {
-                            var $element = $(element);
-                            $element.attr("data-original-title", "").parents('.form-group').removeClass('has-error');
-                        });
 
-                        // destroy tooltips on valid elements
-                        $("." + this.settings.validClass).tooltip("destroy");
+                   $('form').each(function(){
+                       $(this).validate({
+                           ignore:'div.ql-editor',
+                           rules: {
+                               name: "required",
+                               park: "required",
+                               campground_type: "required",
+                               campground_type_physical: "required",
+                               campground_class: "required",
+                               // contact: "required",
+                               //email: {
+                               //    required: true,
+                               //    email: true
+                               //},
+                               // telephone: "required",
+                               vessel_size_limit: "required",
+                               vessel_draft_limit: "required",
+                               // longitude: "required",
+                               // latitude: "required",
+                               // editor: "required",
+                           },
+                           messages: {
+                               name: "Enter a mooring name",
+                               park: "Select a park from the options",
+                               campground_type: "Select a booking type from the options",
+                               campground_type_physical: "Select a mooring type from the options",
+                               campground_class: "Select a mooring class from the options",
+                               // contact: "Select a contact",
+                               // email: "Please select a contact",
+                               // telephone: "Please select a contact",
+                               vessel_size_limit: "Please set a size limit greater than 0",
+                               vessel_draft_limit: "Please set a draft limit greater than 0",
+                               // longitude: "Please set a longitude",
+                               // latitude: "Please set a latitude",
+                               // editor : "Please enter a valid description",
+                           },
+                           showErrors: function(errorMap, errorList) {
+                               $.each(this.validElements(), function(index, element) {
+                                   var $element = $(element);
+                                   $element.attr("data-original-title", "").parents('.form-group').removeClass('has-error');
+                               });
 
-                        // add or update tooltips
-                        for (var i = 0; i < errorList.length; i++) {
-                            var error = errorList[i];
-                            $('#' + error.element.id).focus();
-                            $(error.element)
-                                .tooltip({
-                                    trigger: "focus"
-                                })
-                                .attr("data-original-title", error.message)
-                                .parents('.form-group').addClass('has-error');
-                        }
-                    }
-                });
-            });
+                               // destroy tooltips on valid elements
+                               $("." + this.settings.validClass).tooltip("destroy");
+
+                               // add or update tooltips
+                               for (var i = 0; i < errorList.length; i++) {
+                                   var error = errorList[i];
+                                   $('#' + error.element.id).focus();
+                                   $(error.element)
+                                       .tooltip({
+                                           trigger: "focus"
+                                       })
+                                       .attr("data-original-title", error.message)
+                                       .parents('.form-group').addClass('has-error');
+                               }
+                           }
+                       });
+                   });
         },
         validateSize: function(){
             let vm = this;
@@ -918,6 +974,8 @@ export default {
         validateContact: function(){
             let vm = this;
             var isValid = true;
+            console.log('validateContact');
+            console.log(vm.campground.contact);
             if (vm.campground.contact == "undefined"){
                 isValid = false;
                 var error = {
@@ -982,10 +1040,21 @@ export default {
                     },
                 });
             }
-            isValid = vm.validateContact();
-            if (isValid){
-                isValid = vm.validateSize();
+            var mooring_specification = $('#mooring_specification').val();
+            if (mooring_specification == '2') {
+            } else {
+                 isValid = vm.validateContact();
+                 if (isValid){
+                     isValid = vm.validateDescription();
+                 }
             }
+
+            
+
+            if (isValid){
+               isValid = vm.validateSize();
+            }
+
             if (isValid){
                 isValid = vm.validateDraft();
             }
@@ -994,9 +1063,6 @@ export default {
             }
             if (isValid){
                 isValid = vm.validateMooringGroups();
-            }
-            if (isValid){
-                isValid = vm.validateDescription();
             }
 
             if (isValid){
@@ -1233,8 +1299,31 @@ export default {
         // $('#collapse_pricehistory').click();
         // $('#collapse_closurehistory').click();
 
+
+
+        //console.log("IIIICMAP");
+        //console.log(vm.campground);
+        //if (vm.campground) {
+        //    console.log('CC');
+        //    console.log(vm.campground.mooring_specification);
+        //    if (vm.campground.mooring_specification) {
+        //         $('#mooring_details').show();
+        //    } else {
+        //        $('#mooring_details').hide();
+        //    }
+        //} else {
+        //    $('#mooring_details').hide();
+        //}
+
+
+
+        $( "#mooring_specification" ).change(function() {
+          vm.mooringSpecificationCheck();
+        });
+
         setTimeout(function(){
             $(vm.$refs.top).focus();
+            vm.mooringSpecificationCheck();           
             vm.addFormValidations();
         }, 50);
     }
