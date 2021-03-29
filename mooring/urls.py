@@ -90,6 +90,7 @@ api_patterns = [
     url(r'^api/annual_admissions_refund_oracle$', api.AnnualAdmissionRefundOracleView.as_view(), name='annual_admissions_refund_oracle'),
     url(r'^api/ip-check/', api.ip_check),
     # External System API's - START
+    url(r'^api/external/vessel-create-update/(?P<apikey>.+)/', api.vessel_create_update),
     url(r'^api/external/licence-create-update/(?P<apikey>.+)/', api.licence_create_update),
     url(r'^api/external/marine-parks/(?P<apikey>.+)/', api.marine_parks),
     url(r'^api/external/mooring-groups/(?P<apikey>.+)/', api.mooring_groups), 

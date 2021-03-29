@@ -590,6 +590,13 @@ class RegisteredVessels(admin.ModelAdmin):
     ordering = ('rego_no',)
     search_fields = ('rego_no',)
 
+@admin.register(models.RegisteredVesselsMooringLicensing)
+class RegisteredVesselsMooringLicensing(admin.ModelAdmin):
+    list_display = ('rego_no', 'vessel_size','vessel_draft','vessel_beam','vessel_weight','updated','created')
+    ordering = ('rego_no',)
+    search_fields = ('rego_no',)
+
+
 @admin.register(models.MooringAreaBookingRange)
 class MooringAreaBookingRange(admin.ModelAdmin):
     list_display = ('id', 'range_start', 'range_end', 'campground_id')
@@ -640,4 +647,17 @@ class RefundFailed(admin.ModelAdmin):
 @admin.register(models.API)
 class APIAdmin(admin.ModelAdmin):
     list_display = ('id','system_name','active')
+
+
+@admin.register(models.UpdateLog)
+class UpdateLogAdmin(admin.ModelAdmin):
+    list_display = ('id','model_name','json_context','created')
+    search_fields = ('json_context',)
+    list_filter = ('model_name',)
+    ordering = ('-id',)
+
+@admin.register(models.VesselLicence)
+class VesselLicenceAdmin(admin.ModelAdmin):
+    list_display = ('id','vessel_rego','licence_id','licence_type','start_date','expiry_date','status')
+
 
