@@ -4500,7 +4500,9 @@ class GetProfile(views.APIView):
         data['is_admin'] = is_admin(user)
         data['is_payment_officer'] = is_payment_officer(user)
         data['groups'] = groups_text
-        return JsonResponse(data)
+        response= JsonResponse(data)
+        response['Cache-Control'] = 'no-cache'
+        return response
 
 
 class GetProfileAdmin(views.APIView):
@@ -5667,6 +5669,55 @@ def get_mooring(request, apikey):
             jsondata['data'] = items
             jsondata['status'] = 200
             jsondata['message'] = 'Results'
+        else:
+            jsondata['status'] = 403
+            jsondata['message'] = 'Access Forbidden'
+    else:
+        pass
+    return HttpResponse(json.dumps(jsondata), content_type='application/json')
+
+@csrf_exempt
+def get_bookings(request, apikey):
+
+    jsondata = {'status': 404, 'message': 'API Key Not Found'}
+    ledger_user_json  = {}
+    date_query = request.POST.get('date',None)
+    mooring_id = request.POST.get('mooring_id',None)
+    rego_no = request.POST.get('rego_no',None)
+
+    if models.API.objects.filter(api_key=apikey,active=1).count():
+        if common_iplookup.api_allow(common_iplookup.get_client_ip(request),apikey) is True:
+            if date_query is not None:
+                  date_obj = datetime.strptime(date_query, "%Y-%m-%d").date()
+                  msb_query=Q()
+                  msb_query &= Q(date=date_obj)
+
+                  if mooring_id:
+                       msb_query &= Q(campsite__mooringarea_id=46)
+
+                  rows = []
+                  msb = models.MooringsiteBooking.objects.filter(msb_query).values('id','booking','campsite__mooringarea_id','campsite__mooringarea__name','booking_id','booking__customer_id','booking__details')
+                  for m in msb:
+                      booking_rego = ''
+                      if 'vessel_rego' in m['booking__details']:
+                           booking_rego = m['booking__details']['vessel_rego']
+
+                      append_row = True
+                      if rego_no:
+                          append_row = False
+                          if booking_rego.upper() == rego_no.upper():
+                               append_row = True
+
+                      if append_row is True:
+                          rows.append({'id': m['id'], 'booking_id': m['booking_id'], 'mooring_id': m['campsite__mooringarea_id'],'mooring_name': m['campsite__mooringarea__name'],'booking__customer_id': m['booking__customer_id'],'booking_rego': booking_rego})
+
+
+                  jsondata['data'] = rows 
+                  jsondata['status'] = 200
+                  jsondata['message'] = 'Results'
+            else:
+                jsondata['status'] = 503
+                jsondata['message'] = 'No date provided'
         else:
             jsondata['status'] = 403
             jsondata['message'] = 'Access Forbidden'
