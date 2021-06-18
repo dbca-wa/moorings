@@ -34,8 +34,8 @@ RUN rm /app/libgeos.py.patch
 FROM python_libs_moorings
 
 COPY gunicorn.ini manage_mo.py ./
-COPY postfix-main.cf /etc/postfix/main.cf
-RUN update-rc.d postfix enable
+#COPY postfix-main.cf /etc/postfix/main.cf
+#RUN update-rc.d postfix enable
 
 #COPY ledger ./ledger
 COPY timezone /etc/timezone
