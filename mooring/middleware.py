@@ -9,6 +9,12 @@ from mooring.models import Booking, AdmissionsBooking, BookingAnnualAdmission
 
 CHECKOUT_PATH = re.compile('^/ledger/checkout/checkout')
 
+class CacheHeaders(object):
+    def process_response(self, request, response):
+         if request.path[:5] == '/api/':
+              response['Cache-Control'] = 'private, no-store'
+         return response
+
 class BookingTimerMiddleware(object):
     def process_request(self, request):
         #print ("REQUEST SESSION")

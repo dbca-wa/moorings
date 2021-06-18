@@ -31,7 +31,8 @@ INSTALLED_APPS += [
 ]
 
 MIDDLEWARE_CLASSES += [
-    'mooring.middleware.BookingTimerMiddleware'
+    'mooring.middleware.BookingTimerMiddleware',
+    'mooring.middleware.CacheHeaders'
 ]
 
 # maximum number of days allowed for a booking
