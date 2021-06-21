@@ -5690,11 +5690,11 @@ def get_bookings(request, apikey):
         if common_iplookup.api_allow(common_iplookup.get_client_ip(request),apikey) is True:
             if date_query is not None:
                   date_obj = datetime.strptime(date_query, "%Y-%m-%d").date()
-                  msb_query=Q()
+                  msb_query=Q(booking__booking_type=1)
                   msb_query &= Q(date=date_obj)
 
                   if mooring_id:
-                       msb_query &= Q(campsite__mooringarea_id=46)
+                       msb_query &= Q(campsite__mooringarea_id=int(mooring_id))
 
                   rows = []
                   msb = models.MooringsiteBooking.objects.filter(msb_query).values('id','booking','campsite__mooringarea_id','campsite__mooringarea__name','booking_id','booking__customer_id','booking__details')
