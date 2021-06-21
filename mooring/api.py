@@ -5709,7 +5709,7 @@ def get_bookings(request, apikey):
                                append_row = True
 
                       if append_row is True:
-                          rows.append({'id': m['id'], 'booking_id': m['booking_id'], 'mooring_id': m['campsite__mooringarea_id'],'mooring_name': m['campsite__mooringarea__name'],'booking__customer_id': m['booking__customer_id'],'booking_rego': booking_rego})
+                          rows.append({'id': m['id'], 'booking_id_pf': 'PS'+str(m['booking_id']), 'booking_id': m['booking_id'], 'mooring_id': m['campsite__mooringarea_id'],'mooring_name': m['campsite__mooringarea__name'],'booking__customer_id': m['booking__customer_id'],'booking_rego': booking_rego})
 
 
                   jsondata['data'] = rows 
