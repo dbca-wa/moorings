@@ -5706,7 +5706,6 @@ def get_bookings(request, apikey):
                   emailuser_obj = EmailUser.objects.filter(eu_query)
                   for eu in emailuser_obj:
                       emailuser_list[eu.id] = eu
-                  print (eu)
 
                   for m in msb:
                       booking_phone_number = ''
