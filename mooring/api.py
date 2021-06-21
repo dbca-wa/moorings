@@ -5699,6 +5699,16 @@ def get_bookings(request, apikey):
                   rows = []
                   msb = models.MooringsiteBooking.objects.filter(msb_query).values('id','booking','campsite__mooringarea_id','campsite__mooringarea__name','booking_id','booking__customer_id','booking__details')
 
+                  emailuser_list = {} 
+                  eu_query =Q()
+                  for m in msb:
+                       eu_query |= Q(id=m['booking__customer_id'])
+
+                  emailuser_obj = EmailUser.objects.filter(eu_query)
+                  for eu in emailuser_obj:
+                      emailuser_list[eu.id] = eu
+                  print (eu)
+
                   for m in msb:
                       booking_phone_number = ''
                       booking_rego = ''
@@ -5712,10 +5722,20 @@ def get_bookings(request, apikey):
                           append_row = False
                           if booking_rego.upper() == rego_no.upper():
                                append_row = True
-                       
+
+                      customer_account_phone_number = ''
+                      if m['booking__customer_id'] in emailuser_list:
+
+                             if emailuser_list[m['booking__customer_id']].phone_number:
+                                   customer_account_phone_number = emailuser_list[m['booking__customer_id']].phone_number
+                             else:
+
+                                   if emailuser_list[m['booking__customer_id']].mobile_number:
+                                          customer_account_phone_number = emailuser_list[m['booking__customer_id']].mobile_number
+                      
 
                       if append_row is True:
-                          rows.append({'id': m['id'], 'booking_id_pf': 'PS'+str(m['booking_id']), 'booking_id': m['booking_id'], 'mooring_id': m['campsite__mooringarea_id'],'mooring_name': m['campsite__mooringarea__name'],'booking__customer_id': m['booking__customer_id'],'booking_rego': booking_rego, 'booking_phone_number': booking_phone_number })
+                          rows.append({'id': m['id'], 'booking_id_pf': 'PS'+str(m['booking_id']), 'booking_id': m['booking_id'], 'mooring_id': m['campsite__mooringarea_id'],'mooring_name': m['campsite__mooringarea__name'],'booking__customer_id': m['booking__customer_id'],'booking_rego': booking_rego, 'booking_phone_number': booking_phone_number, 'customer_account_phone_number': customer_account_phone_number })
 
 
                   jsondata['data'] = rows 
