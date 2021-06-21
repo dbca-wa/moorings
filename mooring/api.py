@@ -5697,19 +5697,24 @@ def get_bookings(request, apikey):
 
                   rows = []
                   msb = models.MooringsiteBooking.objects.filter(msb_query).values('id','booking','campsite__mooringarea_id','campsite__mooringarea__name','booking_id','booking__customer_id','booking__details')
+
                   for m in msb:
+                      booking_phone_number = ''
                       booking_rego = ''
                       if 'vessel_rego' in m['booking__details']:
                            booking_rego = m['booking__details']['vessel_rego']
+                      if 'phone' in m['booking__details']:
+                           booking_phone_number =  m['booking__details']['phone']
 
                       append_row = True
                       if rego_no:
                           append_row = False
                           if booking_rego.upper() == rego_no.upper():
                                append_row = True
+                       
 
                       if append_row is True:
-                          rows.append({'id': m['id'], 'booking_id_pf': 'PS'+str(m['booking_id']), 'booking_id': m['booking_id'], 'mooring_id': m['campsite__mooringarea_id'],'mooring_name': m['campsite__mooringarea__name'],'booking__customer_id': m['booking__customer_id'],'booking_rego': booking_rego})
+                          rows.append({'id': m['id'], 'booking_id_pf': 'PS'+str(m['booking_id']), 'booking_id': m['booking_id'], 'mooring_id': m['campsite__mooringarea_id'],'mooring_name': m['campsite__mooringarea__name'],'booking__customer_id': m['booking__customer_id'],'booking_rego': booking_rego, 'booking_phone_number': booking_phone_number })
 
 
                   jsondata['data'] = rows 
