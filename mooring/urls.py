@@ -93,6 +93,7 @@ api_patterns = [
     url(r'^api/external/vessel-create-update/(?P<apikey>.+)/', api.vessel_create_update),
     url(r'^api/external/licence-create-update/(?P<apikey>.+)/', api.licence_create_update),
     url(r'^api/external/marine-parks/(?P<apikey>.+)/', api.marine_parks),
+    url(r'^api/external/vessels-details/(?P<apikey>.+)/', api.vessels_details),
     url(r'^api/external/mooring-groups/(?P<apikey>.+)/', api.mooring_groups), 
     url(r'^api/external/all-mooring/(?P<apikey>.+)/', api.get_mooring),
     url(r'^api/external/bookings/(?P<apikey>.+)/', api.get_bookings),

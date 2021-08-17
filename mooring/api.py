@@ -5605,6 +5605,32 @@ def marine_parks(request, apikey):
         pass
     return HttpResponse(json.dumps(jsondata), content_type='application/json')
 
+@csrf_exempt
+def vessels_details(request, apikey):
+    jsondata = {'status': 404, 'message': 'API Key Not Found'}
+    ledger_user_json  = {}
+
+    if models.API.objects.filter(api_key=apikey,active=1).count():
+        if common_iplookup.api_allow(common_iplookup.get_client_ip(request),apikey) is True:
+            items = []
+            data = cache.get('vessels_details_api')
+            if data is None:
+               rows = models.VesselDetail.objects.all()
+               for r in rows:
+                   items.append({'id': r.id, 'rego_no': r.rego_no, 'vessel_name': r.vessel_name, 'vessel_size' : str(r.vessel_size), 'vessel_draft' : str(r.vessel_draft), 'vessel_beam' : str(r.vessel_beam), 'vessel_beam' : str(r.vessel_beam) })
+               jsondata['status'] = 200
+               jsondata['message'] = 'Results'
+               jsondata['data'] = items
+               jdata = json.dumps(jsondata)
+               cache.set('vessels_details_api',jdata,300)
+            else:
+               jsondata = json.loads(data)   
+        else:
+            jsondata['status'] = 403
+            jsondata['message'] = 'Access Forbidden'
+    else:
+        pass
+    return HttpResponse(json.dumps(jsondata), content_type='application/json')
 
 def mooring_specification(request):
     mooring_specification_array = []
@@ -5613,7 +5639,6 @@ def mooring_specification(request):
     for ms in mooring_specification:
         mooring_specification_array.append({'id': ms[0], 'name': ms[1]})
     return HttpResponse(json.dumps(mooring_specification_array), content_type='application/json')
-
 
 @csrf_exempt
 def mooring_groups(request, apikey):
