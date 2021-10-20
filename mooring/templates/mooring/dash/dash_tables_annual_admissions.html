@@ -197,47 +197,11 @@
         <table width="100%" id='table-abb'  class='display responsive hover table table-striped table-bordered dt-responsive nowrap dataTable no-footer dtr-inline'>
         <thead>
         <tr>
-	      <th>ID</th><th>Person</th><th>Mobile</th><th>Vessel Reg # / length</th><th>Sticker#</th><th>Year</th><th class='none'>Status</th><th class='none'>Actions</th>
+		<th>ID</th><th>Created</th><th>Person</th><th>Mobile</th><th>Vessel Reg # / length</th><th>Sticker#</th><th>Year</th><th class='none'>Status</th><th class='none'>Actions</th>
 	
 	</tr>
         </thead>
         <tbody>
-        {% for row in baad %}
-            <tr>
-	    <td>AA{{ row.id }}</td>
-                <td>
-			{{ row.customer.first_name }} {{ row.customer.last_name }}
-                </td>
-		<td>{% if row.details.phone %}{{ row.details.phone }}<br>{% endif %}{% if row.details.mobile %}{{ row.details.mobile }}{% endif %}</td>
-		<td>{{ row.details.vessel_rego }} / {{ row.details.vessel_length }}</td>
-                <td></td>
-		<td>{{ row.start_dt|date:"Y" }}/{{ row.expiry_dt|date:"y" }} {{ row.expiry_dt }}</td>
-
-                <td>{{ row.status }}</td>
-                <td>
-                   {% if row.fr.booking %}
-                      <a href=''>View History</a><BR>
-                      <a href=''>Oracle Refund</a><BR>
-		   {% endif %}
-		   {% if row.invoices|length > 0 %}
-		      <a href='/ledger/payments/invoice/payment?{% for i in row.invoices %}&invoice={{ i }}{% endfor %}' target='' >View Payment</a><br>
-                   {% endif %}
-                   {% if row.booking_type == 1 %}
-		       <a href=''>Cancel</a><br>
-		   {% endif %}
-		   {% if row.sticker_no|length > 1 %}
-                       <a href=''>Update Sticker No</a><br>
-		   {% else %}
-		       <a href=''>Add Sticker No</a><br>
-                   {% endif %}
-                   {% for i in row.invoices %}
-		      <i style="color:red;" class="fa fa-file-pdf-o"></i> <a href='{% url 'mooring-invoice-pdf' i %}'>#{{ i }}</a><br>
-		   {% endfor %}
-		      <i style="color:red;" class="fa fa-file-pdf-o"></i> <a href=''>Letter</a><br>
-
-                </td>
-            </tr>
-	{% endfor %}
         </tbody>
         </table>
 
@@ -340,25 +304,26 @@
                     console.log('dtformat');
                     console.log(d);
                     var created_by_name = '';
-                    if (d[9] != null ) {
-                         created_by_name = d[9]['fullname'];
+			console.log("FFF");
+                    if (d[10] != null ) {
+                         created_by_name = d[10]['fullname'];
 		    }
 		    var canceled_by_name = '';
-	            if (d[16] != null) {
-                       canceled_by_name = d[16]['fullname'];
+	            if (d[17] != null) {
+                       canceled_by_name = d[17]['fullname'];
 	            }
 		    var sticker_table_history = '';
-		    if (d[19].length > 0) {
+		    if (d[20].length > 0) {
 		       sticker_table_history = '<h5  style="font-weight: bold;">Sticker Change History</h5>';
 	               sticker_table_history += '<table cellpadding="5" cellspacing="0" border="0" width="100%" style="padding-left:50px;">';
 	               sticker_table_history += '<tr style="background-color: #ececec;"><th>Value</th><th>Changed By</th><th>Change Date</th><th>Comment</th></tr>';
-	               for ( var s = 0, l = d[19].length; s < l; s++ ) {
-                                console.log(d[19][s]);
+	               for ( var s = 0, l = d[20].length; s < l; s++ ) {
+                                console.log(d[20][s]);
 			        var sticker_comment = '';
-			        if (d[19][s]['sticker_comment'] != null) { 
-                                   sticker_comment = d[19][s]['sticker_comment'];
+			        if (d[20][s]['sticker_comment'] != null) { 
+                                   sticker_comment = d[20][s]['sticker_comment'];
 				}
-			       sticker_table_history += "<tr style='background-color: #fffafa'><td style='padding: 5px;'>"+d[19][s]['value']+"</td><td>"+d[19][s]['first_name']+" "+d[19][s]['last_name']+"</td><td>"+d[19][s]['updated_friendly']+"</td><td>"+sticker_comment+"</td></tr>";
+			       sticker_table_history += "<tr style='background-color: #fffafa'><td style='padding: 5px;'>"+d[20][s]['value']+"</td><td>"+d[20][s]['first_name']+" "+d[20][s]['last_name']+"</td><td>"+d[20][s]['updated_friendly']+"</td><td>"+sticker_comment+"</td></tr>";
 	               }
 		       sticker_table_history += "</table>";
                     }
@@ -370,9 +335,9 @@
                             '<td>Created:</td>'+
                         '</tr>'+
                         '<tr style="background-color: #fffafa" >'+
-			    '<td style="padding: 5px;" >'+d[15]+'</td>'+
+			    '<td style="padding: 5px;" >'+d[16]+'</td>'+
                             '<td style="padding: 5px;">'+created_by_name+'</td>'+
-			    '<td style="padding: 5px;">'+d[8]+'</td>'+
+			    '<td style="padding: 5px;">'+d[9]+'</td>'+
                         '</tr>'+
                     '</table>'+
                     '<h5  style="font-weight: bold;">Override</h5><table cellpadding="5" cellspacing="0" border="0" width="100%" style="padding-left:50px;">'+
@@ -383,16 +348,16 @@
                             '<td>&nbsp;</td>'+
                         '</tr>'+
                         '<tr style="background-color: #fffafa">'+
-				'<td style="padding: 5px;">'+d[11]['fullname']+'</td>'+
-                                '<td>$'+d[12]+'</td>'+
-                                '<td>'+d[13]+'</td>'+
+				'<td style="padding: 5px;">'+d[12]['fullname']+'</td>'+
+                                '<td>$'+d[13]+'</td>'+
+                                '<td>'+d[14]+'</td>'+
                                 '<td>&nbsp;</td>'+
                         '</tr>'+
                         '<tr style="background-color: #ececec; font-weight: bold;">'+
                             '<td style="padding: 5px; text-align: left" align="left" colspan=4>Information:</td>'+
                         '</tr>'+
                         '<tr style="background-color: #fffafa;">'+
-                            '<td style="padding: 5px; text-align: left" colspan=4>'+d[14]+'</td>'+
+                            '<td style="padding: 5px; text-align: left" colspan=4>'+d[15]+'</td>'+
                         '</tr>'+
                     '</table>'+
                     '<h5  style="font-weight: bold;">Cancellation</h5><table cellpadding="5" cellspacing="0" border="0" width="100%" style="padding-left:50px;">'+
@@ -405,7 +370,7 @@
 
                         '<tr style="background-color: #fffafa">'+
                             '<td style="padding: 5px;">'+canceled_by_name+'</td>'+
-                            '<td style="padding: 5px;">'+d[18]+'</td>'+
+                            '<td style="padding: 5px;">'+d[19]+'</td>'+
                             '<td>&nbsp;</td>'+
                             '<td>&nbsp;</td>'+
 
@@ -414,7 +379,7 @@
                             '<td colspan="4" style="padding: 5px; font-weight: bold;">Reason:</td>'+
                         '</tr>'+
                         '<tr style="background-color: #fffafa">'+
-                            '<td colspan="4" style="padding: 5px;">'+d[17]+'&nbsp;</td>'+
+                            '<td colspan="4" style="padding: 5px;">'+d[18]+'&nbsp;</td>'+
                         '</tr>'+
                     '</table>'+sticker_table_history;
                 },
@@ -444,12 +409,15 @@
                                                          },
                                                          {
                                                            "orderable":      true,
-                                                         }
-
+                                                         },
+						         {
+						            "orderable":      true,
+							 }
+                                                           
 
                                                        ],
                                              columnDefs: [
-                                                         { type: 'natural-nohtml', targets: 0 }, { 'aTargets':  1 },  { 'aTargets':  2 }, { type: 'natural-nohtml', targets: 3 }, { 'aTargets':  4 }, { 'aTargets':  5 }, { 'aTargets':  6 }, { 'aTargets':  7 }
+						     { type: 'natural-nohtml', targets: 0 }, { 'aTargets':  1,  },  { 'aTargets':  2 }, { type: 'natural-nohtml', targets: 3 }, { 'aTargets':  4 }, { 'aTargets':  5 }, { 'aTargets':  6 }, { 'aTargets':  7 }, { 'aTargets':  8 }
                                              ],
                                              searching: false,
                                              paging: true, 
@@ -537,7 +505,7 @@
 
 			annual_bookings.var.datatables.clear().draw();
 			annual_bookings.var.datatables.row.add(["<center><img src='/static/common/img/ajax-loader-spinner.gif'><br><strong>Please Wait Loading</strong></center>","","","","","","","",""]).draw();
-			$('td:eq(0)', annual_bookings.var.datatables.row).attr('colspan', 8);
+			$('td:eq(0)', annual_bookings.var.datatables.row).attr('colspan', 9);
 
                         $('td:eq(1)', annual_bookings.var.datatables.row).css('display', 'none');
                         $('td:eq(2)', annual_bookings.var.datatables.row).css('display', 'none');
@@ -547,6 +515,7 @@
                         $('td:eq(6)', annual_bookings.var.datatables.row).css('display', 'none');
                         $('td:eq(7)', annual_bookings.var.datatables.row).css('display', 'none');
                         $('td:eq(8)', annual_bookings.var.datatables.row).css('display', 'none');
+		        $('td:eq(9)', annual_bookings.var.datatables.row).css('display', 'none');
 
                         $.ajax({  
                                   type: "GET",
@@ -615,8 +584,9 @@
                                                   action_buttons = action_buttons + pdf_invoices;
 						  action_buttons = action_buttons + '<i style="color:red;" class="fa fa-file-pdf-o"></i> <a href="/api/get_aa_letter/'+data['data'][i]['id']+'">Letter</a><br>';
 
-
-						  var rowc = annual_bookings.var.datatables.row.add([bookingid,fullname,phones,vessel_info,sticker_no,booking_year,status,action_buttons,data['data'][i]['created'], data['data'][i]['created_by'],data['data'][i]['email'], data['data'][i]['overridden_by'],  data['data'][i]['override_price'], data['data'][i]['override_reason'], data['data'][i]['override_reason_info'], phone, data['data'][i]['canceled_by'], data['data'][i]['cancellation_reason'],  data['data'][i]['cancelation_time'],data['data'][i]['sticker_no_history']]).draw();
+						  //var CreatedDateObj = new Date(data['data'][i]['created']);
+						  var CreatedMomentObj = moment(data['data'][i]['created'], 'DD/MM/YYYY LT');
+						  var rowc = annual_bookings.var.datatables.row.add([bookingid,CreatedMomentObj.format("DD/MM/YYYY LT"),fullname,phones,vessel_info,sticker_no,booking_year,status,action_buttons,data['data'][i]['created'], data['data'][i]['created_by'],data['data'][i]['email'], data['data'][i]['overridden_by'],  data['data'][i]['override_price'], data['data'][i]['override_reason'], data['data'][i]['override_reason_info'], phone, data['data'][i]['canceled_by'], data['data'][i]['cancellation_reason'],  data['data'][i]['cancelation_time'],data['data'][i]['sticker_no_history']]).draw();
 
                                                   
                                           }

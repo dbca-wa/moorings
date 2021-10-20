@@ -50,10 +50,11 @@ def annual_admissions_booking_report(aadata):
         bookings = []
         today = datetime.date.today()
         strIO = StringIO()
-        fieldnames = ['ID','First Name','Last Name','Email','Mobile','Phone','Vessel Name','Vessel Rego','Vessel Length','Sticker No','Year','Status','Booking Period','Postal Address 1','Postal Address 2','Suburb','Post Code','State','Country' ]
+        fieldnames = ['ID','Created','First Name','Last Name','Email','Mobile','Phone','Vessel Name','Vessel Rego','Vessel Length','Sticker No','Year','Status','Booking Period','Postal Address 1','Postal Address 2','Suburb','Post Code','State','Country' ]
         writer = csv.writer(strIO)
         writer.writerow(fieldnames)
         for o in aadata:
+            created  =''
             email = ''
             country = ''
             postal_address_line_1 = ''
@@ -97,8 +98,9 @@ def annual_admissions_booking_report(aadata):
                    last_name = o['details']['last_name']
                 else:
                    last_name = o['customer']['last_name']
-                        
-            writer.writerow(['AA'+str(o['id']),first_name,last_name,email,mobile,phone,vessel_name,vessel_rego,vessel_length,sticker_no,o['year'],o['status'],o['annual_booking_period_group_name'],postal_address_line_1,postal_address_line_2,suburb,post_code,state,country])
+            created = o['created'] 
+            
+            writer.writerow(['AA'+str(o['id']),created,first_name,last_name,email,mobile,phone,vessel_name,vessel_rego,vessel_length,sticker_no,o['year'],o['status'],o['annual_booking_period_group_name'],postal_address_line_1,postal_address_line_2,suburb,post_code,state,country])
 
         strIO.flush()
         strIO.seek(0)

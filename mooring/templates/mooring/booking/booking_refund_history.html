@@ -111,12 +111,26 @@ filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#d0e4f7', end
         <div class="col-sm-12">
             <h2>Refund - Allocation Pool</h2>
 	</div>
+	<div class="col-sm-12 col-md-12 col-lg-12">
+	
         <div class="pull-right">
 		      {% if booking_class_type == 'Booking' %}
                       <a class='btn btn-primary' href="{% url 'view_booking_history' booking_id %}">Booking History</a>
 		      {% endif %}
                       <a class='btn btn-primary' href='/ledger/payments/invoice/payment?{% for bh in booking_history %}{% if bh.booking.booking_type != 3 %}{% for bi in bh.invoices %}invoice={{ bi.invoice_reference }}&{% endfor %}{% endif %}{% endfor %}'>Ledger Group Invoices</a>
         </div>
+        </div>
+	{% if invoice_line_items.booking_balance_issue is True %}
+        <div class="col-sm-12 col-md-12 col-lg-12">
+	<br>
+
+        <div class="alert alert-danger">
+	  There is a booking balance issue which requires investigating.   Please contact OIM for assistance.
+        </div>
+	</div>
+
+	{% endif %}
+
 
         <div class="col-sm-12 col-md-12 col-lg-12">
             <br>
@@ -133,25 +147,28 @@ filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#d0e4f7', end
                   <th>Line Item (all bookings)</th>
                   <th>Oracle Code</th>
                   <th>Price (inc tax)</th>
+		  <th>Rolling Total</th>
                   <th>Order Date</th>
                 </tr>
         </thead>
         <tbody>
 
-        {% for line in invoice_line_items.invoice_line_items|dictsort:"order.date_placed" %}
+        {% for line in invoice_line_items.invoice_line_items_array|dictsort:"order_date_placed" %}
            <tr>
-                <th>#{{ line.order.number }}</th>
+                <th>#{{ line.order_number }}</th>
                 <th>{{ line.title }}</th>
-  		<th>{{ line.oracle_code }}</th>
-                <th>{{ line.line_price_incl_tax }}</th>	
-                <th>{{ line.order.date_placed }}</th>
-	   </tr>
-	{% endfor %}
+                <th>{{ line.oracle_code }}</th>
+                <th>{{ line.line_price_incl_tax }}</th>
+		<th>{{ line.rolling_total }}</th>
+                <th>{{ line.order_date_placed }}</th>
+           </tr>
+        {% endfor %}
+	
+
 
         </tbody>
         </table>
         </div>
-
         <div class="col-sm-12 col-md-12 col-lg-12">
             <br>
             <h4>Payment Gateway Transaction</h4>
