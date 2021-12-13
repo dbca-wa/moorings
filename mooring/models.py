@@ -2351,7 +2351,7 @@ class RefundFailed(models.Model):
     basket_json = JSONField(null=True,blank=True)
     created = models.DateTimeField(default=timezone.now)
     completed_date = models.DateTimeField(null=True, blank=True)
-    completed_by = models.ForeignKey(EmailUser, blank=True, null=True) 
+    completed_by = models.ForeignKey(EmailUser, blank=True, null=True, related_name="RefundFailed_completed_by") 
 
 # LISTENERS
 # ======================================
