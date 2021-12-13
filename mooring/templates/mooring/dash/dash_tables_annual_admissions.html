@@ -204,7 +204,6 @@
         <tbody>
         </tbody>
         </table>
-
     </div>
 </div>
 <script>
@@ -383,20 +382,13 @@
                         '</tr>'+
                     '</table>'+sticker_table_history;
                 },
-                get: function(data_type) {  
-                        if (annual_bookings.var.datatables == null) {
-				annual_bookings.var.datatables = $('#table-abb').DataTable(
-                                            {'responsive': true, 
+                init_dt: function() {
+                                annual_bookings.var.datatables = $('#table-abb').DataTable(
+                                            {'responsive': true,
                                             "columns": [
-				                        {
-					                    "className":      'details-control',
-					                    "orderable":      true,
-					                 },
-						         {
-                                                           "orderable":      true,
-					                 },
                                                          {
-                                                           "orderable":      true,
+                                                            "className":      'details-control',
+                                                            "orderable":      true,
                                                          },
                                                          {
                                                            "orderable":      true,
@@ -410,49 +402,58 @@
                                                          {
                                                            "orderable":      true,
                                                          },
-						         {
-						            "orderable":      true,
-							 }
-                                                           
-
+                                                         {
+                                                           "orderable":      true,
+                                                         },
+                                                         {
+                                                           "orderable":      true,
+                                                         },
+                                                         {
+                                                            "orderable":      true,
+                                                         }
                                                        ],
                                              columnDefs: [
-						     { type: 'natural-nohtml', targets: 0 }, { 'aTargets':  1,  },  { 'aTargets':  2 }, { type: 'natural-nohtml', targets: 3 }, { 'aTargets':  4 }, { 'aTargets':  5 }, { 'aTargets':  6 }, { 'aTargets':  7 }, { 'aTargets':  8 }
+                                                     { type: 'natural-nohtml', targets: 0 }, { 'aTargets':  1,  },  { 'aTargets':  2 }, { type: 'natural-nohtml', targets: 3 }, { 'aTargets':  4 }, { 'aTargets':  5 }, { 'aTargets':  6 }, { 'aTargets':  7 }, { 'aTargets':  8 }
                                              ],
                                              searching: false,
-                                             paging: true, 
-                                             "pageLength": 25, 
+                                             paging: true,
+                                             "pageLength": 25,
                                              "order": [[ 0, "desc" ]]
-                                             
-			                    });
+                                            });
 
-				//annual_bookings.var.datatables = $('#table-abb').DataTable({'responsive': true, searching: false, paging: true, "pageLength": 25, "order": [[ 0, "desc" ]],
-				//     columnDefs: [
-				//       { type: 'natural-nohtml', targets: 0 }, { 'aTargets':  1 },  { 'aTargets':  2 }, { type: 'natural-nohtml', targets: 3 }, { 'aTargets':  2 }
-				//     ]
-				//});
+                                //annual_bookings.var.datatables = $('#table-abb').DataTable({'responsive': true, searching: false, paging: true, "pageLength": 25, "order": [[ 0, "desc" ]],
+                                //     columnDefs: [
+                                //       { type: 'natural-nohtml', targets: 0 }, { 'aTargets':  1 },  { 'aTargets':  2 }, { type: 'natural-nohtml', targets: 3 }, { 'aTargets':  2 }
+                                //     ]
+                                //});
 
                                 $('#table-abb tbody').on('click', 'td.details-control', function () {
                                     var tr = $(this).closest('tr');
                                     var row = annual_bookings.var.datatables.row( tr );
- 
+
                                     if ( row.child.isShown() ) {
                                         // This row is already open - close it
                                         row.child.hide();
                                         tr.removeClass('shown');
-                                    }
-                                    else {
+                                    } else {
                                         // Open this row
                                         row.child( annual_bookings.dtformat(row.data()) ).show();
                                         tr.addClass('shown');
                                     }
-                                } );				
-			}
+                                });
+                },
+                get: function(data_type) { 
+
                         var booking_period = $('#booking-period').val();
-			var booking_status = $('#status').val();
-			var keyword = $('#keyword').val();
+                        var booking_status = $('#status').val();
+                        var keyword = $('#keyword').val();
 
+                        if (booking_period == 'ALL' && keyword.length == 0) {
+                              alert('Please select enter a keyword or select a booking period');
+                              return;
+                        }
 
+                        // console.log("datatables init - completed");
 
                         if (data_type == 'csv' ) {
                              $('#export-csv-button').hide();
@@ -503,9 +504,9 @@
 
 
 
-			annual_bookings.var.datatables.clear().draw();
+			// annual_bookings.var.datatables.clear().draw();
 			annual_bookings.var.datatables.row.add(["<center><img src='/static/common/img/ajax-loader-spinner.gif'><br><strong>Please Wait Loading</strong></center>","","","","","","","",""]).draw();
-			$('td:eq(0)', annual_bookings.var.datatables.row).attr('colspan', 9);
+			$('td:eq(0)', annual_bookings.var.datatables.row).attr('colspan', 10);
 
                         $('td:eq(1)', annual_bookings.var.datatables.row).css('display', 'none');
                         $('td:eq(2)', annual_bookings.var.datatables.row).css('display', 'none');
@@ -610,7 +611,7 @@
 //}
 window.onload= function() {
 //$('#status').val('{{ status }}');
-    annual_bookings.get();
+      annual_bookings.init_dt();
 }
 
 // var tableabb = $('#table-abb').DataTable();
