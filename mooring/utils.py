@@ -510,12 +510,17 @@ def get_campsite_availability(campsites_qs, start_date, end_date, ongoing_bookin
 
                     for closure in cgbr_qs:
                         # CLOSURE INFORMATION
+                        if  closure.range_end:
+                            c_range_end = closure.range_end
+                        else:
+                            c_range_end = closure.range_start
+
                         start = max(start_date, (closure.range_start+ timedelta(hours=8)).date() -timedelta(days=2))
-                        end = min(end_date, (closure.range_end + timedelta(hours=8)).date()) if closure.range_end.date() else end_date
+                        end = min(end_date, (c_range_end + timedelta(hours=8)).date()) if c_range_end.date() else end_date
                         closure_range = (end-start).days + 1
 
                         closure_start = closure.range_start+ timedelta(hours=8)
-                        closure_finish = closure.range_end+timedelta(hours=8)
+                        closure_finish = c_range_end+timedelta(hours=8)
                         
                         # BOOKING PERIOD
                         if closure_start.strftime('%Y-%m-%d %H:%M:%S') >= start_dt.strftime('%Y-%m-%d %H:%M:%S'):
