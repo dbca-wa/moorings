@@ -577,11 +577,10 @@
 																					                                                      action_buttons = action_buttons + "<a href='/annual-admissions-booking-history-refund/"+data['data'][i]['id']+"/'>Oracle Refund</a><br>";
 						  if (data['data'][i]['status'] != 'cancelled') {
                                                      action_buttons = action_buttons + "<a href="+'"'+"javascript:annual_bookings.cancel_booking_confirm('"+data['data'][i]['id']+"');"+'"'+";>Cancel</a><br>";
+			                          }
 					          
 						  action_buttons = action_buttons + "<a href="+'"'+"javascript:annual_bookings.update_sticker('"+data['data'][i]['id']+"','"+data['data'][i]['sticker_no']+"','"+vessel_rego+"');"+'"'+" >Update Sticker No</a><br>";
 
-					          }
-					         
                                                   action_buttons = action_buttons + pdf_invoices;
 						  action_buttons = action_buttons + '<i style="color:red;" class="fa fa-file-pdf-o"></i> <a href="/api/get_aa_letter/'+data['data'][i]['id']+'">Letter</a><br>';
 
