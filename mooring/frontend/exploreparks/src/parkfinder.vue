@@ -73,7 +73,7 @@
                                     <label for="num_adults" class="text-right">Adults (ages 12+)<label>
                                 </div>
                                 <div class="small-6 columns">
-                                    <input type="number" id="numAdults" name="num_adults" v-model="numAdults" min="0" max="16"/></label>
+                                    <input type="number" id="numAdults" name="num_adults" v-model="numAdults" min="1" max="16"/></label>
                                 </div>
                             </div>
                             <div class="row" style="display:none;">

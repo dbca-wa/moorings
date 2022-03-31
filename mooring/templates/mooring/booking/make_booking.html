@@ -111,7 +111,6 @@
                                     <div class="col-md-2 over_ride_price_mooring_header" style='display:none'>
                                         <strong>Price Override</strong>
                                     </div>
-
                                 </div>
 
                                 {% for bm in booking_mooring %}
@@ -140,11 +139,9 @@
 						<span class='money_sign'>$</span>
                                          	<input style='width: 100px;' type='number' id='over_ride_mooring_price{{ bm.id }}' step='0.01' class='form-control input-sm money' value='{{ bm.amount }}' v-on:change="money_update($event)">
                                     </div>
-
                                 </div>
                                 {% endfor %}
 				</div>
- 
                                 <BR> 
                             <div id='admissions_pricing_table' v-if="payingAdmissions && linesAdmissions.length > 0" v-cloak>
                                 <div class="row" >
@@ -178,7 +175,6 @@
                                     <div class="col-md-2 over_ride_price_mooring_header" style='display:none'>
                                         <strong>Price Override</strong>
                                     </div>
-
                                 </div>
                                 {% verbatim %}
                                 <div class="row" v-for="index in linesAdmissions.length" v-cloak>
@@ -462,8 +458,8 @@
                         <div v-if="payingAdmissions" class="row">
                             <div class="col-md-4">
                                 <div class="form-group">
-                                    <label for="num_adults" class="text-right">Adults (ages 12+):</label>
-                                    <input type="number" class="form-control" id="numAdults" name="num_adults" v-model="numAdults" v-on:change="guestsUpdated()" min="0" max="16"/>
+                                    <label for="num_adults" class="text-right">Adults (ages 12+)i:</label>
+                                    <input type="number" class="form-control" id="numAdults" name="num_adults" v-model="numAdults" v-on:change="guestsUpdated()" min="1" max="16"/>
                                 </div>
                             </div>
                             <div class="col-md-4">
@@ -648,7 +644,7 @@
             entryFee: 0,
             total: 0,
             concessionWarning: false,
-            numAdults: {% if details.num_adult > 0 %}{{ details.num_adult }}{% else %}0{% endif %},
+            numAdults: {% if details.num_adult > 0 %}{{ details.num_adult }}{% else %}1{% endif %},
             numChildren: {% if details.num_children > 0 %}{{ details.num_children }}{% else %}0{% endif %},
             numInfants: {% if details.num_infant > 0 %}{{ details.num_infant }}{% else %}0{% endif %},
             linesAdmissions: {{ lines|safe }},
