@@ -458,7 +458,7 @@
                         <div v-if="payingAdmissions" class="row">
                             <div class="col-md-4">
                                 <div class="form-group">
-                                    <label for="num_adults" class="text-right">Adults (ages 12+)i:</label>
+                                    <label for="num_adults" class="text-right">Adults (ages 12+):</label>
                                     <input type="number" class="form-control" id="numAdults" name="num_adults" v-model="numAdults" v-on:change="guestsUpdated()" min="1" max="16"/>
                                 </div>
                             </div>
@@ -835,6 +835,20 @@
             guestsUpdated: function() {
                 let vm = this;
                 console.log(vm.numAdults);
+
+                if (vm.numAdults < 1) { 
+                    var error = {
+                        title : "Invalid Guest Amount",
+                        text : "Number of guests cannot be a negative or zero value.",
+                        type : "error",
+                    }
+                    vm.swalMessage(error); 
+	            vm.numAdults = 1;
+	            return false;
+                }
+
+
+
                 var details = {
                     'num_adults' : parseInt(vm.numAdults),
                     'num_children' : parseInt(vm.numChildren),
@@ -844,7 +858,6 @@
                     'vessel_draft' : vm.draft,
                     'vessel_beam' : vm.beam,
                     'vessel_weight' : vm.weight
-
                 }
                 data = {
                     booking : vm.booking_id,
