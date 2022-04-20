@@ -4885,19 +4885,34 @@ def get_paid_admissions(request):
     response = []
     if RegisteredVessels.objects.filter(rego_no=rego).count() > 0:
          rv = RegisteredVessels.objects.filter(rego_no=rego)
-         response.append({'admissionsPaid': rv[0].admissionsPaid, 'id': rv[0].id, 'rego_no': rv[0].rego_no})
-         if rv[0].admissionsPaid is False:
-              baa = models.BookingAnnualAdmission.objects.filter(booking_type=1,start_dt__lte=dtarrival,expiry_dt__gte=dtarrival,rego_no=rego)
-              if baa.count() > 0:
-                  response = []
-                  response.append({'admissionsPaid': True, 'id': baa[0].id, 'rego_no': baa[0].rego_no})
+
+         if settings.ML_ADMISSION_PAID_CHECK == True:
+            ml_vl = models.VesselLicence.objects.filter(status=1, start_date__lte=dtarrival,expiry_date__gte=dtarrival,vessel_rego__icontains=rego)
+            if ml_vl.count() > 0:
+                  response.append({'admissionsPaid': True, 'id': mv_vl[0].id, 'rego_no': mv_vl[0].vessel_rego})
+
+         else:
+            response.append({'admissionsPaid': rv[0].admissionsPaid, 'id': rv[0].id, 'rego_no': rv[0].rego_no})
+
+            if rv[0].admissionsPaid is False:
+                 baa = models.BookingAnnualAdmission.objects.filter(booking_type=1,start_dt__lte=dtarrival,expiry_dt__gte=dtarrival,rego_no=rego)
+                 if baa.count() > 0:
+                     response = []
+                     response.append({'admissionsPaid': True, 'id': baa[0].id, 'rego_no': baa[0].rego_no})
 
     else:
-        #baa = BookingAnnualAdmission.objects.filter(start_dt__lte=now_dt,expiry_dt__gte=now_dt,rego_no=rego)
-        baa = models.BookingAnnualAdmission.objects.filter(booking_type=1,start_dt__lte=dtarrival,expiry_dt__gte=dtarrival,rego_no=rego)
-        if baa.count() > 0:
-            response = []
-            response.append({'admissionsPaid': True, 'id': baa[0].id, 'rego_no': baa[0].rego_no})
+
+         if settings.ML_ADMISSION_PAID_CHECK == True:
+            ml_vl = models.VesselLicence.objects.filter(status=1, start_date__lte=dtarrival,expiry_date__gte=dtarrival,vessel_rego__icontains=rego)
+            if ml_vl.count() > 0:
+                  response.append({'admissionsPaid': True, 'id': ml_vl[0].id, 'rego_no': ml_vl[0].vessel_rego})
+
+         else:
+            #baa = BookingAnnualAdmission.objects.filter(start_dt__lte=now_dt,expiry_dt__gte=now_dt,rego_no=rego)
+            baa = models.BookingAnnualAdmission.objects.filter(booking_type=1,start_dt__lte=dtarrival,expiry_dt__gte=dtarrival,rego_no=rego)
+            if baa.count() > 0:
+                response = []
+                response.append({'admissionsPaid': True, 'id': baa[0].id, 'rego_no': baa[0].rego_no})
 
     return HttpResponse(geojson.dumps(
               response
