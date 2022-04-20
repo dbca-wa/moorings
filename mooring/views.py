@@ -989,7 +989,7 @@ class MakeBookingsView(TemplateView):
             if details['vessel_rego']:
                 vessel = RegisteredVessels.objects.filter(rego_no=details['vessel_rego'].upper())
                 if settings.ML_ADMISSION_PAID_CHECK == True:
-                   ml_vl = models.VesselLicence.objects.filter(status=1, start_date__lte=booking.arrival,expiry_date__gte=booking.arrival,vessel_rego=details['vessel_rego'])
+                   ml_vl = models.VesselLicence.objects.filter(status=1, start_date__lte=booking.arrival,expiry_date__gte=booking.arrival,vessel_rego__icontains=details['vessel_rego'])
                    if ml_vl.count() > 0:
                          no_admissions = True
 
