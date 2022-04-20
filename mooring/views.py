@@ -988,14 +988,20 @@ class MakeBookingsView(TemplateView):
             no_admissions = False
             if details['vessel_rego']:
                 vessel = RegisteredVessels.objects.filter(rego_no=details['vessel_rego'].upper())
-                if vessel.count() > 0:
-                    vessel = vessel[0]
-                    if vessel:
-                        no_admissions = vessel.admissionsPaid
-                if no_admissions is False:
-                    baa = BookingAnnualAdmission.objects.filter(booking_type=1,start_dt__lte=booking.arrival,expiry_dt__gte=booking.arrival,rego_no=details['vessel_rego'])
-                    if baa.count() > 0:
-                        no_admissions = True
+                if settings.ML_ADMISSION_PAID_CHECK == True:
+                   ml_vl = models.VesselLicence.objects.filter(status=1, start_date__lte=booking.arrival,expiry_date__gte=booking.arrival,vessel_rego=details['vessel_rego'])
+                   if ml_vl.count() > 0:
+                         no_admissions = True
+
+                else:
+                   if vessel.count() > 0:
+                       vessel = vessel[0]
+                       if vessel:
+                           no_admissions = vessel.admissionsPaid
+                   if no_admissions is False:
+                       baa = BookingAnnualAdmission.objects.filter(booking_type=1,start_dt__lte=booking.arrival,expiry_dt__gte=booking.arrival,rego_no=details['vessel_rego'])
+                       if baa.count() > 0:
+                           no_admissions = True
  
 
             details['admission_fees'] = no_admissions
@@ -1008,7 +1014,7 @@ class MakeBookingsView(TemplateView):
                     if AdmissionsOracleCode.objects.filter(mooring_group__in=[line['group'],]).count() > 0:
                         if AdmissionsLocation.objects.filter(mooring_group__in=[line['group'],]).count() > 0:
                             rates = AdmissionsRate.objects.filter(Q(period_start__lte=booking.arrival), (Q(period_end=None) | Q(period_end__gte=booking.arrival)), Q(mooring_group=line['group']))
-                            rate =  None
+                            rate = None
                             if rates:
                                 rate = rates[0]
                             if rate:
