@@ -659,5 +659,6 @@ class UpdateLogAdmin(admin.ModelAdmin):
 @admin.register(models.VesselLicence)
 class VesselLicenceAdmin(admin.ModelAdmin):
     list_display = ('id','vessel_rego','licence_id','licence_type','start_date','expiry_date','status')
+    search_fields = ('vessel_rego','licence_id',)
 
 
