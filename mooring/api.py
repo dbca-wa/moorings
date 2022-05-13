@@ -5565,7 +5565,7 @@ def licence_create_update(request, apikey):
 
             if update is True:
                  try:
-                     vessel_licence  = models.VesselLicence.objects.filter(licence_id=licence_id, licence_type=licence_type)
+                     vessel_licence  = models.VesselLicence.objects.filter(licence_id=licence_id, licence_type=licence_type,vessel_rego=vessel_rego)
                      if vessel_licence.count():
                          vl = vessel_licence[0]
                          vl.vessel_rego=vessel_rego
