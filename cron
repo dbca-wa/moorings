@@ -1,5 +1,5 @@
 30 0 * * * root eval $(grep -v '^#' /etc/.cronenv | xargs -d "\n" -I {} echo export \"{}\" ) && python /app/manage_mo.py runcrons >> /app/logs/cronjob_mo.log 2>&1
-*/30 * * * * root eval $(grep -v '^#' /etc/.cronenv | xargs -d "\n" -I {} echo export \"{}\" ) && python /app/manage_mo.py check_oracle_bpoint_mi >> /app/logs/oracle_bpoint_checker.log 2>&1
+#*/30 * * * * root eval $(grep -v '^#' /etc/.cronenv | xargs -d "\n" -I {} echo export \"{}\" ) && python /app/manage_mo.py check_oracle_bpoint_mi >> /app/logs/oracle_bpoint_checker.log 2>&1
 03 11 * * * root eval $(grep -v '^#' /etc/.cronenv | xargs -d "\n" -I {} echo export \"{}\"  ) && python /app/manage_mo.py import_lotus_vessel_to_dbca_table >> /app/logs/import_lotus_vessel_to_dbca_table.log 2>&1
 #30 9 * * * root eval $(grep -v '^#' /etc/.cronenv | xargs -d "\n" -I {} echo export \"{}\" ) && python /app/manage_mo.py check_for_missing_bpoint_payments >> /app/logs/check_for_missing_bpoint_payments.log 2>&1
 */1 * * * * root eval $(grep -v '^#' /etc/.cronenv | xargs -d "\n" -I {} echo export \"{}\" ) && python /app/manage_mo.py check_for_payments_not_linked_to_booking >> /app/logs/check_for_payments_not_linked_to_booking.log 2>&1
