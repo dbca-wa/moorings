@@ -84,7 +84,7 @@ class MooringAreaAdmin(admin.GeoModelAdmin):
     list_display = ('name','park','promo_area','mooring_type','max_advance_booking','mooring_specification')
     ordering = ('name',)
     search_fields = ('name',)
-    list_filter = ('mooring_type','site_type')
+    list_filter = ('mooring_type','site_type','mooring_specification',)
     openlayers_url = 'https://cdnjs.cloudflare.com/ajax/libs/openlayers/2.13.1/OpenLayers.js'
 
 @admin.register(models.MooringAreaGroup)
