@@ -916,7 +916,7 @@ class MooringsiteRateLog(models.Model):
         return self.mooringarea
 
 class Mooringsite(models.Model):
-    mooringarea = models.ForeignKey('MooringArea', db_index=True, on_delete=models.PROTECT, related_name='campsites')
+    mooringarea = models.ForeignKey('MooringArea', db_index=True, on_delete=models.CASCADE, related_name='campsites')
     name = models.CharField(max_length=255)
     mooringsite_class = models.ForeignKey('MooringsiteClass', on_delete=models.PROTECT, null=True,blank=True, related_name='campsites')
     wkb_geometry = models.PointField(srid=4326, blank=True, null=True)
@@ -1056,7 +1056,7 @@ class Mooringsite(models.Model):
             raise
 
 class MooringsiteBookingRange(BookingRange):
-    campsite = models.ForeignKey('Mooringsite', on_delete=models.PROTECT,related_name='booking_ranges')
+    campsite = models.ForeignKey('Mooringsite', on_delete=models.CASCADE,related_name='booking_ranges')
 
     # Properties
     # ====================================
@@ -1087,10 +1087,10 @@ class MooringsiteBookingRange(BookingRange):
         return '{}: {} {} - {}'.format(self.campsite, self.status, self.range_start, self.range_end)
 
 class MooringsiteStayHistory(StayHistory):
-    campsite = models.ForeignKey('Mooringsite', on_delete=models.PROTECT,related_name='stay_history')
+    campsite = models.ForeignKey('Mooringsite', on_delete=models.CASCADE,related_name='stay_history')
 
 class MooringAreaStayHistory(StayHistory):
-    mooringarea = models.ForeignKey('MooringArea', on_delete=models.PROTECT,related_name='stay_history')
+    mooringarea = models.ForeignKey('MooringArea', on_delete=models.CASCADE,related_name='stay_history')
 
 class Feature(models.Model):
     TYPE_CHOICES = (
