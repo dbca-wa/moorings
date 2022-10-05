@@ -5606,7 +5606,7 @@ def marine_parks(request, apikey):
             items = []
             marinepark = MarinePark.objects.all()
             for mp in marinepark:
-                items.append({'id': mp.id, 'name': mp.name, 'district_id': mp.district.id})
+                items.append({'id': mp.id, 'name': mp.name, 'district_id': mp.district.id, 'mooring_group': mp.mooring_group.id})
 
             jsondata['status'] = 200
             jsondata['message'] = 'Results'
