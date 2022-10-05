@@ -5600,11 +5600,17 @@ def marine_parks(request, apikey):
 
     jsondata = {'status': 404, 'message': 'API Key Not Found'}
     ledger_user_json  = {}
-    
+    mooring_group_id = request.GET.get('mooring_group_id',None)
+
     if models.API.objects.filter(api_key=apikey,active=1).count():
         if common_iplookup.api_allow(common_iplookup.get_client_ip(request),apikey) is True:
             items = []
-            marinepark = MarinePark.objects.all()
+            marinepark = []
+            if mooring_group_id:
+                marinepark = MarinePark.objects.filter(mooring_group_id=mooring_group_id)
+            else:
+                marinepark = MarinePark.objects.all()
+
             for mp in marinepark:
                 items.append({'id': mp.id, 'name': mp.name, 'district_id': mp.district.id, 'mooring_group': mp.mooring_group.id})
 
@@ -5685,13 +5691,21 @@ def get_mooring(request, apikey):
     ledger_user_json  = {}
     mooring_specification_filter = None
     mooring_specification = request.GET.get('mooring_specification',None)
+    mooring_group_param = request.GET.get('mooring_group_id', None)
 
     if models.API.objects.filter(api_key=apikey,active=1).count():
         if common_iplookup.api_allow(common_iplookup.get_client_ip(request),apikey) is True:
             items = []
+            mooring_area_groups = models.MooringAreaGroup.objects.all()
             mooring_groups = models.MooringArea.objects.all()
             for mg in mooring_groups:
                 append_row = True
+
+                mag_array = []
+                for mag in mooring_area_groups:
+                    if mg in mag.moorings.all():
+                        mag_array.append(mag.id)
+
                 if mooring_specification:
                     append_row = False
                     if mooring_specification == 'rental':
@@ -5701,9 +5715,16 @@ def get_mooring(request, apikey):
                         if mg.mooring_specification == 2:
                               append_row = True
 
-                            
+                if mooring_group_param:
+                     if append_row is True:
+                          append_row = False
+                          if int(mooring_group_param) in mag_array:
+                                 append_row = True
+
+
+
                 if append_row is True:
-                     items.append({'id': mg.id, 'name': mg.name, 'marine_park_name': mg.park.name,'marine_park_id': mg.park.id ,'vessel_size_limit': mg.vessel_size_limit, 'vessel_draft_limit' : mg.vessel_draft_limit, 'vessel_beam_limit' : mg.vessel_beam_limit, 'vessel_weight_limit' : mg.vessel_weight_limit, 'mooring_specification': mg.mooring_specification})
+                    items.append({'id': mg.id, 'name': mg.name, 'marine_park_name': mg.park.name,'marine_park_id': mg.park.id ,'vessel_size_limit': mg.vessel_size_limit, 'vessel_draft_limit' : mg.vessel_draft_limit, 'vessel_beam_limit' : mg.vessel_beam_limit, 'vessel_weight_limit' : mg.vessel_weight_limit, 'mooring_specification': mg.mooring_specification, 'mooring_group': mag_array})
 
 
             jsondata['data'] = items
