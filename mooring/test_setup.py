@@ -9,7 +9,7 @@ from .models import *
 from django.contrib.gis.geos import Point
 from ledger.accounts.models import EmailUser, EmailUserManager
 from ledger.payments.models import Invoice, OracleInterfaceSystem
-from oscar.apps.order.models import Order
+from ledger.order.models import Order
 import random
 import string
 

@@ -6,7 +6,7 @@ from mooring import utils
 from mooring import context_processors
 #from ledger.payments.bpoint.models import BpointTransaction, BpointToken
 #from ledger.payments.models import Invoice,OracleInterface,CashTransaction
-#from oscar.apps.order.models import Order
+#from ledger.order.models import Order
 from ledger.basket.models import Basket
 from django.conf import settings
 from datetime import timedelta, datetime

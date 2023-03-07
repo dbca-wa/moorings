@@ -4,10 +4,16 @@
     background: #3580ca url(/static/mooring/img/top-bg-grasses.gif) repeat-x center bottom;
 }
 
-.topmast-rottnest {
+.topmast-rottnest-old {
     height: 115px;
     padding-top: 0px;
     background: #01b9bc; 
+}
+
+.topmast-rottnest {
+    height: 115px;
+    padding-top: 0px;
+    background: #ffffff; 
 }
 
 @media (max-width: 992px) {
