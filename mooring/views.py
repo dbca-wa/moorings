@@ -74,7 +74,7 @@ from ledger.payments.utils import systemid_check, update_payments
 from ledger.checkout.utils import place_order_submission 
 from ledger.payments.cash.models import CashTransaction 
 # Ledger
-from oscar.apps.order.models import Order
+from ledger.order.models import Order
 from django_ical.views import ICalFeed
 from datetime import datetime, timedelta, date
 from decimal import *
