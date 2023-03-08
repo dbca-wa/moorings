@@ -17,7 +17,7 @@ RUN add-apt-repository ppa:deadsnakes/ppa -y
 RUN apt update
 RUN apt-get install --no-install-recommends -y  python3.8 python3.8-distutils python3.8-dev python3-pip python3-setuptools
 
-RUN ln -s /usr/bin/python3 /usr/bin/python3.8 
+RUN ln -s /usr/bin/python3.8 /usr/bin/python3
 #RUN ln -s /usr/bin/pip3 /usr/bin/pip
 RUN pip3 install --upgrade pip
 # Install Python libs from requirements.txt.
