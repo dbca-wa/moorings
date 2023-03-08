@@ -7,11 +7,16 @@ ENV PRODUCTION_EMAIL=True
 ENV SECRET_KEY="ThisisNotRealKey"
 RUN apt-get clean
 RUN apt-get update
+RUN apt-get install --no-install-recommends -y software-properties-common
 RUN apt-get upgrade -y
-RUN apt-get install --no-install-recommends -y wget git libmagic-dev gcc binutils libproj-dev gdal-bin python3 python3-setuptools python3-dev python3-pip tzdata cron rsyslog gunicorn libreoffice
+RUN apt-get install --no-install-recommends -y wget git libmagic-dev gcc g++ binutils libproj-dev gdal-bin python3 python3-setuptools python3-dev python3-pip tzdata cron rsyslog gunicorn libreoffice gpg-agent 
 RUN apt-get install --no-install-recommends -y libpq-dev patch
 RUN apt-get install --no-install-recommends -y postgresql-client mtr htop vim ssh
 RUN apt-get install --no-install-recommends -y postfix syslog-ng syslog-ng-core
+RUN add-apt-repository ppa:deadsnakes/ppa -y
+RUN apt update
+RUN apt-get install --no-install-recommends -y  python3.8
+
 RUN ln -s /usr/bin/python3 /usr/bin/python 
 #RUN ln -s /usr/bin/pip3 /usr/bin/pip
 RUN pip install --upgrade pip
