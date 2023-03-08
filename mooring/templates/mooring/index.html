@@ -28,15 +28,14 @@
                         <h3>
                             Access Mooring 
                         </h3>
-                        {% bootstrap_messages %}
-                        <form method="post" action="{% url "social:complete" backend="email" %}">
-                            {% csrf_token %}
-                            {% bootstrap_form form %}
-                            <div id="submit-container">
-                                {% bootstrap_button 'Submit' button_class='btn-primary' %}
-                            </div>
-                        </form>
-                        <p>Submit your email to login or start the new-user registration process.</p>
+
+                        <div id="submit-container">
+                            <br>
+                            <a href='/ssologin' class="btn btn-primary">Login</a>
+                            <br><br>
+                        </div>
+
+                        <p>Click the login button to login or start the new-user registration process.</p>
                         <hr>
                         <h4>
                             Mooring Password-less Logins
@@ -44,7 +43,7 @@
                         <p>
                             At the Department of Biodiversity, Conservation and Attractions, we employ a password-less authentication system, meaning you never need to remember
                             a password. When you need to login to a site, such as Mooring Bookings, simply enter your email and an 
-                            authentication link will be sent to your registered email address. From there, simply follow the link to complete the login process.
+                            authentication code will be sent to your registered email address. From there, enter the code on screen to complete the login process.
                         </p>
                     </div>
                 {% endif %}
