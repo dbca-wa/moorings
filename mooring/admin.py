@@ -156,6 +156,11 @@ class CancelPricePeriodAdmin(admin.ModelAdmin):
     list_display = ('id','percentage','days')
     ordering = ('-days',)
 
+class BookingVehicleRegoInline(admin.TabularInline):
+    model = models.BookingVehicleRego
+    extra = 0
+
+
 @admin.register(models.Booking)
 class BookingAdmin(admin.ModelAdmin):
     raw_id_fields = ('customer','created_by','overridden_by','canceled_by','old_booking','admission_payment',)
@@ -164,7 +169,7 @@ class BookingAdmin(admin.ModelAdmin):
     search_fields = ('customer','id','admission_payment','cost_total')
     list_filter = ('booking_type',)
     readonly_fields=('created','property_cache',)
-    inlines = [BookingInvoiceInline,MooringsiteBookingInline]
+    inlines = [BookingInvoiceInline,MooringsiteBookingInline,BookingVehicleRegoInline]
 
     def has_add_permission(self, request, obj=None):
         return False
