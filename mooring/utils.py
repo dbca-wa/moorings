@@ -1,4 +1,4 @@
-from datetime import datetime, timedelta, date
+from datetime import datetime, timedelta, date, timezone as datetimetimezone
 import logging
 import traceback
 from decimal import *
@@ -907,39 +907,47 @@ def admission_lineitems(lines):
 
 def calculate_price_booking_cancellation(booking, overide_cancel_fees=False):
     current_date_time = datetime.strptime(datetime.now().strftime('%Y-%m-%d %H:%M:%S'), '%Y-%m-%d %H:%M:%S')
+    print ("current_date_time")
+    print (current_date_time)
     nowtime =  datetime.today()
-    nowtimec = datetime.strptime(nowtime.strftime('%Y-%m-%d'),'%Y-%m-%d')
+    nowtimec = datetime.strptime(nowtime.strftime('%Y-%m-%d %H:%M:%S'),'%Y-%m-%d %H:%M:%S')
+    print (nowtimec)
     mg = MooringAreaGroup.objects.all()
 
-    booking = MooringsiteBooking.objects.filter(booking=booking)
+    booking = MooringsiteBooking.objects.filter(booking=booking).order_by('from_dt')
     cancellation_fees = []
     adjustment_fee = Decimal('0.00')
     #{'additional_fees': 'true', 'description': 'Booking Change Fee','amount': Decimal('0.00')}
     cancellation_fee_applied = False
+    charge_cancel_fees = False
+    charge_cancel_fees_hash = {}
+    
+    cancel_policy = None
     for ob in booking:
          changed = True
          #for bc in booking_changes:
          #    if bc.campsite == ob.campsite and ob.from_dt == bc.from_dt and ob.to_dt == bc.to_dt and ob.booking_period_option == bc.booking_period_option:
-         #       changed = False
-         from_dt = datetime.strptime(ob.from_dt.strftime('%Y-%m-%d'),'%Y-%m-%d')
-         daystillbooking =  (from_dt-nowtimec).days
-
-         cancel_policy = None
+         #       changed = False         
+         from_dt = datetime.strptime(ob.from_dt.astimezone().strftime('%Y-%m-%d %H:%M:%S'),'%Y-%m-%d %H:%M:%S')
+         daystillbooking =  (from_dt-nowtimec).days                 
          cancel_fee_amount = '0.00'
+
          #change_price_period = CancelPricePeriod.objects.filter(id=ob.booking_period_option.cancel_group_id).order_by('days')
-         cancel_group =  CancelGroup.objects.get(id=ob.booking_period_option.cancel_group_id)
+         cancel_group =  CancelGroup.objects.get(id=ob.booking_period_option.cancel_group_id)         
          cancel_price_period = cancel_group.cancel_period.all().order_by('days')
          mooring_group =None
          for i in mg:
             if i.moorings.count() > 0:
                     mooring_group = i.moorings.all()[0].id 
 
-
-         for cpp in cancel_price_period:
-             if daystillbooking < 0:
-                  daystillbooking = 0
-             if daystillbooking >= cpp.days:
-                  cancel_policy =cpp
+         if cancel_policy is None:
+            for cpp in cancel_price_period:
+                
+                if daystillbooking < 0:
+                    daystillbooking = 0
+                if daystillbooking >= cpp.days:
+                    cancel_policy =cpp
+                print (daystillbooking)
 
          if cancel_policy:
              if cancel_policy.calulation_type == 0:
@@ -959,9 +967,22 @@ def calculate_price_booking_cancellation(booking, overide_cancel_fees=False):
                       cancellation_fees.append({'additional_fees': 'true', 'description': 'Past Booking - '+description,'amount': Decimal('0.00'), 'mooring_group': mooring_group, 'oracle_code': str(ob.campsite.mooringarea.oracle_code)})
                   else:
                       #change_fees['amount'] = str(refund_amount)
+
+                      if cancel_policy.calulation_type == 0:
+                        if str(ob.campsite.mooringarea.oracle_code) not in charge_cancel_fees_hash:
+                            charge_cancel_fees_hash[str(ob.campsite.mooringarea.oracle_code)] = {"cancel_fee_amount":cancel_fee_amount, "mooring_group": mooring_group, "oracle_code": str(ob.campsite.mooringarea.oracle_code)}
+                        else:
+                            charge_cancel_fees_hash[str(ob.campsite.mooringarea.oracle_code)]['cancel_fee_amount'] = charge_cancel_fees_hash[str(ob.campsite.mooringarea.oracle_code)]['cancel_fee_amount'] + cancel_fee_amount
+                        
+
                       if cancel_policy.calulation_type == 1 and cancellation_fee_applied is False:
-                        cancellation_fees.append({'additional_fees': 'true', 'description': 'Cancellation Fee','amount': cancel_fee_amount, 'mooring_group': mooring_group, 'oracle_code': str(ob.campsite.mooringarea.oracle_code)})
-                        cancellation_fee_applied = True
+                        if str(ob.campsite.mooringarea.oracle_code) not in charge_cancel_fees_hash:
+                            charge_cancel_fees_hash[str(ob.campsite.mooringarea.oracle_code)] = {"cancel_fee_amount":cancel_fee_amount, "mooring_group": mooring_group, "oracle_code": str(ob.campsite.mooringarea.oracle_code)}
+                        else:
+                            charge_cancel_fees_hash[str(ob.campsite.mooringarea.oracle_code)]['cancel_fee_amount'] = charge_cancel_fees_hash[str(ob.campsite.mooringarea.oracle_code)]['cancel_fee_amount'] + cancel_fee_amount
+                        cancellation_fee_applied = True                            
+                        ###cancellation_fees.append({'additional_fees': 'true', 'description': 'Cancellation Fee','amount': cancel_fee_amount, 'mooring_group': mooring_group, 'oracle_code': str(ob.campsite.mooringarea.oracle_code)})
+                        
 
                       # REMOVED 18/09/2023--> cancellation_fees.append({'additional_fees': 'true', 'description': 'Cancel Fee - '+description,'amount': cancel_fee_amount, 'mooring_group': mooring_group, 'oracle_code': str(ob.campsite.mooringarea.oracle_code)})
                       cancellation_fees.append({'additional_fees': 'true', 'description': 'Refund - '+description,'amount': str(ob.amount - ob.amount - ob.amount), 'mooring_group': mooring_group, 'oracle_code': str(ob.campsite.mooringarea.oracle_code)})
@@ -971,8 +992,10 @@ def calculate_price_booking_cancellation(booking, overide_cancel_fees=False):
 
              print ("NO CANCELATION POLICY")
 
-         #else:
-         #    adjustment_fee = ob.amount + adjustment_fee
+    for ccf in charge_cancel_fees_hash:
+        cancellation_fees.append({'additional_fees': 'true', 'description': 'Cancellation Fee','amount': '{:.2f}'.format(charge_cancel_fees_hash[ccf]['cancel_fee_amount']), 'mooring_group': charge_cancel_fees_hash[ccf]['mooring_group'], 'oracle_code': charge_cancel_fees_hash[ccf]['oracle_code']})
+        #else:
+        #    adjustment_fee = ob.amount + adjustment_fee
     #change_fees.append({'additional_fees': 'true', 'description': 'Mooring Adjustment Credit' ,'amount': str(adjustment_fee - adjustment_fee - adjustment_fee)})
 
     return cancellation_fees
@@ -981,13 +1004,16 @@ def calculate_price_booking_cancellation(booking, overide_cancel_fees=False):
 
 def calculate_price_booking_change(old_booking, new_booking,overide_change_fees=False):
     nowtime =  datetime.today()
-    nowtimec = datetime.strptime(nowtime.strftime('%Y-%m-%d'),'%Y-%m-%d')
+    #nowtimec = datetime.strptime(nowtime.strftime('%Y-%m-%d'),'%Y-%m-%d')
+    nowtimec = datetime.strptime(nowtime.strftime('%Y-%m-%d %H:%M:%S'),'%Y-%m-%d %H:%M:%S')
 
     old_booking_mooring = MooringsiteBooking.objects.filter(booking=old_booking)
     booking_changes = MooringsiteBooking.objects.filter(booking=new_booking)
+    charge_change_fees_hash = {}
     change_fees = []
     adjustment_fee = Decimal('0.00')
     mg = MooringAreaGroup.objects.all()
+    refund_policy = None
     #{'additional_fees': 'true', 'description': 'Booking Change Fee','amount': Decimal('0.00')}
     change_fee_applied = False
     for ob in old_booking_mooring:
@@ -997,7 +1023,7 @@ def calculate_price_booking_change(old_booking, new_booking,overide_change_fees=
                 changed = False
          from_dt = datetime.strptime(ob.from_dt.strftime('%Y-%m-%d'),'%Y-%m-%d')
          daystillbooking =  (from_dt-nowtimec).days
-         refund_policy = None
+         
 
          for i in mg:
             if i.moorings.count() > 0:
@@ -1010,12 +1036,13 @@ def calculate_price_booking_change(old_booking, new_booking,overide_change_fees=
              change_group =  ChangeGroup.objects.get(id=ob.booking_period_option.change_group_id)
 
              change_price_period = change_group.change_period.all().order_by('days')
-             for cpp in change_price_period:
-                  if daystillbooking < 0:
-                       daystillbooking = 0
-#                  if cpp.days >= daystillbooking:
-                  if daystillbooking >= cpp.days:
-                      refund_policy =cpp
+             if refund_policy is None:
+                for cpp in change_price_period:
+                    if daystillbooking < 0:
+                        daystillbooking = 0
+    #                  if cpp.days >= daystillbooking:
+                    if daystillbooking >= cpp.days:
+                        refund_policy =cpp
              if refund_policy:
                 if refund_policy.calulation_type == 0:
                     # Percentage
@@ -1029,12 +1056,26 @@ def calculate_price_booking_change(old_booking, new_booking,overide_change_fees=
                 if overide_change_fees is True:
                      change_fees.append({'additional_fees': 'true', 'description': 'Refund - '+description,'amount': str(format(ob.amount - ob.amount - ob.amount, '.2f')), 'oracle_code': str(ob.campsite.mooringarea.oracle_code), 'mooring_group': mooring_group, 'line_status': 3})
                 else:
-                     
+
+                     if refund_policy.calulation_type == 0:
+                        if str(ob.campsite.mooringarea.oracle_code) not in charge_change_fees_hash:
+                            charge_change_fees_hash[str(ob.campsite.mooringarea.oracle_code)] = {"change_fee_amount": change_fee_amount, "mooring_group": mooring_group, "oracle_code": str(ob.campsite.mooringarea.oracle_code)}
+                        else:
+                            charge_change_fees_hash[str(ob.campsite.mooringarea.oracle_code)]['change_fee_amount'] = charge_change_fees_hash[str(ob.campsite.mooringarea.oracle_code)]['change_fee_amount'] + change_fee_amount
+                        
+
                        #change_fees['amount'] = str(refund_amount)
                      #change_fees.append({'additional_fees': 'true', 'description': 'Change Fee - '+description,'amount': float(change_fee_amount), 'oracle_code': str(ob.campsite.mooringarea.oracle_code), 'mooring_group': mooring_group})
                      #change_fees.append({'additional_fees': 'true', 'description': 'Refund - '+description,'amount': str(ob.amount - ob.amount - ob.amount), 'oracle_code': str(ob.campsite.mooringarea.oracle_code), 'mooring_group': mooring_group})
-                     if refund_policy.calulation_type  == 1 and change_fee_applied is False:                    
-                        change_fees.append({'additional_fees': 'true', 'description': 'Change Fee','amount': str(format(change_fee_amount, '.2f')), 'oracle_code': str(ob.campsite.mooringarea.oracle_code), 'mooring_group': mooring_group, 'line_status': 2})
+                    
+                     if refund_policy.calulation_type  == 1 and change_fee_applied is False:  
+                        if str(ob.campsite.mooringarea.oracle_code) not in charge_change_fees_hash:
+                            charge_change_fees_hash[str(ob.campsite.mooringarea.oracle_code)] = {"change_fee_amount": change_fee_amount, "mooring_group": mooring_group, "oracle_code": str(ob.campsite.mooringarea.oracle_code)}
+                        else:
+                            charge_change_fees_hash[str(ob.campsite.mooringarea.oracle_code)]['change_fee_amount'] = charge_change_fees_hash[str(ob.campsite.mooringarea.oracle_code)]['change_fee_amount'] + change_fee_amount
+                                                
+
+                        # change_fees.append({'additional_fees': 'true', 'description': 'Change Fee','amount': str(format(change_fee_amount, '.2f')), 'oracle_code': str(ob.campsite.mooringarea.oracle_code), 'mooring_group': mooring_group, 'line_status': 2})
                         change_fee_applied = True                     
                      #"Remove 18/09/2023--> change_fees.append({'additional_fees': 'true', 'description': 'Change Fee - '+description,'amount': str(format(change_fee_amount, '.2f')), 'oracle_code': str(ob.campsite.mooringarea.oracle_code), 'mooring_group': mooring_group, 'line_status': 2})
                      change_fees.append({'additional_fees': 'true', 'description': 'Refund - '+description,'amount': str(format(ob.amount - ob.amount - ob.amount, '.2f')), 'oracle_code': str(ob.campsite.mooringarea.oracle_code), 'mooring_group': mooring_group, 'line_status': 3})
@@ -1048,6 +1089,11 @@ def calculate_price_booking_change(old_booking, new_booking,overide_change_fees=
              description = 'Mooring {} ({} - {})'.format(ob.campsite.mooringarea.name,ob.from_dt.astimezone(pytimezone('Australia/Perth')).strftime('%d/%m/%Y %H:%M %p'),ob.to_dt.astimezone(pytimezone('Australia/Perth')).strftime('%d/%m/%Y %H:%M %p'))
 #             change_fees.append({'additional_fees': 'true', 'description': 'Adjustment - '+description ,'amount': str(adjustment_fee - adjustment_fee - adjustment_fee), 'oracle_code': str(ob.campsite.mooringarea.oracle_code), 'mooring_group': mooring_group})   
              change_fees.append({'additional_fees': 'true', 'description': 'Adjustment - '+description ,'amount': str(format(adjustment_fee - adjustment_fee - adjustment_fee, '.2f')), 'oracle_code': str(ob.campsite.mooringarea.oracle_code), 'mooring_group': mooring_group, 'line_status': 3})
+             
+    for ccf in charge_change_fees_hash:
+        print (ccf)            
+        change_fees.append({'additional_fees': 'true', 'description': 'Change Fee','amount': '{:.2f}'.format(charge_change_fees_hash[ccf]['change_fee_amount']), 'mooring_group': charge_change_fees_hash[ccf]['mooring_group'], 'oracle_code': charge_change_fees_hash[ccf]['oracle_code'], 'line_status': 2})
+
 
     return change_fees
 
