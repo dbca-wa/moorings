@@ -28,6 +28,7 @@ INSTALLED_APPS += [
     'rest_framework_gis',
     'crispy_forms',
     'ledger',
+    'appmonitor_client'
 ]
 
 MIDDLEWARE_CLASSES += [
