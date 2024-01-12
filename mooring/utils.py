@@ -921,20 +921,25 @@ def calculate_price_booking_cancellation(booking, overide_cancel_fees=False):
     cancellation_fee_applied = False
     charge_cancel_fees = False
     charge_cancel_fees_hash = {}
-    
+    daystillbooking = None
     cancel_policy = None
     for ob in booking:
          changed = True
          #for bc in booking_changes:
          #    if bc.campsite == ob.campsite and ob.from_dt == bc.from_dt and ob.to_dt == bc.to_dt and ob.booking_period_option == bc.booking_period_option:
-         #       changed = False         
+         #       changed = False   
+         
+         
          from_dt = datetime.strptime(ob.from_dt.astimezone().strftime('%Y-%m-%d %H:%M:%S'),'%Y-%m-%d %H:%M:%S')
-         daystillbooking =  (from_dt-nowtimec).days                 
+         # fees cancelations should be calulcated on the day arrival even if they remove the last day of a 3 day booking for examnple
+         if daystillbooking is None: 
+            daystillbooking =  (from_dt-nowtimec).days                 
          cancel_fee_amount = '0.00'
 
          #change_price_period = CancelPricePeriod.objects.filter(id=ob.booking_period_option.cancel_group_id).order_by('days')
          cancel_group =  CancelGroup.objects.get(id=ob.booking_period_option.cancel_group_id)         
          cancel_price_period = cancel_group.cancel_period.all().order_by('days')
+
          mooring_group =None
          for i in mg:
             if i.moorings.count() > 0:
@@ -1016,13 +1021,17 @@ def calculate_price_booking_change(old_booking, new_booking,overide_change_fees=
     refund_policy = None
     #{'additional_fees': 'true', 'description': 'Booking Change Fee','amount': Decimal('0.00')}
     change_fee_applied = False
+    daystillbooking = None
     for ob in old_booking_mooring:
          changed = True
          for bc in booking_changes:
              if bc.campsite == ob.campsite and ob.from_dt == bc.from_dt and ob.to_dt == bc.to_dt and ob.booking_period_option == bc.booking_period_option:
                 changed = False
          from_dt = datetime.strptime(ob.from_dt.strftime('%Y-%m-%d'),'%Y-%m-%d')
-         daystillbooking =  (from_dt-nowtimec).days
+
+         # fees cancelations should be calulcated on the day arrival even if they remove the last day of a 3 day booking for examnple
+         if daystillbooking is None:          
+            daystillbooking =  (from_dt-nowtimec).days
          
 
          for i in mg:
