@@ -21,6 +21,8 @@ RUN rm /usr/bin/python3
 RUN ln -s /usr/bin/python3.8 /usr/bin/python3
 #RUN ln -s /usr/bin/pip3 /usr/bin/pip
 RUN pip3 install --upgrade pip
+RUN wget -O /tmp/GDAL-3.8.3-cp310-cp310-manylinux_2_17_x86_64.manylinux2014_x86_64.whl https://github.com/girder/large_image_wheels/raw/wheelhouse/GDAL-3.8.3-cp310-cp310-manylinux_2_17_x86_64.manylinux2014_x86_64.whl#sha256=e2fe6cfbab02d535bc52c77cdbe1e860304347f16d30a4708dc342a231412c57
+RUN pip install /tmp/GDAL-3.8.3-cp310-cp310-manylinux_2_17_x86_64.manylinux2014_x86_64.whl
 # Install Python libs from requirements.txt.
 FROM builder_base_moorings as python_libs_moorings
 WORKDIR /app
