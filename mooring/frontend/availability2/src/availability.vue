@@ -80,9 +80,9 @@
                             <button title="Please enter vessel details" style="border-radius: 4px; border: 1px solid #2e6da4" class="button small-12 medium-12 large-12" @click="validateVessel()">Proceed to Check Out</button>
                            </div>
                            <div v-else>
-                            <a  v-show="current_booking.length > 0 && booking_changed == true && numAdults > 0" class="button small-12 medium-12 large-12" :href="parkstayUrl+'/booking'" style="border-radius: 4px; border: 1px solid #2e6da4">Proceed to Check Out</a>
-                            <button  title="Please add items into your trolley." v-show="current_booking.length > 0 && booking_changed == true && numAdults < 1" style="color: #000000; background-color: rgb(224, 217, 217); border: 1px solid #000; border-radius: 4px;" class="button small-12 medium-12 large-12" disabled >Please select minimum of 1 adult guest</button>
-                            <button  title="Please add items into your trolley." v-show="current_booking.length == 0 && numAdults > 0 || booking_changed == false" style="color: #000000; background-color: rgb(224, 217, 217); border: 1px solid #000; border-radius: 4px;" class="button small-12 medium-12 large-12" disabled >Add items to Proceed to Check Out</button>                
+                            <a  v-show="current_booking.length > 0 && booking_changed == true && numAdults >= 0" class="button small-12 medium-12 large-12" :href="parkstayUrl+'/booking'" style="border-radius: 4px; border: 1px solid #2e6da4">Proceed to Check Out</a>
+                            <button  title="Please add items into your trolley." v-show="current_booking.length > 0 && booking_changed == true && numAdults < 0" style="color: #000000; background-color: rgb(224, 217, 217); border: 1px solid #000; border-radius: 4px;" class="button small-12 medium-12 large-12" disabled >Please select minimum of 1 adult guest</button>
+                            <button  title="Please add items into your trolley." v-show="current_booking.length == 0 && numAdults >= 0 || booking_changed == false" style="color: #000000; background-color: rgb(224, 217, 217); border: 1px solid #000; border-radius: 4px;" class="button small-12 medium-12 large-12" disabled >Add items to Proceed to Check Out</button>                
                             </div>
 
 
@@ -200,7 +200,7 @@
                         <div class="small-6 columns">
                             <label for="num_adults" class="text-right">Adults (ages 12+)</label>
                         </div><div class="small-6 columns">
-                            <input type="number" id="numAdults" name="num_adults" @change="checkGuests()" v-model="numAdults" min="1" max="16"/>
+                            <input type="number" id="numAdults" name="num_adults" @change="checkGuests()" v-model="numAdults" min="0" max="16"/>
                         </div>
                     </div>
                     <div class="row" style="display:none;">
@@ -976,10 +976,10 @@ export default {
         },
         checkGuests: function(){
             let vm = this;
-            if (vm.numAdults < 1 || vm.numChildren < 0 || vm.numInfants < 0){
+            if (vm.numAdults < 0 || vm.numChildren < 0 || vm.numInfants < 0){
                 swal({
                     title: 'Invalid Guest Amount',
-                    text: "Number of guests cannot be a negative or zero value.",
+                    text: "Number of guests cannot be a negative.",
                     type: 'warning',
                     showCancelButton: false,
                     confirmButtonText: 'OK',
