@@ -1005,14 +1005,12 @@ class MakeBookingsView(TemplateView):
  
 
             details['admission_fees'] = no_admissions
-            
             if not no_admissions:
-                lines_pre_check = utils.admissions_lines(booking_mooring)
-
+                lines_pre_check = utils.admissions_lines(booking_mooring)                
                 # rate = AdmissionsRate.objects.filter(Q(period_start__lte=booking.arrival), (Q(period_end=None) | Q(period_end__gte=booking.arrival)))[0]
                 for line in lines_pre_check:
-                    if AdmissionsOracleCode.objects.filter(mooring_group__in=[line['group'],]).count() > 0:
-                        if AdmissionsLocation.objects.filter(mooring_group__in=[line['group'],]).count() > 0:
+                    if AdmissionsOracleCode.objects.filter(mooring_group__in=[line['group'],]).count() > 0:                        
+                        if AdmissionsLocation.objects.filter(mooring_group__in=[line['group'],]).count() > 0:                            
                             rates = AdmissionsRate.objects.filter(Q(period_start__lte=booking.arrival), (Q(period_end=None) | Q(period_end__gte=booking.arrival)), Q(mooring_group=line['group']))
                             rate = None
                             if rates:

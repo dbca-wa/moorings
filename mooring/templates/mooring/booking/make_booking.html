@@ -136,7 +136,7 @@
                                         ${{ bm.amount }}
                                     </div>
                                     <div class="col-md-2 over_ride_price_mooring_body form-group" style='display:none; margin-bottom: 0px;'>
-						<span class='money_sign'>$</span>
+						            <span class='money_sign'>$</span>
                                          	<input style='width: 100px;' type='number' id='over_ride_mooring_price{{ bm.id }}' step='0.01' class='form-control input-sm money' value='{{ bm.amount }}' v-on:change="money_update($event)">
                                     </div>
                                 </div>
@@ -644,7 +644,7 @@
             entryFee: 0,
             total: 0,
             concessionWarning: false,
-            numAdults: {% if details.num_adult > 0 %}{{ details.num_adult }}{% else %}1{% endif %},
+            numAdults: {% if details.num_adult > 0 %}{{ details.num_adult }}{% else %}0{% endif %},
             numChildren: {% if details.num_children > 0 %}{{ details.num_children }}{% else %}0{% endif %},
             numInfants: {% if details.num_infant > 0 %}{{ details.num_infant }}{% else %}0{% endif %},
             linesAdmissions: {{ lines|safe }},
@@ -836,15 +836,15 @@
                 let vm = this;
                 console.log(vm.numAdults);
 
-                if (vm.numAdults < 1) { 
+                if (vm.numAdults < 0) { 
                     var error = {
                         title : "Invalid Guest Amount",
                         text : "Number of guests cannot be a negative or zero value.",
                         type : "error",
                     }
                     vm.swalMessage(error); 
-	            vm.numAdults = 1;
-	            return false;
+	                vm.numAdults = 1;
+	                return false;
                 }
 
 
