@@ -33,7 +33,7 @@
     "vue-resource": "^1.0.3",
     "vue-router": "^2.0.1",
     "vuex": "^2.2.1",
-    "webpack-dev-server": "^2.9.1",
+    "webpack-dev-server": "^4.8.0",
     "openlayers": "4.0.1",
     "ol": "4.5.0"
   },
