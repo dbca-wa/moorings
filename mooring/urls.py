@@ -9,6 +9,9 @@ from ledger.urls import urlpatterns as ledger_patterns
 
 # API patterns
 router = routers.DefaultRouter()
+if settings.DEBUG is not True:
+    router.include_root_view = False  
+    
 #router.register(r'mooring_map', api.MooringAreaMapViewSet)
 #router.register(r'current_booking', api.CurrentBookingViewSet)
 router.register(r'mooring_map_filter', api.MooringAreaMapFilterViewSet)
