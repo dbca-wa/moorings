@@ -11,7 +11,7 @@ from ledger.urls import urlpatterns as ledger_patterns
 router = routers.DefaultRouter()
 if settings.DEBUG is not True:
     router.include_root_view = False  
-    
+
 #router.register(r'mooring_map', api.MooringAreaMapViewSet)
 #router.register(r'current_booking', api.CurrentBookingViewSet)
 router.register(r'mooring_map_filter', api.MooringAreaMapFilterViewSet)
@@ -47,7 +47,7 @@ router.register(r'priceReasons',api.PriceReasonViewSet)
 router.register(r'admissionsReasons',api.AdmissionsReasonViewSet)
 router.register(r'maxStayReasons',api.MaximumStayReasonViewSet)
 router.register(r'discountReasons', api.DiscountReasonViewSet)
-router.register(r'users',api.UsersViewSet)
+#router.register(r'users',api.UsersViewSet)
 router.register(r'contacts',api.ContactViewSet)
 router.register(r'countries', api.CountryViewSet)
 router.register(r'bookingPeriodOptions', api.BookingPeriodOptionsViewSet)
