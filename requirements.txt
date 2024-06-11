@@ -55,7 +55,6 @@ phonenumbers==8.12.15
 psycopg2==2.8.6
 git+https://github.com/dbca-wa/appmonitor_client.git#egg=appmonitor_client
 python-decouple==3.8
-cryptography==41.0.7
 click==6.7
 numpy==1.24.4
 oauthlib==3.2.2
