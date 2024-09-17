@@ -1,0 +1,5 @@
+{
+    "python.linting.mypyEnabled": false,
+    "python.linting.enabled": true,
+    "python.pythonPath": "${workspaceFolder}/venv/bin/python3.8"
+}
