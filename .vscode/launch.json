@@ -13,7 +13,9 @@
             ],
             "django": true,
             "autoStartBrowser": false,
-            "program": "${workspaceFolder}/manage_mo.py"
+            "program": "${workspaceFolder}/manage_mo.py",
+            "python": "${workspaceFolder}/venv/bin/python",
+            "justMyCode": false
         }
     ]
 }
