@@ -8,13 +8,14 @@
             "name": "Python Debugger: Django",
             "type": "debugpy",
             "request": "launch",
+            "program": "${workspaceFolder}/manage_mo.py",
+            "python": "${workspaceFolder}/venv/bin/python",
             "args": [
-                "runserver"
+                "runserver",
+                "0.0.0.0:9071"
             ],
             "django": true,
             "autoStartBrowser": false,
-            "program": "${workspaceFolder}/manage_mo.py",
-            "python": "${workspaceFolder}/venv/bin/python",
             "justMyCode": false
         }
     ]
