@@ -3,7 +3,7 @@ from confy import env
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 # confy.read_environment_file(BASE_DIR+"/.env")
 os.environ.setdefault("BASE_DIR", BASE_DIR)
-from ledger.settings_base import *
+from ledger_api_client.settings_base import *
 from decimal import Decimal
 
 BASE_DIR = None
@@ -28,7 +28,8 @@ INSTALLED_APPS += [
     'rest_framework_gis',
     'crispy_forms',
     'ledger',
-    'appmonitor_client'
+    'appmonitor_client',
+    'ledger_api_client',
 ]
 
 MIDDLEWARE_CLASSES += [
