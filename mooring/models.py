@@ -23,8 +23,9 @@ from django.dispatch import receiver
 from django.db.models.signals import post_delete, pre_save, post_save,pre_delete
 from mooring.exceptions import BookingRangeWithinException
 from django.core.cache import cache
-from ledger.payments.models import Invoice
-from ledger.accounts.models import EmailUser
+# from ledger.payments.models import Invoice
+# from ledger.accounts.models import EmailUser
+from ledger_api_client.ledger_models import EmailUserRO as EmailUser, Invoice
 from django.core.files.storage import FileSystemStorage
 from django.core import serializers
 from django.utils.crypto import get_random_string
