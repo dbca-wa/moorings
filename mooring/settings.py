@@ -27,7 +27,7 @@ INSTALLED_APPS += [
     'rest_framework',
     'rest_framework_gis',
     'crispy_forms',
-    'ledger',
+    # 'ledger',
     'appmonitor_client',
     'ledger_api_client',
 ]
