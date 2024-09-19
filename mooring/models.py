@@ -58,7 +58,7 @@ class Contact(models.Model):
     description = models.TextField(null=True,blank=True)
     opening_hours = models.TextField(null=True)
     other_services = models.TextField(null=True)
-    mooring_group = models.ForeignKey('mooring.MooringAreaGroup', blank=True, null=True)
+    mooring_group = models.ForeignKey('mooring.MooringAreaGroup', blank=True, null=True, on_delete=models.SET_NULL)
 
     def __str__(self):
         return "{}: {}".format(self.name, self.phone_number)
@@ -101,7 +101,7 @@ class MarinePark(models.Model):
     wkb_geometry = models.PointField(srid=4326, blank=True, null=True)
     zoom_level = models.IntegerField(choices=ZOOM_LEVEL,default=-1)  
     distance_radius = models.IntegerField(default=25)
-    mooring_group = models.ForeignKey('mooring.MooringAreaGroup', blank=True, null=True)
+    mooring_group = models.ForeignKey('mooring.MooringAreaGroup', blank=True, null=True, on_delete=models.SET_NULL)
 
     def __str__(self):
         return '{} - {}'.format(self.name, self.district)
@@ -149,7 +149,7 @@ class PromoArea(models.Model):
     name = models.CharField(max_length=255, unique=True)
     wkb_geometry = models.PointField(srid=4326, blank=True, null=True)
     zoom_level = models.IntegerField(choices=ZOOM_LEVEL,default=-1)
-    mooring_group = models.ForeignKey('mooring.MooringAreaGroup', blank=True, null=True)
+    mooring_group = models.ForeignKey('mooring.MooringAreaGroup', blank=True, null=True, on_delete=models.SET_NULL)
 
     def __str__(self):
         return self.name
@@ -512,7 +512,7 @@ class MooringAreaGroup(models.Model):
 
 class MooringAreaImage(models.Model):
     image = models.ImageField(max_length=255, upload_to=campground_image_path)
-    campground = models.ForeignKey(MooringArea, related_name='images')
+    campground = models.ForeignKey(MooringArea, related_name='images', on_delete=models.CASCADE)
     checksum = models.CharField(blank=True, max_length=255, editable=False)
 
     class Meta:
@@ -573,7 +573,7 @@ class MooringAreaImage(models.Model):
         super(MooringAreaImage,self).delete(*args,**kwargs)
 
 class AnnualAdmissionEmail(models.Model):
-    mooring_group = models.ForeignKey('MooringAreaGroup', blank=False, null=False)
+    mooring_group = models.ForeignKey('MooringAreaGroup', blank=False, null=False, on_delete=models.PROTECT)
     email = models.CharField(max_length=300)
     active = models.BooleanField(default=True)
 
@@ -590,7 +590,7 @@ class EmailGroup(models.Model):
         (2, 'Daily Admission Booking Checks'),
     )
 
-    mooring_group = models.ForeignKey('MooringAreaGroup', blank=False, null=False)
+    mooring_group = models.ForeignKey('MooringAreaGroup', blank=False, null=False, on_delete=models.PROTECT)
     email_group = models.SmallIntegerField(choices=EMAIL_GROUP, default=0)
     email = models.CharField(max_length=300)
     active = models.BooleanField(default=True)
@@ -607,7 +607,7 @@ class AnnualBookingPeriodGroup(models.Model):
     )
 
     name = models.CharField(max_length=100)
-    mooring_group = models.ForeignKey('MooringAreaGroup', blank=False, null=False)
+    mooring_group = models.ForeignKey('MooringAreaGroup', blank=False, null=False, on_delete=models.PROTECT)
     start_time = models.DateTimeField(null=True, blank=True)
     finish_time = models.DateTimeField(null=True, blank=True)
     status = models.SmallIntegerField(choices=STATUS, default=1)
@@ -632,7 +632,7 @@ class AnnualBookingPeriodGroup(models.Model):
             super(AnnualBookingPeriodGroup, self).delete()
 class AnnualBookingPeriodOption(models.Model):
 
-    annual_booking_period_group = models.ForeignKey('AnnualBookingPeriodGroup', blank=False, null=False)
+    annual_booking_period_group = models.ForeignKey('AnnualBookingPeriodGroup', blank=False, null=False, on_delete=models.CASCADE)
     start_time = models.DateTimeField(null=True, blank=True)
     finish_time = models.DateTimeField(null=True, blank=True)
     created = models.DateTimeField(auto_now_add=True)
@@ -652,7 +652,7 @@ class VesselSizeCategory(models.Model):
     start_size = models.DecimalField(max_digits=8, decimal_places=2, default='0.00') 
     end_size = models.DecimalField(max_digits=8, decimal_places=2, default='0.00')
     status = models.SmallIntegerField(choices=STATUS, default=1)
-    mooring_group = models.ForeignKey('MooringAreaGroup', blank=False, null=False)
+    mooring_group = models.ForeignKey('MooringAreaGroup', blank=False, null=False, on_delete=models.CASCADE)
     created = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
@@ -664,8 +664,8 @@ class VesselSizeCategory(models.Model):
 
 class AnnualBookingPeriodOptionVesselCategoryPrice(models.Model):
 
-    annual_booking_period_option = models.ForeignKey('AnnualBookingPeriodOption', blank=False, null=False)
-    vessel_category = models.ForeignKey('VesselSizeCategory', blank=False, null=False)
+    annual_booking_period_option = models.ForeignKey('AnnualBookingPeriodOption', blank=False, null=False, on_delete=models.CASCADE)
+    vessel_category = models.ForeignKey('VesselSizeCategory', blank=False, null=False, on_delete=models.CASCADE)
     price = models.DecimalField(max_digits=8, decimal_places=2, default='0.00', blank=True, null=True, unique=False)
     oracle_code = models.CharField(max_length=50,null=True,blank=True)
     created = models.DateTimeField(auto_now_add=True)
@@ -697,7 +697,7 @@ class ChangeGroup(models.Model):
     name = models.CharField(max_length=100)
     change_period = models.ManyToManyField(ChangePricePeriod, related_name='refund_period_options')
     created = models.DateTimeField(auto_now_add=True)
-    mooring_group = models.ForeignKey('MooringAreaGroup', blank=False, null=False)
+    mooring_group = models.ForeignKey('MooringAreaGroup', blank=False, null=False, on_delete=models.PROTECT)
 
     def __str__(self):
         return self.name
@@ -727,7 +727,7 @@ class CancelGroup(models.Model):
     name = models.CharField(max_length=100)
     cancel_period = models.ManyToManyField(CancelPricePeriod, related_name='cancel_period_options')
     created = models.DateTimeField(auto_now_add=True)
-    mooring_group = models.ForeignKey('MooringAreaGroup', blank=False, null=False)
+    mooring_group = models.ForeignKey('MooringAreaGroup', blank=False, null=False, on_delete=models.PROTECT)
 
     def __str__(self):
         return self.name
@@ -742,8 +742,8 @@ class BookingPeriodOption(models.Model):
     start_time = models.TimeField(null=True, blank=True)
     finish_time = models.TimeField(null=True, blank=True)
     all_day = models.BooleanField(default=True)
-    change_group = models.ForeignKey('ChangeGroup',null=True,blank=True)
-    cancel_group = models.ForeignKey('CancelGroup',null=True,blank=True)
+    change_group = models.ForeignKey('ChangeGroup',null=True,blank=True, on_delete=models.SET_NULL)
+    cancel_group = models.ForeignKey('CancelGroup',null=True,blank=True, on_delete=models.SET_NULL)
     caption = models.TextField(blank=True,null=True, max_length=255)
     created = models.DateTimeField(auto_now_add=True)
     #mooring_group = models.ForeignKey('MooringAreaGroup', blank=False, null=False)
@@ -757,7 +757,7 @@ class BookingPeriodOption(models.Model):
 class BookingPeriod(models.Model):
     name = models.CharField(max_length=100)
     booking_period = models.ManyToManyField(BookingPeriodOption, related_name='booking_period_options')
-    mooring_group = models.ForeignKey('MooringAreaGroup', blank=True, null=True)
+    mooring_group = models.ForeignKey('MooringAreaGroup', blank=True, null=True, on_delete=models.SET_NULL)
     created = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
@@ -775,8 +775,8 @@ class BookingRange(models.Model):
     updated_on = models.DateTimeField(auto_now_add=True,help_text='Used to check if the start and end dated were changed')
 
     status = models.SmallIntegerField(choices=BOOKING_RANGE_CHOICES, default=0)
-    closure_reason = models.ForeignKey('ClosureReason',null=True,blank=True)
-    open_reason = models.ForeignKey('OpenReason',null=True,blank=True)
+    closure_reason = models.ForeignKey('ClosureReason', null=True, blank=True, on_delete=models.SET_NULL)
+    open_reason = models.ForeignKey('OpenReason', null=True, blank=True, on_delete=models.SET_NULL)
     details = models.TextField(blank=True,null=True)
     range_start = models.DateTimeField(blank=True, null=True)
     range_end = models.DateTimeField(blank=True, null=True)
@@ -837,7 +837,7 @@ class StayHistory(models.Model):
     min_dba = models.SmallIntegerField(default=0)
     max_dba = models.SmallIntegerField(default=180)
 
-    reason = models.ForeignKey('MaximumStayReason')
+    reason = models.ForeignKey('MaximumStayReason', blank=True, null=True, on_delete=models.SET_NULL)
     details = models.TextField(blank=True,null=True)
     range_start = models.DateField(blank=True, null=True)
     range_end = models.DateField(blank=True, null=True)
@@ -909,7 +909,7 @@ class MooringsiteRateLog(models.Model):
     booking_period = models.ForeignKey(BookingPeriod, on_delete=models.PROTECT, null=True, blank=True)
     date_start = models.DateField(default=date.today)
     date_end = models.DateField(null=True, blank=True)
-    reason = models.ForeignKey('PriceReason')
+    reason = models.ForeignKey('PriceReason', null=True, blank=True, on_delete=models.SET_NULL)
     details = models.TextField(null=True,blank=True)
     created = models.DateTimeField(auto_now_add=True, null=True,blank=True)
 
@@ -1137,7 +1137,7 @@ class Region(models.Model):
     ratis_id = models.IntegerField(default=-1)
     wkb_geometry = models.PointField(srid=4326, blank=True, null=True)
     zoom_level = models.IntegerField(choices=ZOOM_LEVEL,default=-1)
-    mooring_group = models.ForeignKey(MooringAreaGroup, blank=True, null=True)
+    mooring_group = models.ForeignKey(MooringAreaGroup, blank=True, null=True, on_delete=models.SET_NULL)
 
     def __str__(self):
         return self.name
@@ -1153,7 +1153,7 @@ class District(models.Model):
     abbreviation = models.CharField(max_length=16, null=True, unique=True)
     region = models.ForeignKey('Region', on_delete=models.PROTECT)
     ratis_id = models.IntegerField(default=-1)
-    mooring_group = models.ForeignKey(MooringAreaGroup, blank=True, null=True)
+    mooring_group = models.ForeignKey(MooringAreaGroup, blank=True, null=True, on_delete=models.SET_NULL)
 
     def __str__(self):
         return self.name
@@ -1314,7 +1314,7 @@ class MooringsiteRate(models.Model):
     date_end = models.DateField(null=True, blank=True)
     rate_type = models.SmallIntegerField(choices=RATE_TYPE_CHOICES, default=0)
     price_model = models.SmallIntegerField(choices=PRICE_MODEL_CHOICES, default=0)
-    reason = models.ForeignKey('PriceReason')
+    reason = models.ForeignKey('PriceReason', null=True, blank=True, on_delete=models.SET_NULL)
     details = models.TextField(null=True,blank=True)
     update_level = models.SmallIntegerField(choices=UPDATE_LEVEL_CHOICES, default=0)
    
@@ -1368,10 +1368,10 @@ class BookingAnnualAdmission(models.Model):
     details = JSONField(null=True, blank=True)
     rego_no = models.CharField(max_length=255, blank=True,null=True) 
     booking_type = models.SmallIntegerField(choices=BOOKING_TYPE_CHOICES, default=0)
-    annual_booking_period_group = models.ForeignKey('AnnualBookingPeriodGroup',null=True, blank=True)
+    annual_booking_period_group = models.ForeignKey('AnnualBookingPeriodGroup',null=True, blank=True, on_delete=models.SET_NULL)
     cost_total = models.DecimalField(max_digits=8, decimal_places=2, default='0.00')
     override_price = models.DecimalField(max_digits=8, decimal_places=2, blank=True, null=True)
-    override_reason = models.ForeignKey('DiscountReason', null=True, blank=True)
+    override_reason = models.ForeignKey('DiscountReason', null=True, blank=True, on_delete=models.SET_NULL)
     override_reason_info = models.TextField(blank=True, null=True)
     overridden_by = models.ForeignKey(settings.AUTH_USER_MODEL,on_delete=models.PROTECT, blank=True, null=True, related_name='overridden_annual_bookings')
     is_canceled = models.BooleanField(default=False)
@@ -1397,7 +1397,7 @@ class BookingAnnualAdmission(models.Model):
 
 
 class BookingAnnualInvoice(models.Model):
-    booking_annual_admission = models.ForeignKey(BookingAnnualAdmission, related_name='annual_booking_invoices')
+    booking_annual_admission = models.ForeignKey(BookingAnnualAdmission, related_name='annual_booking_invoices', on_delete=models.PROTECT)
     invoice_reference = models.CharField(max_length=50, null=True, blank=True, default='')
     system_invoice = models.BooleanField(default=False)
 
@@ -1437,7 +1437,7 @@ class Booking(models.Model):
     expiry_time = models.DateTimeField(blank=True, null=True)
     cost_total = models.DecimalField(max_digits=8, decimal_places=2, default='0.00')
     override_price = models.DecimalField(max_digits=8, decimal_places=2, blank=True, null=True)
-    override_reason = models.ForeignKey('DiscountReason', null=True, blank=True)
+    override_reason = models.ForeignKey('DiscountReason', null=True, blank=True, on_delete=models.SET_NULL)
     override_reason_info = models.TextField(blank=True, null=True)
     overridden_by = models.ForeignKey(settings.AUTH_USER_MODEL,on_delete=models.PROTECT, blank=True, null=True, related_name='overridden_bookings')
     mooringarea = models.ForeignKey('MooringArea', null=True)
@@ -1450,8 +1450,8 @@ class Booking(models.Model):
     created = models.DateTimeField(default=timezone.now)
     created_by = models.ForeignKey(settings.AUTH_USER_MODEL,on_delete=models.PROTECT, blank=True, null=True,related_name='created_by_booking')
     canceled_by = models.ForeignKey(settings.AUTH_USER_MODEL,on_delete=models.PROTECT, blank=True, null=True,related_name='canceled_bookings')
-    old_booking = models.ForeignKey('Booking', null=True, blank=True)
-    admission_payment = models.ForeignKey('AdmissionsBooking', null=True, blank=True)
+    old_booking = models.ForeignKey('Booking', null=True, blank=True, on_delete=models.SET_NULL)
+    admission_payment = models.ForeignKey('AdmissionsBooking', null=True, blank=True, on_delete=models.SET_NULL)
     override_lines = JSONField(null=True, blank=True, default={})
     property_cache = JSONField(null=True, blank=True, default={})
     property_cache_version = models.CharField(max_length=10, blank=True, null=True)
@@ -1856,7 +1856,7 @@ class Booking(models.Model):
         return payment_dict
 
 class BookingHistory(models.Model):
-    booking = models.ForeignKey(Booking,related_name='history')
+    booking = models.ForeignKey(Booking, related_name='history', null=True, blank=True, on_delete=models.SET_NULL)
     created = models.DateTimeField(auto_now_add=True)
     arrival = models.DateField()
     departure = models.DateField()
