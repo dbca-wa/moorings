@@ -5,7 +5,8 @@ from rest_framework import routers
 from mooring import views, api
 from mooring.admin import admin
 
-from ledger.urls import urlpatterns as ledger_patterns
+# from ledger.urls import urlpatterns as ledger_patterns
+from ledger_api_client.urls import urlpatterns as ledger_patterns
 
 # API patterns
 router = routers.DefaultRouter()
