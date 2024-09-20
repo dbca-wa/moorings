@@ -32,17 +32,20 @@ from rest_framework.pagination import PageNumberPagination
 from datetime import datetime, timedelta
 from collections import OrderedDict
 from django.core.cache import cache
-from ledger.accounts.models import EmailUser,Address
+# from ledger.accounts.models import EmailUser,Address
+from ledger_api_client.ledger_models import EmailUserRO as EmailUser, Address
 # from ledger.address.models import Country
 from ledger_api_client.country_models import Country
-from ledger.payments.models import Invoice, OracleAccountCode
+# from ledger.payments.models import Invoice, OracleAccountCode
+from ledger_api_client.ledger_models import Invoice 
 from django.db.models import Count
 from mooring import utils
 from mooring.helpers import can_view_campground, is_inventory, is_admin, is_payment_officer
 from datetime import datetime,timedelta, date
 from decimal import Decimal
 from django.db.models import Value, ManyToManyField
-from ledger.payments.utils import systemid_check, update_payments
+# from ledger.payments.utils import systemid_check, update_payments
+from ledger_api_client.utils import update_payments
 from mooring.context_processors import mooring_url, template_context
 from mooring import doctopdf
 from mooring import common_iplookup
@@ -157,7 +160,7 @@ from mooring import emails
 from mooring import exceptions
 from django.contrib.gis.geos import Point
 from django.contrib.gis.measure import Distance  
-from ledger.payments.bpoint.models import BpointTransaction, BpointToken
+# from ledger.payments.bpoint.models import BpointTransaction, BpointToken
 
 # API Views
 class MooringsiteBookingViewSet(viewsets.ModelViewSet):
