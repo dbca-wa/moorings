@@ -17,7 +17,8 @@ from django.shortcuts import redirect
 from django.utils import timezone
 from dateutil.tz.tz import tzoffset
 from pytz import timezone as pytimezone
-from ledger.payments.models import Invoice,OracleInterface,CashTransaction
+# from ledger.payments.models import Invoice,OracleInterface,CashTransaction
+from ledger_api_client.ledger_models import Invoice
 from ledger.payments.utils import oracle_parser_on_invoice,update_payments
 from ledger.checkout.utils import create_basket_session, create_checkout_session, place_order_submission, get_cookie_basket
 from mooring.models import (MooringArea, Mooringsite, MooringsiteRate, MooringsiteBooking, Booking, BookingInvoice, MooringsiteBookingRange, Rate, MooringAreaBookingRange,MooringAreaStayHistory, MooringsiteRate, MarinaEntryRate, BookingVehicleRego, AdmissionsBooking, AdmissionsOracleCode, AdmissionsRate, AdmissionsLine, ChangePricePeriod, CancelPricePeriod, GlobalSettings, MooringAreaGroup, AdmissionsLocation, ChangeGroup, CancelGroup, BookingPeriod, BookingPeriodOption, AdmissionsBookingInvoice, BookingAnnualAdmission)
@@ -1425,14 +1426,14 @@ def create_temp_bookingupdate(request,arrival,departure,booking_details,old_book
     # Check if the booking is a legacy booking and doesn't have an invoice
     if old_booking.legacy_id and old_booking.invoices.count() < 1:
         # Create a cash transaction in order to fix the outstnding invoice payment
-        CashTransaction.objects.create(
-            invoice = Invoice.objects.get(reference=new_invoice.invoice_reference),
-            amount = old_booking.cost_total,
-            type = 'move_in',
-            source = 'cash',
-            details = 'Transfer of funds from migrated booking',
-            movement_reference='Migrated Booking Funds'
-        )
+        # CashTransaction.objects.create(
+        #     invoice = Invoice.objects.get(reference=new_invoice.invoice_reference),
+        #     amount = old_booking.cost_total,
+        #     type = 'move_in',
+        #     source = 'cash',
+        #     details = 'Transfer of funds from migrated booking',
+        #     movement_reference='Migrated Booking Funds'
+        # )
         # Update payment details for the new invoice
         update_payments(new_invoice.invoice_reference)
 
