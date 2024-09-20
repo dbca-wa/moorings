@@ -1,5 +1,6 @@
 from __future__ import unicode_literals
-from ledger.accounts.models import EmailUser
+# from ledger.accounts.models import EmailUser
+from ledger_api_client.ledger_models import EmailUserRO
 
 
 def belongs_to(user, group_name):
@@ -36,7 +37,8 @@ def is_customer(user):
 
 
 def get_all_officers():
-    return EmailUser.objects.filter(is_staff=True)
+    # return EmailUser.objects.filter(is_staff=True)
+    return EmailUserRO.objects.filter(is_staff=True)
 
 def can_view_campground(user,campground):
     for g in campground.mooringareagroup_set.all():
