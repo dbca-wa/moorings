@@ -70,7 +70,9 @@ from mooring import emails
 # from ledger.payments.models import Invoice
 # from ledger.basket.models import Basket
 from ledger_api_client.ledger_models import EmailUserRO as EmailUser, Address, Invoice, Basket
-from ledger.payments.bpoint.models import BpointTransaction, BpointToken
+# from ledger.payments.bpoint.models import BpointTransaction, BpointToken
+class BpointTransaction():
+    pass
 # from ledger.payments.utils import systemid_check, update_payments
 # from ledger.checkout.utils import place_order_submission 
 from ledger_api_client.utils import update_payments, place_order_submission
