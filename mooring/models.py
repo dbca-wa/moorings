@@ -573,7 +573,7 @@ class MooringAreaImage(models.Model):
         super(MooringAreaImage,self).delete(*args,**kwargs)
 
 class AnnualAdmissionEmail(models.Model):
-    mooring_group = models.ForeignKey('MooringAreaGroup', blank=False, null=False, on_delete=models.PROTECT)
+    mooring_group = models.ForeignKey('MooringAreaGroup', blank=False, null=False, on_delete=models.CASCADE)
     email = models.CharField(max_length=300)
     active = models.BooleanField(default=True)
 
@@ -590,7 +590,7 @@ class EmailGroup(models.Model):
         (2, 'Daily Admission Booking Checks'),
     )
 
-    mooring_group = models.ForeignKey('MooringAreaGroup', blank=False, null=False, on_delete=models.PROTECT)
+    mooring_group = models.ForeignKey('MooringAreaGroup', blank=False, null=False, on_delete=models.CASCADE)
     email_group = models.SmallIntegerField(choices=EMAIL_GROUP, default=0)
     email = models.CharField(max_length=300)
     active = models.BooleanField(default=True)
@@ -607,7 +607,7 @@ class AnnualBookingPeriodGroup(models.Model):
     )
 
     name = models.CharField(max_length=100)
-    mooring_group = models.ForeignKey('MooringAreaGroup', blank=False, null=False, on_delete=models.PROTECT)
+    mooring_group = models.ForeignKey('MooringAreaGroup', blank=False, null=False, on_delete=models.CASCADE)
     start_time = models.DateTimeField(null=True, blank=True)
     finish_time = models.DateTimeField(null=True, blank=True)
     status = models.SmallIntegerField(choices=STATUS, default=1)
@@ -697,7 +697,7 @@ class ChangeGroup(models.Model):
     name = models.CharField(max_length=100)
     change_period = models.ManyToManyField(ChangePricePeriod, related_name='refund_period_options')
     created = models.DateTimeField(auto_now_add=True)
-    mooring_group = models.ForeignKey('MooringAreaGroup', blank=False, null=False, on_delete=models.PROTECT)
+    mooring_group = models.ForeignKey('MooringAreaGroup', blank=False, null=False, on_delete=models.CASCADE)
 
     def __str__(self):
         return self.name
@@ -727,7 +727,7 @@ class CancelGroup(models.Model):
     name = models.CharField(max_length=100)
     cancel_period = models.ManyToManyField(CancelPricePeriod, related_name='cancel_period_options')
     created = models.DateTimeField(auto_now_add=True)
-    mooring_group = models.ForeignKey('MooringAreaGroup', blank=False, null=False, on_delete=models.PROTECT)
+    mooring_group = models.ForeignKey('MooringAreaGroup', blank=False, null=False, on_delete=models.CASCADE)
 
     def __str__(self):
         return self.name
@@ -1397,7 +1397,7 @@ class BookingAnnualAdmission(models.Model):
 
 
 class BookingAnnualInvoice(models.Model):
-    booking_annual_admission = models.ForeignKey(BookingAnnualAdmission, related_name='annual_booking_invoices', on_delete=models.PROTECT)
+    booking_annual_admission = models.ForeignKey(BookingAnnualAdmission, related_name='annual_booking_invoices', on_delete=models.CASCADE)
     invoice_reference = models.CharField(max_length=50, null=True, blank=True, default='')
     system_invoice = models.BooleanField(default=False)
 
@@ -1440,7 +1440,7 @@ class Booking(models.Model):
     override_reason = models.ForeignKey('DiscountReason', null=True, blank=True, on_delete=models.SET_NULL)
     override_reason_info = models.TextField(blank=True, null=True)
     overridden_by = models.ForeignKey(settings.AUTH_USER_MODEL,on_delete=models.PROTECT, blank=True, null=True, related_name='overridden_bookings')
-    mooringarea = models.ForeignKey('MooringArea', null=True)
+    mooringarea = models.ForeignKey('MooringArea', null=True, on_delete=models.SET_NULL)
     is_canceled = models.BooleanField(default=False)
     send_invoice = models.BooleanField(default=False)
     cancellation_reason = models.TextField(null=True,blank=True)
@@ -1867,7 +1867,7 @@ class BookingHistory(models.Model):
     campsites = JSONField()
     vessels = JSONField()
     updated_by = models.ForeignKey(EmailUser,on_delete=models.PROTECT, blank=True, null=True)
-    invoice=models.ForeignKey(Invoice,null=True,blank=True)
+    invoice=models.ForeignKey(Invoice, null=True, blank=True, on_delete=models.SET_NULL)
 
 class OutstandingBookingRecipient(models.Model):
     email = models.EmailField()
@@ -1877,7 +1877,7 @@ class OutstandingBookingRecipient(models.Model):
 
 
 class BookingInvoice(models.Model):
-    booking = models.ForeignKey(Booking, related_name='invoices')
+    booking = models.ForeignKey(Booking, related_name='invoices', on_delete=models.CASCADE)
     invoice_reference = models.CharField(max_length=50, null=True, blank=True, default='')
     system_invoice = models.BooleanField(default=False)
  
@@ -1912,7 +1912,7 @@ class BookingVehicleRego(models.Model):
 #        ('concession','Vehicle (concession)')
     )
 
-    booking = models.ForeignKey(Booking, related_name = "regos")
+    booking = models.ForeignKey(Booking, related_name = "regos", on_delete=models.CASCADE)
     rego = models.CharField(max_length=50)
     type = models.CharField(max_length=10,choices=VEHICLE_CHOICES)
     entry_fee = models.BooleanField(default=False)
@@ -2021,7 +2021,7 @@ class Reason(models.Model):
     text = models.TextField()
     detailRequired = models.BooleanField(default=False)
     editable = models.BooleanField(default=True,editable=False)
-    mooring_group = models.ForeignKey(MooringAreaGroup, blank=True, null=True)
+    mooring_group = models.ForeignKey(MooringAreaGroup, blank=True, null=True, on_delete=models.SET_NULL)
 
     class Meta:
         ordering = ('id',)
@@ -2126,7 +2126,7 @@ class MooringsiteClassPriceHistory(ViewPriceHistory):
 class AdmissionsLocation(models.Model):
     key = models.CharField(max_length=5, blank=False, null=False, unique=True)
     text = models.CharField(max_length=255, blank=False, null=False)
-    mooring_group = models.ForeignKey(MooringAreaGroup, blank=False, null=False)
+    mooring_group = models.ForeignKey(MooringAreaGroup, blank=False, null=False, on_delete=models.CASCADE)
     annual_admissions_terms = models.CharField(max_length=1024, blank=False, null=False, default ='')
     annual_admissions_more_price_info_url = models.CharField(max_length=1024, blank=False, null=False, default ='')
     daily_admissions_terms = models.CharField(max_length=1024, blank=False, null=False, default ='')
@@ -2163,7 +2163,7 @@ class AdmissionsBooking(models.Model):
     cancelation_time = models.DateTimeField(null=True,blank=True)
     cancellation_reason = models.TextField(null=True,blank=True)
     created = models.DateTimeField(default=timezone.now)
-    location = models.ForeignKey(AdmissionsLocation, blank=True, null=True)    
+    location = models.ForeignKey(AdmissionsLocation, blank=True, null=True, on_delete=models.SET_NULL)    
     override_lines = JSONField(null=True, blank=True, default={})
     mobile = models.CharField(max_length=50, blank=True, null=True)
 
@@ -2215,7 +2215,7 @@ class AdmissionsLine(models.Model):
     overnightStay = models.BooleanField(default=False)
     admissionsBooking = models.ForeignKey(AdmissionsBooking, on_delete=models.PROTECT, blank=False, null=False)
     cost = models.DecimalField(max_digits=8, decimal_places=2, default='0.00')
-    location = models.ForeignKey(AdmissionsLocation, blank=True, null=True)
+    location = models.ForeignKey(AdmissionsLocation, blank=True, null=True, on_delete=models.SET_NULL)
     
 
 class AdmissionsOracleCode(models.Model):
@@ -2224,7 +2224,7 @@ class AdmissionsOracleCode(models.Model):
 
 
 class AdmissionsBookingInvoice(models.Model):
-    admissions_booking = models.ForeignKey(AdmissionsBooking, related_name='invoices')
+    admissions_booking = models.ForeignKey(AdmissionsBooking, related_name='invoices', on_delete=models.CASCADE)
     invoice_reference = models.CharField(max_length=50, null=True, blank=True, default='')
     system_invoice = models.BooleanField(default=False)
 
@@ -2256,8 +2256,8 @@ class AdmissionsRate(models.Model):
     family_cost = models.DecimalField(max_digits=8, decimal_places=2, default='0.00', blank=False, null=False)
     family_overnight_cost = models.DecimalField(max_digits=8, decimal_places=2, default='0.00', blank=False, null=False)
     comment = models.CharField(max_length=250, blank=True, null=True)
-    reason = models.ForeignKey('AdmissionsReason')
-    mooring_group = models.ForeignKey('MooringAreaGroup', blank=False, null=False)
+    reason = models.ForeignKey('AdmissionsReason', on_delete=models.CASCADE)
+    mooring_group = models.ForeignKey('MooringAreaGroup', blank=False, null=False, on_delete=models.CASCADE)
 
     def __str__(self):
         return '{} - {} ({})'.format(self.period_start, self.period_end, self.comment)
@@ -2301,7 +2301,7 @@ class GlobalSettings(models.Model):
         (17, 'Non Online Booking Oracle Code'),
         (18, 'Max Advance Booking (Open Time)')
     )
-    mooring_group = models.ForeignKey('MooringAreaGroup', blank=False, null=False)
+    mooring_group = models.ForeignKey('MooringAreaGroup', blank=False, null=False, on_delete=models.CASCADE)
     key = models.SmallIntegerField(choices=keys, blank=False, null=False)
     value = models.CharField(max_length=255)
 
@@ -2344,15 +2344,15 @@ class RefundFailed(models.Model):
     )
 
 
-    booking = models.ForeignKey(Booking, related_name = "booking_refund", null=True, blank=True)
-    admission_booking = models.ForeignKey(AdmissionsBooking, null=True, blank=True)
+    booking = models.ForeignKey(Booking, related_name = "booking_refund", null=True, blank=True, on_delete=models.SET_NULL)
+    admission_booking = models.ForeignKey(AdmissionsBooking, null=True, blank=True, on_delete=models.SET_NULL)
     invoice_reference = models.CharField(max_length=50, null=True, blank=True, default='')
     refund_amount = models.DecimalField(max_digits=8, decimal_places=2, default='0.00', blank=False, null=False)            
     status = models.SmallIntegerField(choices=STATUS, default=0)
     basket_json = JSONField(null=True,blank=True)
     created = models.DateTimeField(default=timezone.now)
     completed_date = models.DateTimeField(null=True, blank=True)
-    completed_by = models.ForeignKey(EmailUser, blank=True, null=True, related_name="RefundFailed_completed_by") 
+    completed_by = models.ForeignKey(EmailUser, blank=True, null=True, related_name="RefundFailed_completed_by", on_delete=models.SET_NULL) 
 
 # LISTENERS
 # ======================================
