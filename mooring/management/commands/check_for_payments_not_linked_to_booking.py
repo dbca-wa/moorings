@@ -11,7 +11,7 @@ from mooring import context_processors
 from ledger_api_client.ledger_models import Basket
 from django.conf import settings
 from datetime import timedelta, datetime
-from ledger.payments.utils import bpoint_integrity_checks, bpoint_integrity_checks_completed
+# from ledger.payments.utils import bpoint_integrity_checks, bpoint_integrity_checks_completed
 
 class Command(BaseCommand):
     help = 'Check for payment which have been completed but are missing a booking.'

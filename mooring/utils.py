@@ -28,8 +28,11 @@ from mooring import models
 from mooring.serialisers import BookingRegoSerializer, MooringsiteRateSerializer, MarinaEntryRateSerializer, RateSerializer, MooringsiteRateReadonlySerializer, AdmissionsRateSerializer
 from mooring.emails import send_booking_invoice,send_booking_confirmation
 from mooring import emails
-from ledger.order.models import Order
-from ledger.payments.invoice import utils
+# from ledger.order.models import Order
+# from ledger.payments.invoice import utils
+from ledger_api_client.order import Order
+from ledger_api_client import utils
+
 from mooring import models
 
 logger = logging.getLogger('booking_checkout')
