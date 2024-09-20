@@ -7,18 +7,22 @@ from mooring import models
 from mooring.models import MooringsiteBooking, AdmissionsBooking, AdmissionsLine, AdmissionsLocation, BookingAnnualInvoice
 #from ledger.payments.pdf import create_invoice_pdf_bytes
 from mooring.invoice_pdf import create_invoice_pdf_bytes
-from ledger.payments.models import Invoice
+# from ledger.payments.models import Invoice
+from ledger_api_client.ledger_models import Invoice
 from mooring import settings 
 from mooring.helpers import is_inventory, is_admin
 from django.core.mail import EmailMessage, EmailMultiAlternatives
 
-from ledger.emails.emails import EmailBase2
+# from ledger.emails.emails import EmailBase2
+from ledger_api_client.emails import EmailBase2 
 from django.template.loader import render_to_string, get_template
 from confy import env
 #from django.template import Context
-from ledger.accounts.models import Document
+# from ledger.accounts.models import Document
+from ledger_api_client.ledger_models import Document
 from django.contrib.auth.models import Group
-from ledger.accounts.models import EmailUser
+# from ledger.accounts.models import EmailUser
+from ledger_api_client.ledger_models import EmailUserRO as EmailUser
 
 import datetime
 import hashlib
