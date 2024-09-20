@@ -23,12 +23,14 @@ from django.views.decorators.csrf import csrf_exempt
 from django.utils import timezone
 from pytz import timezone as pytimezone
 from rest_framework import viewsets, serializers, status, generics, views
-from django.core import serializers as djangoserializers
-from rest_framework.decorators import detail_route, list_route,renderer_classes,authentication_classes,permission_classes
+# from django.core import serializers as djangoserializers
+# from rest_framework.decorators import detail_route, list_route, renderer_classes, authentication_classes, permission_classes
+from rest_framework.decorators import renderer_classes, authentication_classes, permission_classes
+from rest_framework.decorators import action
 from rest_framework.response import Response
 from rest_framework.renderers import JSONRenderer
 from rest_framework.permissions import IsAuthenticated, AllowAny, IsAdminUser, BasePermission, IsAuthenticatedOrReadOnly
-from rest_framework.pagination import PageNumberPagination
+# from rest_framework.pagination import PageNumberPagination
 from datetime import datetime, timedelta
 from collections import OrderedDict
 from django.core.cache import cache
@@ -265,7 +267,7 @@ class MooringsiteViewSet(viewsets.ModelViewSet):
             print(traceback.print_exc())
             raise serializers.ValidationError(str(e))
 
-    @detail_route(methods=['post'])
+    @action(detail=True, methods=['post'])
     def open_close(self, request, format='json', pk=None):
         try:
             http_status = status.HTTP_200_OK
@@ -307,7 +309,7 @@ class MooringsiteViewSet(viewsets.ModelViewSet):
             except Exception as e:
                 raise
 
-    @list_route(methods=['post'])
+    @action(detail=False, methods=['post',])
     def bulk_close(self, request, format='json', pk=None):
         with transaction.atomic():
             try:
@@ -324,7 +326,7 @@ class MooringsiteViewSet(viewsets.ModelViewSet):
                 raise serializers.ValidationError(str(e[0]))
 
 
-    @detail_route(methods=['get'])
+    @action(detail=True, methods=['get'])
     def status_history(self, request, format='json', pk=None):
         try:
             http_status = status.HTTP_200_OK
@@ -346,7 +348,7 @@ class MooringsiteViewSet(viewsets.ModelViewSet):
             print(traceback.print_exc())
             raise serializers.ValidationError(str(e))
 
-    @detail_route(methods=['get'])
+    @action(detail=True, methods=['get'])
     def stay_history(self, request, format='json', pk=None):
         try:
             http_status = status.HTTP_200_OK
@@ -361,7 +363,7 @@ class MooringsiteViewSet(viewsets.ModelViewSet):
         except Exception as e:
             raise serializers.ValidationError(str(e))
 
-    @detail_route(methods=['get'])
+    @action(detail=True, methods=['get'])
     def price_history(self, request, format='json', pk=None):
         try:
             http_status = status.HTTP_200_OK
@@ -376,7 +378,7 @@ class MooringsiteViewSet(viewsets.ModelViewSet):
         except Exception as e:
             raise serializers.ValidationError(str(e))
 
-    @detail_route(methods=['get'])
+    @action(detail=True, methods=['get'])
     def current_price(self, request, format='json', pk=None):
         try:
             http_status = status.HTTP_200_OK
@@ -792,7 +794,7 @@ class MooringAreaViewSet(viewsets.ModelViewSet):
     queryset = queryset_MooringArea()
     serializer_class = MooringAreaSerializer
 
-    @list_route(methods=['GET',])
+    @action(detail=False, methods=['get',])
     @renderer_classes((JSONRenderer,))
     def datatable_list(self,request,format=None):
         mooring_groups = MooringAreaGroup.objects.filter(members__in=[self.request.user,])
@@ -1086,7 +1088,7 @@ class MooringAreaViewSet(viewsets.ModelViewSet):
             print(traceback.print_exc())
             raise serializers.ValidationError(str(e))
 
-    @detail_route(methods=['post'])
+    @action(detail=True, methods=['get'])
     def open_close(self, request, format='json', pk=None):
         try:
             http_status = status.HTTP_200_OK
@@ -1137,7 +1139,7 @@ class MooringAreaViewSet(viewsets.ModelViewSet):
             except Exception as e:
                 raise
 
-    @list_route(methods=['post'])
+    @action(detail=False, methods=['post',])
     def bulk_close(self, request, format='json', pk=None):
         with transaction.atomic():
             try:
@@ -1229,7 +1231,7 @@ class MooringAreaViewSet(viewsets.ModelViewSet):
                 errorstr += m
             raise ValueError(errorstr)
 
-    @list_route(methods=['post'])
+    @action(detail=False, methods=['post',])
     def bulk_period(self, request, format='json', pk=None):
         try:
             http_status = status.HTTP_200_OK
@@ -1278,7 +1280,7 @@ class MooringAreaViewSet(viewsets.ModelViewSet):
 
 
 
-    @detail_route(methods=['post'],)
+    @action(detail=True, methods=['post'])
     def addPrice(self, request, format='json', pk=None):
         try:
             http_status = status.HTTP_200_OK
@@ -1336,7 +1338,7 @@ class MooringAreaViewSet(viewsets.ModelViewSet):
             print(traceback.format_exc())
             raise serializers.ValidationError(str(e))
 
-    @detail_route(methods=['post'],)
+    @action(detail=True, methods=['post'])
     def updatePrice(self, request, format='json', pk=None):
         try:
             http_status = status.HTTP_200_OK
@@ -1395,7 +1397,7 @@ class MooringAreaViewSet(viewsets.ModelViewSet):
             print(traceback.print_exc())
             raise serializers.ValidationError(str(e))
 
-    @detail_route(methods=['post'],)
+    @action(detail=True, methods=['post'])
     def deletePrice(self, request, format='json', pk=None):
         try:
             http_status = status.HTTP_200_OK
@@ -1417,7 +1419,7 @@ class MooringAreaViewSet(viewsets.ModelViewSet):
             print(traceback.print_exc())
             raise serializers.ValidationError(str(e))
 
-    @detail_route(methods=['get'])
+    @action(detail=True, methods=['get'])
     def status_history(self, request, format='json', pk=None):
         
         try:
@@ -1440,7 +1442,7 @@ class MooringAreaViewSet(viewsets.ModelViewSet):
             print(traceback.print_exc())
             raise serializers.ValidationError(str(e))
 
-    @detail_route(methods=['get'])
+    @action(detail=True, methods=['get'])
     def campsites(self, request, format='json', pk=None):
         try:
             http_status = status.HTTP_200_OK
@@ -1455,7 +1457,7 @@ class MooringAreaViewSet(viewsets.ModelViewSet):
         except Exception as e:
             raise serializers.ValidationError(str(e))
 
-    @detail_route(methods=['get'])
+    @action(detail=True, methods=['get'])
     def price_history(self, request, format='json', pk=None):
         try:
             http_status = status.HTTP_200_OK
@@ -1476,7 +1478,7 @@ class MooringAreaViewSet(viewsets.ModelViewSet):
         except Exception as e:
             raise serializers.ValidationError(str(e))
 
-    @detail_route(methods=['get'])
+    @action(detail=True, methods=['get'])
     def stay_history(self, request, format='json', pk=None):
         
         try:
@@ -1510,7 +1512,7 @@ class MooringAreaViewSet(viewsets.ModelViewSet):
                 pass
         raise serializers.ValidationError('no valid date format found')
 
-    @detail_route(methods=['get'])
+    @action(detail=True, methods=['get'])
     def available_campsites(self, request, format='json', pk=None):
         try:
             start_date = self.try_parsing_date(request.GET.get('arrival')).date()
@@ -1525,7 +1527,7 @@ class MooringAreaViewSet(viewsets.ModelViewSet):
         except Exception as e:
             raise serializers.ValidationError(str(e))
 
-    @detail_route(methods=['get'])
+    @action(detail=True, methods=['get'])
     def available_campsites_booking(self, request, format='json', pk=None):
         start_date = self.try_parsing_date(request.GET.get('arrival')).date()
         end_date = self.try_parsing_date(request.GET.get('departure')).date()
@@ -1562,7 +1564,7 @@ class MooringAreaViewSet(viewsets.ModelViewSet):
             print(traceback.print_exc())
             raise serializers.ValidationError(str(e))
 
-    @detail_route(methods=['get'])
+    @action(detail=True, methods=['get'])
     def available_campsite_classes(self, request, format='json', pk=None):
         try:
             start_date = datetime.strptime(request.GET.get('arrival'),'%Y/%m/%d').date()
@@ -2626,7 +2628,7 @@ class MarinaViewSet(viewsets.ModelViewSet):
             cache.set('parks',data,3600)
         return Response(data)
 
-    @list_route(methods=['get'])
+    @action(detail=False, methods=['get',])
     def price_history(self, request, format='json', pk=None):
         http_status = status.HTTP_200_OK
         try:
@@ -2640,7 +2642,7 @@ class MarinaViewSet(viewsets.ModelViewSet):
 
         return Response(res,status=http_status)
 
-    @detail_route(methods=['get'])
+    @action(detail=True, methods=['get'])
     def current_price(self, request, format='json', pk=None):
         try:
             http_status = status.HTTP_200_OK
@@ -2659,7 +2661,7 @@ class MarinaViewSet(viewsets.ModelViewSet):
             }
         return Response(res,status=http_status)
 
-    @list_route(methods=['post'],)
+    @action(detail=False, methods=['post',])
     def add_price(self, request, format='json', pk=None):
         try:
             http_status = status.HTTP_200_OK
@@ -2713,7 +2715,7 @@ class MooringsiteClassViewSet(viewsets.ModelViewSet):
         return Response(serializer.data)
 
 
-    @detail_route(methods=['get'])
+    @action(detail=True, methods=['get'])
     def price_history(self, request, format='json', pk=None):
         try:
             http_status = status.HTTP_200_OK
@@ -2744,7 +2746,7 @@ class MooringsiteClassViewSet(viewsets.ModelViewSet):
         except Exception as e:
             raise serializers.ValidationError(str(e))
 
-    @detail_route(methods=['post'],)
+    @action(detail=True, methods=['post'])
     def addPrice(self, request, format='json', pk=None):
         try:
             http_status = status.HTTP_200_OK
@@ -2781,7 +2783,7 @@ class MooringsiteClassViewSet(viewsets.ModelViewSet):
         except Exception as e:
             raise serializers.ValidationError(str(e))
 
-    @detail_route(methods=['post'],)
+    @action(detail=True, methods=['post'])
     def updatePrice(self, request, format='json', pk=None):
         try:
             http_status = status.HTTP_200_OK
@@ -2825,7 +2827,7 @@ class MooringsiteClassViewSet(viewsets.ModelViewSet):
             print(traceback.print_exc())
             raise serializers.ValidationError(str(e))
 
-    @detail_route(methods=['post'],)
+    @action(detail=True, methods=['post'])
     def deletePrice(self, request, format='json', pk=None):
         try:
             http_status = status.HTTP_200_OK
@@ -3651,7 +3653,7 @@ class BookingViewSet(viewsets.ModelViewSet):
             raise serializers.ValidationError(str(e))
 
     @csrf_exempt
-    @detail_route(permission_classes=[PaymentCallbackPermission],methods=['GET','POST'])
+    @action(detail=True, methods=['get', 'post',], permission_classes=[PaymentCallbackPermission])
     def payment_callback(self, request, *args, **kwargs):
         from django.utils import timezone
         http_status = status.HTTP_200_OK
@@ -3698,7 +3700,7 @@ class BookingViewSet(viewsets.ModelViewSet):
             print(traceback.print_exc())
             raise serializers.ValidationError(str(e))
 
-    @detail_route(permission_classes=[],methods=['GET'])
+    @action(detail=True, methods=['get',], permission_classes=[])
     def booking_checkout_status(self, request, *args, **kwargs):
         from django.utils import timezone
         http_status = status.HTTP_200_OK
@@ -3728,7 +3730,7 @@ class BookingViewSet(viewsets.ModelViewSet):
             print(traceback.print_exc())
             raise serializers.ValidationError(str(e))
 
-    @detail_route(methods=['GET'])
+    @action(detail=True, methods=['get',])
     def history(self, request, *args, **kwargs):
         http_status = status.HTTP_200_OK
         try:
@@ -4102,7 +4104,7 @@ class UsersViewSet(viewsets.ModelViewSet):
         serializer = self.get_serializer(queryset,many=True)
         return Response(serializer.data)
 
-    @detail_route(methods=['POST',])
+    @action(detail=True, methods=['post',])
     def update_personal(self, request, *args, **kwargs):
         try:
             instance = self.get_object()
@@ -4121,7 +4123,7 @@ class UsersViewSet(viewsets.ModelViewSet):
             print(traceback.print_exc())
             raise serializers.ValidationError(str(e))
 
-    @detail_route(methods=['POST',])
+    @action(detail=True, methods=['post',])
     def update_contact(self, request, *args, **kwargs):
         try:
             instance = self.get_object()
@@ -4140,7 +4142,7 @@ class UsersViewSet(viewsets.ModelViewSet):
             print(traceback.print_exc())
             raise serializers.ValidationError(str(e))
 
-    @detail_route(methods=['POST',])
+    @action(detail=True, methods=['post',])
     def update_address(self, request, *args, **kwargs):
         try:
             instance = self.get_object()
@@ -4219,7 +4221,7 @@ class AdmissionsRatesViewSet(viewsets.ModelViewSet):
     serializer_class = AdmissionsRateSerializer
     permission_classes = (IsAuthenticatedOrReadOnly,)
 
-    @detail_route(methods=['GET'])
+    @action(detail=True, methods=['get',])
     def get_price(self, request, format='json', pk=None):
         http_status = status.HTTP_200_OK
         try:
@@ -4241,7 +4243,7 @@ class AdmissionsRatesViewSet(viewsets.ModelViewSet):
             }
         return Response(res, status=http_status)
 
-    @list_route(methods=['get'])
+    @action(detail=False, methods=['get',])
     def get_price_by_location(self, request, format='json', pk=None):
         http_status = status.HTTP_200_OK
         res = ""
@@ -4270,7 +4272,7 @@ class AdmissionsRatesViewSet(viewsets.ModelViewSet):
         return Response(res, status=http_status)
 
 
-    @list_route(methods=['get'])
+    @action(detail=False, methods=['get',])
     def price_history(self, request, format='json', pk=None):
         http_status = status.HTTP_200_OK
         try:
@@ -4288,7 +4290,7 @@ class AdmissionsRatesViewSet(viewsets.ModelViewSet):
 
         return Response(res,status=http_status)
 
-    @list_route(methods=['post'],)
+    @action(detail=False, methods=['post',])
     def add_price(self, request, format='json', pk=None):
         try:
             http_status = status.HTTP_200_OK
