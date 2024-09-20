@@ -1,7 +1,7 @@
 import re
 import datetime
 
-from django.core.urlresolvers import reverse
+from django.urls import reverse
 from django.http import HttpResponseRedirect
 from django.utils import timezone
 from mooring import utils
