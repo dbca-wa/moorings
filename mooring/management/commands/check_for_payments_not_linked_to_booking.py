@@ -7,7 +7,8 @@ from mooring import context_processors
 #from ledger.payments.bpoint.models import BpointTransaction, BpointToken
 #from ledger.payments.models import Invoice,OracleInterface,CashTransaction
 #from ledger.order.models import Order
-from ledger.basket.models import Basket
+# from ledger.basket.models import Basket
+from ledger_api_client.ledger_models import Basket
 from django.conf import settings
 from datetime import timedelta, datetime
 from ledger.payments.utils import bpoint_integrity_checks, bpoint_integrity_checks_completed
