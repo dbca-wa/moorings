@@ -6,8 +6,9 @@ from django.contrib.auth.models import Group
 
 from django.db.models import Q
 
-from ledger.accounts import admin as ledger_admin
-from ledger.accounts.models import EmailUser
+# from ledger.accounts import admin as ledger_admin
+# from ledger.accounts.models import EmailUser
+from ledger_api_client.ledger_models import EmailUserRO
 from copy import deepcopy
 
 from mooring import models
@@ -17,31 +18,43 @@ class MooringAdminSite(AdminSite):
     site_title = 'Moorings Bookings'
 
 mooring_admin_site = MooringAdminSite(name='mooringadmin')
-admin.site.unregister(EmailUser)
-@admin.register(EmailUser)
-class EmailUserAdmin(ledger_admin.EmailUserAdmin):
-    """
-    Override the EmailUserAdmin from ledger.accounts.admin to remove is_superuser checkbox field on Admin page
-    """
-    def get_fieldsets(self, request, obj=None):
-        """ Remove the is_superuser checkbox from the Admin page, is user is Mooring Admin or RIA Admin and NOT superuser."""
-        fieldsets = super(UserAdmin, self).get_fieldsets(request, obj)
-        if not obj:
-            return fieldsets
+# admin.site.unregister(EmailUser)
+# @admin.register(EmailUser)
+# class EmailUserAdmin(ledger_admin.EmailUserAdmin):
+#     """
+#     Override the EmailUserAdmin from ledger.accounts.admin to remove is_superuser checkbox field on Admin page
+#     """
+#     def get_fieldsets(self, request, obj=None):
+#         """ Remove the is_superuser checkbox from the Admin page, is user is Mooring Admin or RIA Admin and NOT superuser."""
+#         fieldsets = super(UserAdmin, self).get_fieldsets(request, obj)
+#         if not obj:
+#             return fieldsets
         
-        if request.user.is_superuser:
-            return fieldsets
+#         if request.user.is_superuser:
+#             return fieldsets
 
-        group = Group.objects.filter(name='Mooring Admin')
-        if group and (group[0] in request.user.groups.all()):
-            fieldsets = deepcopy(fieldsets)
-            for fieldset in fieldsets:
-                if 'is_superuser' in fieldset[1]['fields']:
-                    if type(fieldset[1]['fields']) == tuple:
-                        fieldset[1]['fields'] = list(fieldset[1]['fields'])
-                    fieldset[1]['fields'].remove('is_superuser')
-                    break
-        return fieldsets
+#         group = Group.objects.filter(name='Mooring Admin')
+#         if group and (group[0] in request.user.groups.all()):
+#             fieldsets = deepcopy(fieldsets)
+#             for fieldset in fieldsets:
+#                 if 'is_superuser' in fieldset[1]['fields']:
+#                     if type(fieldset[1]['fields']) == tuple:
+#                         fieldset[1]['fields'] = list(fieldset[1]['fields'])
+#                     fieldset[1]['fields'].remove('is_superuser')
+#                     break
+#         return fieldsets
+
+
+@admin.register(EmailUserRO)
+class EmailUserROAdmin(admin.ModelAdmin):
+    list_display = ('email','first_name','last_name','is_staff','is_active',)
+    ordering = ('email',)
+    search_fields = ('id','email','first_name','last_name')
+    readonly_fields = ['email','first_name','last_name','is_staff','is_active','user_permissions']
+
+    def has_delete_permission(self, request, obj=None):
+        return False
+
 
 @admin.register(models.MooringsiteClass)
 class MooringsiteClassAdmin(admin.ModelAdmin):
