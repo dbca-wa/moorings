@@ -1,9 +1,11 @@
 from django.core.management.base import BaseCommand
 from django.utils import timezone
 from mooring.models import GlobalSettings, MooringAreaGroup
-from ledger.payments.bpoint.models import BpointTransaction, BpointToken
-from ledger.payments.models import Invoice,OracleInterface,CashTransaction
-from ledger.order.models import Order
+# from ledger.payments.bpoint.models import BpointTransaction, BpointToken
+# from ledger.payments.models import Invoice,OracleInterface,CashTransaction
+from ledger_api_client.ledger_models import Invoice
+# from ledger.order.models import Order
+from ledger_api_client.order import Order
 from django.core.exceptions import ValidationError
 from django.conf import settings
 from decimal import *
