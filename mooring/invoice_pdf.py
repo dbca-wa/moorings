@@ -17,8 +17,11 @@ from reportlab.lib import colors
 from django.core.files import File
 from django.conf import settings
 
-from ledger.accounts.models import Document
-from ledger.checkout.utils import calculate_excl_gst
+# from ledger.accounts.models import Document
+from ledger_api_client.ledger_models import Document
+# from ledger.checkout.utils import calculate_excl_gst
+from ledger_api_client.utils import calculate_excl_gst
+
 
 #DPAW_HEADER_LOGO = os.path.join(settings.BASE_DIR, 'ledger', 'payments','static', 'payments', 'img','dbca_logo.jpg')
 DPAW_HEADER_LOGO = os.path.join(settings.STATIC_ROOT, 'payments','img', 'dbca_logo.jpg')
