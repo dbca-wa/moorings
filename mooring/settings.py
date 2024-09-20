@@ -36,6 +36,7 @@ MIDDLEWARE_CLASSES += [
     'mooring.middleware.BookingTimerMiddleware',
     'mooring.middleware.CacheHeaders'
 ]
+MIDDLEWARE = MIDDLEWARE_CLASSES
 
 # maximum number of days allowed for a booking
 PS_MAX_BOOKING_LENGTH = 28
