@@ -10,13 +10,26 @@ from mooring.models import Booking, AdmissionsBooking, BookingAnnualAdmission
 CHECKOUT_PATH = re.compile('^/ledger/checkout/checkout')
 
 class CacheHeaders(object):
-    def process_response(self, request, response):
-         if request.path[:5] == '/api/':
-              response['Cache-Control'] = 'private, no-store'
-         return response
+    # def process_response(self, request, response):
+    #      if request.path[:5] == '/api/':
+    #           response['Cache-Control'] = 'private, no-store'
+    #      return response
+    def __init__(self, get_response):
+        self.get_response = get_response
+
+    def __call__(self, request):
+        response = self.get_response(request)
+        if request.path.startswith('/api/'):
+            response['Cache-Control'] = 'private, no-store'
+        return response
 
 class BookingTimerMiddleware(object):
-    def process_request(self, request):
+    def __init__(self, get_response):
+        self.get_response = get_response
+
+    def __call__(self, request):
+        response = self.get_response(request)
+    # def process_request(self, request):
         #print ("REQUEST SESSION")
         #print request.session['ps_booking']
         print ("LOADING MIDDLE WARE")
