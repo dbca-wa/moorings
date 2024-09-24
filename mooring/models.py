@@ -12,8 +12,9 @@ from django.core.files.base import ContentFile
 from django.core.exceptions import ValidationError
 from django.db.models import Q
 from django.contrib.gis.db import models
-from django.contrib.auth.models import Group
-from django.contrib.postgres.fields import JSONField
+# from django.contrib.auth.models import Group
+# from django.contrib.postgres.fields import JSONField
+from django.db import models as django_models
 from django.db import IntegrityError, transaction, connection
 from django.utils import timezone
 from datetime import date, time, datetime, timedelta
@@ -210,7 +211,7 @@ class MooringArea(models.Model):
     mooring_type = models.SmallIntegerField(choices=MOORING_TYPE_CHOICES, default=3)
     promo_area = models.ForeignKey('PromoArea', on_delete=models.PROTECT,blank=True, null=True)
     site_type = models.SmallIntegerField(choices=SITE_TYPE_CHOICES, default=0)
-    address = JSONField(null=True,blank=True)
+    address = django_models.JSONField(null=True,blank=True)
     features = models.ManyToManyField('Feature')
     description = models.TextField(blank=True, null=True, default="")
     additional_info = models.TextField(blank=True, null=True, default="")
@@ -1365,7 +1366,7 @@ class BookingAnnualAdmission(models.Model):
     customer = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.PROTECT, blank=True, null=True)
     start_dt = models.DateTimeField()
     expiry_dt = models.DateTimeField()
-    details = JSONField(null=True, blank=True)
+    details = django_models.JSONField(null=True, blank=True)
     rego_no = models.CharField(max_length=255, blank=True,null=True) 
     booking_type = models.SmallIntegerField(choices=BOOKING_TYPE_CHOICES, default=0)
     annual_booking_period_group = models.ForeignKey('AnnualBookingPeriodGroup',null=True, blank=True, on_delete=models.SET_NULL)
@@ -1382,10 +1383,10 @@ class BookingAnnualAdmission(models.Model):
     created = models.DateTimeField(default=timezone.now)
     created_by = models.ForeignKey(settings.AUTH_USER_MODEL,on_delete=models.PROTECT, blank=True, null=True,related_name='created_by_annual_booking')
     canceled_by = models.ForeignKey(settings.AUTH_USER_MODEL,on_delete=models.PROTECT, blank=True, null=True,related_name='canceled_annual_bookings')
-    override_lines = JSONField(null=True, blank=True, default={})
+    override_lines = django_models.JSONField(null=True, blank=True, default=dict)
     sticker_no = models.TextField(blank=True, null=True) 
     sticker_created = models.DateTimeField(null=True,blank=True, editable=False)
-    sticker_no_history = JSONField(null=True, blank=True, default=[])
+    sticker_no_history = django_models.JSONField(null=True, blank=True, default=dict)
 
     def __str__(self):
          return str(self.id)
@@ -1432,7 +1433,7 @@ class Booking(models.Model):
     legacy_name = models.CharField(max_length=255, blank=True,null=True)
     arrival = models.DateField()
     departure = models.DateField()
-    details = JSONField(null=True, blank=True)
+    details = django_models.JSONField(null=True, blank=True)
     booking_type = models.SmallIntegerField(choices=BOOKING_TYPE_CHOICES, default=0)
     expiry_time = models.DateTimeField(blank=True, null=True)
     cost_total = models.DecimalField(max_digits=8, decimal_places=2, default='0.00')
@@ -1452,8 +1453,8 @@ class Booking(models.Model):
     canceled_by = models.ForeignKey(settings.AUTH_USER_MODEL,on_delete=models.PROTECT, blank=True, null=True,related_name='canceled_bookings')
     old_booking = models.ForeignKey('Booking', null=True, blank=True, on_delete=models.SET_NULL)
     admission_payment = models.ForeignKey('AdmissionsBooking', null=True, blank=True, on_delete=models.SET_NULL)
-    override_lines = JSONField(null=True, blank=True, default={})
-    property_cache = JSONField(null=True, blank=True, default={})
+    override_lines = django_models.JSONField(null=True, blank=True, default=dict)
+    property_cache = django_models.JSONField(null=True, blank=True, default=dict)
     property_cache_version = models.CharField(max_length=10, blank=True, null=True)
     property_cache_stale = models.BooleanField(default=True)
 
@@ -1860,12 +1861,12 @@ class BookingHistory(models.Model):
     created = models.DateTimeField(auto_now_add=True)
     arrival = models.DateField()
     departure = models.DateField()
-    details = JSONField()
+    details = django_models.JSONField()
     cost_total = models.DecimalField(max_digits=8, decimal_places=2, default='0.00')
     confirmation_sent = models.BooleanField()
     campground = models.CharField(max_length=100)
-    campsites = JSONField()
-    vessels = JSONField()
+    campsites = django_models.JSONField()
+    vessels = django_models.JSONField()
     updated_by = models.ForeignKey(EmailUser,on_delete=models.PROTECT, blank=True, null=True)
     invoice=models.ForeignKey(Invoice, null=True, blank=True, on_delete=models.SET_NULL)
 
@@ -2164,7 +2165,7 @@ class AdmissionsBooking(models.Model):
     cancellation_reason = models.TextField(null=True,blank=True)
     created = models.DateTimeField(default=timezone.now)
     location = models.ForeignKey(AdmissionsLocation, blank=True, null=True, on_delete=models.SET_NULL)    
-    override_lines = JSONField(null=True, blank=True, default={})
+    override_lines = django_models.JSONField(null=True, blank=True, default=dict)
     mobile = models.CharField(max_length=50, blank=True, null=True)
 
     def __str__(self):
@@ -2349,7 +2350,7 @@ class RefundFailed(models.Model):
     invoice_reference = models.CharField(max_length=50, null=True, blank=True, default='')
     refund_amount = models.DecimalField(max_digits=8, decimal_places=2, default='0.00', blank=False, null=False)            
     status = models.SmallIntegerField(choices=STATUS, default=0)
-    basket_json = JSONField(null=True,blank=True)
+    basket_json = django_models.JSONField(null=True,blank=True)
     created = models.DateTimeField(default=timezone.now)
     completed_date = models.DateTimeField(null=True, blank=True)
     completed_by = models.ForeignKey(EmailUser, blank=True, null=True, related_name="RefundFailed_completed_by", on_delete=models.SET_NULL) 
@@ -2872,7 +2873,7 @@ class VesselLicence(models.Model):
 class UpdateLog(models.Model):
 
     model_name = models.CharField(max_length=200)
-    json_context = JSONField(null=True,blank=True, default={})
+    json_context = django_models.JSONField(null=True,blank=True, default=dict)
     created = models.DateTimeField(default=timezone.now, editable=False)
     
 
