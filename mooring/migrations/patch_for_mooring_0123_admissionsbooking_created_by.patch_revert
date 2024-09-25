@@ -1,0 +1,11 @@
+--- 0123_admissionsbooking_created_by_after.py	2024-09-25 13:10:49.101539219 +0800
++++ 0123_admissionsbooking_created_by.py	2024-09-06 11:01:41.713068655 +0800
+@@ -10,7 +10,7 @@
+ class Migration(migrations.Migration):
+ 
+     dependencies = [
+-        # migrations.swappable_dependency(settings.AUTH_USER_MODEL),
++        migrations.swappable_dependency(settings.AUTH_USER_MODEL),
+         ('mooring', '0122_booking_created_by'),
+     ]
+ 

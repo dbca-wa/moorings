@@ -1,0 +1,11 @@
+--- 0132_auto_20200710_1411_after.py	2024-09-25 14:14:39.707775589 +0800
++++ 0132_auto_20200710_1411.py	2024-09-06 11:01:41.713068655 +0800
+@@ -12,7 +12,7 @@
+ class Migration(migrations.Migration):
+ 
+     dependencies = [
+-        # migrations.swappable_dependency(settings.AUTH_USER_MODEL),
++        migrations.swappable_dependency(settings.AUTH_USER_MODEL),
+         ('mooring', '0131_auto_20200708_1545'),
+     ]
+ 

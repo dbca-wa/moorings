@@ -1,0 +1,13 @@
+--- 0001_initial.py	2024-09-25 10:49:52.964109135 +0800
++++ 0001_initial_after.py	2024-09-25 10:44:39.681050293 +0800
+@@ -19,8 +19,8 @@
+ 
+     dependencies = [
+         ('taggit', '0002_auto_20150616_2121'),
+-        migrations.swappable_dependency(settings.AUTH_USER_MODEL),
+-        ('invoice', '0008_invoice_previous_invoice'),
++        # migrations.swappable_dependency(settings.AUTH_USER_MODEL),
++        # ('invoice', '0008_invoice_previous_invoice'),
+     ]
+ 
+     operations = [
