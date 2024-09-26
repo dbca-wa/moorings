@@ -176,7 +176,8 @@ class BookingVehicleRegoInline(admin.TabularInline):
 
 @admin.register(models.Booking)
 class BookingAdmin(admin.ModelAdmin):
-    raw_id_fields = ('customer','created_by','overridden_by','canceled_by','old_booking','admission_payment',)
+    # raw_id_fields = ('customer','created_by','overridden_by','canceled_by','old_booking','admission_payment',)
+    raw_id_fields = ('old_booking','admission_payment',)
     list_display = ('id','arrival','departure','booking_type','mooringarea','legacy_id','legacy_name','cost_total','property_cache_version','property_cache_stale')
     ordering = ('-id',)
     search_fields = ('customer','id','admission_payment','cost_total')
@@ -189,7 +190,7 @@ class BookingAdmin(admin.ModelAdmin):
 
 @admin.register(models.BookingAnnualAdmission)
 class BookingAnnualAdmissionAdmin(admin.ModelAdmin):
-    raw_id_fields = ('customer','created_by','overridden_by','canceled_by',)
+    # raw_id_fields = ('customer','created_by','overridden_by','canceled_by',)
     list_display = ('id','customer','start_dt','expiry_dt','rego_no','booking_type','cost_total','created_by','created')
     ordering = ('-id',)
     search_fields = ('customer__first_name','customer__last_name','id',)
@@ -463,7 +464,7 @@ class AdmissionLineInline(admin.TabularInline):
 
 @admin.register(models.AdmissionsBooking)
 class AdmissionBooking(admin.ModelAdmin):
-    raw_id_fields = ('customer',)
+    # raw_id_fields = ('customer',)
     list_display = ('confirmation_number', 'booking_type','customer','mobile', 'totalCost','created')
     readonly_fields=('created_by','canceled_by',)
     inlines = [AdmissionLineInline]
