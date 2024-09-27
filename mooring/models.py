@@ -26,7 +26,7 @@ from mooring.exceptions import BookingRangeWithinException
 from django.core.cache import cache
 # from ledger.payments.models import Invoice
 # from ledger.accounts.models import EmailUser
-from ledger_api_client.ledger_models import EmailUserRO, Invoice
+from ledger_api_client.ledger_models import EmailUserRO as EmailUser, Invoice
 from django.core.files.storage import FileSystemStorage
 from django.core import serializers
 from django.utils.crypto import get_random_string
@@ -500,8 +500,7 @@ def campground_image_path(instance, filename):
 
 class MooringAreaGroup(models.Model):
     name = models.CharField(max_length=100)
-    # members = models.ManyToManyField(EmailUser,blank=True)
-    members = models.ManyToManyField(EmailUserRO, blank=True)
+    members = models.ManyToManyField(EmailUser,blank=True)
 #    campgrounds = models.ManyToManyField(MooringArea,blank=True)
     moorings = models.ManyToManyField(MooringArea,blank=True)
 
@@ -1364,8 +1363,7 @@ class BookingAnnualAdmission(models.Model):
         (5, 'Changed Booking')
     )
 
-    # customer = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.PROTECT, blank=True, null=True)
-    customer = models.IntegerField(blank=True, null=True)
+    customer = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.PROTECT, blank=True, null=True)
     start_dt = models.DateTimeField()
     expiry_dt = models.DateTimeField()
     details = django_models.JSONField(null=True, blank=True)
@@ -1376,18 +1374,15 @@ class BookingAnnualAdmission(models.Model):
     override_price = models.DecimalField(max_digits=8, decimal_places=2, blank=True, null=True)
     override_reason = models.ForeignKey('DiscountReason', null=True, blank=True, on_delete=models.SET_NULL)
     override_reason_info = models.TextField(blank=True, null=True)
-    # overridden_by = models.ForeignKey(settings.AUTH_USER_MODEL,on_delete=models.PROTECT, blank=True, null=True, related_name='overridden_annual_bookings')
-    overridden_by = models.IntegerField(blank=True, null=True)
+    overridden_by = models.ForeignKey(settings.AUTH_USER_MODEL,on_delete=models.PROTECT, blank=True, null=True, related_name='overridden_annual_bookings')
     is_canceled = models.BooleanField(default=False)
     send_invoice = models.BooleanField(default=False)
     cancellation_reason = models.TextField(null=True,blank=True)
     cancelation_time = models.DateTimeField(null=True,blank=True)
     confirmation_sent = models.BooleanField(default=False)
     created = models.DateTimeField(default=timezone.now)
-    # created_by = models.ForeignKey(settings.AUTH_USER_MODEL,on_delete=models.PROTECT, blank=True, null=True,related_name='created_by_annual_booking')
-    created_by = models.IntegerField(blank=True, null=True)
-    # canceled_by = models.ForeignKey(settings.AUTH_USER_MODEL,on_delete=models.PROTECT, blank=True, null=True,related_name='canceled_annual_bookings')
-    canceled_by = models.IntegerField(blank=True, null=True)
+    created_by = models.ForeignKey(settings.AUTH_USER_MODEL,on_delete=models.PROTECT, blank=True, null=True,related_name='created_by_annual_booking')
+    canceled_by = models.ForeignKey(settings.AUTH_USER_MODEL,on_delete=models.PROTECT, blank=True, null=True,related_name='canceled_annual_bookings')
     override_lines = django_models.JSONField(null=True, blank=True, default=dict)
     sticker_no = models.TextField(blank=True, null=True) 
     sticker_created = models.DateTimeField(null=True,blank=True, editable=False)
@@ -1433,8 +1428,7 @@ class Booking(models.Model):
         (5, 'Changed Booking')
     )
 
-    # customer = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.PROTECT, blank=True, null=True)
-    customer = models.IntegerField(blank=True, null=True)
+    customer = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.PROTECT, blank=True, null=True)
     legacy_id = models.IntegerField(unique=True, blank=True, null=True)
     legacy_name = models.CharField(max_length=255, blank=True,null=True)
     arrival = models.DateField()
@@ -1446,8 +1440,7 @@ class Booking(models.Model):
     override_price = models.DecimalField(max_digits=8, decimal_places=2, blank=True, null=True)
     override_reason = models.ForeignKey('DiscountReason', null=True, blank=True, on_delete=models.SET_NULL)
     override_reason_info = models.TextField(blank=True, null=True)
-    # overridden_by = models.ForeignKey(settings.AUTH_USER_MODEL,on_delete=models.PROTECT, blank=True, null=True, related_name='overridden_bookings')
-    overridden_by = models.IntegerField(blank=True, null=True)
+    overridden_by = models.ForeignKey(settings.AUTH_USER_MODEL,on_delete=models.PROTECT, blank=True, null=True, related_name='overridden_bookings')
     mooringarea = models.ForeignKey('MooringArea', null=True, on_delete=models.SET_NULL)
     is_canceled = models.BooleanField(default=False)
     send_invoice = models.BooleanField(default=False)
@@ -1456,10 +1449,8 @@ class Booking(models.Model):
     confirmation_sent = models.BooleanField(default=False)
     updated = models.DateTimeField(default=timezone.now)
     created = models.DateTimeField(default=timezone.now)
-    # created_by = models.ForeignKey(settings.AUTH_USER_MODEL,on_delete=models.PROTECT, blank=True, null=True,related_name='created_by_booking')
-    created_by = models.IntegerField(blank=True, null=True)
-    # canceled_by = models.ForeignKey(settings.AUTH_USER_MODEL,on_delete=models.PROTECT, blank=True, null=True,related_name='canceled_bookings')
-    canceled_by = models.IntegerField(blank=True, null=True)
+    created_by = models.ForeignKey(settings.AUTH_USER_MODEL,on_delete=models.PROTECT, blank=True, null=True,related_name='created_by_booking')
+    canceled_by = models.ForeignKey(settings.AUTH_USER_MODEL,on_delete=models.PROTECT, blank=True, null=True,related_name='canceled_bookings')
     old_booking = models.ForeignKey('Booking', null=True, blank=True, on_delete=models.SET_NULL)
     admission_payment = models.ForeignKey('AdmissionsBooking', null=True, blank=True, on_delete=models.SET_NULL)
     override_lines = django_models.JSONField(null=True, blank=True, default=dict)
@@ -1876,8 +1867,7 @@ class BookingHistory(models.Model):
     campground = models.CharField(max_length=100)
     campsites = django_models.JSONField()
     vessels = django_models.JSONField()
-    # updated_by = models.ForeignKey(EmailUser,on_delete=models.PROTECT, blank=True, null=True)
-    updated_by = models.IntegerField(blank=True, null=True)
+    updated_by = models.ForeignKey(EmailUser,on_delete=models.PROTECT, blank=True, null=True)
     invoice=models.ForeignKey(Invoice, null=True, blank=True, on_delete=models.SET_NULL)
 
 class OutstandingBookingRecipient(models.Model):
@@ -2160,8 +2150,7 @@ class AdmissionsBooking(models.Model):
         (3, 'In-complete booking'),
         (4, 'Cancelled booking')
     )
-    # customer = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.PROTECT, blank=True, null=True)
-    customer = models.IntegerField(blank=True, null=True)
+    customer = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.PROTECT, blank=True, null=True)
     booking_type = models.SmallIntegerField(choices=BOOKING_TYPE_CHOICES, default=0)
     vesselRegNo = models.CharField(max_length=200, blank=True )
     noOfAdults = models.IntegerField()
@@ -2170,10 +2159,8 @@ class AdmissionsBooking(models.Model):
     noOfInfants = models.IntegerField()
     warningReferenceNo = models.CharField(max_length=200, blank=True)
     totalCost = models.DecimalField(max_digits=8, decimal_places=2, default='0.00')
-    # created_by = models.ForeignKey(settings.AUTH_USER_MODEL,on_delete=models.PROTECT, blank=True, null=True,related_name='created_by_admissions')
-    created_by = models.IntegerField(blank=True, null=True)
-    # canceled_by = models.ForeignKey(settings.AUTH_USER_MODEL,on_delete=models.PROTECT, blank=True, null=True,related_name='canceled_bookings_admissions')
-    canceled_by = models.IntegerField(blank=True, null=True)
+    created_by = models.ForeignKey(settings.AUTH_USER_MODEL,on_delete=models.PROTECT, blank=True, null=True,related_name='created_by_admissions')
+    canceled_by = models.ForeignKey(settings.AUTH_USER_MODEL,on_delete=models.PROTECT, blank=True, null=True,related_name='canceled_bookings_admissions')
     cancelation_time = models.DateTimeField(null=True,blank=True)
     cancellation_reason = models.TextField(null=True,blank=True)
     created = models.DateTimeField(default=timezone.now)
@@ -2366,8 +2353,7 @@ class RefundFailed(models.Model):
     basket_json = django_models.JSONField(null=True,blank=True)
     created = models.DateTimeField(default=timezone.now)
     completed_date = models.DateTimeField(null=True, blank=True)
-    # completed_by = models.ForeignKey(EmailUser, blank=True, null=True, related_name="RefundFailed_completed_by", on_delete=models.SET_NULL) 
-    completed_by = models.IntegerField(blank=True, null=True) 
+    completed_by = models.ForeignKey(EmailUser, blank=True, null=True, related_name="RefundFailed_completed_by", on_delete=models.SET_NULL) 
 
 # LISTENERS
 # ======================================
