@@ -9,7 +9,7 @@
             "type": "debugpy",
             "request": "launch",
             "program": "${workspaceFolder}/manage_mo.py",
-            "python": "${workspaceFolder}/venv3.10/bin/python",
+            "python": "${workspaceFolder}/venv/bin/python",
             "args": [
                 "runserver",
                 "0.0.0.0:9071"
