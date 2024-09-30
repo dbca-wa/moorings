@@ -3129,7 +3129,7 @@ class AnnualAdmissionSuccessView(TemplateView):
             context_processor = template_context(self.request)
             basket = None
             booking = utils.get_annual_admission_session_booking(request.session)
-            if self.request.user.is_authenticated():
+            if self.request.user.is_authenticated:
                 basket = Basket.objects.filter(status='Submitted', owner=request.user).order_by('-id')[:1]
             else:
                 basket = Basket.objects.filter(status='Submitted', owner=booking.customer).order_by('-id')[:1]
@@ -3237,7 +3237,7 @@ class BookingSuccessView(TemplateView):
             context_processor = template_context(self.request)
             basket = None
             booking = utils.get_session_booking(request.session)
-            if self.request.user.is_authenticated():
+            if self.request.user.is_authenticated:
                 basket = Basket.objects.filter(status='Submitted', owner=request.user).order_by('-id')[:1]
             else:
                 basket = Basket.objects.filter(status='Submitted', owner=booking.customer).order_by('-id')[:1]
@@ -3886,7 +3886,7 @@ class AdmissionsCostView(TemplateView):
     template_name = 'mooring/admissions/admissions_cost.html'
 
     def get(self, *args, **kwargs):
-        if self.request.user.is_authenticated():
+        if self.request.user.is_authenticated:
             if self.request.user.is_staff:
                 mg_array = []
                 mooring_groups = MooringAreaGroup.objects.filter(members__in=[self.request.user])
@@ -3901,7 +3901,7 @@ class MarinastayRoutingView(TemplateView):
     template_name = 'mooring/index.html'
 
     def get(self, *args, **kwargs):
-        if self.request.user.is_authenticated():
+        if self.request.user.is_authenticated:
             if is_officer(self.request.user):
                 return redirect('dash-campgrounds')
             return redirect('public_my_bookings')
