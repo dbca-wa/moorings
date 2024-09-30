@@ -34,9 +34,11 @@ INSTALLED_APPS += [
 
 MIDDLEWARE_CLASSES += [
     'mooring.middleware.BookingTimerMiddleware',
-    'mooring.middleware.CacheHeaders'
+    'mooring.middleware.CacheHeaders',
 ]
 MIDDLEWARE = MIDDLEWARE_CLASSES
+MIDDLEWARE_CLASSES = None
+
 
 # maximum number of days allowed for a booking
 PS_MAX_BOOKING_LENGTH = 28
@@ -160,3 +162,4 @@ BOOKING_PROPERTY_CACHE_VERSION = '2.00'
 ML_ADMISSION_PAID_CHECK=env('ML_ADMISSION_PAID_CHECK', False)
 #os.environ.setdefault("UPDATE_PAYMENT_ALLOCATION", True)
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+X_FRAME_OPTIONS = 'SAMEORIGIN'

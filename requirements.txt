@@ -1,4 +1,4 @@
-Django==3.2.25
+Django==3.2.24
 git+https://github.com/dbca-wa/ledger_api_client.git
 django-extensions==1.9.8
 git+https://github.com/dbca-wa/dbca-utils.git#egg=dbca-utils
@@ -31,7 +31,7 @@ pycountry==17.1.8
 six>=1.10.0
 django-ical==1.4
 django-taggit==4.0.0
-geojson==1.3.3
+geojson==3.1.0
 unicodecsv==0.14.1
 PyPDF2==1.26.0
 django-extra-fields==0.9
@@ -46,7 +46,7 @@ gunicorn==21.2.0
 dj-static==0.0.6
 mixer==6.1.3
 django-dirtyfields==1.4.1
-python-docx==0.8.10
+python-docx==1.1.2
 docxtpl==0.10.0
 dj-database-url==0.5.0
 psutil==5.7.0
