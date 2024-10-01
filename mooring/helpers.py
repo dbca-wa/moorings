@@ -1,6 +1,8 @@
 from __future__ import unicode_literals
 # from ledger.accounts.models import EmailUser
 from ledger_api_client.ledger_models import EmailUserRO
+from django.core.cache import cache
+from ledger_api_client.managed_models import SystemGroup, SystemGroupPermission
 
 
 def belongs_to(user, group_name):
@@ -10,7 +12,20 @@ def belongs_to(user, group_name):
     :param group_name:
     :return:
     """
-    return user.groups.filter(name=group_name).exists()
+    # return user.groups.filter(name=group_name).exists()
+    belongs_to_value = cache.get('User-belongs_to'+str(user.id)+'group_name:'+group_name)
+    #belongs_to_value = None
+    if belongs_to_value:
+        print ('From Cache - User-belongs_to'+str(user.id)+'group_name:'+group_name)
+    if belongs_to_value is None:
+       sg = SystemGroup.objects.filter(name=group_name)
+       if sg.count() > 0:
+          sgp = SystemGroupPermission.objects.filter(system_group=sg[0],emailuser=user)
+          if sgp.count() > 0:
+               belongs_to_value = True
+          #belongs_to_value = SystemGroup.object.filter(name=group_name).exists()
+       cache.set('User-belongs_to'+str(user.id)+'group_name:'+group_name, belongs_to_value, 3600)
+    return belongs_to_value
 
 
 def is_officer(user):
