@@ -26,10 +26,10 @@ INSTALLED_APPS += [
     'taggit',
     'rest_framework',
     'rest_framework_gis',
-    'crispy_forms',
     # 'ledger',
-    'appmonitor_client',
     'ledger_api_client',
+    'appmonitor_client',
+    'crispy_forms',
 ]
 
 MIDDLEWARE_CLASSES += [
@@ -163,3 +163,5 @@ ML_ADMISSION_PAID_CHECK=env('ML_ADMISSION_PAID_CHECK', False)
 #os.environ.setdefault("UPDATE_PAYMENT_ALLOCATION", True)
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 X_FRAME_OPTIONS = 'SAMEORIGIN'
+
+print(DATABASES)
