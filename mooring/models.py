@@ -517,7 +517,7 @@ class MooringAreaGroupMember(models.Model):
     A Model introduced to fix the ManyToManyField that stopped working due to the change from EmailUser to EmailUserRO. The existing intermediate table is specified using the db_table option.
     """
     mooringareagroup = models.ForeignKey(MooringAreaGroup, on_delete=models.CASCADE)
-    emailuser = models.ForeignKey(EmailUser, on_delete=models.CASCADE)
+    emailuser = models.ForeignKey(EmailUser, on_delete=models.CASCADE)  # By using the field name "emailuser" here, the ManyToMany relationship will function correctly without changing the column name from emailuser_id to emailuserro_id in the existing intermediate table.
 
     class Meta:
         db_table = 'mooring_mooringareagroup_members'  # Specify the existing intermediate table
