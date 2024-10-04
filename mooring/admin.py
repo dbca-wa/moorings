@@ -14,7 +14,7 @@ from copy import deepcopy
 
 from mooring import models
 
-admin.site.index_template = 'admin-index.html'  # This line 
+admin.site.index_template = 'admin-index.html'  # This line fixs the weird django_admin_log error when accessing the admin pages
 admin.autodiscover()
 
 class MooringAdminSite(AdminSite):
