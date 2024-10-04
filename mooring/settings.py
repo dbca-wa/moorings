@@ -163,3 +163,6 @@ ML_ADMISSION_PAID_CHECK=env('ML_ADMISSION_PAID_CHECK', False)
 #os.environ.setdefault("UPDATE_PAYMENT_ALLOCATION", True)
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 X_FRAME_OPTIONS = 'SAMEORIGIN'
+
+
+DEFAULT_AUTO_FIELD = 'django.db.models.AutoField'
