@@ -3,21 +3,25 @@ from django.contrib.gis import admin
 from django.contrib.admin import AdminSite
 from django.contrib.auth.admin import UserAdmin
 from django.contrib.auth.models import Group
+from django.contrib.sites.models import Site
 
 from django.db.models import Q
 
 # from ledger.accounts import admin as ledger_admin
 # from ledger.accounts.models import EmailUser
-from ledger_api_client.ledger_models import EmailUserRO
+from ledger_api_client.ledger_models import EmailUserRO as EmailUser
 from copy import deepcopy
 
 from mooring import models
+
+admin.site.index_template = 'admin-index.html'  # This line 
+admin.autodiscover()
 
 class MooringAdminSite(AdminSite):
     site_header = 'Moorings Administration'
     site_title = 'Moorings Bookings'
 
-mooring_admin_site = MooringAdminSite(name='mooringadmin')
+# mooring_admin_site = MooringAdminSite(name='mooringadmin')
 # admin.site.unregister(EmailUser)
 # @admin.register(EmailUser)
 # class EmailUserAdmin(ledger_admin.EmailUserAdmin):
@@ -45,16 +49,25 @@ mooring_admin_site = MooringAdminSite(name='mooringadmin')
 #         return fieldsets
 
 
-@admin.register(EmailUserRO)
-class EmailUserROAdmin(admin.ModelAdmin):
+@admin.register(EmailUser)
+class EmailUserAdmin(admin.ModelAdmin):
     list_display = ('email','first_name','last_name','is_staff','is_active',)
     ordering = ('email',)
     search_fields = ('id','email','first_name','last_name')
     readonly_fields = ['email','first_name','last_name','is_staff','is_active','user_permissions']
-
+ 
+#    def has_change_permission(self, request, obj=None):
+#        if obj is None: # and obj.status > 1:
+#            return True
+#        return None 
     def has_delete_permission(self, request, obj=None):
         return False
-
+    
+#    def get_readonly_fields(self, request, obj=None):
+#        if 'edit' not in request.GET:
+#            return self.readonly_fields
+#        else:
+#            return self.readonly_fields 
 
 @admin.register(models.MooringsiteClass)
 class MooringsiteClassAdmin(admin.ModelAdmin):
@@ -679,5 +692,3 @@ class UpdateLogAdmin(admin.ModelAdmin):
 class VesselLicenceAdmin(admin.ModelAdmin):
     list_display = ('id','vessel_rego','licence_id','licence_type','start_date','expiry_date','status')
     search_fields = ('vessel_rego','licence_id',)
-
-
