@@ -498,10 +498,10 @@ class MooringArea(models.Model):
 def campground_image_path(instance, filename):
     return '/'.join(['mooring', 'campground_images', filename])
 
+
 class MooringAreaGroup(models.Model):
     name = models.CharField(max_length=100)
-    members = models.ManyToManyField(EmailUser,blank=True)
-#    campgrounds = models.ManyToManyField(MooringArea,blank=True)
+    members = models.ManyToManyField(EmailUser, blank=True, through='MooringAreaGroupMember')
     moorings = models.ManyToManyField(MooringArea,blank=True)
 
     def __str__(self):
@@ -510,6 +510,18 @@ class MooringAreaGroup(models.Model):
     class Meta:
         verbose_name = 'Mooring Group'
         verbose_name_plural = 'Mooring Groups'
+
+
+class MooringAreaGroupMember(models.Model):
+    """
+    A Model introduced to fix the ManyToManyField that stopped working due to the change from EmailUser to EmailUserRO. The existing intermediate table is specified using the db_table option.
+    """
+    mooringareagroup = models.ForeignKey(MooringAreaGroup, on_delete=models.CASCADE)
+    emailuser = models.ForeignKey(EmailUser, on_delete=models.CASCADE)
+
+    class Meta:
+        db_table = 'mooring_mooringareagroup_members'  # Specify the existing intermediate table
+
 
 class MooringAreaImage(models.Model):
     image = models.ImageField(max_length=255, upload_to=campground_image_path)
