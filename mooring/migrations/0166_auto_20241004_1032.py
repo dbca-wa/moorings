@@ -9,7 +9,7 @@ import django.db.models.deletion
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('ledger_api_client', '0017_auto_20241004_1030'),
+        ('ledger_api_client', '0015_alter_systemuser_first_name_and_more'),
         migrations.swappable_dependency(settings.AUTH_USER_MODEL),
         ('mooring', '0165_auto_20220928_1052'),
     ]
