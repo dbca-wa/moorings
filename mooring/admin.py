@@ -113,9 +113,21 @@ class MooringAreaAdmin(admin.GeoModelAdmin):
     list_filter = ('mooring_type','site_type','mooring_specification',)
     openlayers_url = 'https://cdnjs.cloudflare.com/ajax/libs/openlayers/2.13.1/OpenLayers.js'
 
+
+# class MooringAreaGroupMemberInline(admin.TabularInline):
+#     model = models.MooringAreaGroupMember
+#     extra = 0
+#     verbose_name = 'Member'
+#     verbose_name_plural = 'Members'
+
+
 @admin.register(models.MooringAreaGroup)
 class MooringAreaGroupAdmin(admin.ModelAdmin):
-    filter_horizontal = ('members','moorings')
+    filter_horizontal = ('members', 'moorings',)
+    # filter_horizontal = ('moorings',)
+    # filter_horizontal = ('members',)
+    # inlines = [MooringAreaGroupMemberInline,]
+    list_per_page = 20
 
     def formfield_for_manytomany(self, db_field, request, **kwargs):
         if db_field.name == "members":
