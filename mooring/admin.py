@@ -114,20 +114,50 @@ class MooringAreaAdmin(admin.GeoModelAdmin):
     openlayers_url = 'https://cdnjs.cloudflare.com/ajax/libs/openlayers/2.13.1/OpenLayers.js'
 
 
-# class MooringAreaGroupMemberInline(admin.TabularInline):
-#     model = models.MooringAreaGroupMember
-#     extra = 0
+class MooringAreaGroupMemberInline(admin.TabularInline):
+    model = models.MooringAreaGroup.members.through  # MooringAreaGroupMember
+    raw_id_fields = ('emailuser',)
+    extra = 0
 #     verbose_name = 'Member'
 #     verbose_name_plural = 'Members'
+    def save_new_objects(self, commit=False):
+        pass
+    def save_new(self, form, commit=False):
+        pass
+    def save_existing(self, form, instance, commit=False):
+        pass
+
+
+class MooringAreaGroupMooringAreaInline(admin.TabularInline):
+    model = models.MooringAreaGroup.moorings.through
+    raw_id_fields = ('mooringarea',)
+    extra = 0
+
+    def save_new_objects(self, commit=False):
+        pass
+    def save_new(self, form, commit=False):
+        pass
+    def save_existing(self, form, instance, commit=False):
+        pass
 
 
 @admin.register(models.MooringAreaGroup)
 class MooringAreaGroupAdmin(admin.ModelAdmin):
-    filter_horizontal = ('members', 'moorings',)
+    # filter_horizontal = ('members', 'moorings',)
+    exclude = ('members', 'moorings',)
     # filter_horizontal = ('moorings',)
     # filter_horizontal = ('members',)
-    # inlines = [MooringAreaGroupMemberInline,]
+    inlines = [MooringAreaGroupMemberInline, MooringAreaGroupMooringAreaInline,]
     list_per_page = 20
+    list_display = ('name', 'members_count', 'moorings_count')
+
+    def members_count(self, obj):
+        return obj.members.count()
+    members_count.short_description = 'Members Count'
+
+    def moorings_count(self, obj):
+        return obj.moorings.count()
+    moorings_count.short_description = 'Moorings Count'
 
     def formfield_for_manytomany(self, db_field, request, **kwargs):
         if db_field.name == "members":
