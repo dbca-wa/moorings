@@ -641,7 +641,7 @@ def delete_booking(request, *args, **kwargs):
     response_data = {}
     response_data['result'] = 'success'
     response_data['message'] = ''
-    payments_officer_group = request.user.groups.filter(name__in=['Payments Officers']).exists()
+    payments_officer_group = request.user.groups().filter(name__in=['Payments Officers']).exists()
     nowtime = datetime.strptime(str(datetime.utcnow().strftime('%Y-%m-%d %H:%M:%S')), '%Y-%m-%d %H:%M:%S')+timedelta(hours=8)
     booking = None
     booking_item = request.POST['booking_item']
@@ -3132,7 +3132,7 @@ class AdmissionsBookingViewSet(viewsets.ModelViewSet):
                 brokenrow_section = "14"
 
                 future_or_admin = False
-                if request.user.groups.filter(name__in=['Mooring Admin']).exists():
+                if request.user.groups().filter(name__in=['Mooring Admin']).exists():
                     future_or_admin = True
                 else:
                     future_or_admin = ad.in_future
@@ -4789,7 +4789,7 @@ def cancel_annual_admissions(request):
         else:
            raise ValidationError('Permission Denied')
 
-        payments_officer_group = request.user.groups.filter(name__in=['Payments Officers']).exists()
+        payments_officer_group = request.user.groups().filter(name__in=['Payments Officers']).exists()
 
         if payments_officer_group is True:
              
@@ -4856,7 +4856,7 @@ def update_sticker_admission_booking(request):
            pass
         else:
            raise ValidationError('Permission Denied')
-        payments_officer_group = request.user.groups.filter(name__in=['Payments Officers']).exists()
+        payments_officer_group = request.user.groups().filter(name__in=['Payments Officers']).exists()
 
         if payments_officer_group is True:
              nowdt = datetime.now()
@@ -5196,7 +5196,7 @@ def get_current_booking(ongoing_booking, request):
          #expiry_time = ongoing_booking.expiry_time
          timer = (ongoing_booking.expiry_time-timezone.now()).seconds if ongoing_booking else -1
          expiry = ongoing_booking.expiry_time.isoformat() if ongoing_booking else ''
-     payments_officer_group = request.user.groups.filter(name__in=['Payments Officers']).exists()
+     payments_officer_group = request.user.groups().filter(name__in=['Payments Officers']).exists()
 
      ms_booking = MooringsiteBooking.objects.filter(booking=ongoing_booking).order_by('from_dt')
      cb = {'current_booking':[], 'total_price': '0.00'}
@@ -5267,7 +5267,7 @@ class AnnualAdmissionRefundOracleView(views.APIView):
     #def get(self, request, format='json'):
 
         try:
-           if request.user.is_superuser or request.user.groups.filter(name__in=['Payments Officers']).exists():
+           if request.user.is_superuser or request.user.groups().filter(name__in=['Payments Officers']).exists():
 
                 money_from = request.POST.get('money_from',[])
                 money_to = request.POST.get('money_to',[])
@@ -5381,7 +5381,7 @@ class RefundOracleView(views.APIView):
     #def get(self, request, format='json'):
         
         try:
-           if request.user.is_superuser or request.user.groups.filter(name__in=['Payments Officers']).exists():
+           if request.user.is_superuser or request.user.groups().filter(name__in=['Payments Officers']).exists():
  
                 money_from = request.POST.get('money_from',[])
                 money_to = request.POST.get('money_to',[])

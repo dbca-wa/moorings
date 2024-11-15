@@ -38,7 +38,7 @@ class MooringAdminSite(AdminSite):
 #             return fieldsets
 
 #         group = Group.objects.filter(name='Mooring Admin')
-#         if group and (group[0] in request.user.groups.all()):
+#         if group and (group[0] in request.user.groups().all()):
 #             fieldsets = deepcopy(fieldsets)
 #             for fieldset in fieldsets:
 #                 if 'is_superuser' in fieldset[1]['fields']:

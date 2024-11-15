@@ -2251,7 +2251,7 @@ def check_mooring_admin_access(request):
     if request.user.is_superuser is True:
         return True
     else:
-      if request.user.groups.filter(name__in=['Mooring Admin']).exists():
+      if request.user.groups().filter(name__in=['Mooring Admin']).exists():
           return True
     return False
 
