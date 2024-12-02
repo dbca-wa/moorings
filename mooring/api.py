@@ -164,6 +164,9 @@ from django.contrib.gis.geos import Point
 from django.contrib.gis.measure import Distance  
 # from ledger.payments.bpoint.models import BpointTransaction, BpointToken
 
+
+logger = logging.getLogger(__name__)
+
 # API Views
 class MooringsiteBookingViewSet(viewsets.ModelViewSet):
     queryset = MooringsiteBooking.objects.all()
@@ -5189,57 +5192,60 @@ def get_annual_admission_pricing_old(request, annual_booking_period_id, vessel_s
 
 
 def get_current_booking(ongoing_booking, request): 
-     #ongoing_booking = Booking.objects.get(pk=request.session['ps_booking']) if 'ps_booking' in request.session else None
-     timer = None
-     expiry = None
-     if ongoing_booking:
-         #expiry_time = ongoing_booking.expiry_time
-         timer = (ongoing_booking.expiry_time-timezone.now()).seconds if ongoing_booking else -1
-         expiry = ongoing_booking.expiry_time.isoformat() if ongoing_booking else ''
-     payments_officer_group = request.user.groups().filter(name__in=['Payments Officers']).exists()
+    #ongoing_booking = Booking.objects.get(pk=request.session['ps_booking']) if 'ps_booking' in request.session else None
+    timer = None
+    expiry = None
+    try:
+        if ongoing_booking:
+            #expiry_time = ongoing_booking.expiry_time
+            timer = (ongoing_booking.expiry_time-timezone.now()).seconds if ongoing_booking else -1
+            expiry = ongoing_booking.expiry_time.isoformat() if ongoing_booking else ''
+        payments_officer_group = request.user.groups().filter(name__in=['Payments Officers']).exists()
+    except Exception as e:
+        logger.error(f'Error getting current booking: {e}')
 
-     ms_booking = MooringsiteBooking.objects.filter(booking=ongoing_booking).order_by('from_dt')
-     cb = {'current_booking':[], 'total_price': '0.00'}
-     current_booking = []
-#     total_price = Decimal('0.00')
-     total_price = Decimal('0.00')
-     for ms in ms_booking:
-         row = {}
-         row['id'] = ms.id
-           #print ms.from_dt.astimezone(pytimezone('Australia/Perth'))
-         row['item'] = ms.campsite.name + ' from '+ms.from_dt.astimezone(pytimezone('Australia/Perth')).strftime('%d/%m/%y %H:%M %p')+' to '+ms.to_dt.astimezone(pytimezone('Australia/Perth')).strftime('%d/%m/%y %H:%M %p')
-         row['amount'] = str(ms.amount)
-         
-         row['past_booking'] = False
-#         if ms.from_dt.date() <= datetime.now().date():
-         ms_from_ft = datetime.strptime(ms.from_dt.strftime('%Y-%m-%d %H:%M:%S'), '%Y-%m-%d %H:%M:%S')
-         #+timedelta(hours=8)
-#         print datetime.utcnow()+timedelta(hours=8)
-         nowtime = datetime.strptime(str(datetime.utcnow().strftime('%Y-%m-%d %H:%M:%S')), '%Y-%m-%d %H:%M:%S')
-         #+timedelta(hours=8)
-         if ms_from_ft <= nowtime:
-              
-              if ms_from_ft.date() == nowtime.date():
-                 if ongoing_booking.old_booking is None:
-                     pass 
-                 else:
-                     row['past_booking'] = True              
-              else:
-                  row['past_booking'] = True
-              if payments_officer_group is True: 
-                  row['past_booking'] = False
-#           row['item'] = ms.campsite.name
-         total_price = str(Decimal(total_price) +Decimal(ms.amount))
-         current_booking.append(row)
-     cb['current_booking'] = current_booking
-     cb['total_price'] = str(total_price)
-     cb['ongoing_booking'] = True if ongoing_booking else False,
-     cb['ongoing_booking_id'] = ongoing_booking.id if ongoing_booking else None,
-     cb['details'] = ongoing_booking.details if ongoing_booking else [],
-     cb['expiry'] = expiry
-     cb['timer'] = timer
+    ms_booking = MooringsiteBooking.objects.filter(booking=ongoing_booking).order_by('from_dt')
+    cb = {'current_booking':[], 'total_price': '0.00'}
+    current_booking = []
+#    total_price = Decimal('0.00')
+    total_price = Decimal('0.00')
+    for ms in ms_booking:
+        row = {}
+        row['id'] = ms.id
+          #print ms.from_dt.astimezone(pytimezone('Australia/Perth'))
+        row['item'] = ms.campsite.name + ' from '+ms.from_dt.astimezone(pytimezone('Australia/Perth')).strftime('%d/%m/%y %H:%M %p')+' to '+ms.to_dt.astimezone(pytimezone('Australia/Perth')).strftime('%d/%m/%y %H:%M %p')
+        row['amount'] = str(ms.amount)
+        
+        row['past_booking'] = False
+#        if ms.from_dt.date() <= datetime.now().date():
+        ms_from_ft = datetime.strptime(ms.from_dt.strftime('%Y-%m-%d %H:%M:%S'), '%Y-%m-%d %H:%M:%S')
+        #+timedelta(hours=8)
+#        print datetime.utcnow()+timedelta(hours=8)
+        nowtime = datetime.strptime(str(datetime.utcnow().strftime('%Y-%m-%d %H:%M:%S')), '%Y-%m-%d %H:%M:%S')
+        #+timedelta(hours=8)
+        if ms_from_ft <= nowtime:
+             
+             if ms_from_ft.date() == nowtime.date():
+                if ongoing_booking.old_booking is None:
+                    pass 
+                else:
+                    row['past_booking'] = True              
+             else:
+                 row['past_booking'] = True
+             if payments_officer_group is True: 
+                 row['past_booking'] = False
+#          row['item'] = ms.campsite.name
+        total_price = str(Decimal(total_price) +Decimal(ms.amount))
+        current_booking.append(row)
+    cb['current_booking'] = current_booking
+    cb['total_price'] = str(total_price)
+    cb['ongoing_booking'] = True if ongoing_booking else False,
+    cb['ongoing_booking_id'] = ongoing_booking.id if ongoing_booking else None,
+    cb['details'] = ongoing_booking.details if ongoing_booking else [],
+    cb['expiry'] = expiry
+    cb['timer'] = timer
 
-     return cb
+    return cb
 
 
 class CheckOracleCodeView(views.APIView):

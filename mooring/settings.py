@@ -98,6 +98,11 @@ CRON_CLASSES = [
 ]
 
 # Additional logging for mooring
+LOGGING['formatters']['verbose2'] = {
+    "format": "%(levelname)s %(asctime)s %(name)s [Line:%(lineno)s][%(funcName)s] %(message)s"
+}
+LOGGING['handlers']['console']['formatter'] = 'verbose2'
+LOGGING['handlers']['file']['formatter'] = 'verbose2'
 LOGGING['handlers']['booking_checkout'] = {
             'level': 'INFO',
             'class': 'logging.handlers.RotatingFileHandler',
@@ -110,6 +115,7 @@ LOGGING['loggers']['booking_checkout'] = {
             'level': 'INFO'
         }
 
+print(f'{json.dumps(LOGGING, indent=4)}')
 
 # Additional logging for mooring
 #LOGGING['handlers']['ledger_bpoint'] = {
