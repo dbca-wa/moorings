@@ -40,6 +40,7 @@ from ledger_api_client.ledger_models import EmailUserRO as EmailUser, Address
 from ledger_api_client.country_models import Country
 # from ledger.payments.models import Invoice, OracleAccountCode
 from ledger_api_client.ledger_models import Invoice 
+from ledger_api_client.managed_models import SystemGroup
 from django.db.models import Count
 from mooring import utils
 from mooring.helpers import can_view_campground, is_inventory, is_admin, is_payment_officer
@@ -162,10 +163,10 @@ from mooring import emails
 from mooring import exceptions
 from django.contrib.gis.geos import Point
 from django.contrib.gis.measure import Distance  
-# from ledger.payments.bpoint.models import BpointTransaction, BpointToken
 
 
 logger = logging.getLogger(__name__)
+
 
 # API Views
 class MooringsiteBookingViewSet(viewsets.ModelViewSet):
@@ -5200,9 +5201,15 @@ def get_current_booking(ongoing_booking, request):
             #expiry_time = ongoing_booking.expiry_time
             timer = (ongoing_booking.expiry_time-timezone.now()).seconds if ongoing_booking else -1
             expiry = ongoing_booking.expiry_time.isoformat() if ongoing_booking else ''
-        payments_officer_group = request.user.groups().filter(name__in=['Payments Officers']).exists()
+        # payments_officer_group = request.user.groups().filter(name__in=['Payments Officers']).exists()
+        payments_officer_group = SystemGroup.objects.filter(name__in=['Payments Officers',]).exists()
+        # er_groups = request.u #ser.groups()
+        # user_groups = user_groups.filter(name__in=['Payments Officers'])
+        # payments_officer_group = user_groups.filter(name__in=['Payments Officers']).exists()
     except Exception as e:
+        logger.disabled = False
         logger.error(f'Error getting current booking: {e}')
+        raise
 
     ms_booking = MooringsiteBooking.objects.filter(booking=ongoing_booking).order_by('from_dt')
     cb = {'current_booking':[], 'total_price': '0.00'}

@@ -102,6 +102,7 @@ LOGGING['formatters']['verbose2'] = {
     "format": "%(levelname)s %(asctime)s %(name)s [Line:%(lineno)s][%(funcName)s] %(message)s"
 }
 LOGGING['handlers']['console']['formatter'] = 'verbose2'
+LOGGING['handlers']['console']['level'] = 'DEBUG'
 LOGGING['handlers']['file']['formatter'] = 'verbose2'
 LOGGING['handlers']['booking_checkout'] = {
             'level': 'INFO',
@@ -114,22 +115,8 @@ LOGGING['loggers']['booking_checkout'] = {
             'handlers': ['booking_checkout'],
             'level': 'INFO'
         }
-
-print(f'{json.dumps(LOGGING, indent=4)}')
-
-# Additional logging for mooring
-#LOGGING['handlers']['ledger_bpoint'] = {
-#            'level': 'INFO',
-#            'class': 'logging.handlers.RotatingFileHandler',
-#            'filename': os.path.join(BASE_DIR, 'logs', 'ledger_bpoint.log'),
-#            'formatter': 'verbose',
-#            'maxBytes': 5242880
-#        }
-#LOGGING['loggers']['ledger_bpoint'] = {
-#            'handlers': ['ledger_bpoint'],
-#            'level': 'INFO'
-#        }
-
+LOGGING['loggers']['django']['propagate'] = True
+LOGGING['loggers']['']['level'] = 'DEBUG'
 
 #PS_PAYMENT_SYSTEM_ID = env('PS_PAYMENT_SYSTEM_ID', 'S019')
 PS_PAYMENT_SYSTEM_ID = env('PS_PAYMENT_SYSTEM_ID', 'S516')
