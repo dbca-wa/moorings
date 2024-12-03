@@ -92,7 +92,7 @@
                                                 <input id="noOfAdults" v-model="noOfAdults" class="form-control" name="noOfAdults" @blur="validateNoOfPeople()" type="number" palceholder="0"/>
                                             </div>
                                         </div>
-                                        <label class="label-small">(12 and over)</label>
+                                        <label class="label-small"></label>
                                     </div>
                                     <div class="row" style="display:none;">
                                         <div class="small-12 medium-12 large-4 columns">
@@ -111,7 +111,7 @@
                                                 <input id="noOfChildren" v-model="noOfChildren" class="form-control" name="noOfChildren" @blur="validateNoOfPeople()" type="number" palceholder="0"/>
                                             </div>
                                         </div>
-                                        <label class="label-small">(4 - 12)</label>
+                                        <label class="label-small">(4 - 16)</label>
                                     </div>
                                     <div class="row">
                                         <div class="small-12 medium-12 large-4 columns">
