@@ -1135,7 +1135,7 @@ class MakeBookingsView(TemplateView):
 #            form.fields['postcode'].required = False
 #            form.fields['country'].required = False
         else:  
-            if request.user.is_anonymous() or request.user.is_staff:
+            if request.user.is_anonymous or request.user.is_staff:
                 form = AnonymousMakeBookingsForm(form_context)
             else:
                 form_context['first_name'] = request.user.first_name
@@ -1173,7 +1173,7 @@ class MakeBookingsView(TemplateView):
         mooring_booking = ""
         if booking:
             mooring_booking = MooringsiteBooking.objects.filter(booking=booking)
-        if request.user.is_anonymous() or request.user.is_staff:
+        if request.user.is_anonymous or request.user.is_staff:
             form = AnonymousMakeBookingsForm(request.POST)
         else:
             form = MakeBookingsForm(request.POST)
@@ -1399,7 +1399,7 @@ class MakeBookingsView(TemplateView):
         total = sum([Decimal(p['price_incl_tax'])*p['quantity'] for p in lines])
 
         # get the customer object
-        if request.user.is_anonymous() or request.user.is_staff:
+        if request.user.is_anonymous or request.user.is_staff:
             if booking.old_booking is None:     
                 try:
                    customer = EmailUser.objects.get(email=form.cleaned_data.get('email').lower())
@@ -1991,7 +1991,7 @@ class AnnualAdmissionsView(CreateView):
 
 
         customer = None
-        if self.request.user.is_anonymous() or self.request.user.is_staff:
+        if self.request.user.is_anonymous or self.request.user.is_staff:
             try:
                customer = EmailUser.objects.get(email=form.cleaned_data.get('email').lower())
             except EmailUser.DoesNotExist:

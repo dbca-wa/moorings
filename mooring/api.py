@@ -779,14 +779,6 @@ def add_booking(request, *args, **kwargs):
         response_data['result'] = 'success'
         response_data['message'] = ''
 
-#    with transaction.atomic():
-#            set_session_booking(request.session,booking)
-
-
-    #booking = Booking.objects.get(pk=request.session['ps_booking']) if 'ps_booking' in request.session else None
-#    if request.user.is_anonymous():
-#        form = AnonymousMakeBookingsForm(request.POST)
-
     return HttpResponse(json.dumps(response_data), content_type='application/json')
 
 def queryset_MooringArea():
@@ -2405,7 +2397,7 @@ def create_admissions_booking(request, *args, **kwargs):
 
     
     #Lookup customer
-    if request.user.is_anonymous() or request.user.is_staff:
+    if request.user.is_anonymous or request.user.is_staff:
         try:
             customer = EmailUser.objects.get(email=request.POST.get('email').lower())
         except EmailUser.DoesNotExist:

@@ -1760,7 +1760,7 @@ def admissionsCheckout(request, admissionsBooking, lines, invoice_text=None, vou
         'invoice_text': invoice_text,
     }
     
-    if internal or request.user.is_anonymous():
+    if internal or request.user.is_anonymous:
         checkout_params['basket_owner'] = admissionsBooking.customer.id
     create_checkout_session(request, checkout_params)
 
@@ -1802,7 +1802,7 @@ def annual_admission_checkout(request, booking, lines, invoice_text=None, vouche
         'proxy': True if internal else False,
         'invoice_text': invoice_text,
     }
-    if internal or request.user.is_anonymous():
+    if internal or request.user.is_anonymous:
         checkout_params['basket_owner'] = booking.customer.id
 
     create_checkout_session(request, checkout_params)
@@ -1861,7 +1861,7 @@ def checkout(request, booking, lines, invoice_text=None, vouchers=[], internal=F
     }
 #    if not internal:
 #        checkout_params['check_url'] = request.build_absolute_uri('/api/booking/{}/booking_checkout_status.json'.format(booking.id))
-    if internal or request.user.is_anonymous():
+    if internal or request.user.is_anonymous:
         checkout_params['basket_owner'] = booking.customer.id
 
     print ("BOOKING ID 3")
