@@ -120,7 +120,7 @@
                                                 <input id="noOfInfants" v-model="noOfInfants" class="form-control" name="noOfInfants" @blur="validateNoOfPeople()" type="number" palceholder="0"/>
                                             </div>
                                         </div>
-                                        <label class="label-small">(0 - 4)</label>
+                                        <label class="label-small">(under 4)</label>
                                     </div>
                                     
                                     <div class="row">
