@@ -23087,7 +23087,7 @@ module.exports={render:function (){var _vm=this;var _h=_vm.$createElement;var _c
     }
   })])]), _vm._v(" "), _c('label', {
     staticClass: "label-small"
-  }, [_vm._v("(0 - 4)")])]), _vm._v(" "), _c('div', {
+  }, [_vm._v("(under 4)")])]), _vm._v(" "), _c('div', {
     staticClass: "row"
   }, [_c('div', {
     staticClass: "small-12 medium-12 large-4 columns"
