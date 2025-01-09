@@ -1155,9 +1155,13 @@ def price_or_lineitems(request,booking,campsite_list,lines=True,old_booking=None
             for ob in booking_mooring_old:
                 if bm.campsite == ob.campsite and ob.from_dt == bm.from_dt and ob.to_dt == bm.to_dt and ob.booking_period_option == bm.booking_period_option:
                       line_status = 2
-            invoice_lines.append({'ledger_description':'Mooring {} ({} - {})'.format(bm.campsite.mooringarea.name,bm.from_dt.astimezone(pytimezone('Australia/Perth')).strftime('%d/%m/%Y %H:%M %p'),bm.to_dt.astimezone(pytimezone('Australia/Perth')).strftime('%d/%m/%Y %H:%M %p')),"quantity":1,"price_incl_tax":amount,"oracle_code":bm.campsite.mooringarea.oracle_code, 'line_status': line_status})
-
-
+            invoice_lines.append({
+                'ledger_description':'Mooring {} ({} - {})'.format(bm.campsite.mooringarea.name,bm.from_dt.astimezone(pytimezone('Australia/Perth')).strftime('%d/%m/%Y %H:%M %p'),bm.to_dt.astimezone(pytimezone('Australia/Perth')).strftime('%d/%m/%Y %H:%M %p')),
+                "quantity": 1,
+                "price_incl_tax": float(amount),
+                "oracle_code": bm.campsite.mooringarea.oracle_code,
+                'line_status': line_status
+            })
 
 #            invoice_lines.append({'ledger_description':'Mooring {} ({} - {})'.format(bm.campsite.mooringarea.name,bm.from_dt.astimezone(pytimezone('Australia/Perth')).strftime('%d/%m/%Y %H:%M %p'),bm.to_dt.astimezone(pytimezone('Australia/Perth')).strftime('%d/%m/%Y %H:%M %p')),"quantity":1,"price_incl_tax":bm.amount,"oracle_code":bm.campsite.mooringarea.oracle_code})
         return invoice_lines
@@ -1792,7 +1796,7 @@ def annual_admission_checkout(request, booking, lines, invoice_text=None, vouche
         'custom_basket': True,
         'booking_reference': 'AA-'+str(booking.id)
     }
-    basket, basket_hash = create_basket_session(request, basket_params)
+    basket, basket_hash = create_basket_session(request, booking.customer.id, basket_params)
     checkout_params = {
         'system': settings.PS_PAYMENT_SYSTEM_ID,
         'fallback_url': request.build_absolute_uri('/'),
@@ -1849,7 +1853,7 @@ def checkout(request, booking, lines, invoice_text=None, vouchers=[], internal=F
         'booking_reference': 'PS-'+str(booking.id)
     }
  
-    basket, basket_hash = create_basket_session(request, basket_params)
+    basket, basket_hash = create_basket_session(request, booking.customer.id, basket_params)
     checkout_params = {
         'system': settings.PS_PAYMENT_SYSTEM_ID,
         'fallback_url': request.build_absolute_uri('/'),
@@ -1858,6 +1862,8 @@ def checkout(request, booking, lines, invoice_text=None, vouchers=[], internal=F
         'force_redirect': True,
         'proxy': True if internal else False,
         'invoice_text': invoice_text,
+        'session_type': 'ledger_api',
+        'basket_owner': booking.customer.id
     }
 #    if not internal:
 #        checkout_params['check_url'] = request.build_absolute_uri('/api/booking/{}/booking_checkout_status.json'.format(booking.id))
@@ -1923,7 +1929,7 @@ def allocate_failedrefund_to_unallocated(request, booking, lines, invoice_text=N
             'booking_reference': booking_reference
         }
 
-        basket, basket_hash = create_basket_session(request, basket_params)
+        basket, basket_hash = create_basket_session(request, booking.customer.id, basket_params)
         ci = utils.CreateInvoiceBasket()
         order  = ci.create_invoice_and_order(basket, total=None, shipping_method='No shipping required',shipping_charge=False, user=user, status='Submitted', invoice_text='Refund Allocation Pool', )
         #basket.status = 'Submitted'
@@ -1959,7 +1965,7 @@ def allocate_refund_to_invoice(request, booking, lines, invoice_text=None, inter
             'booking_reference': booking_reference
         }
 
-        basket, basket_hash = create_basket_session(request, basket_params)
+        basket, basket_hash = create_basket_session(request, booking.customer.id, basket_params)
         ci = utils.CreateInvoiceBasket()
         order  = ci.create_invoice_and_order(basket, total=None, shipping_method='No shipping required',shipping_charge=False, user=user, status='Submitted', invoice_text='Oracle Allocation Pools', )
         #basket.status = 'Submitted'

@@ -460,7 +460,7 @@ class CancelBookingView(TemplateView):
             'booking_reference': 'PS-'+str(booking.id)
         }
 
-        basket, basket_hash = create_basket_session(request, basket_params)
+        basket, basket_hash = create_basket_session(request, request.user.id, basket_params)
         ci = utils_ledger_payment_invoice.CreateInvoiceBasket()
         order_ci  = ci.create_invoice_and_order(basket, total=None, shipping_method='No shipping required',shipping_charge=False, status='Submitted', invoice_text='Refund Allocation Pool', user=booking.customer)
         #basket.status = 'Submitted'
@@ -642,7 +642,7 @@ class CancelAdmissionsBookingView(TemplateView):
             'custom_basket': True,
             'booking_reference': 'AD-'+str(booking.id)
         }
-        basket, basket_hash = create_basket_session(request, basket_params)
+        basket, basket_hash = create_basket_session(request, request.user.id, basket_params)
 
         checkout_params = {
             'system': settings.PS_PAYMENT_SYSTEM_ID,
