@@ -1884,25 +1884,18 @@ def checkout(request, booking, lines, invoice_text=None, vouchers=[], internal=F
         'session_type': 'ledger_api',
         'basket_owner': booking.customer.id
     }
-#    if not internal:
-#        checkout_params['check_url'] = request.build_absolute_uri('/api/booking/{}/booking_checkout_status.json'.format(booking.id))
+
     if internal or request.user.is_anonymous:
         checkout_params['basket_owner'] = booking.customer.id
 
-    print ("BOOKING ID 3")
-    print (request.session['ps_booking'])
-
     create_checkout_session(request, checkout_params)
-    print ("BOOKING ID 4")
-    print (request.session['ps_booking'])
 
-
-
-#    if internal:
-#        response = place_order_submission(request)
-#    else:
-    #response = HttpResponseRedirect(reverse('checkout:index'))
-    response = HttpResponse("<script> window.location='"+reverse('checkout:index')+"';</script> <a href='"+reverse('checkout:index')+"'> Redirecting please wait: "+reverse('checkout:index')+"</a>")
+    # response = HttpResponse("<script> window.location='"+reverse('checkout:index')+"';</script> <a href='"+reverse('checkout:index')+"'> Redirecting please wait: "+reverse('checkout:index')+"</a>")
+    response = HttpResponse(
+        "<script> window.location='" + reverse('ledgergw-payment-details') + "';</script> <a href='" + reverse(
+            'ledgergw-payment-details'
+            ) + "'> Redirecting please wait: " + reverse('ledgergw-payment-details') + "</a>"
+        )
 
     # inject the current basket into the redirect response cookies
     # or else, anonymous users will be directionless

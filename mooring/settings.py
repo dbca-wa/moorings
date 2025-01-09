@@ -88,6 +88,8 @@ STATICFILES_DIRS.append(os.path.join(os.path.join(BASE_DIR, 'mooring', 'static')
 
 BPAY_ALLOWED = env('BPAY_ALLOWED',False)
 OSCAR_BASKET_COOKIE_OPEN = 'mooring_basket'
+OSCAR_BASKET_COOKIE_LIFETIME = env('OSCAR_BASKET_COOKIE_LIFETIME', 7 * 24 * 60 * 60)
+OSCAR_BASKET_COOKIE_SECURE = env('OSCAR_BASKET_COOKIE_SECURE', False)
 
 CRON_CLASSES = [
     #'mooring.cron.SendBookingsConfirmationCronJob',
