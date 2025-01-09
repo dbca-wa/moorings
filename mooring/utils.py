@@ -18,7 +18,7 @@ from django.utils import timezone
 from dateutil.tz.tz import tzoffset
 from pytz import timezone as pytimezone
 # from ledger.payments.models import Invoice,OracleInterface,CashTransaction
-from ledger_api_client.ledger_models import Invoice
+from ledger_api_client.ledger_models import Invoice, Basket
 # from ledger.payments.utils import oracle_parser_on_invoice,update_payments
 from ledger_api_client.utils import oracle_parser, update_payments
 # from ledger.checkout.utils import create_basket_session, create_checkout_session, place_order_submission, get_cookie_basket
@@ -1139,6 +1139,12 @@ def calculate_price_admissions_change(adBooking, change_fees):
     return change_fees
 
 
+def get_basket_by_basket_hash(basket_hash):
+    basket_hash_split = basket_hash.split("|")
+    basket = Basket.objects.get(id=basket_hash_split[0])
+    return basket
+
+
 def convert_decimal_to_float(obj):
     if isinstance(obj, dict):
         return {k: convert_decimal_to_float(v) for k, v in obj.items()}
@@ -1765,7 +1771,7 @@ def admissionsCheckout(request, admissionsBooking, lines, invoice_text=None, vou
     }
 
     basket_params = convert_decimal_to_float(basket_params)
-    basket, basket_hash = create_basket_session(request, request.user.id, basket_params)
+    basket_hash = create_basket_session(request, request.user.id, basket_params)
     checkout_params = {
         'system': settings.PS_PAYMENT_SYSTEM_ID,
         'fallback_url': request.build_absolute_uri('/'),
@@ -1808,7 +1814,7 @@ def annual_admission_checkout(request, booking, lines, invoice_text=None, vouche
         'booking_reference': 'AA-'+str(booking.id)
     }
     basket_params = convert_decimal_to_float(basket_params)
-    basket, basket_hash = create_basket_session(request, booking.customer.id, basket_params)
+    basket_hash = create_basket_session(request, booking.customer.id, basket_params)
     checkout_params = {
         'system': settings.PS_PAYMENT_SYSTEM_ID,
         'fallback_url': request.build_absolute_uri('/'),
@@ -1866,7 +1872,7 @@ def checkout(request, booking, lines, invoice_text=None, vouchers=[], internal=F
     }
 
     basket_params = convert_decimal_to_float(basket_params)
-    basket, basket_hash = create_basket_session(request, booking.customer.id, basket_params)
+    basket_hash = create_basket_session(request, booking.customer.id, basket_params)
     checkout_params = {
         'system': settings.PS_PAYMENT_SYSTEM_ID,
         'fallback_url': request.build_absolute_uri('/'),
@@ -1942,7 +1948,8 @@ def allocate_failedrefund_to_unallocated(request, booking, lines, invoice_text=N
             'booking_reference': booking_reference
         }
         basket_params = convert_decimal_to_float(basket_params)
-        basket, basket_hash = create_basket_session(request, booking.customer.id, basket_params)
+        basket_hash = create_basket_session(request, booking.customer.id, basket_params)
+        basket = get_basket_by_basket_hash(basket_hash)
         ci = utils.CreateInvoiceBasket()
         order  = ci.create_invoice_and_order(basket, total=None, shipping_method='No shipping required',shipping_charge=False, user=user, status='Submitted', invoice_text='Refund Allocation Pool', )
         #basket.status = 'Submitted'
@@ -1978,7 +1985,8 @@ def allocate_refund_to_invoice(request, booking, lines, invoice_text=None, inter
             'booking_reference': booking_reference
         }
         basket_params = convert_decimal_to_float(basket_params)
-        basket, basket_hash = create_basket_session(request, booking.customer.id, basket_params)
+        basket_hash = create_basket_session(request, booking.customer.id, basket_params)
+        basket = get_basket_by_basket_hash(basket_hash)
         ci = utils.CreateInvoiceBasket()
         order  = ci.create_invoice_and_order(basket, total=None, shipping_method='No shipping required',shipping_charge=False, user=user, status='Submitted', invoice_text='Oracle Allocation Pools', )
         #basket.status = 'Submitted'
