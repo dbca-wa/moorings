@@ -1138,6 +1138,17 @@ def calculate_price_admissions_change(adBooking, change_fees):
 
     return change_fees
 
+
+def convert_decimal_to_float(obj):
+    if isinstance(obj, dict):
+        return {k: convert_decimal_to_float(v) for k, v in obj.items()}
+    elif isinstance(obj, (list, tuple)):
+        return [convert_decimal_to_float(x) for x in obj]
+    elif isinstance(obj, Decimal):
+        return float(obj)
+    return obj
+
+
 def price_or_lineitems(request,booking,campsite_list,lines=True,old_booking=None):
     total_price = Decimal(0)
     booking_mooring = MooringsiteBooking.objects.filter(booking=booking)
@@ -1752,8 +1763,9 @@ def admissionsCheckout(request, admissionsBooking, lines, invoice_text=None, vou
         'custom_basket': True,
         'booking_reference': 'AD-'+str(admissionsBooking.id)
     }
-    
-    basket, basket_hash = create_basket_session(request, basket_params)
+
+    basket_params = convert_decimal_to_float(basket_params)
+    basket, basket_hash = create_basket_session(request, request.user.id, basket_params)
     checkout_params = {
         'system': settings.PS_PAYMENT_SYSTEM_ID,
         'fallback_url': request.build_absolute_uri('/'),
@@ -1788,7 +1800,6 @@ def get_basket(request):
     return get_cookie_basket(settings.OSCAR_BASKET_COOKIE_OPEN,request)
 
 def annual_admission_checkout(request, booking, lines, invoice_text=None, vouchers=[], internal=False):
-
     basket_params = {
         'products': lines,
         'vouchers': vouchers,
@@ -1796,6 +1807,7 @@ def annual_admission_checkout(request, booking, lines, invoice_text=None, vouche
         'custom_basket': True,
         'booking_reference': 'AA-'+str(booking.id)
     }
+    basket_params = convert_decimal_to_float(basket_params)
     basket, basket_hash = create_basket_session(request, booking.customer.id, basket_params)
     checkout_params = {
         'system': settings.PS_PAYMENT_SYSTEM_ID,
@@ -1852,7 +1864,8 @@ def checkout(request, booking, lines, invoice_text=None, vouchers=[], internal=F
         'custom_basket': True,
         'booking_reference': 'PS-'+str(booking.id)
     }
- 
+
+    basket_params = convert_decimal_to_float(basket_params)
     basket, basket_hash = create_basket_session(request, booking.customer.id, basket_params)
     checkout_params = {
         'system': settings.PS_PAYMENT_SYSTEM_ID,
@@ -1928,7 +1941,7 @@ def allocate_failedrefund_to_unallocated(request, booking, lines, invoice_text=N
             'custom_basket': True,
             'booking_reference': booking_reference
         }
-
+        basket_params = convert_decimal_to_float(basket_params)
         basket, basket_hash = create_basket_session(request, booking.customer.id, basket_params)
         ci = utils.CreateInvoiceBasket()
         order  = ci.create_invoice_and_order(basket, total=None, shipping_method='No shipping required',shipping_charge=False, user=user, status='Submitted', invoice_text='Refund Allocation Pool', )
@@ -1964,7 +1977,7 @@ def allocate_refund_to_invoice(request, booking, lines, invoice_text=None, inter
             'custom_basket': True,
             'booking_reference': booking_reference
         }
-
+        basket_params = convert_decimal_to_float(basket_params)
         basket, basket_hash = create_basket_session(request, booking.customer.id, basket_params)
         ci = utils.CreateInvoiceBasket()
         order  = ci.create_invoice_and_order(basket, total=None, shipping_method='No shipping required',shipping_charge=False, user=user, status='Submitted', invoice_text='Oracle Allocation Pools', )
