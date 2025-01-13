@@ -5,7 +5,6 @@ from decimal import *
 import json
 import calendar
 import geojson
-import requests
 import io
 from django.conf import settings
 from django.urls import reverse, reverse_lazy
@@ -30,7 +29,8 @@ from mooring.emails import send_booking_invoice,send_booking_confirmation
 from mooring import emails
 # from ledger.order.models import Order
 # from ledger.payments.invoice import utils
-from ledger_api_client.order import Order
+# from ledger_api_client.order import Order
+from ledger_api_client.utils import Order
 from ledger_api_client import utils
 
 from mooring import models
@@ -2297,7 +2297,11 @@ def get_provinces(country_code):
 def booking_success(basket, booking, context_processor):
 
     print("MLINE 1.01", datetime.now().strftime("%d/%m/%Y %H:%M:%S"))
-    order = Order.objects.get(basket=basket[0])
+    # order = Order.objects.get(basket=basket[0])
+    # basket_instance = basket[0]
+    # basket_data = model_to_dict(basket_instance)
+    # order = Order.objects.get(basket=basket_data)
+    order = Order.objects.get(basket_id=basket[0].id)
     invoice = Invoice.objects.get(order_number=order.number)
     print("MLINE 1.02", datetime.now().strftime("%d/%m/%Y %H:%M:%S"))
     invoice_ref = invoice.reference

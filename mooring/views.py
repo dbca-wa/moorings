@@ -3387,6 +3387,11 @@ class BookingSuccessView(TemplateView):
 #            if 'ps_booking_internal' in request.COOKIES:
 #                print "INTERNAL REDIRECT"
 #                return redirect('dash-bookings')
+
+            # from pprint import pprint
+            # print("session contents: ")
+            # pprint(dict(request.session))
+
             if ('ps_last_booking' in request.session) and Booking.objects.filter(id=request.session['ps_last_booking']).exists():
                 booking = Booking.objects.get(id=request.session['ps_last_booking'])
                 if BookingInvoice.objects.filter(booking=booking).count() > 0:

@@ -37,6 +37,7 @@ def mooring_url(request):
      mooring_url['IS_ADMIN'] = is_admin
      mooring_url['IS_PAYMENT_OFFICER'] = is_payment_officer
      mooring_url['IS_CUSTOMER'] = is_customer
+     mooring_url['template_group'] = 'ria'
      return mooring_url
  
 #def mooring_url(request):

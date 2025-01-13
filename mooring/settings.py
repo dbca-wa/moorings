@@ -21,6 +21,7 @@ STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles_mo')
 BOOKING_TIMEOUT = 1200
 
 INSTALLED_APPS += [
+    'webtemplate_dbca',
     'bootstrap3',
     'mooring',
     'taggit',
@@ -77,6 +78,7 @@ TEMPLATES[0]['OPTIONS']['context_processors'].append('mooring.context_processors
 #    'required_css_class': 'required-form-field',
 #    'set_placeholder': False,
 #}'''
+LEDGER_TEMPLATE = 'bootstrap5'
 CACHES = {
     'default': {
         'BACKEND': 'django.core.cache.backends.filebased.FileBasedCache',
