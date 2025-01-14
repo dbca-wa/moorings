@@ -27,6 +27,7 @@ from django.core.cache import cache
 # from ledger.payments.models import Invoice
 # from ledger.accounts.models import EmailUser
 from ledger_api_client.ledger_models import EmailUserRO as EmailUser, Invoice
+from ledger_api_client import utils as ledger_api_utils
 from django.core.files.storage import FileSystemStorage
 from django.core import serializers
 from django.utils.crypto import get_random_string
@@ -1823,10 +1824,9 @@ class Booking(models.Model):
             total_due = D('0.0')
             lines = []
             if not self.legacy_id:
-                lines = []
                 if inv.order:
                     lines = inv.order.lines.filter(oracle_code=self.mooringarea.park.oracle_code)
-                
+                # lines = ledger_api_utils.OrderLine.objects.filter(number=inv.order_number, oracle_code=self.campground.park.oracle_code)
 
             price_dict = {}
             for line in lines:
