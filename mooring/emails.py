@@ -6,7 +6,7 @@ from mooring import pdf
 from mooring import models
 from mooring.models import MooringsiteBooking, AdmissionsBooking, AdmissionsLine, AdmissionsLocation, BookingAnnualInvoice
 #from ledger.payments.pdf import create_invoice_pdf_bytes
-from mooring.invoice_pdf import create_invoice_pdf_bytes
+# from mooring.invoice_pdf import create_invoice_pdf_bytes
 # from ledger.payments.models import Invoice
 from ledger_api_client.ledger_models import Invoice
 from mooring import settings 
