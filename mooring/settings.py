@@ -122,6 +122,10 @@ LOGGING['loggers']['booking_checkout'] = {
 LOGGING['loggers']['django']['propagate'] = True
 LOGGING['loggers']['']['level'] = 'DEBUG'
 
+from pprint import pprint
+print("\n=== LOGGING Configuration ===\n")
+pprint(LOGGING, indent=2, width=80)
+
 #PS_PAYMENT_SYSTEM_ID = env('PS_PAYMENT_SYSTEM_ID', 'S019')
 PS_PAYMENT_SYSTEM_ID = env('PS_PAYMENT_SYSTEM_ID', 'S516')
 if not VALID_SYSTEMS:

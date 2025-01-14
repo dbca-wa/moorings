@@ -2297,10 +2297,6 @@ def get_provinces(country_code):
 def booking_success(basket, booking, context_processor):
 
     print("MLINE 1.01", datetime.now().strftime("%d/%m/%Y %H:%M:%S"))
-    # order = Order.objects.get(basket=basket[0])
-    # basket_instance = basket[0]
-    # basket_data = model_to_dict(basket_instance)
-    # order = Order.objects.get(basket=basket_data)
     order = Order.objects.get(basket_id=basket[0].id)
     invoice = Invoice.objects.get(order_number=order.number)
     print("MLINE 1.02", datetime.now().strftime("%d/%m/%Y %H:%M:%S"))
@@ -2312,9 +2308,9 @@ def booking_success(basket, booking, context_processor):
         print("MLINE 2.01", datetime.now().strftime("%d/%m/%Y %H:%M:%S"))
         try:
             inv = Invoice.objects.get(reference=invoice_ref)
-            order = Order.objects.get(number=inv.order_number)
-            order.user = booking.customer
-            order.save()
+            # order = Order.objects.get(number=inv.order_number)
+            # order.user = booking.customer
+            # order.save()
         except Invoice.DoesNotExist:
             print ("INVOICE ERROR")
             logger.error('{} tried making a booking with an incorrect invoice'.format('User {} with id {}'.format(booking.customer.get_full_name(),booking.customer.id) if booking.customer else 'An anonymous user'))
@@ -2366,7 +2362,7 @@ def booking_success(basket, booking, context_processor):
             booking.booking_type = 1  # internet booking
             booking.expiry_time = None
             print("MLINE 7.01", datetime.now().strftime("%d/%m/%Y %H:%M:%S"))
-            update_payments(invoice_ref)
+            # update_payments(invoice_ref)
             print("MLINE 8.01", datetime.now().strftime("%d/%m/%Y %H:%M:%S"))
             #Calculate Admissions and create object
             if booking.admission_payment:
