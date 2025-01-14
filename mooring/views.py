@@ -3,6 +3,7 @@ import calendar
 import json
 import os
 import mimetypes
+import requests
 from django.db.models import Q
 from django.http import Http404, HttpResponse, JsonResponse, HttpResponseRedirect
 from django.shortcuts import render, get_object_or_404, redirect
@@ -89,8 +90,7 @@ from mooring.helpers import is_officer, is_payment_officer
 from mooring import utils
 # from ledger.payments.mixins import InvoiceOwnerMixin
 from ledger_api_client.mixins import InvoiceOwnerMixin
-from mooring.invoice_pdf import create_invoice_pdf_bytes
-# from ledger_api_client.pdf import create_invoice_pdf_bytes
+# from mooring.invoice_pdf import create_invoice_pdf_bytes
 from mooring.context_processors import mooring_url, template_context
 # from ledger.checkout.utils import create_basket_session, create_checkout_session, place_order_submission, get_cookie_basket
 from ledger_api_client.utils import create_basket_session, create_checkout_session, place_order_submission
@@ -3790,8 +3790,10 @@ class InvoicePDFView(InvoiceOwnerMixin,View):
         invoice = get_object_or_404(Invoice, reference=self.kwargs['reference'])
         response = HttpResponse(content_type='application/pdf')
         mooring_var = mooring_url(request)
-        response.write(create_invoice_pdf_bytes('invoice.pdf',invoice, mooring_var))
-        # response.write(create_invoice_pdf_bytes('invoice.pdf', invoice))
+        api_key = settings.LEDGER_API_KEY
+        url = settings.LEDGER_API_URL + '/ledgergw/invoice-pdf/' + api_key + '/' + invoice.reference
+        invoice_pdf = requests.get(url=url)
+        response.write(invoice_pdf.content)
         return response
 
     def get_object(self):

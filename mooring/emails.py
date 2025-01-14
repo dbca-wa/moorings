@@ -26,6 +26,7 @@ from ledger_api_client.ledger_models import EmailUserRO as EmailUser
 
 import datetime
 import hashlib
+import requests
 
 default_from_email = settings.DEFAULT_FROM_EMAIL
 default_campground_email = settings.CAMPGROUNDS_EMAIL
@@ -158,11 +159,29 @@ def send_admissions_booking_invoice(admissionsBooking, context_processor):
     references = [b.invoice_reference for b in admissionsBooking.invoices.all()]
     invoice = Invoice.objects.filter(reference__in=references).order_by('-created')[0]
 #    invoice_pdf = create_invoice_pdf_bytes(filename,invoice)
-    invoice_pdf = create_invoice_pdf_bytes(filename,invoice, context_processor)
+    # invoice_pdf = create_invoice_pdf_bytes(filename,invoice, context_processor)
+    attachments = []
+    url = f'{settings.LEDGER_API_URL}/ledgergw/invoice-pdf/{settings.LEDGER_API_KEY}/{references}'
+    invoice_pdf = requests.get(url=url)
+    if invoice_pdf.status_code == 200:
+        attachment = ('invoice#{}.pdf'.format(references), invoice_pdf.content, 'application/pdf')
+        attachments.append(attachment)
+
 #    rottnest_email = default_rottnest_email
 #    rottnest_email = default_from_email
     template_group = context_processor['TEMPLATE_GROUP']
-    sendHtmlEmail([to],subject,context,template,cc,bcc,from_email,template_group,attachments=[(filename, invoice_pdf, 'application/pdf')])
+    sendHtmlEmail(
+        [to],
+        subject,
+        context,
+        template,
+        cc,
+        bcc,
+        from_email,
+        template_group,
+        # attachments=[(filename, invoice_pdf, 'application/pdf')]
+        attachments=attachments
+    )
 
 #    email_obj.send([email], from_address=rottnest_email, context=context, attachments=[(filename, invoice_pdf, 'application/pdf')])
 
@@ -178,9 +197,28 @@ def send_annual_admission_booking_invoice(booking,context_processor):
     filename = 'invoice-annual_admission-{}.pdf'.format(booking.id)
     references = [b.invoice_reference for b in BookingAnnualInvoice.objects.filter(booking_annual_admission=booking)]
     invoice = Invoice.objects.filter(reference__in=references).order_by('-created')[0]
-    invoice_pdf = create_invoice_pdf_bytes(filename,invoice, context_processor)
+
+    # invoice_pdf = create_invoice_pdf_bytes(filename,invoice, context_processor)
+    attachments = []
+    url = f'{settings.LEDGER_API_URL}/ledgergw/invoice-pdf/{settings.LEDGER_API_KEY}/{references}'
+    invoice_pdf = requests.get(url=url)
+    if invoice_pdf.status_code == 200:
+        attachment = ('invoice#{}.pdf'.format(references), invoice_pdf.content, 'application/pdf')
+        attachments.append(attachment)
+
     template_group = context_processor['TEMPLATE_GROUP']
-    sendHtmlEmail([to],subject,context,template,cc,bcc,from_email,template_group,attachments=[(filename, invoice_pdf, 'application/pdf')])
+    sendHtmlEmail(
+        [to],
+        subject,
+        context,
+        template,
+        cc,
+        bcc,
+        from_email,
+        template_group,
+        # attachments=[(filename, invoice_pdf, 'application/pdf')]
+        attachments=attachments
+    )
 
 def send_booking_invoice(booking, context_processor):
     subject = 'Your booking invoice'
@@ -194,10 +232,28 @@ def send_booking_invoice(booking, context_processor):
     references = [b.invoice_reference for b in booking.invoices.all()]
     invoice = Invoice.objects.filter(reference__in=references).order_by('-created')[0]
     filename = 'invoice-{}-({}-{}).pdf'.format(invoice.reference,booking.arrival,booking.departure)
-    invoice_pdf = create_invoice_pdf_bytes(filename,invoice, context_processor)
-    template_group = context_processor['TEMPLATE_GROUP']
-    sendHtmlEmail([to],subject,context,template,cc,bcc,from_email,template_group,attachments=[(filename, invoice_pdf, 'application/pdf')])
 
+    # invoice_pdf = create_invoice_pdf_bytes(filename,invoice, context_processor)
+    attachments = []
+    url = f'{settings.LEDGER_API_URL}/ledgergw/invoice-pdf/{settings.LEDGER_API_KEY}/{references}'
+    invoice_pdf = requests.get(url=url)
+    if invoice_pdf.status_code == 200:
+        attachment = ('invoice#{}.pdf'.format(references), invoice_pdf.content, 'application/pdf')
+        attachments.append(attachment)
+
+    template_group = context_processor['TEMPLATE_GROUP']
+    sendHtmlEmail(
+        [to],
+        subject,
+        context,
+        template,
+        cc,
+        bcc,
+        from_email,
+        template_group,
+        # attachments=[(filename, invoice_pdf, 'application/pdf')]
+        attachments=attachments
+    )
 
 def send_booking_invoice_old(booking, request, context_processor):
     email_obj = TemplateEmailBase()
@@ -215,11 +271,23 @@ def send_booking_invoice_old(booking, request, context_processor):
     references = [b.invoice_reference for b in booking.invoices.all()]
     invoice = Invoice.objects.filter(reference__in=references).order_by('-created')[0]
         
-    invoice_pdf = create_invoice_pdf_bytes(filename,invoice, request, context_processor)
+    # invoice_pdf = create_invoice_pdf_bytes(filename,invoice, request, context_processor)
+    attachments = []
+    url = f'{settings.LEDGER_API_URL}/ledgergw/invoice-pdf/{settings.LEDGER_API_KEY}/{references}'
+    invoice_pdf = requests.get(url=url)
+    if invoice_pdf.status_code == 200:
+        attachment = ('invoice#{}.pdf'.format(references), invoice_pdf.content, 'application/pdf')
+        attachments.append(attachment)
 
 #    campground_email = booking.mooringarea.email if booking.mooringarea.email else default_campground_email
     campground_email = default_from_email 
-    email_obj.send([email], from_address=campground_email, context=context, attachments=[(filename, invoice_pdf, 'application/pdf')])
+    email_obj.send(
+        [email],
+        from_address=campground_email,
+        context=context,
+        # attachments=[(filename, invoice_pdf, 'application/pdf')]
+        attachments=attachments
+    )
 
 def send_admissions_booking_confirmation(admissionsBooking, context_processor):
     email_obj = TemplateEmailBase()
