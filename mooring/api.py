@@ -3224,7 +3224,6 @@ class BookingViewSet(viewsets.ModelViewSet):
             # build predata
             booking_items = {}
             booking_item_query = Q()
-            mooring_name_list = {}
             rego_cache = {}
             for booking in booking_query: 
                   booking_item_query |= Q(booking_id=booking.id)
