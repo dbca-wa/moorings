@@ -3217,13 +3217,10 @@ class BookingViewSet(viewsets.ModelViewSet):
                 if search[:2] == 'PS':
                     booking_id_search = search.replace('PS','')
                     filter_query &= Q(id=int(booking_id_search))
-            #print("MLINE 1.03", datetime.now().strftime("%d/%m/%Y %H:%M:%S"))
             booking_query = Booking.objects.filter(filter_query).order_by('-id')
             recordsTotal = Booking.objects.filter(Q(Q(booking_type=1) | Q(booking_type=4))).count()
             recordsFiltered = booking_query.count()
 
-            #print ("COUNT:"+str(recordsFiltered))
-            #print("MLINE 1.04", datetime.now().strftime("%d/%m/%Y %H:%M:%S"))
             # build predata
             booking_items = {}
             booking_item_query = Q()
@@ -3232,11 +3229,9 @@ class BookingViewSet(viewsets.ModelViewSet):
             for booking in booking_query: 
                   booking_item_query |= Q(booking_id=booking.id)
                   booking_items[booking.id] = []
-            #print("MLINE 1.05", datetime.now().strftime("%d/%m/%Y %H:%M:%S"))
 
             if len(booking_items) > 0:
                 booking_items_object = MooringsiteBooking.objects.filter(booking_item_query).values('campsite__mooringarea__name','campsite__mooringarea__id','campsite_id','id','to_dt','from_dt','amount','booking_period_option','booking_id','booking','date','campsite__mooringarea__park__district__region__name','campsite__mooringarea__park__district__region__id','campsite__name','booking__customer__email','booking__customer_id','booking_id','booking__customer__phone_number','booking__customer__mobile_number','booking__details','booking__booking_type','booking__canceled_by__first_name','booking__canceled_by__last_name')
-                #bvr = BookingVehicleRego.objects.filter(rego__icontains=search.lower()).values('booking_id','rego','type')
                 bvr = BookingVehicleRego.objects.filter(booking_item_query).values('booking_id','rego','type')
                 for v in bvr:
                     if v['booking_id'] not in rego_cache:
