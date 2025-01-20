@@ -239,10 +239,10 @@ class BookingAdmin(admin.ModelAdmin):
     list_filter = ('booking_type',)
     readonly_fields=('created','property_cache',)
     exclude = (
-        'customer',
-        'overridden_by',
-        'created_by',
-        'canceled_by',
+        # 'customer',
+        # 'overridden_by',
+        # 'created_by',
+        # 'canceled_by',
     )
 
     def has_add_permission(self, request, obj=None):
