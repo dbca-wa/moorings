@@ -1503,6 +1503,23 @@ class Booking(models.Model):
         self.property_cache['paid'] = self.paid
         self.property_cache['invoices'] = [i.invoice_reference for i in self.invoices.all()]
         self.property_cache['active_invoices'] = [i.invoice_reference for i in self.invoices.all() if i.active]
+        self.property_cache_stale = False
+        if self.customer:
+            if self.customer.id:
+                self.property_cache['customer_id'] = self.customer.id
+            if self.customer.phone_number:
+                self.property_cache['customer_phone_number'] = self.customer.phone_number
+            if self.customer.mobile_number:
+                self.property_cache['customer_mobile_number'] = self.customer.mobile_number
+            if self.customer.email:
+                self.property_cache['customer_email'] = self.customer.email
+        if self.canceled_by:
+            if self.canceled_by.first_name:
+                self.property_cache['canceled_by_first_name'] = self.canceled_by.first_name
+            if self.canceled_by.last_name:
+                self.property_cache['canceled_by_last_name'] = self.canceled_by.last_name
+
+        self.property_cache_version = settings.BOOKING_PROPERTY_CACHE_VERSION
         if save is True:
            self.save()
         return self.property_cache

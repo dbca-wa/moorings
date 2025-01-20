@@ -3223,14 +3223,47 @@ class BookingViewSet(viewsets.ModelViewSet):
 
             # build predata
             booking_items = {}
-            booking_item_query = Q()
+            # booking_item_query = Q()
             rego_cache = {}
-            for booking in booking_query: 
-                  booking_item_query |= Q(booking_id=booking.id)
-                  booking_items[booking.id] = []
+            # for booking in booking_query: 
+            #       booking_item_query |= Q(booking_id=booking.id)
+            #       booking_items[booking.id] = []
+            booking_ids = booking_query.values_list('id', flat=True)
+            booking_items = {id: [] for id in booking_ids}
+            booking_item_query = Q(booking_id__in=booking_ids) if booking_ids else Q()
 
             if len(booking_items) > 0:
-                booking_items_object = MooringsiteBooking.objects.filter(booking_item_query).values('campsite__mooringarea__name','campsite__mooringarea__id','campsite_id','id','to_dt','from_dt','amount','booking_period_option','booking_id','booking','date','campsite__mooringarea__park__district__region__name','campsite__mooringarea__park__district__region__id','campsite__name','booking__customer__email','booking__customer_id','booking_id','booking__customer__phone_number','booking__customer__mobile_number','booking__details','booking__booking_type','booking__canceled_by__first_name','booking__canceled_by__last_name')
+                booking_items_object = MooringsiteBooking.objects.filter(booking_item_query).values(
+                    'campsite__mooringarea__name',
+                    'campsite__mooringarea__id',
+                    'campsite_id',
+                    'id',
+                    'to_dt',
+                    'from_dt',
+                    'amount',
+                    'booking_period_option',
+                    'booking_id',
+                    'booking',
+                    'date',
+                    'campsite__mooringarea__park__district__region__name',
+                    'campsite__mooringarea__park__district__region__id',
+                    'campsite__name',
+                    # 'booking__customer__email',
+                    'booking__property_cache__customer_email',
+                    # 'booking__customer_id',
+                    'booking__property_cache__customer_id',
+                    'booking_id',
+                    # 'booking__customer__phone_number',
+                    'booking__property_cache__customer_phone_number',
+                    # 'booking__customer__mobile_number',
+                    'booking__property_cache__customer_mobile_number',
+                    'booking__details',
+                    'booking__booking_type',
+                    # 'booking__canceled_by__first_name',
+                    'booking__property_cache__canceled_by_first_name',
+                    # 'booking__canceled_by__last_name'
+                    'booking__property_cache__canceled_by_last_name',
+                )
                 bvr = BookingVehicleRego.objects.filter(booking_item_query).values('booking_id','rego','type')
                 for v in bvr:
                     if v['booking_id'] not in rego_cache:
@@ -3239,11 +3272,38 @@ class BookingViewSet(viewsets.ModelViewSet):
 
                 
                 for bi in booking_items_object:
-                    if bi['booking__canceled_by__first_name']:
-                       cancelled_by = bi['booking__canceled_by__first_name']+' '+bi['booking__canceled_by__last_name']
+                    # if bi['booking__canceled_by__first_name']:
+                    #    cancelled_by = bi['booking__canceled_by__first_name']+' '+bi['booking__canceled_by__last_name']
+                    if bi['booking__property_cache__canceled_by_first_name']:
+                        cancelled_by = bi['booking__property_cache__canceled_by_first_name']+' '+bi['booking__property_cache__canceled_by_last_name']
                     else:
                        cancelled_by = '' 
-                    booking_items[bi['booking_id']].append({'id':bi['id'], 'campsite_id': bi['campsite_id'] , 'date' : bi['date'], 'from_dt': bi['from_dt'], 'to_dt': bi['to_dt'], 'amount': bi['amount'], 'booking_type' : bi['booking__booking_type'], 'booking_period_option' :bi['booking_period_option'], 'campsite_name': bi['campsite__name'], 'region_name': bi['campsite__mooringarea__park__district__region__name'],'mooring_name': bi['campsite__mooringarea__name'], 'region_id': bi['campsite__mooringarea__park__district__region__id'], 'mooringarea_id': bi['campsite__mooringarea__id'],'email': bi['booking__customer__email'], 'customer_id': bi['booking__customer_id'],'booking_id': bi['booking_id'],'phone_number': bi['booking__customer__phone_number'],'mobile_number': bi['booking__customer__mobile_number'], 'details': bi['booking__details'],'cancelled_by': cancelled_by})
+                    booking_items[bi['booking_id']].append({
+                        'id':bi['id'],
+                        'campsite_id': bi['campsite_id'],
+                        'date' : bi['date'],
+                        'from_dt': bi['from_dt'],
+                        'to_dt': bi['to_dt'],
+                        'amount': bi['amount'],
+                        'booking_type' : bi['booking__booking_type'],
+                        'booking_period_option' :bi['booking_period_option'],
+                        'campsite_name': bi['campsite__name'],
+                        'region_name': bi['campsite__mooringarea__park__district__region__name'],
+                        'mooring_name': bi['campsite__mooringarea__name'],
+                        'region_id': bi['campsite__mooringarea__park__district__region__id'],
+                        'mooringarea_id': bi['campsite__mooringarea__id'],
+                        # 'email': bi['booking__customer__email'],
+                        'email': bi['booking__property_cache__customer_email'],
+                        # 'customer_id': bi['booking__customer_id'],
+                        'customer_id': bi['booking__property_cache__customer_id'],
+                        'booking_id': bi['booking_id'],
+                        # 'phone_number': bi['booking__customer__phone_number'],
+                        'phone_number': bi['booking__property_cache__customer_phone_number'],
+                        # 'mobile_number': bi['booking__customer__mobile_number'],
+                        'mobile_number': bi['booking__property_cache__customer_mobile_number'],
+                        'details': bi['booking__details'],
+                        # 'cancelled_by': cancelled_by
+                    })
             #print("LINE 1.06", datetime.now().strftime("%d/%m/%Y %H:%M:%S"))
             clean_data = []
             booking_data = []
@@ -3349,9 +3409,9 @@ class BookingViewSet(viewsets.ModelViewSet):
                         show_row = False
                 if show_row is True:
                     bk_list={}
-                    get_property_cache = booking.get_property_cache()
-                    if 'active_invoices' not in get_property_cache or 'invoices' not in get_property_cache:
-                        get_property_cache = booking.update_property_cache()
+                    property_cache = booking.get_property_cache()
+                    if 'active_invoices' not in property_cache or 'invoices' not in property_cache:
+                        property_cache = booking.update_property_cache()
                     #print("MLINE 1.08.01", datetime.now().strftime("%d/%m/%Y %H:%M:%S"))
                     booking_editable = False
                     if is_staff is True:
@@ -3366,24 +3426,25 @@ class BookingViewSet(viewsets.ModelViewSet):
                     if bitem['booking_type'] == 4:
                         bk_list['status'] = 'Cancelled'
                     else:
-                        bk_list['status'] = get_property_cache['status']
+                        bk_list['status'] = property_cache['status']
                     #booking_invoices= booking.invoices.all()
                     #print("MLINE 1.08.03", datetime.now().strftime("%d/%m/%Y %H:%M:%S"))
 
                     bk_list['booking_type'] = bitem['booking_type']
                     bk_list['has_history'] = 0 #booking.has_history
                     bk_list['cost_total'] = booking.cost_total
-                    bk_list['amount_paid'] = get_property_cache['amount_paid'] #booking.amount_paid
-                    bk_list['invoice_status'] = get_property_cache['invoice_status'] #booking.invoice_status
-                    bk_list['vehicle_payment_status'] = get_property_cache['vehicle_payment_status'] #booking.vehicle_payment_status
-                    bk_list['refund_status'] = get_property_cache['refund_status'] #booking.refund_status
+                    bk_list['amount_paid'] = property_cache['amount_paid'] #booking.amount_paid
+                    bk_list['invoice_status'] = property_cache['invoice_status'] #booking.invoice_status
+                    bk_list['vehicle_payment_status'] = property_cache['vehicle_payment_status'] #booking.vehicle_payment_status
+                    bk_list['refund_status'] = property_cache['refund_status'] #booking.refund_status
                     bk_list['is_canceled'] = 'Yes' if booking.is_canceled else 'No'
                     bk_list['cancelation_reason'] = booking.cancellation_reason
-                    bk_list['canceled_by'] = bitem['cancelled_by'] 
+                    # bk_list['canceled_by'] = bitem['cancelled_by'] 
+                    bk_list['canceled_by'] = f'{property_cache["canceled_by_first_name"]} {property_cache["canceled_by_last_name"]}' if 'canceled_by_first_name' in property_cache else ''
                     bk_list['cancelation_time'] = booking.cancelation_time if booking.cancelation_time else ''
-                    bk_list['paid'] = get_property_cache['paid'] #booking.paid
-                    bk_list['invoices'] = get_property_cache['invoices'] #[i.invoice_reference for i in booking_invoices]
-                    bk_list['active_invoices'] = get_property_cache['active_invoices'] #[ i.invoice_reference for i in booking_invoices if i.active]
+                    bk_list['paid'] = property_cache['paid'] #booking.paid
+                    bk_list['invoices'] = property_cache['invoices'] #[i.invoice_reference for i in booking_invoices]
+                    bk_list['active_invoices'] = property_cache['active_invoices'] #[ i.invoice_reference for i in booking_invoices if i.active]
                     bk_list['guests'] = booking.guests
                     bk_list['admissions'] = { 'id': booking.admission_payment.id, 'amount': booking.admission_payment.totalCost } if booking.admission_payment else None
 
@@ -3455,10 +3516,10 @@ class BookingViewSet(viewsets.ModelViewSet):
                 ('results',booking_data)
             ]),status=status.HTTP_200_OK)
         except serializers.ValidationError:
-            print(traceback.print_exc())
+            logger.error(e)
             raise
         except Exception as e:
-            print(traceback.print_exc())
+            logger.error('An error occurred', exc_info=True)
             raise serializers.ValidationError(str(e))
 
     def create(self, request, format=None):

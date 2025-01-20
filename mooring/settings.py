@@ -102,6 +102,7 @@ CRON_CLASSES = [
 ]
 
 # Additional logging for mooring
+LOGGING['disable_existing_loggers'] = False
 LOGGING['formatters']['verbose2'] = {
     "format": "%(levelname)s %(asctime)s %(name)s [Line:%(lineno)s][%(funcName)s] %(message)s"
 }
