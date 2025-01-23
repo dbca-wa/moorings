@@ -470,7 +470,7 @@ class CancelBookingView(TemplateView):
             'booking_reference_link': 'PS-'+str(booking.id)
         }
 
-        # basket_params = utils.convert_decimal_to_float(basket_params)
+        basket_params = utils.convert_decimal_to_float(basket_params)
         basket_hash = create_basket_session(request, request.user.id, basket_params)
         basket = utils.get_basket_by_basket_hash(basket_hash)
         # ci = utils_ledger_payment_invoice.CreateInvoiceBasket()
@@ -3433,7 +3433,8 @@ class ViewBookingHistory(LoginRequiredMixin, TemplateView):
 
     def get_history(self, booking_id, booking_array=[]):
         booking = Booking.objects.get(pk=booking_id)
-        booking.invoices =()
+        # booking.invoices =()
+        booking.invoices.set([])  # Direct assignment to the reverse side of a related set is prohibited. Use invoices.set() instead.
         #booking.invoices = BookingInvoice.objects.filter(booking=booking)
         booking_invoices= BookingInvoice.objects.filter(booking=booking) 
 #        for bi in booking_invoices:
