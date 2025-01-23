@@ -58,6 +58,7 @@ REST_FRAMEWORK = {
     )
 }
 
+LANGUAGE_CODE = 'en-au'  # This affects time formats.
 # disable Django REST Framework UI on prod
 if not DEBUG:
     REST_FRAMEWORK['DEFAULT_RENDERER_CLASSES']=('rest_framework.renderers.JSONRenderer',)

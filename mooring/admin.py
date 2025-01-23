@@ -1,14 +1,6 @@
-from django.contrib import messages
 from django.contrib.gis import admin
 from django.contrib.admin import AdminSite
-from django.contrib.auth.admin import UserAdmin
-from django.contrib.auth.models import Group
-from django.contrib.sites.models import Site
 
-from django.db.models import Q
-
-# from ledger.accounts import admin as ledger_admin
-# from ledger.accounts.models import EmailUser
 from ledger_api_client.ledger_models import EmailUserRO as EmailUser
 from copy import deepcopy
 
@@ -232,15 +224,16 @@ class BookingVehicleRegoInline(admin.TabularInline):
 @admin.register(models.Booking)
 class BookingAdmin(admin.ModelAdmin):
     # raw_id_fields = ('old_booking','admission_payment',)
-    raw_id_fields = ('old_booking','admission_payment','customer', 'created_by', 'overridden_by', 'canceled_by')
-    list_display = ('id','arrival','departure','booking_type','mooringarea','legacy_id','legacy_name','cost_total','property_cache_version','property_cache_stale')
+    raw_id_fields = ('old_booking','admission_payment','customer', 'created_by', 'overridden_by', 'canceled_by',)
+    list_display = ('id','arrival','departure','booking_type','mooringarea','is_canceled','legacy_id','legacy_name','cost_total','property_cache_version','property_cache_stale','created')
     ordering = ('-id',)
     search_fields = ('customer','id','admission_payment','cost_total')
-    list_filter = ('booking_type',)
+    list_filter = ('booking_type', 'property_cache_stale', 'is_canceled',)
     readonly_fields=('created','property_cache',)
 
     def has_add_permission(self, request, obj=None):
         return False
+
 
 @admin.register(models.BookingAnnualAdmission)
 class BookingAnnualAdmissionAdmin(admin.ModelAdmin):
