@@ -1455,7 +1455,7 @@ class Booking(models.Model):
     override_reason_info = models.TextField(blank=True, null=True)
     overridden_by = models.ForeignKey(settings.AUTH_USER_MODEL,on_delete=models.PROTECT, blank=True, null=True, related_name='overridden_bookings')
     mooringarea = models.ForeignKey('MooringArea', null=True, on_delete=models.SET_NULL)
-    is_canceled = models.BooleanField(default=False)
+    is_canceled = models.BooleanField(default=False)  # This might not be used...???  Instead, BOOKING_TYPE_CHOICES[4] might be used
     send_invoice = models.BooleanField(default=False)
     cancellation_reason = models.TextField(null=True,blank=True)
     cancelation_time = models.DateTimeField(null=True,blank=True)
