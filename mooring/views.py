@@ -515,6 +515,9 @@ class CancelBookingView(TemplateView):
         return_preload_url = request.build_absolute_uri()+"/booking/return-cancelled/"
         jsondata = process_api_refund(request, basket_params, booking.customer.id, return_url, return_preload_url)
         if jsondata['message'] == 'success':
+            for ir in jsondata['data']['invoice_reference']:
+                # Link the refund invoice to the booking  (Ref: https://github.com/dbca-wa/parkstay_bs_v2/blob/63895cd92193cebe003f53bb2866ce7346006d40/parkstay/views.py#L816)
+                BookingInvoice.objects.get_or_create(booking=booking, invoice_reference=ir)
             emails.send_refund_completed_email_customer(booking, context_processor)
         else:
             emails.send_refund_failure_email(booking, context_processor)
