@@ -221,6 +221,8 @@ def mooring_url_group(tg):
         'GIT_COMMIT_DATE' : settings.GIT_COMMIT_DATE,
         'GIT_COMMIT_HASH' : settings.GIT_COMMIT_HASH,
         'SYSTEM_NAME' : settings.SYSTEM_NAME,
+        'LEDGER_UI_URL' : settings.LEDGER_UI_URL,
+        'LEDGER_SYSTEM_ID' : settings.PS_PAYMENT_SYSTEM_ID.replace("S","0"),
 #        'REFUND_FAILED_COUNT': failed_refund_count,
 #        'IS_OFFICER' : is_officer,
 #        'IS_INVENTORY' : is_inventory,
