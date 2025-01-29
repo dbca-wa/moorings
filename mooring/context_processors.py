@@ -5,6 +5,10 @@ from mooring import helpers
 import json
 import hashlib
 import uuid
+import logging
+
+
+logger = logging.getLogger(__name__)
 
 
 def mooring_url(request):
@@ -23,9 +27,12 @@ def mooring_url(request):
     is_payment_officer = False
     is_customer = False
 
-    checkouthash = hashlib.sha256(str(uuid.uuid4()).encode('utf-8')).hexdigest()
     if 'ps_booking' in request.session:
         checkouthash =  hashlib.sha256(str(request.session["ps_booking"]).encode('utf-8')).hexdigest()
+        logger.info(f"session['ps_booking']: [{request.session['ps_booking']}] exists.  checkouthash: [{checkouthash}] has been generated from it.")
+    else:
+        checkouthash = hashlib.sha256(str(uuid.uuid4()).encode('utf-8')).hexdigest()
+        logger.info(f"session['ps_booking']: does not exist.  checkouthash: [{checkouthash}] has been generated from uuid.")
 
     failed_refund_count = 0
     if authed:

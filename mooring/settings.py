@@ -114,7 +114,7 @@ LOGGING['handlers']['booking_checkout'] = {
             'level': 'INFO',
             'class': 'logging.handlers.RotatingFileHandler',
             'filename': os.path.join(BASE_DIR, 'logs', 'mooring_booking_checkout.log'),
-            'formatter': 'verbose',
+            'formatter': 'verbose2',
             'maxBytes': 5242880
         }
 LOGGING['loggers']['booking_checkout'] = {

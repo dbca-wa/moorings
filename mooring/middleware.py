@@ -139,7 +139,7 @@ class BookingTimerMiddleware(object):
             self.get_response = get_response
 
     def process_view(self, request, view_func, view_args, view_kwargs):
-        logger.info("Loading MIDDLE WARE")
+        logger.info("in BookingTimerMiddleware.process_view()...")
         if 'ad_booking' in request.session:
             logger.info(f"session['ad_booking']: [{request.session['ad_booking']}] exists.")
             try:
@@ -155,6 +155,8 @@ class BookingTimerMiddleware(object):
                 # safeguard against e.g. part 1 of the multipart checkout confirmation process passing, then part 2 timing out.
                 # on POST boosts remaining time to at least 2 minutes
                 booking.save()
+        else:
+            logger.info('session[ad_booking] does not exist.')
 
         if 'annual_admission_booking' in request.session:
             logger.info(f"session['annual_admission_booking']: [{request.session['annual_admission_booking']}] exists.")
@@ -171,6 +173,8 @@ class BookingTimerMiddleware(object):
                 # safeguard against e.g. part 1 of the multipart checkout confirmation process passing, then part 2 timing out.
                 # on POST boosts remaining time to at least 2 minutes
                 booking.save()
+        else:
+            logger.info(f'session[annual_admission_booking] does not exist.')
 
         if 'ps_booking' in request.session:
             logger.info(f"session['ps_booking']: [{request.session['ps_booking']}] exists.")
@@ -192,6 +196,8 @@ class BookingTimerMiddleware(object):
                 # on POST boosts remaining time to at least 2 minutes
                 booking.expiry_time = max(booking.expiry_time, timezone.now()+datetime.timedelta(minutes=3))
                 booking.save()
+        else:
+            logger.info('session[ps_booking] does not exist.')
 
         if CHECKOUT_PATH.match(request.path):
             # basket = utils.get_basket(request)

@@ -408,6 +408,7 @@ def generate_mooring_rate(mooringsites_qs,start_date, end_date, duration):
 def get_campsite_availability(campsites_qs, start_date, end_date, ongoing_booking, request=None):
     """Fetch the availability of each mooring in a queryset over a range of visit dates."""
     # fetch all of the single-day MooringsiteBooking objects within the date range for the sites
+    logger.info(f'Fetching the availability of each mooring in a queryset over a range of visit dates...')
 
     end_date =end_date+timedelta(days=1)
     start_date_time = datetime.strptime(str(start_date)+str(' 00:00'), '%Y-%m-%d %H:%M')
@@ -625,7 +626,6 @@ def get_campsite_availability(campsites_qs, start_date, end_date, ongoing_bookin
                  
     mooring_map = {cg[0]: [cs.pk for cs in campsites_qs if cs.mooringarea.pk == cg[0]] for cg in campsites_qs.distinct('mooringarea').values_list('mooringarea')}
     today = date.today()
-    print ("GLOBA 1")
     # strike out days after the max_advance_booking
     for site in campsites_qs:
         max_advance = None

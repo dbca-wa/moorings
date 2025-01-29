@@ -3,6 +3,9 @@ from __future__ import unicode_literals
 from ledger_api_client.ledger_models import EmailUserRO
 from django.core.cache import cache
 from ledger_api_client.managed_models import SystemGroup, SystemGroupPermission
+import logging
+
+logger = logging.getLogger(__name__)
 
 
 def belongs_to(user, group_name):
@@ -16,7 +19,7 @@ def belongs_to(user, group_name):
     belongs_to_value = cache.get('User-belongs_to'+str(user.id)+'group_name:'+group_name)
     #belongs_to_value = None
     if belongs_to_value:
-        print ('From Cache - User-belongs_to'+str(user.id)+'group_name:'+group_name)
+        logger.info('From Cache - User-belongs_to'+str(user.id)+'group_name:'+group_name)
     if belongs_to_value is None:
        sg = SystemGroup.objects.filter(name=group_name)
        if sg.count() > 0:
