@@ -7,8 +7,10 @@ from django.contrib import messages
 from django.urls import reverse
 from django.http import Http404, HttpResponse, JsonResponse, HttpResponseRedirect
 from django.utils import timezone
-from mooring.models import Booking
+from mooring.models import AdmissionsBooking, Booking, BookingAnnualAdmission
 import hashlib
+
+from mooring.utils import delete_session_booking
 
 
 logger = logging.getLogger(__name__)
@@ -137,14 +139,9 @@ class BookingTimerMiddleware(object):
             self.get_response = get_response
 
     def process_view(self, request, view_func, view_args, view_kwargs):
-
-
-    # def process_request(self, request):
-        #print ("REQUEST SESSION")
-        #print request.session['ps_booking']
-        print ("LOADING MIDDLE WARE")
+        logger.info("Loading MIDDLE WARE")
         if 'ad_booking' in request.session:
-            print ("ADMISSION MIDDLE WARE")
+            logger.info(f"session['ad_booking']: [{request.session['ad_booking']}] exists.")
             try:
                 booking = AdmissionsBooking.objects.get(pk=request.session['ad_booking'])
             except:
@@ -160,7 +157,7 @@ class BookingTimerMiddleware(object):
                 booking.save()
 
         if 'annual_admission_booking' in request.session:
-            print ("ANNUAL ADMISSION MIDDLE WARE")
+            logger.info(f"session['annual_admission_booking']: [{request.session['annual_admission_booking']}] exists.")
             try:
                 booking = BookingAnnualAdmission.objects.get(pk=request.session['annual_admission_booking'])
             except:
@@ -174,24 +171,22 @@ class BookingTimerMiddleware(object):
                 # safeguard against e.g. part 1 of the multipart checkout confirmation process passing, then part 2 timing out.
                 # on POST boosts remaining time to at least 2 minutes
                 booking.save()
-            print ("END ANNUAL")
+
         if 'ps_booking' in request.session:
-            print ("YES PS BOOKING")
-            print (request.session['ps_booking'])
-        #    print ("BOOKING SESSION : "+str(request.session['ps_booking']))
+            logger.info(f"session['ps_booking']: [{request.session['ps_booking']}] exists.")
             try:
                 booking = Booking.objects.get(pk=request.session['ps_booking'])
             except:
                 # no idea what object is in self.request.session['ps_booking'], ditch it
-                del request.session['ps_booking']
+                delete_session_booking(request.session)
                 return
             if booking.booking_type != 3:
                 # booking in the session is not a temporary type, ditch it
-                del request.session['ps_booking']
+                delete_session_booking(request.session)
             elif timezone.now() > booking.expiry_time:
                 # expiry time has been hit, destroy the Booking then ditch it
                 #booking.delete()
-                del request.session['ps_booking']
+                delete_session_booking(request.session)
             elif CHECKOUT_PATH.match(request.path) and request.method == 'POST':
                 # safeguard against e.g. part 1 of the multipart checkout confirmation process passing, then part 2 timing out.
                 # on POST boosts remaining time to at least 2 minutes
@@ -215,7 +210,7 @@ class BookingTimerMiddleware(object):
                 #    booking = Booking.objects.get(pk=int(booking_id[1]))
                    if timezone.now() > booking.expiry_time:
                        try:
-                           del request.session['ps_booking']
+                           delete_session_booking(request.session)
                        except:
                            pass
                        return HttpResponseRedirect(reverse('public_make_booking'))

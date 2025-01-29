@@ -157,9 +157,16 @@ class MooringAvailability2Selector(TemplateView):
             }
 #            mooring_site = Mooringsite.objects.get(id=ratis_id)
             mooringarea = MooringArea.objects.get(id=request.GET.get('site_id', None))
-            booking = Booking.objects.create(mooringarea=mooringarea,booking_type=3,expiry_time=timezone.now()+timedelta(seconds=settings.BOOKING_TIMEOUT),details=details,arrival=booking_period_start,departure=booking_period_finish)
-            request.session['ps_booking'] = booking.id
-            request.session.modified = True
+            booking = Booking.objects.create(
+                mooringarea=mooringarea,
+                booking_type=3,
+                expiry_time=timezone.now()+timedelta(seconds=settings.BOOKING_TIMEOUT),
+                details=details,
+                arrival=booking_period_start,
+                departure=booking_period_finish
+            )
+            logger.info(f'New Booking: [{booking}] has been created.')
+            utils.set_session_booking(request.session, booking)
 
         return render(request, self.template_name, context)
 
@@ -3720,55 +3727,51 @@ class ChangeBookingView(LoginRequiredMixin, TemplateView):
         booking = None
         if request.user.is_staff or request.user.is_superuser or Booking.objects.filter(customer=request.user,pk=booking_id).count() == 1:
 
-#             booking = Booking.objects.get(customer=request.user, booking_type__in=(0, 1), is_canceled=False, pk=booking_id)
-             booking = Booking.objects.get(pk=booking_id)
-             if booking.in_future is True or request.user.is_staff or request.user.is_superuser:
-                 if booking.booking_type == 4:
-                      print ("BOOKING HAS BEEN CANCELLED")
-                      messages.error(self.request, 'Sorry this booking is not longer a current active booking.')
-                      return HttpResponseRedirect(reverse('home'))
+#            booking = Booking.objects.get(customer=request.user, booking_type__in=(0, 1), is_canceled=False, pk=booking_id)
+            booking = Booking.objects.get(pk=booking_id)
+            if booking.in_future is True or request.user.is_staff or request.user.is_superuser:
+                if booking.booking_type == 4:
+                     print ("BOOKING HAS BEEN CANCELLED")
+                     messages.error(self.request, 'Sorry this booking is not longer a current active booking.')
+                     return HttpResponseRedirect(reverse('home'))
     
-                 if booking.booking_type == 1:
-                     
-                     booking_temp = Booking.objects.create(mooringarea=booking.mooringarea,
-                                                           booking_type=3,
-                                                           expiry_time=timezone.now()+timedelta(seconds=settings.BOOKING_TIMEOUT),
-                                                           details=booking.details,
-                                                           arrival=booking.arrival,
-                                                           departure=booking.departure, 
-                                                           old_booking=booking, 
-                                                           customer=booking.customer)
-               
-        	     #request.session['ps_booking'] = booking_temp.id
-                     #request.session.modified = True
-                     booking_items = MooringsiteBooking.objects.filter(booking=booking)
-                     for bi in booking_items:
-                          cb =  MooringsiteBooking.objects.create(
-                                 campsite=bi.campsite,
-                                 booking_type=3,
-                                 date=bi.date,
-                                 from_dt=bi.from_dt,
-                                 to_dt=bi.to_dt,
-                                 booking=booking_temp,
-                                 amount=bi.amount,
-                                 booking_period_option=bi.booking_period_option
-                               )
-                          campsite_id= bi.campsite_id
-                     request.session['ps_booking'] = booking_temp.id
-                     #request.session['ps_booking_old'] =  booking.id
-                     request.session.modified = True
-                     change_booking_url_redirect = reverse('mooring_availaiblity2_selector')+'?site_id='+str(booking.mooringarea_id)+'&arrival='+str(booking.arrival.strftime('%Y/%m/%d'))+'&departure='+str(booking.departure.strftime('%Y/%m/%d'))+'&vessel_size='+str(booking.details['vessel_size'])+'&vessel_draft='+str(booking.details['vessel_draft'])+'&vessel_beam='+str(booking.details['vessel_beam'])+'&vessel_weight='+str(booking.details['vessel_weight'])+'&vessel_rego='+str(booking.details['vessel_rego'])+'&num_adult='+str(booking.details['num_adults'])+'&num_children='+str(booking.details['num_children'])+'&num_infants='+str(booking.details['num_infants'])+'&distance_radius='+str(booking.mooringarea.park.distance_radius)
+                if booking.booking_type == 1:
+                    
+                    booking_temp = Booking.objects.create(mooringarea=booking.mooringarea,
+                                                          booking_type=3,
+                                                          expiry_time=timezone.now()+timedelta(seconds=settings.BOOKING_TIMEOUT),
+                                                          details=booking.details,
+                                                          arrival=booking.arrival,
+                                                          departure=booking.departure, 
+                                                          old_booking=booking, 
+                                                          customer=booking.customer)
+              
+                    booking_items = MooringsiteBooking.objects.filter(booking=booking)
+                    for bi in booking_items:
+                         cb =  MooringsiteBooking.objects.create(
+                                campsite=bi.campsite,
+                                booking_type=3,
+                                date=bi.date,
+                                from_dt=bi.from_dt,
+                                to_dt=bi.to_dt,
+                                booking=booking_temp,
+                                amount=bi.amount,
+                                booking_period_option=bi.booking_period_option
+                              )
+                         campsite_id= bi.campsite_id
+                    utils.set_session_booking(request.session, booking_temp)
+                    change_booking_url_redirect = reverse('mooring_availaiblity2_selector')+'?site_id='+str(booking.mooringarea_id)+'&arrival='+str(booking.arrival.strftime('%Y/%m/%d'))+'&departure='+str(booking.departure.strftime('%Y/%m/%d'))+'&vessel_size='+str(booking.details['vessel_size'])+'&vessel_draft='+str(booking.details['vessel_draft'])+'&vessel_beam='+str(booking.details['vessel_beam'])+'&vessel_weight='+str(booking.details['vessel_weight'])+'&vessel_rego='+str(booking.details['vessel_rego'])+'&num_adult='+str(booking.details['num_adults'])+'&num_children='+str(booking.details['num_children'])+'&num_infants='+str(booking.details['num_infants'])+'&distance_radius='+str(booking.mooringarea.park.distance_radius)
 
-                     response = HttpResponse("<script> window.location='"+change_booking_url_redirect+"';</script> <a href='"+change_booking_url_redirect+"'> Redirecting please wait </a>")
-                     response.delete_cookie(settings.OSCAR_BASKET_COOKIE_OPEN)
-                     return response
-                     #return HttpResponseRedirect(reverse('mooring_availaiblity2_selector')+'?site_id='+str(booking.mooringarea_id)+'&arrival='+str(booking.arrival.strftime('%Y/%m/%d'))+'&departure='+str(booking.departure.strftime('%Y/%m/%d'))+'&vessel_size='+str(booking.details['vessel_size'])+'&vessel_draft='+str(booking.details['vessel_draft'])+'&vessel_beam='+str(booking.details['vessel_beam'])+'&vessel_weight='+str(booking.details['vessel_weight'])+'&vessel_rego='+str(booking.details['vessel_rego'])+'&num_adult='+str(booking.details['num_adults'])+'&num_children='+str(booking.details['num_children'])+'&num_infants='+str(booking.details['num_infants'])+'&distance_radius='+str(booking.mooringarea.park.distance_radius)  )
-                 else:
-                      print ("BOOKING NOT ACTIVE")
-                      messages.error(self.request, 'Sorry this booking is not longer a current active booking.')
-             else:
-                  print ("BOOKING IN THE PAST")
-                  messages.error(self.request, 'Sorry this booking is not longer a current active booking.')
+                    response = HttpResponse("<script> window.location='"+change_booking_url_redirect+"';</script> <a href='"+change_booking_url_redirect+"'> Redirecting please wait </a>")
+                    response.delete_cookie(settings.OSCAR_BASKET_COOKIE_OPEN)
+                    return response
+                    #return HttpResponseRedirect(reverse('mooring_availaiblity2_selector')+'?site_id='+str(booking.mooringarea_id)+'&arrival='+str(booking.arrival.strftime('%Y/%m/%d'))+'&departure='+str(booking.departure.strftime('%Y/%m/%d'))+'&vessel_size='+str(booking.details['vessel_size'])+'&vessel_draft='+str(booking.details['vessel_draft'])+'&vessel_beam='+str(booking.details['vessel_beam'])+'&vessel_weight='+str(booking.details['vessel_weight'])+'&vessel_rego='+str(booking.details['vessel_rego'])+'&num_adult='+str(booking.details['num_adults'])+'&num_children='+str(booking.details['num_children'])+'&num_infants='+str(booking.details['num_infants'])+'&distance_radius='+str(booking.mooringarea.park.distance_radius)  )
+                else:
+                     print ("BOOKING NOT ACTIVE")
+                     messages.error(self.request, 'Sorry this booking is not longer a current active booking.')
+            else:
+                 print ("BOOKING IN THE PAST")
+                 messages.error(self.request, 'Sorry this booking is not longer a current active booking.')
 
         return HttpResponseRedirect(reverse('home'))
 

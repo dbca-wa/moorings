@@ -677,6 +677,8 @@ def delete_booking(request, *args, **kwargs):
 #@require_http_methods(['GET'])
 #@require_http_methods(['POST'])
 def add_booking(request, *args, **kwargs):
+    logger.info('in add_booking()')
+
     response_data = {}
     response_data['result'] = 'error'
     response_data['message'] = ''
@@ -727,9 +729,16 @@ def add_booking(request, *args, **kwargs):
            'vessel_rego' : vessel_rego,
         }
         mooringarea = MooringArea.objects.get(id=request.POST['mooring_id'])
-        booking = Booking.objects.create(mooringarea=mooringarea,booking_type=3,expiry_time=timezone.now()+timedelta(seconds=settings.BOOKING_TIMEOUT),details=details,arrival=booking_period_start,departure=booking_period_finish)
-        request.session['ps_booking'] = booking.id
-        request.session.modified = True
+        booking = Booking.objects.create(
+            mooringarea=mooringarea,
+            booking_type=3,
+            expiry_time=timezone.now() + timedelta(seconds=settings.BOOKING_TIMEOUT),
+            details=details,
+            arrival=booking_period_start,
+            departure=booking_period_finish
+        )
+        logger.info(f'New Booking: [{booking}] has been created.')
+        utils.set_session_booking(request.session, booking)
 
     #print BookingPeriodOption.objects.all()
     mooringsite = Mooringsite.objects.get(id=request.POST['site_id'])
@@ -2451,6 +2460,8 @@ def create_admissions_booking(request, *args, **kwargs):
 @csrf_exempt
 @require_http_methods(['POST'])
 def create_booking(request, *args, **kwargs):
+    logger.info(f'in create_booking()')
+
     """Create a temporary booking and link it to the current session"""
     data = {
         'arrival': request.POST.get('arrival'),
@@ -2534,7 +2545,7 @@ def create_booking(request, *args, **kwargs):
         }), status=400, content_type='application/json')
 
     # add the booking to the current session
-    request.session['ps_booking'] = booking.pk
+    utils.set_session_booking(request.session, booking)
     checkouthash = hashlib.sha256(str(booking.pk).encode('utf-8')).hexdigest()
     request.session['checkouthash'] = checkouthash
 
