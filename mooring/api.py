@@ -2554,7 +2554,8 @@ def create_booking(request, *args, **kwargs):
     # add the booking to the current session
     utils.set_session_booking(request.session, booking)
     checkouthash = hashlib.sha256(str(booking.pk).encode('utf-8')).hexdigest()
-    request.session['checkouthash'] = checkouthash
+    logger.info(f"checkouthash: [{checkouthash}] has been generated from the booking.pk: [{booking.pk}].")
+    utils.set_session_checkouthash(request.session, checkouthash)
 
     return HttpResponse(geojson.dumps({
         'status': 'success',

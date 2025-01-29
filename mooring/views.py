@@ -517,7 +517,9 @@ class CancelBookingView(TemplateView):
         refund = None
 
         checkouthash =  hashlib.sha256(str(booking.pk).encode('utf-8')).hexdigest()
-        request.session['checkouthash'] = checkouthash
+        logger.info(f"checkouthash: [{checkouthash}] has been generated from the booking.pk: [{booking.pk}].")
+        utils.set_session_checkouthash(request.session, checkouthash)
+
         return_url = request.build_absolute_uri()+"/booking/cancellation-success/?checkouthash="+checkouthash
         return_preload_url = request.build_absolute_uri()+"/booking/return-cancelled/"
         jsondata = process_api_refund(request, basket_params, booking.customer.id, return_url, return_preload_url)

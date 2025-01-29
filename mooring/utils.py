@@ -2105,6 +2105,11 @@ def set_session_booking(session, booking):
     session.modified = True
     logger.info(f"session['ps_booking'] has been set to the booking.id: [{booking.id}]")
 
+def set_session_checkouthash(session, hash):
+    session['checkouthash'] = hash
+    session.modified = True
+    logger.info(f"session['checkouthash'] has been set to the hash: [{hash}]")
+
 def delete_session_booking(session):
     if 'ps_booking' in session:
         del session['ps_booking']
