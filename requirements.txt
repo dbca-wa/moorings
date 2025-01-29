@@ -1,4 +1,4 @@
-Django==3.2.24
+Django~=5.0.8
 git+https://github.com/dbca-wa/ledger_api_client.git
 django-extensions==1.9.8
 git+https://github.com/dbca-wa/dbca-utils.git#egg=dbca-utils
@@ -8,7 +8,7 @@ git+https://github.com/dbca-wa/dbca-utils.git#egg=dbca-utils
 git+https://github.com/dbca-wa/webtemplate2.git#egg=webtemplate_dbca
 coverage==4.3.1
 coveralls==1.1
-reportlab==3.5.55
+reportlab==4.2.2
 django-widget-tweaks~=1.5.0
 django-utils-six==2.0
 django_bootstrap3==23.6
