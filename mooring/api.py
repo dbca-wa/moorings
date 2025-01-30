@@ -795,6 +795,10 @@ def add_booking(request, *args, **kwargs):
         response_data['result'] = 'success'
         response_data['message'] = ''
 
+    checkouthash = hashlib.sha256(str(booking.pk).encode('utf-8')).hexdigest()
+    logger.info(f"checkouthash: [{checkouthash}] has been generated from the booking.pk: [{booking.pk}].")
+    utils.set_session_checkouthash(request.session, checkouthash)
+
     return HttpResponse(json.dumps(response_data), content_type='application/json')
 
 def queryset_MooringArea():
