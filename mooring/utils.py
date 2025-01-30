@@ -412,8 +412,11 @@ def get_campsite_availability(campsites_qs, start_date, end_date, ongoing_bookin
     logger.info(f'Fetching the availability of each mooring in a queryset over a range of visit dates...')
 
     end_date =end_date+timedelta(days=1)
-    start_date_time = datetime.strptime(str(start_date)+str(' 00:00'), '%Y-%m-%d %H:%M')
-    end_date_time = datetime.strptime(str(end_date)+str(' 23:59'), '%Y-%m-%d %H:%M')
+    # start_date_time = datetime.strptime(str(start_date)+str(' 00:00'), '%Y-%m-%d %H:%M')
+    # end_date_time = datetime.strptime(str(end_date)+str(' 23:59'), '%Y-%m-%d %H:%M')
+    start_date_time = timezone.make_aware(datetime.strptime(str(start_date)+str(' 00:00'), '%Y-%m-%d %H:%M'))
+    end_date_time = timezone.make_aware(datetime.strptime(str(end_date)+str(' 23:59'), '%Y-%m-%d %H:%M'))
+
     booking_id = None
     booking_period_option = None
     today = date.today()
