@@ -10,7 +10,7 @@ from django.utils import timezone
 from mooring.models import AdmissionsBooking, Booking, BookingAnnualAdmission
 import hashlib
 
-from mooring.utils import delete_session_booking
+from mooring.utils import calculate_checkouthash_from_booking_id, delete_session_booking
 
 
 logger = logging.getLogger(__name__)
@@ -179,14 +179,22 @@ class BookingTimerMiddleware(object):
         if 'ps_booking' in request.session:
             logger.info(f"session['ps_booking']: [{request.session['ps_booking']}] exists.")
 
-            # TEST
-            checkouthash =  hashlib.sha256(str(request.session["ps_booking"]).encode('utf-8')).hexdigest()
+            # Only when user is going to make payment, compare the checkouthash stored in the cookie (sent from the page) with the checkouthash
+            # dynamically calculated on the backend to prevent issues caused by users attempting to place orders
+            # using multiple browser tabs.
+            checkouthash = calculate_checkouthash_from_booking_id(int(request.session["ps_booking"]))
             checkouthash_cookie = request.COOKIES.get('checkouthash')
+            logger.info(f'checkouthash dynamically calc: [{checkouthash}]')
+            logger.info(f'checkouthash stored in cookie: [{checkouthash_cookie}]')
             if checkouthash_cookie != checkouthash:
-                logger.info(f"***** checkouthash mismatch: [{checkouthash}] != [{checkouthash_cookie}]")
-            else:
-                logger.info(f"***** checkouthash match: [{checkouthash}] == [{checkouthash_cookie}]")
-            # END TEST
+                # Checkouthash mismatch which implies the user is handling multiple browser tabs with different booking details,
+                # redirect user to the booking page
+                logger.warning(f"checkouthashs are mismatched!")
+
+                if request.path.startswith("/ledger-api/process-payment") or request.path.startswith('/ledger-api/payment-details'):
+                    url_redirect = reverse('public_make_booking')
+                    response = HttpResponse("<script> window.location='" + url_redirect + "';</script> <center><div class='container'><div class='alert alert-primary' role='alert'><a href='" + url_redirect + "'> Redirecting please wait: " + url_redirect + "</a><div></div></center>")
+                    return response 
 
             try:
                 booking = Booking.objects.get(pk=request.session['ps_booking'])

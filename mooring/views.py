@@ -518,7 +518,7 @@ class CancelBookingView(TemplateView):
 
         checkouthash =  hashlib.sha256(str(booking.pk).encode('utf-8')).hexdigest()
         logger.info(f"checkouthash: [{checkouthash}] has been generated from the booking.pk: [{booking.pk}].")
-        utils.set_session_checkouthash(request.session, checkouthash)
+        # utils.set_session_checkouthash(request.session, checkouthash)
 
         return_url = request.build_absolute_uri()+"/booking/cancellation-success/?checkouthash="+checkouthash
         return_preload_url = request.build_absolute_uri()+"/booking/return-cancelled/"

@@ -5,10 +5,8 @@ import decimal
 import logging
 import json
 import calendar
-import time
 import math
 import hashlib
-import io
 from six.moves.urllib.parse import urlparse
 from wsgiref.util import FileWrapper
 from django.db.models import Q, Min
@@ -789,9 +787,8 @@ def add_booking(request, *args, **kwargs):
         response_data['result'] = 'success'
         response_data['message'] = ''
 
-    checkouthash = hashlib.sha256(str(booking.pk).encode('utf-8')).hexdigest()
+    checkouthash = utils.calculate_checkouthash_from_booking_id(booking.pk)
     logger.info(f"checkouthash: [{checkouthash}] has been generated from the booking.pk: [{booking.pk}].")
-    utils.set_session_checkouthash(request.session, checkouthash)
 
     return HttpResponse(json.dumps(response_data), content_type='application/json')
 
@@ -2551,9 +2548,9 @@ def create_booking(request, *args, **kwargs):
 
     # add the booking to the current session
     utils.set_session_booking(request.session, booking)
-    checkouthash = hashlib.sha256(str(booking.pk).encode('utf-8')).hexdigest()
+    checkouthash = utils.calculate_checkouthash_from_booking_id(booking.pk)
     logger.info(f"checkouthash: [{checkouthash}] has been generated from the booking.pk: [{booking.pk}].")
-    utils.set_session_checkouthash(request.session, checkouthash)
+    # utils.set_session_checkouthash(request.session, checkouthash)
 
     return HttpResponse(geojson.dumps({
         'status': 'success',

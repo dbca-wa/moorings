@@ -6,6 +6,7 @@ import json
 import calendar
 import geojson
 import io
+import hashlib
 from django.conf import settings
 from django.urls import reverse, reverse_lazy
 from django.core.exceptions import ValidationError
@@ -2104,6 +2105,17 @@ def set_session_booking(session, booking):
     session['ps_booking'] = booking.id
     session.modified = True
     logger.info(f"session['ps_booking'] has been set to the booking.id: [{booking.id}]")
+
+def calculate_checkouthash_from_booking_id(booking_id):
+    # Retrieve MooringsiteBooking ids for this booking as a list
+    booking = Booking.objects.get(id=booking_id)
+    mooringsite_booking_ids = booking.campsites.all().order_by('id').values_list('id', flat=True)
+    if mooringsite_booking_ids.count() < 1:
+        # No MooringsiteBooking objects found for this booking
+        checkouthash = None
+    else:
+        checkouthash = hashlib.sha256(str(mooringsite_booking_ids).encode('utf-8')).hexdigest()
+    return checkouthash
 
 def set_session_checkouthash(session, hash):
     session['checkouthash'] = hash
