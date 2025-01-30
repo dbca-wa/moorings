@@ -754,6 +754,18 @@
             }
         },
         methods:{
+            createCookie: function(name, value, days) {
+                var expires;
+            
+                if (days) {
+                    var date = new Date();
+                    date.setTime(date.getTime() + (days * 24 * 60 * 60 * 1000));
+                    expires = "; expires=" + date.toGMTString();
+                } else {
+                    expires = "";
+                }
+                document.cookie = encodeURIComponent(name) + "=" + encodeURIComponent(value) + expires + "; path=/";
+            },
             updateLocalStorage: function() {
                 var vm = this;
                 var data = {
@@ -1163,7 +1175,10 @@
             },
         },
         mounted: function() {
+            console.log('in mounted...')
             var vm = this;
+
+            vm.createCookie('checkouthash', "{{ checkouthash }}");
 
             // check that expiry is in a sane range
             var saneTz = (0 < Math.floor((vm.expiry - moment.now())/1000) < vm.timer);
