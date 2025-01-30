@@ -1,9 +1,9 @@
 import os
-import confy
+from confy import env
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-confy.read_environment_file(BASE_DIR+"/.env")
+# confy.read_environment_file(BASE_DIR+"/.env")
 os.environ.setdefault("BASE_DIR", BASE_DIR)
-from ledger.settings_base import *
+from ledger_api_client.settings_base import *
 from decimal import Decimal
 
 BASE_DIR = None
@@ -21,20 +21,25 @@ STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles_mo')
 BOOKING_TIMEOUT = 1200
 
 INSTALLED_APPS += [
+    'webtemplate_dbca',
     'bootstrap3',
     'mooring',
     'taggit',
     'rest_framework',
     'rest_framework_gis',
+    # 'ledger',
+    'ledger_api_client',
+    'appmonitor_client',
     'crispy_forms',
-    'ledger',
-    'appmonitor_client'
 ]
 
 MIDDLEWARE_CLASSES += [
     'mooring.middleware.BookingTimerMiddleware',
-    'mooring.middleware.CacheHeaders'
+    'mooring.middleware.CacheHeaders',
 ]
+MIDDLEWARE = MIDDLEWARE_CLASSES
+MIDDLEWARE_CLASSES = None
+
 
 # maximum number of days allowed for a booking
 PS_MAX_BOOKING_LENGTH = 28
@@ -53,6 +58,7 @@ REST_FRAMEWORK = {
     )
 }
 
+LANGUAGE_CODE = 'en-au'  # This affects time formats.
 # disable Django REST Framework UI on prod
 if not DEBUG:
     REST_FRAMEWORK['DEFAULT_RENDERER_CLASSES']=('rest_framework.renderers.JSONRenderer',)
@@ -73,6 +79,7 @@ TEMPLATES[0]['OPTIONS']['context_processors'].append('mooring.context_processors
 #    'required_css_class': 'required-form-field',
 #    'set_placeholder': False,
 #}'''
+LEDGER_TEMPLATE = 'bootstrap5'
 CACHES = {
     'default': {
         'BACKEND': 'django.core.cache.backends.filebased.FileBasedCache',
@@ -84,6 +91,8 @@ STATICFILES_DIRS.append(os.path.join(os.path.join(BASE_DIR, 'mooring', 'static')
 
 BPAY_ALLOWED = env('BPAY_ALLOWED',False)
 OSCAR_BASKET_COOKIE_OPEN = 'mooring_basket'
+OSCAR_BASKET_COOKIE_LIFETIME = env('OSCAR_BASKET_COOKIE_LIFETIME', 7 * 24 * 60 * 60)
+OSCAR_BASKET_COOKIE_SECURE = env('OSCAR_BASKET_COOKIE_SECURE', False)
 
 CRON_CLASSES = [
     #'mooring.cron.SendBookingsConfirmationCronJob',
@@ -94,32 +103,30 @@ CRON_CLASSES = [
 ]
 
 # Additional logging for mooring
+LOGGING['disable_existing_loggers'] = False
+LOGGING['formatters']['verbose2'] = {
+    "format": "%(levelname)s %(asctime)s %(name)s [Line:%(lineno)s][%(funcName)s] %(message)s"
+}
+LOGGING['handlers']['console']['formatter'] = 'verbose2'
+LOGGING['handlers']['console']['level'] = 'DEBUG'
+LOGGING['handlers']['file']['formatter'] = 'verbose2'
 LOGGING['handlers']['booking_checkout'] = {
             'level': 'INFO',
             'class': 'logging.handlers.RotatingFileHandler',
             'filename': os.path.join(BASE_DIR, 'logs', 'mooring_booking_checkout.log'),
-            'formatter': 'verbose',
+            'formatter': 'verbose2',
             'maxBytes': 5242880
         }
 LOGGING['loggers']['booking_checkout'] = {
             'handlers': ['booking_checkout'],
             'level': 'INFO'
         }
+LOGGING['loggers']['django']['propagate'] = True
+LOGGING['loggers']['']['level'] = 'DEBUG'
 
-
-# Additional logging for mooring
-#LOGGING['handlers']['ledger_bpoint'] = {
-#            'level': 'INFO',
-#            'class': 'logging.handlers.RotatingFileHandler',
-#            'filename': os.path.join(BASE_DIR, 'logs', 'ledger_bpoint.log'),
-#            'formatter': 'verbose',
-#            'maxBytes': 5242880
-#        }
-#LOGGING['loggers']['ledger_bpoint'] = {
-#            'handlers': ['ledger_bpoint'],
-#            'level': 'INFO'
-#        }
-
+from pprint import pprint
+print("\n=== LOGGING Configuration ===\n")
+pprint(LOGGING, indent=2, width=80)
 
 #PS_PAYMENT_SYSTEM_ID = env('PS_PAYMENT_SYSTEM_ID', 'S019')
 PS_PAYMENT_SYSTEM_ID = env('PS_PAYMENT_SYSTEM_ID', 'S516')
@@ -157,3 +164,8 @@ DATA_UPLOAD_MAX_NUMBER_FIELDS = 10240
 BOOKING_PROPERTY_CACHE_VERSION = '2.00'
 ML_ADMISSION_PAID_CHECK=env('ML_ADMISSION_PAID_CHECK', False)
 #os.environ.setdefault("UPDATE_PAYMENT_ALLOCATION", True)
+DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+X_FRAME_OPTIONS = 'SAMEORIGIN'
+
+
+DEFAULT_AUTO_FIELD = 'django.db.models.AutoField'

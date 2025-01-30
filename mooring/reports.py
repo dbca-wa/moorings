@@ -7,7 +7,17 @@ from django.utils import timezone
 from django.core.mail import EmailMessage 
 from django.conf import settings
 from mooring.models import Booking, BookingInvoice, OutstandingBookingRecipient, BookingHistory, AdmissionsBooking, AdmissionsBookingInvoice
-from ledger.payments.models import OracleParser,OracleParserInvoice, CashTransaction, BpointTransaction, BpayTransaction,Invoice, TrackRefund
+# from ledger.payments.models import OracleParser,OracleParserInvoice, CashTransaction, BpointTransaction, BpayTransaction,Invoice, TrackRefund
+from ledger_api_client.ledger_models import Invoice
+# Copied from the parkstay_bs_v2: https://github.com/dbca-wa/parkstay_bs_v2/blob/605b4c2efdfb68be68dd4239c643cba02d2c44ec/parkstay/reports.py#L10
+class CashTransaction():
+    pass
+class BpointTransaction():
+    pass
+class TrackRefund():
+    pass
+
+# from ledger_api_client.ledger_models 
 from mooring import models
 from datetime import timedelta
 from django.db.models import Q, Min

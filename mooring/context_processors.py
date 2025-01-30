@@ -3,41 +3,57 @@ from django.core.cache import cache
 from mooring import models
 from mooring import helpers
 import json
+import hashlib
+import uuid
+import logging
+
+from mooring.utils import calculate_checkouthash_from_booking_id
+
+
+logger = logging.getLogger(__name__)
 
 
 def mooring_url(request):
-     web_url = request.META.get('HTTP_HOST', None)
-     tg = 'pvs'
-     if web_url in settings.ROTTNEST_ISLAND_URL:
-           tg = 'ria'
-     else:
-           tg = 'pvs'
-     authed = request.user.is_authenticated
-     mooring_url = mooring_url_group(tg)
+    web_url = request.META.get('HTTP_HOST', None)
+    tg = 'pvs'
+    if web_url in settings.ROTTNEST_ISLAND_URL:
+          tg = 'ria'
+    else:
+          tg = 'pvs'
+    authed = request.user.is_authenticated
+    mooring_url = mooring_url_group(tg)
 
-     is_officer = False
-     is_inventory = False
-     is_admin = False
-     is_payment_officer = False
-     is_customer = False
+    is_officer = False
+    is_inventory = False
+    is_admin = False
+    is_payment_officer = False
+    is_customer = False
 
-     failed_refund_count = 0
-     if authed:
-          if request.user.is_staff or request.user.is_superuser:
-              failed_refund_count = models.RefundFailed.objects.filter(status=0).count()
-          is_officer = helpers.is_officer(request.user)
-          is_inventory = helpers.is_inventory(request.user)
-          is_admin = helpers.is_admin(request.user)
-          is_payment_officer = helpers.is_payment_officer(request.user)
-          is_customer = helpers.is_customer(request.user)
+    if 'ps_booking' in request.session:
+        checkouthash = calculate_checkouthash_from_booking_id(int(request.session["ps_booking"]))
+    else:
+        checkouthash = None
 
-     mooring_url['REFUND_FAILED_COUNT'] = failed_refund_count
-     mooring_url['IS_OFFICER'] = is_officer
-     mooring_url['IS_INVENTORY'] = is_inventory
-     mooring_url['IS_ADMIN'] = is_admin
-     mooring_url['IS_PAYMENT_OFFICER'] = is_payment_officer
-     mooring_url['IS_CUSTOMER'] = is_customer
-     return mooring_url
+    failed_refund_count = 0
+    if authed:
+        if request.user.is_staff or request.user.is_superuser:
+            failed_refund_count = models.RefundFailed.objects.filter(status=0).count()
+        is_officer = helpers.is_officer(request.user)
+        is_inventory = helpers.is_inventory(request.user)
+        is_admin = helpers.is_admin(request.user)
+        is_payment_officer = helpers.is_payment_officer(request.user)
+        is_customer = helpers.is_customer(request.user)
+
+    mooring_url['REFUND_FAILED_COUNT'] = failed_refund_count
+    mooring_url['IS_OFFICER'] = is_officer
+    mooring_url['IS_INVENTORY'] = is_inventory
+    mooring_url['IS_ADMIN'] = is_admin
+    mooring_url['IS_PAYMENT_OFFICER'] = is_payment_officer
+    mooring_url['IS_CUSTOMER'] = is_customer
+    mooring_url['template_group'] = 'ria'
+    mooring_url['checkouthash'] = checkouthash
+
+    return mooring_url
  
 #def mooring_url(request):
 #    #web_url = request.META['HTTP_HOST']
@@ -220,6 +236,8 @@ def mooring_url_group(tg):
         'GIT_COMMIT_DATE' : settings.GIT_COMMIT_DATE,
         'GIT_COMMIT_HASH' : settings.GIT_COMMIT_HASH,
         'SYSTEM_NAME' : settings.SYSTEM_NAME,
+        'LEDGER_UI_URL' : settings.LEDGER_UI_URL,
+        'LEDGER_SYSTEM_ID' : settings.PS_PAYMENT_SYSTEM_ID.replace("S","0"),
 #        'REFUND_FAILED_COUNT': failed_refund_count,
 #        'IS_OFFICER' : is_officer,
 #        'IS_INVENTORY' : is_inventory,

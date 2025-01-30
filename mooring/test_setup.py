@@ -7,9 +7,11 @@ import time
 from .models import *
 #from drf_extra_fields.geo_fields import PointField
 from django.contrib.gis.geos import Point
-from ledger.accounts.models import EmailUser, EmailUserManager
-from ledger.payments.models import Invoice, OracleInterfaceSystem
-from ledger.order.models import Order
+# from ledger.accounts.models import EmailUser, EmailUserManager
+from ledger_api_client.ledger_models import EmailUserRO as EmailUser, EmailUserROManager as EmailUserManager
+# from ledger.payments.models import Invoice, OracleInterfaceSystem
+# from ledger.order.models import Order
+from ledger_api_client.ledger_models 
 import random
 import string
 

@@ -1,6 +1,8 @@
 from django.conf import settings
-from ledger.accounts.models import EmailUser, Address
-from ledger.address.models import Country
+# from ledger.accounts.models import EmailUser, Address
+from ledger_api_client.ledger_models import EmailUserRO as EmailUser, Address
+# from ledger.address.models import Country
+from ledger_api_client.country_models import Country
 from mooring.models import (MooringAreaPriceHistory,
                                 MooringsiteClassPriceHistory,
                                 Rate,
