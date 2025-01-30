@@ -211,26 +211,21 @@ class BookingTimerMiddleware(object):
             logger.info('session[ps_booking] does not exist.')
 
         if CHECKOUT_PATH.match(request.path):
-            # basket = utils.get_basket(request)
             booking = Booking.objects.get(pk=request.session['ps_booking'])
-            # booking_reference = basket.booking_reference
             booking_reference = 'PS' + str(booking.id)
-            print (booking_reference[:2])
             if booking_reference[:2] == 'PS':
-                   booking_id = booking_reference.split("-")
-                   print ("parkstay booking")
-                   try:
-                       del request.session['ad_booking']
-                       del request.session['annual_admission_booking']
-                   except:
-                       pass
-                #    booking = Booking.objects.get(pk=int(booking_id[1]))
-                   if timezone.now() > booking.expiry_time:
-                       try:
-                           delete_session_booking(request.session)
-                       except:
-                           pass
-                       return HttpResponseRedirect(reverse('public_make_booking'))
+                booking_id = booking_reference.split("-")
+                try:
+                    del request.session['ad_booking']
+                    del request.session['annual_admission_booking']
+                except:
+                    pass
+                if timezone.now() > booking.expiry_time:
+                    try:
+                        delete_session_booking(request.session)
+                    except:
+                        pass
+                    return HttpResponseRedirect(reverse('public_make_booking'))
 
         # force a redirect if in the checkout
         if ('ps_booking_internal' not in request.COOKIES) and CHECKOUT_PATH.match(request.path):
