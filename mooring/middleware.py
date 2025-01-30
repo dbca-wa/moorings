@@ -192,6 +192,10 @@ class BookingTimerMiddleware(object):
                 logger.warning(f"checkouthashs are mismatched!")
 
                 if request.path.startswith("/ledger-api/process-payment") or request.path.startswith('/ledger-api/payment-details'):
+                    # Redirect user to the booking page when attempting payment processing
+                    # due to mismatch between backend booking data and frontend submitted data,
+                    # likely caused by multiple browser tabs being open.
+                    logger.warning(f"Redirecting user: [{request.user}] to the booking page due to mismatch of the booking data between the one stored in the backend and the one sent from the frontend.")
                     url_redirect = reverse('public_make_booking')
                     response = HttpResponse("<script> window.location='" + url_redirect + "';</script> <center><div class='container'><div class='alert alert-primary' role='alert'><a href='" + url_redirect + "'> Redirecting please wait: " + url_redirect + "</a><div></div></center>")
                     return response 
