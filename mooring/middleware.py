@@ -219,21 +219,25 @@ class BookingTimerMiddleware(object):
             logger.info('session[ps_booking] does not exist.')
 
         if CHECKOUT_PATH.match(request.path):
-            booking = Booking.objects.get(pk=request.session['ps_booking'])
-            booking_reference = 'PS' + str(booking.id)
-            if booking_reference[:2] == 'PS':
-                booking_id = booking_reference.split("-")
+            try:
+                booking = Booking.objects.get(pk=request.session['ps_booking'])
+            except:
+                # no idea what object is in self.request.session['ps_booking'], ditch it
+                delete_session_booking(request.session)
+                return HttpResponseRedirect(reverse('public_make_booking'))
+
+            try:
+                del request.session['ad_booking']
+                del request.session['annual_admission_booking']
+            except:
+                pass
+
+            if timezone.now() > booking.expiry_time:
                 try:
-                    del request.session['ad_booking']
-                    del request.session['annual_admission_booking']
+                    delete_session_booking(request.session)
                 except:
                     pass
-                if timezone.now() > booking.expiry_time:
-                    try:
-                        delete_session_booking(request.session)
-                    except:
-                        pass
-                    return HttpResponseRedirect(reverse('public_make_booking'))
+                return HttpResponseRedirect(reverse('public_make_booking'))
 
         # force a redirect if in the checkout
         if ('ps_booking_internal' not in request.COOKIES) and CHECKOUT_PATH.match(request.path):
@@ -241,7 +245,6 @@ class BookingTimerMiddleware(object):
                 return HttpResponseRedirect(reverse('public_make_booking'))
             else:
                 return
-            return HttpResponseRedirect(reverse('public_make_booking'))
         return
 
     def __call__(self, request):            
