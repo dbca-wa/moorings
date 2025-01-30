@@ -36,13 +36,13 @@ def mooring_url(request):
 
     failed_refund_count = 0
     if authed:
-         if request.user.is_staff or request.user.is_superuser:
-             failed_refund_count = models.RefundFailed.objects.filter(status=0).count()
-         is_officer = helpers.is_officer(request.user)
-         is_inventory = helpers.is_inventory(request.user)
-         is_admin = helpers.is_admin(request.user)
-         is_payment_officer = helpers.is_payment_officer(request.user)
-         is_customer = helpers.is_customer(request.user)
+        if request.user.is_staff or request.user.is_superuser:
+            failed_refund_count = models.RefundFailed.objects.filter(status=0).count()
+        is_officer = helpers.is_officer(request.user)
+        is_inventory = helpers.is_inventory(request.user)
+        is_admin = helpers.is_admin(request.user)
+        is_payment_officer = helpers.is_payment_officer(request.user)
+        is_customer = helpers.is_customer(request.user)
 
     mooring_url['REFUND_FAILED_COUNT'] = failed_refund_count
     mooring_url['IS_OFFICER'] = is_officer

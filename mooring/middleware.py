@@ -178,12 +178,23 @@ class BookingTimerMiddleware(object):
 
         if 'ps_booking' in request.session:
             logger.info(f"session['ps_booking']: [{request.session['ps_booking']}] exists.")
+
+            # TEST
+            checkouthash =  hashlib.sha256(str(request.session["ps_booking"]).encode('utf-8')).hexdigest()
+            checkouthash_cookie = request.COOKIES.get('checkouthash')
+            if checkouthash_cookie != checkouthash:
+                logger.info(f"***** checkouthash mismatch: [{checkouthash}] != [{checkouthash_cookie}]")
+            else:
+                logger.info(f"***** checkouthash match: [{checkouthash}] == [{checkouthash_cookie}]")
+            # END TEST
+
             try:
                 booking = Booking.objects.get(pk=request.session['ps_booking'])
             except:
                 # no idea what object is in self.request.session['ps_booking'], ditch it
                 delete_session_booking(request.session)
                 return
+
             if booking.booking_type != 3:
                 # booking in the session is not a temporary type, ditch it
                 delete_session_booking(request.session)

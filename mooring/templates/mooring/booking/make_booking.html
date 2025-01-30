@@ -42,6 +42,7 @@
     </div>
 {% else %}
     <form method="POST" name="addBookingForm" @submit.prevent="validate()" novalidate><div class="container">
+        <input id="booking_hash_id" name="booking_hash_id" type="hidden" value="{{ checkouthash }}" />
         {% csrf_token %}
         <div class="row">
             <div class="col-lg-12">

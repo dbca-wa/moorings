@@ -644,6 +644,7 @@ def search_suggest(request, *args, **kwargs):
         entries.append(geojson.Point((x[2].x, x[2].y), properties={'type': 'Region', 'id': x[0], 'name': x[1], 'zoom_level': x[3]}))
     return HttpResponse(geojson.dumps(geojson.FeatureCollection(entries)), content_type='application/json')
 
+
 @csrf_exempt
 def delete_booking(request, *args, **kwargs):
     response_data = {}
@@ -670,25 +671,20 @@ def delete_booking(request, *args, **kwargs):
                      else:
                          response_data['result'] = 'error'
                          response_data['message'] = 'Unable to delete booking'
-
                  else:
-
                      response_data['result'] = 'error'
                      response_data['message'] = 'Unable to delete booking'
     return HttpResponse(json.dumps(response_data), content_type='application/json')
 
+
 @csrf_exempt
-#@require_http_methods(['GET'])
-#@require_http_methods(['POST'])
 def add_booking(request, *args, **kwargs):
-    logger.info('in add_booking()')
+    logger.info('in add_booking()...')
 
     response_data = {}
     response_data['result'] = 'error'
     response_data['message'] = ''
     booking_date = request.POST['date']
-#    booking_period_start = request.POST['booking_start']
-#    booking_period_finish = request.POST['booking_finish']
     booking_period_start = datetime.strptime(request.POST['booking_start'], "%d/%m/%Y").date()
     booking_period_finish = datetime.strptime(request.POST['booking_finish'], "%d/%m/%Y").date()
     num_adults = request.POST.get('num_adult', 0)
@@ -778,19 +774,17 @@ def add_booking(request, *args, **kwargs):
     if existing_booking_check is True:
         response_data['result'] = 'error'
         response_data['message'] = 'Sorry booking has already been taken by another booking.' 
-
-    
     else:
-        cb =    MooringsiteBooking.objects.create(
-                  campsite=mooringsite,
-                  booking_type=3,
-                  date=booking_date,
-                  from_dt=start_booking_date+' '+str(booking_period.start_time),
-                  to_dt=finish_booking_date+' '+str(booking_period.finish_time),
-                  booking=booking,
-                  amount=amount,
-                  booking_period_option=booking_period 
-                  )
+        cb = MooringsiteBooking.objects.create(
+            campsite=mooringsite,
+            booking_type=3,
+            date=booking_date,
+            from_dt=start_booking_date+' '+str(booking_period.start_time),
+            to_dt=finish_booking_date+' '+str(booking_period.finish_time),
+            booking=booking,
+            amount=amount,
+            booking_period_option=booking_period 
+        )
 
         response_data['result'] = 'success'
         response_data['message'] = ''
