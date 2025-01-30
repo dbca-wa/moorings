@@ -20,7 +20,7 @@ class Migration(migrations.Migration):
     dependencies = [
         ('taggit', '0002_auto_20150616_2121'),
         migrations.swappable_dependency(settings.AUTH_USER_MODEL),
-        ('invoice', '0008_invoice_previous_invoice'),
+        # ('invoice', '0008_invoice_previous_invoice'),
     ]
 
     operations = [
@@ -99,7 +99,8 @@ class Migration(migrations.Migration):
                 ('campsites', django.contrib.postgres.fields.jsonb.JSONField()),
                 ('vehicles', django.contrib.postgres.fields.jsonb.JSONField()),
                 ('booking', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='history', to='mooring.Booking')),
-                ('invoice', models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.CASCADE, to='invoice.Invoice')),
+                # ('invoice', models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.CASCADE, to='invoice.Invoice')),
+                ('invoice', models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.CASCADE, to='ledger_api_client.Invoice')),
                 ('updated_by', models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.PROTECT, to=settings.AUTH_USER_MODEL)),
             ],
         ),

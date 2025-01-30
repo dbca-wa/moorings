@@ -2,11 +2,12 @@ from django.core.management.base import BaseCommand
 from django.utils import timezone
 from django.conf import settings
 from mooring import emails
-from ledger.accounts.models import EmailUser, Address, EmailIdentity
+# from ledger.accounts.models import EmailUser, Address, EmailIdentity
+from ledger_api_client.ledger_models import EmailUserRO as EmailUser
 from mooring import models
 from datetime import timedelta, date, datetime
 from decimal import Decimal as D
-from ledger.payments.utils import systemid_check
+# from ledger.payments.utils import systemid_check
 from decimal import Decimal
 import itertools
 

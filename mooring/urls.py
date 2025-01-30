@@ -5,7 +5,8 @@ from rest_framework import routers
 from mooring import views, api
 from mooring.admin import admin
 
-from ledger.urls import urlpatterns as ledger_patterns
+# from ledger.urls import urlpatterns as ledger_patterns
+from ledger_api_client.urls import urlpatterns as ledger_patterns
 
 # API patterns
 router = routers.DefaultRouter()
@@ -14,14 +15,14 @@ if settings.DEBUG is not True:
 
 #router.register(r'mooring_map', api.MooringAreaMapViewSet)
 #router.register(r'current_booking', api.CurrentBookingViewSet)
-router.register(r'mooring_map_filter', api.MooringAreaMapFilterViewSet)
-router.register(r'marine_parks_map', api.MarineParksMapViewSet)
+router.register(r'mooring_map_filter', api.MooringAreaMapFilterViewSet, basename='mooring_map_filter')
+router.register(r'marine_parks_map', api.MarineParksMapViewSet, basename='marine_parks_map')
 router.register(r'region_marine_parks_map', api.MarineParksRegionMapViewSet)
 #router.register(r'availability', api.AvailabilityViewSet, 'availability')
 router.register(r'availability2', api.AvailabilityViewSet2, 'availability2')
-router.register(r'availability_admin', api.AvailabilityAdminViewSet)
+router.register(r'availability_admin', api.AvailabilityAdminViewSet, basename='availability_admin')
 router.register(r'availability_ratis', api.AvailabilityRatisViewSet, 'availability_ratis')
-router.register(r'mooring-areas', api.MooringAreaViewSet)
+router.register(r'mooring-areas', api.MooringAreaViewSet, basename='mooringarea3')
 router.register(r'mooringsites', api.MooringsiteViewSet)
 router.register(r'mooringsite_bookings', api.MooringsiteBookingViewSet)
 router.register(r'promo_areas', api.PromoAreaViewSet)
@@ -111,7 +112,8 @@ urlpatterns = [
     url(r'', include(api_patterns)),
     url(r'^forbidden', views.ForbiddenView.as_view(), name='forbidden-view'),
     url(r'^account/', views.ProfileView.as_view(), name='account'),
-    url(r'^$', views.MarinastayRoutingView.as_view(), name='ps_home'),
+    # url(r'^$', views.MarinastayRoutingView.as_view(), name='ps_home'),
+    url(r'^$', views.MarinastayRoutingView.as_view(), name='home'),
     url(r'^mooringsites/(?P<ground_id>[0-9]+)/$', views.MooringsiteBookingSelector.as_view(), name='campsite_booking_selector'),
     url(r'^availability/$', views.MooringsiteAvailabilitySelector.as_view(), name='campsite_availaiblity_selector'),
     url(r'^availability2/$', views.MooringAvailability2Selector.as_view(), name='mooring_availaiblity2_selector'),
