@@ -3,7 +3,8 @@ from django.utils import timezone
 from django.conf import settings
 from parkstay.models import Booking
 from parkstay import emails
-from ledger.payments.models import Invoice
+# from ledger.payments.models import Invoice
+from ledger_api_client.ledger_models import Invoice
 
 from datetime import timedelta, date
 from decimal import Decimal as D

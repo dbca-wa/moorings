@@ -1,47 +1,65 @@
-from django.contrib import messages
 from django.contrib.gis import admin
 from django.contrib.admin import AdminSite
-from django.contrib.auth.admin import UserAdmin
-from django.contrib.auth.models import Group
 
-from django.db.models import Q
-
-from ledger.accounts import admin as ledger_admin
-from ledger.accounts.models import EmailUser
+from ledger_api_client.ledger_models import EmailUserRO as EmailUser
 from copy import deepcopy
 
 from mooring import models
+
+admin.site.index_template = 'admin-index.html'  # Overwriting the default admin index page.  This fixs the weird django_admin_log error when accessing the admin pages.
+admin.autodiscover()
 
 class MooringAdminSite(AdminSite):
     site_header = 'Moorings Administration'
     site_title = 'Moorings Bookings'
 
-mooring_admin_site = MooringAdminSite(name='mooringadmin')
-admin.site.unregister(EmailUser)
-@admin.register(EmailUser)
-class EmailUserAdmin(ledger_admin.EmailUserAdmin):
-    """
-    Override the EmailUserAdmin from ledger.accounts.admin to remove is_superuser checkbox field on Admin page
-    """
-    def get_fieldsets(self, request, obj=None):
-        """ Remove the is_superuser checkbox from the Admin page, is user is Mooring Admin or RIA Admin and NOT superuser."""
-        fieldsets = super(UserAdmin, self).get_fieldsets(request, obj)
-        if not obj:
-            return fieldsets
+# mooring_admin_site = MooringAdminSite(name='mooringadmin')
+# admin.site.unregister(EmailUser)
+# @admin.register(EmailUser)
+# class EmailUserAdmin(ledger_admin.EmailUserAdmin):
+#     """
+#     Override the EmailUserAdmin from ledger.accounts.admin to remove is_superuser checkbox field on Admin page
+#     """
+#     def get_fieldsets(self, request, obj=None):
+#         """ Remove the is_superuser checkbox from the Admin page, is user is Mooring Admin or RIA Admin and NOT superuser."""
+#         fieldsets = super(UserAdmin, self).get_fieldsets(request, obj)
+#         if not obj:
+#             return fieldsets
         
-        if request.user.is_superuser:
-            return fieldsets
+#         if request.user.is_superuser:
+#             return fieldsets
 
-        group = Group.objects.filter(name='Mooring Admin')
-        if group and (group[0] in request.user.groups.all()):
-            fieldsets = deepcopy(fieldsets)
-            for fieldset in fieldsets:
-                if 'is_superuser' in fieldset[1]['fields']:
-                    if type(fieldset[1]['fields']) == tuple:
-                        fieldset[1]['fields'] = list(fieldset[1]['fields'])
-                    fieldset[1]['fields'].remove('is_superuser')
-                    break
-        return fieldsets
+#         group = Group.objects.filter(name='Mooring Admin')
+#         if group and (group[0] in request.user.groups().all()):
+#             fieldsets = deepcopy(fieldsets)
+#             for fieldset in fieldsets:
+#                 if 'is_superuser' in fieldset[1]['fields']:
+#                     if type(fieldset[1]['fields']) == tuple:
+#                         fieldset[1]['fields'] = list(fieldset[1]['fields'])
+#                     fieldset[1]['fields'].remove('is_superuser')
+#                     break
+#         return fieldsets
+
+
+@admin.register(EmailUser)
+class EmailUserAdmin(admin.ModelAdmin):
+    list_display = ('email','first_name','last_name','is_staff','is_active',)
+    ordering = ('email',)
+    search_fields = ('id','email','first_name','last_name')
+    readonly_fields = ['email','first_name','last_name','is_staff','is_active','user_permissions']
+ 
+#    def has_change_permission(self, request, obj=None):
+#        if obj is None: # and obj.status > 1:
+#            return True
+#        return None 
+    def has_delete_permission(self, request, obj=None):
+        return False
+    
+#    def get_readonly_fields(self, request, obj=None):
+#        if 'edit' not in request.GET:
+#            return self.readonly_fields
+#        else:
+#            return self.readonly_fields 
 
 @admin.register(models.MooringsiteClass)
 class MooringsiteClassAdmin(admin.ModelAdmin):
@@ -87,9 +105,51 @@ class MooringAreaAdmin(admin.GeoModelAdmin):
     list_filter = ('mooring_type','site_type','mooring_specification',)
     openlayers_url = 'https://cdnjs.cloudflare.com/ajax/libs/openlayers/2.13.1/OpenLayers.js'
 
+
+class MooringAreaGroupMemberInline(admin.TabularInline):
+    model = models.MooringAreaGroup.members.through  # MooringAreaGroupMember
+    raw_id_fields = ('emailuser',)
+    extra = 0
+#     verbose_name = 'Member'
+#     verbose_name_plural = 'Members'
+    def save_new_objects(self, commit=False):
+        pass
+    def save_new(self, form, commit=False):
+        pass
+    def save_existing(self, form, instance, commit=False):
+        pass
+
+
+class MooringAreaGroupMooringAreaInline(admin.TabularInline):
+    model = models.MooringAreaGroup.moorings.through
+    raw_id_fields = ('mooringarea',)
+    extra = 0
+
+    def save_new_objects(self, commit=False):
+        pass
+    def save_new(self, form, commit=False):
+        pass
+    def save_existing(self, form, instance, commit=False):
+        pass
+
+
 @admin.register(models.MooringAreaGroup)
 class MooringAreaGroupAdmin(admin.ModelAdmin):
-    filter_horizontal = ('members','moorings')
+    # filter_horizontal = ('members', 'moorings',)
+    exclude = ('members', 'moorings',)
+    # filter_horizontal = ('moorings',)
+    # filter_horizontal = ('members',)
+    inlines = [MooringAreaGroupMemberInline, MooringAreaGroupMooringAreaInline,]
+    list_per_page = 20
+    list_display = ('name', 'members_count', 'moorings_count')
+
+    def members_count(self, obj):
+        return obj.members.count()
+    members_count.short_description = 'Members Count'
+
+    def moorings_count(self, obj):
+        return obj.moorings.count()
+    moorings_count.short_description = 'Moorings Count'
 
     def formfield_for_manytomany(self, db_field, request, **kwargs):
         if db_field.name == "members":
@@ -163,19 +223,38 @@ class BookingVehicleRegoInline(admin.TabularInline):
 
 @admin.register(models.Booking)
 class BookingAdmin(admin.ModelAdmin):
-    raw_id_fields = ('customer','created_by','overridden_by','canceled_by','old_booking','admission_payment',)
-    list_display = ('id','arrival','departure','booking_type','mooringarea','legacy_id','legacy_name','cost_total','property_cache_version','property_cache_stale')
+    # raw_id_fields = ('old_booking','admission_payment',)
+    raw_id_fields = ('old_booking','admission_payment','customer', 'created_by', 'overridden_by', 'canceled_by',)
+    list_display = (
+        'id',
+        'arrival',
+        'departure',
+        'booking_type',
+        'mooringarea',
+        'cancelation_time',
+        'legacy_id',
+        'legacy_name',
+        'cost_total',
+        'property_cache_version',
+        'property_cache_stale',
+        'created'
+    )
     ordering = ('-id',)
     search_fields = ('customer','id','admission_payment','cost_total')
-    list_filter = ('booking_type',)
+    list_filter = ('booking_type', 'property_cache_stale',)
     readonly_fields=('created','property_cache',)
-    inlines = [BookingInvoiceInline,MooringsiteBookingInline,BookingVehicleRegoInline]
+    inlines = [
+        BookingInvoiceInline,
+        BookingVehicleRegoInline,
+    ]
 
     def has_add_permission(self, request, obj=None):
         return False
 
+
 @admin.register(models.BookingAnnualAdmission)
 class BookingAnnualAdmissionAdmin(admin.ModelAdmin):
+    # raw_id_fields = ('customer','created_by','overridden_by','canceled_by',)
     raw_id_fields = ('customer','created_by','overridden_by','canceled_by',)
     list_display = ('id','customer','start_dt','expiry_dt','rego_no','booking_type','cost_total','created_by','created')
     ordering = ('-id',)
@@ -450,7 +529,7 @@ class AdmissionLineInline(admin.TabularInline):
 
 @admin.register(models.AdmissionsBooking)
 class AdmissionBooking(admin.ModelAdmin):
-    raw_id_fields = ('customer',)
+    raw_id_fields = ('customer', 'created_by', 'canceled_by')
     list_display = ('confirmation_number', 'booking_type','customer','mobile', 'totalCost','created')
     readonly_fields=('created_by','canceled_by',)
     inlines = [AdmissionLineInline]
@@ -665,5 +744,3 @@ class UpdateLogAdmin(admin.ModelAdmin):
 class VesselLicenceAdmin(admin.ModelAdmin):
     list_display = ('id','vessel_rego','licence_id','licence_type','start_date','expiry_date','status')
     search_fields = ('vessel_rego','licence_id',)
-
-

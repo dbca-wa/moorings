@@ -1,12 +1,14 @@
+import hashlib
 import logging
 import calendar
 import json
 import os
 import mimetypes
+import requests
 from django.db.models import Q
 from django.http import Http404, HttpResponse, JsonResponse, HttpResponseRedirect
 from django.shortcuts import render, get_object_or_404, redirect
-from django.core.urlresolvers import reverse
+from django.urls import reverse
 from django.core.serializers.json import DjangoJSONEncoder
 from django.views.generic.base import View, TemplateView
 from django.views.generic import ListView, DetailView, CreateView, UpdateView, DeleteView, FormView
@@ -66,15 +68,20 @@ from mooring.models import (MooringArea,
 from mooring.serialisers import AdmissionsBookingSerializer, AdmissionsLineSerializer
 from mooring import emails
 # Ledger 
-from ledger.accounts.models import EmailUser, Address
-from ledger.payments.models import Invoice
-from ledger.basket.models import Basket
-from ledger.payments.bpoint.models import BpointTransaction, BpointToken
-from ledger.payments.utils import systemid_check, update_payments
-from ledger.checkout.utils import place_order_submission 
-from ledger.payments.cash.models import CashTransaction 
+# from ledger.accounts.models import EmailUser, Address
+# from ledger.payments.models import Invoice
+# from ledger.basket.models import Basket
+from ledger_api_client.ledger_models import EmailUserRO as EmailUser, Address, Invoice, Basket
+# from ledger.payments.bpoint.models import BpointTransaction, BpointToken
+class BpointTransaction():
+    pass
+# from ledger.payments.utils import systemid_check, update_payments
+# from ledger.checkout.utils import place_order_submission 
+from ledger_api_client.utils import update_payments, place_order_submission
+# from ledger.payments.cash.models import CashTransaction 
 # Ledger
-from ledger.order.models import Order
+# from ledger.order.models import Order
+from ledger_api_client.order import Order
 from django_ical.views import ICalFeed
 from datetime import datetime, timedelta, date
 from decimal import *
@@ -82,11 +89,14 @@ from pytz import timezone as pytimezone
 
 from mooring.helpers import is_officer, is_payment_officer
 from mooring import utils
-from ledger.payments.mixins import InvoiceOwnerMixin
-from mooring.invoice_pdf import create_invoice_pdf_bytes
+# from ledger.payments.mixins import InvoiceOwnerMixin
+from ledger_api_client.mixins import InvoiceOwnerMixin
+# from mooring.invoice_pdf import create_invoice_pdf_bytes
 from mooring.context_processors import mooring_url, template_context
-from ledger.checkout.utils import create_basket_session, create_checkout_session, place_order_submission, get_cookie_basket
-from ledger.payments.invoice import utils as utils_ledger_payment_invoice
+# from ledger.checkout.utils import create_basket_session, create_checkout_session, place_order_submission, get_cookie_basket
+from ledger_api_client.utils import create_basket_session, create_checkout_session, place_order_submission, process_api_refund 
+# from ledger.payments.invoice import utils as utils_ledger_payment_invoice
+
 
 logger = logging.getLogger('booking_checkout')
 
@@ -378,7 +388,7 @@ class CancelBookingView(TemplateView):
         booking_total = Decimal('0.00')
         overide_cancel_fees = False
 
-        payments_officer_group = request.user.groups.filter(name__in=['Payments Officers']).exists()
+        payments_officer_group = request.user.groups().filter(name=['Payments Officers']).exists()
 
         if request.user.is_staff or request.user.is_superuser or Booking.objects.filter(customer=request.user,pk=booking_id).count() == 1:
              booking = Booking.objects.get(pk=booking_id)
@@ -403,7 +413,7 @@ class CancelBookingView(TemplateView):
         overide_cancel_fees = False
         occ = request.POST.get('occ', 'false')
         cancellation_reason = request.POST.get('cancellation_reason','')
-        payments_officer_group = request.user.groups.filter(name__in=['Payments Officers']).exists()
+        payments_officer_group = request.user.groups().filter(name=['Payments Officers']).exists()
         failed_refund = False
 
         if request.session:
@@ -427,10 +437,10 @@ class CancelBookingView(TemplateView):
         if request.user.is_staff or request.user.is_superuser or Booking.objects.filter(customer=request.user,pk=booking_id).count() == 1:
              booking = Booking.objects.get(pk=booking_id)
              if booking.booking_type == 4:
-                  print ("BOOKING HAS BEEN CANCELLED")
+                  logger.info(f'Booking: [{booking.id}] has already been cancelled.')
                   return HttpResponseRedirect(reverse('home'))
         
-        bpoint_id = self.get_booking_info(self, request, *args, **kwargs)
+        # bpoint_id = self.get_booking_info(self, request, *args, **kwargs)
         booking_cancellation_fees = utils.calculate_price_booking_cancellation(booking, overide_cancel_fees)
         if booking.admission_payment:
             booking_admission = AdmissionsBooking.objects.get(pk=booking.admission_payment_id)
@@ -443,19 +453,28 @@ class CancelBookingView(TemplateView):
         ## PLACE IN UTILS
         lines = []
         for cf in booking_cancellation_fees:
-                lines.append({'ledger_description':cf['description'],"quantity":1,"price_incl_tax":cf['amount'],"oracle_code":cf['oracle_code'], 'line_status': 3})
+            lines.append({
+                'ledger_description': cf['description'],
+                "quantity": 1,
+                "price_incl_tax": cf['amount'],
+                "oracle_code": cf['oracle_code'],
+                'line_status': 3
+            })
 
         basket_params = {
             'products': lines,
             'vouchers': [],
             'system': settings.PS_PAYMENT_SYSTEM_ID,
             'custom_basket': True,
-            'booking_reference': 'PS-'+str(booking.id)
+            'booking_reference': 'PS-'+str(booking.id),
+            'booking_reference_link': 'PS-'+str(booking.id)
         }
 
-        basket, basket_hash = create_basket_session(request, basket_params)
-        ci = utils_ledger_payment_invoice.CreateInvoiceBasket()
-        order_ci  = ci.create_invoice_and_order(basket, total=None, shipping_method='No shipping required',shipping_charge=False, status='Submitted', invoice_text='Refund Allocation Pool', user=booking.customer)
+        basket_params = utils.convert_decimal_to_float(basket_params)
+        basket_hash = create_basket_session(request, request.user.id, basket_params)
+        basket = utils.get_basket_by_basket_hash(basket_hash)
+        # ci = utils_ledger_payment_invoice.CreateInvoiceBasket()
+        # order_ci  = ci.create_invoice_and_order(basket, total=None, shipping_method='No shipping required',shipping_charge=False, status='Submitted', invoice_text='Refund Allocation Pool', user=booking.customer)
         #basket.status = 'Submitted'
         #basket.save() 
 #        print (basket)
@@ -475,10 +494,10 @@ class CancelBookingView(TemplateView):
 #        # END PLACE IN UTILS
 #        order_response = place_order_submission(request)
 
-        new_order = Order.objects.get(basket=basket)
-        new_invoice = Invoice.objects.get(order_number=new_order.number)
-        #update_payments(new_invoice.reference)
-        book_inv, created = BookingInvoice.objects.get_or_create(booking=booking, invoice_reference=new_invoice.reference)
+        # new_order = Order.objects.get(basket=basket)
+        # new_invoice = Invoice.objects.get(order_number=new_order.number)
+        # update_payments(new_invoice.reference)
+        # book_inv, created = BookingInvoice.objects.get_or_create(booking=booking, invoice_reference=new_invoice.reference)
 
         #basket.status = 'Submitted'
         #basket.save()
@@ -490,11 +509,26 @@ class CancelBookingView(TemplateView):
 #         info = {'amount': float('10.00'), 'details' : 'Refund via system'}
         refund = None
 
+        checkouthash =  hashlib.sha256(str(booking.pk).encode('utf-8')).hexdigest()
+        request.session['checkouthash'] = checkouthash
+        return_url = request.build_absolute_uri()+"/booking/cancellation-success/?checkouthash="+checkouthash
+        return_preload_url = request.build_absolute_uri()+"/booking/return-cancelled/"
+        jsondata = process_api_refund(request, basket_params, booking.customer.id, return_url, return_preload_url)
+        if jsondata['message'] == 'success':
+            for ir in jsondata['data']['invoice_reference']:
+                # Link the refund invoice to the booking  (Ref: https://github.com/dbca-wa/parkstay_bs_v2/blob/63895cd92193cebe003f53bb2866ce7346006d40/parkstay/views.py#L816)
+                BookingInvoice.objects.get_or_create(booking=booking, invoice_reference=ir)
+            emails.send_refund_completed_email_customer(booking, context_processor)
+        else:
+            emails.send_refund_failure_email(booking, context_processor)
+            emails.send_refund_failure_email_customer(booking, context_processor)
+
+
         try: 
-            bpoint = BpointTransaction.objects.get(id=bpoint_id)
-            refund = bpoint.refund(info,request.user)
-            invoice = Invoice.objects.get(reference=bpoint.crn1)
-            update_payments(invoice.reference)
+            # bpoint = BpointTransaction.objects.get(id=bpoint_id)
+            # refund = bpoint.refund(info,request.user)
+            # invoice = Invoice.objects.get(reference=bpoint.crn1)
+            # update_payments(invoice.reference)
             emails.send_refund_completed_email_customer(booking, context_processor)
  
         except:
@@ -507,29 +541,29 @@ class CancelBookingView(TemplateView):
             emails.send_refund_failure_email(booking, context_processor)
             emails.send_refund_failure_email_customer(booking, context_processor)
          
-            booking_invoice = BookingInvoice.objects.filter(booking=booking).order_by('id')
-            for bi in booking_invoice:
-                invoice = Invoice.objects.get(reference=bi.invoice_reference)
-            RefundFailed.objects.create(booking=booking, invoice_reference=invoice.reference, refund_amount=b_total,status=0, basket_json=None)
+            # booking_invoice = BookingInvoice.objects.filter(booking=booking).order_by('id')
+            # for bi in booking_invoice:
+            #     invoice = Invoice.objects.get(reference=bi.invoice_reference)
+            # RefundFailed.objects.create(booking=booking, invoice_reference=invoice.reference, refund_amount=b_total,status=0, basket_json=None)
 
 
 
-        new_invoice.settlement_date = None
-        new_invoice.save()
+        # new_invoice.settlement_date = None
+        # new_invoice.save()
 
-        if refund:
-            print ("DID REFUND HAPPEN")
-            bpoint_refund = BpointTransaction.objects.get(txn_number=refund.txn_number)
-            bpoint_refund.crn1 = new_invoice.reference
-            bpoint_refund.save()
+        # if refund:
+        #     print ("DID REFUND HAPPEN")
+        #     bpoint_refund = BpointTransaction.objects.get(txn_number=refund.txn_number)
+        #     bpoint_refund.crn1 = new_invoice.reference
+        #     bpoint_refund.save()
 
 
-        update_payments(invoice.reference)
-        update_payments(new_invoice.reference)
+        # update_payments(invoice.reference)
+        # update_payments(new_invoice.reference)
  
-        invoice.voided = True
-        invoice.save()
-        booking.booking_type = 4
+        # invoice.voided = True
+        # invoice.save()
+        booking.booking_type = 4  # This means is_canceled=True
         booking.cancelation_time = datetime.now() 
         booking.canceled_by = request.user
         booking.cancellation_reason = cancellation_reason
@@ -543,13 +577,13 @@ class CancelBookingView(TemplateView):
             booking_admission.cancellation_reason = cancellation_reason
             booking_admission.save()
 
-        update_payments(invoice.reference)
-        update_payments(new_invoice.reference)
+        # update_payments(invoice.reference)
+        # update_payments(new_invoice.reference)
 
-        if failed_refund is True:
-            # Refund Failed Assign Refund amount to allocation pool.
-            lines = [{'ledger_description':'Refund assigned to unallocated pool',"quantity":1,"price_incl_tax":abs(info['amount']),"oracle_code":settings.UNALLOCATED_ORACLE_CODE, 'line_status': 1}]
-            utils.allocate_failedrefund_to_unallocated(request, booking, lines, invoice_text=None, internal=False,order_total=abs(info['amount']),user=booking.customer)
+        # if failed_refund is True:
+        #     # Refund Failed Assign Refund amount to allocation pool.
+        #     lines = [{'ledger_description':'Refund assigned to unallocated pool',"quantity":1,"price_incl_tax":abs(info['amount']),"oracle_code":settings.UNALLOCATED_ORACLE_CODE, 'line_status': 1}]
+        #     utils.allocate_failedrefund_to_unallocated(request, booking, lines, invoice_text=None, internal=False,order_total=abs(info['amount']),user=booking.customer)
 
         return HttpResponseRedirect(reverse('public_booking_cancelled', args=(booking.id,)))
 
@@ -583,7 +617,7 @@ class CancelAdmissionsBookingView(TemplateView):
                   return HttpResponseRedirect(reverse('home'))
 
 
-        if request.user.groups.filter(name__in=['Mooring Admin']).exists():
+        if request.user.groups().filter(name=['Mooring Admin']).exists():
               overide_cancel_fees=True
           
         booking_cancellation_fees = utils.calculate_price_admissions_cancel(booking, [], overide_cancel_fees)
@@ -612,7 +646,7 @@ class CancelAdmissionsBookingView(TemplateView):
                   print ("ADMISSIONS BOOKING HAS BEEN CANCELLED")
                   return HttpResponseRedirect(reverse('home'))
 
-        if request.user.groups.filter(name__in=['Mooring Admin']).exists():
+        if request.user.groups().filter(name__in=['Mooring Admin']).exists():
               overide_cancel_fees=True
         
         bpoint_id = self.get_booking_info(self, request, *args, **kwargs)
@@ -635,7 +669,9 @@ class CancelAdmissionsBookingView(TemplateView):
             'custom_basket': True,
             'booking_reference': 'AD-'+str(booking.id)
         }
-        basket, basket_hash = create_basket_session(request, basket_params)
+        basket_params = utils.convert_decimal_to_float(basket_params)
+        basket_hash = create_basket_session(request, request.user.id, basket_params)
+        basket = utils.get_basket_by_basket_hash(basket_hash)
 
         checkout_params = {
             'system': settings.PS_PAYMENT_SYSTEM_ID,
@@ -895,7 +931,8 @@ class MakeBookingsView(TemplateView):
         campsite = booking.campsites.all()[0].campsite if booking else None
         entry_fees = MarinaEntryRate.objects.filter(Q(period_start__lte = booking.arrival), Q(period_end__gt=booking.arrival)|Q(period_end__isnull=True)).order_by('-period_start').first() if (booking and campsite.mooringarea.park.entry_fee_required) else None
 
-        payments_officer_group = request.user.groups.filter(name__in=['Payments Officers']).exists()
+        # payments_officer_group = request.user.groups().filter(name__in=['Payments Officers']).exists()
+        payments_officer_group = request.user.groups().filter(name=['Payments Officers']).exists()
         if occ == 'true':
             if payments_officer_group:
                 overide_change_fees = True
@@ -1074,7 +1111,7 @@ class MakeBookingsView(TemplateView):
            messages.error(self.request, 'Sorry your booking has expired')   
            return HttpResponseRedirect(reverse('map'))
 
-        #payments_officer_group = request.user.groups.filter(name__in=['Payments Officers']).exists()
+        #payments_officer_group = request.user.groups().filter(name__in=['Payments Officers']).exists()
         #if occ == 'true':
         #    if payments_officer_group:
         #        overide_change_fees = True
@@ -1128,7 +1165,7 @@ class MakeBookingsView(TemplateView):
 #            form.fields['postcode'].required = False
 #            form.fields['country'].required = False
         else:  
-            if request.user.is_anonymous() or request.user.is_staff:
+            if request.user.is_anonymous or request.user.is_staff:
                 form = AnonymousMakeBookingsForm(form_context)
             else:
                 form_context['first_name'] = request.user.first_name
@@ -1166,7 +1203,7 @@ class MakeBookingsView(TemplateView):
         mooring_booking = ""
         if booking:
             mooring_booking = MooringsiteBooking.objects.filter(booking=booking)
-        if request.user.is_anonymous() or request.user.is_staff:
+        if request.user.is_anonymous or request.user.is_staff:
             form = AnonymousMakeBookingsForm(request.POST)
         else:
             form = MakeBookingsForm(request.POST)
@@ -1230,7 +1267,7 @@ class MakeBookingsView(TemplateView):
         overide_change_fees = False
         occ = request.POST.get('occ', 'false')
         overidden = True if request.POST.get('override') else False
-        payments_officer_group = request.user.groups.filter(name__in=['Payments Officers']).exists()
+        payments_officer_group = request.user.groups().filter(name=['Payments Officers']).exists()
         if occ == 'true':
             if payments_officer_group:
                 overide_change_fees = True
@@ -1392,7 +1429,7 @@ class MakeBookingsView(TemplateView):
         total = sum([Decimal(p['price_incl_tax'])*p['quantity'] for p in lines])
 
         # get the customer object
-        if request.user.is_anonymous() or request.user.is_staff:
+        if request.user.is_anonymous or request.user.is_staff:
             if booking.old_booking is None:     
                 try:
                    customer = EmailUser.objects.get(email=form.cleaned_data.get('email').lower())
@@ -1962,7 +1999,7 @@ class AnnualAdmissionsView(CreateView):
         
         initial['allow_override_fees'] = False
         initial['discount_reason'] = DiscountReason.objects.filter(mooring_group=al[0].mooring_group)
-        payments_officer_group = self.request.user.groups.filter(name__in=['Payments Officers']).exists()
+        payments_officer_group = self.request.user.groups().filter(name=['Payments Officers']).exists()
         if payments_officer_group:
              initial['allow_override_fees'] = True
         initial['vessel_length'] = '0.00'
@@ -1977,14 +2014,14 @@ class AnnualAdmissionsView(CreateView):
         print ("SUBMITTED BOOKING")
         self.object = form.save(commit=False)
         forms_data = form.cleaned_data
-        payments_officer_group = self.request.user.groups.filter(name__in=['Payments Officers']).exists()
+        payments_officer_group = self.request.user.groups().filter(name=['Payments Officers']).exists()
         allow_override_fees=False
         if payments_officer_group:
              allow_override_fees = True
 
 
         customer = None
-        if self.request.user.is_anonymous() or self.request.user.is_staff:
+        if self.request.user.is_anonymous or self.request.user.is_staff:
             try:
                customer = EmailUser.objects.get(email=form.cleaned_data.get('email').lower())
             except EmailUser.DoesNotExist:
@@ -3122,7 +3159,7 @@ class AnnualAdmissionSuccessView(TemplateView):
             context_processor = template_context(self.request)
             basket = None
             booking = utils.get_annual_admission_session_booking(request.session)
-            if self.request.user.is_authenticated():
+            if self.request.user.is_authenticated:
                 basket = Basket.objects.filter(status='Submitted', owner=request.user).order_by('-id')[:1]
             else:
                 basket = Basket.objects.filter(status='Submitted', owner=booking.customer).order_by('-id')[:1]
@@ -3230,7 +3267,7 @@ class BookingSuccessView(TemplateView):
             context_processor = template_context(self.request)
             basket = None
             booking = utils.get_session_booking(request.session)
-            if self.request.user.is_authenticated():
+            if self.request.user.is_authenticated:
                 basket = Basket.objects.filter(status='Submitted', owner=request.user).order_by('-id')[:1]
             else:
                 basket = Basket.objects.filter(status='Submitted', owner=booking.customer).order_by('-id')[:1]
@@ -3242,139 +3279,10 @@ class BookingSuccessView(TemplateView):
             response = render(request, self.template_name, context)
             response.delete_cookie(settings.OSCAR_BASKET_COOKIE_OPEN)
             return response
-            #order = Order.objects.get(basket=basket[0]) 
-            #invoice = Invoice.objects.get(order_number=order.number)
-            #invoice_ref = invoice.reference
-            #book_inv, created = BookingInvoice.objects.get_or_create(booking=booking, invoice_reference=invoice_ref)
-            ##invoice_ref = request.GET.get('invoice')
-            #if booking.booking_type == 3:
-            #    try:
-            #        inv = Invoice.objects.get(reference=invoice_ref)
-            #        order = Order.objects.get(number=inv.order_number)
-            #        order.user = booking.customer
-            #        order.save()
-            #    except Invoice.DoesNotExist:
-            #        print ("INVOICE ERROR")
-            #        logger.error('{} tried making a booking with an incorrect invoice'.format('User {} with id {}'.format(booking.customer.get_full_name(),booking.customer.id) if booking.customer else 'An anonymous user'))
-            #        return redirect('public_make_booking')
-            #    if inv.system not in ['0516']:
-            #        print ("SYSTEM ERROR")
-            #        logger.error('{} tried making a booking with an invoice from another system with reference number {}'.format('User {} with id {}'.format(booking.customer.get_full_name(),booking.customer.id) if booking.customer else 'An anonymous user',inv.reference))
-            #        return redirect('public_make_booking')
-#           #     try:
-#           #         print ("BOOKING INVOICE")
-#           #         b = BookingInvoice.objects.get(invoice_reference=invoice_ref)
-#           #         print (b)
-#           #         logger.error('{} tried making a booking with an already used invoice with reference number {}'.format('User {} with id {}'.format(booking.customer.get_full_name(),booking.customer.id) if booking.customer else 'An anonymous user',inv.reference))
-#           #         return redirect('public_make_booking')
-#           #     except BookingInvoice.DoesNotExist:
-#           #         print ("BOOKING DOES NOT EXIST")
-#           #         logger.info('{} finished temporary booking {}, creating new BookingInvoice with reference {}'.format('User {} with id {}'.format(booking.customer.get_full_name(),booking.customer.id) if booking.customer else 'An anonymous user',booking.id, invoice_ref))
-#           #         # FIXME: replace with server side notify_url callback
-#           #         book_inv, created = BookingInvoice.objects.get_or_create(booking=booking, invoice_reference=invoice_ref)
-#           #         book_inv, created = BookingInvoice.objects.get(booking=booking, invoice_reference=invoice_ref) 
-            #    if book_inv:
-            #        if booking.old_booking:
-            #            old_booking = Booking.objects.get(id=booking.old_booking.id)
-            #            old_booking.booking_type = 4
-            #            old_booking.cancelation_time = datetime.now()
-            #            old_booking.canceled_by = request.user
-            #            old_booking.save()
-            #            booking_items = MooringsiteBooking.objects.filter(booking=old_booking)
-            #            # Find admissions booking for old booking
-            #            if old_booking.admission_payment:
-            #                old_booking.admission_payment.booking_type = 4
-            #                old_booking.admission_payment.cancelation_time = datetime.now()
-            #                old_booking.admission_payment.canceled_by = request.user
-
-            #                old_booking.admission_payment.save()
-            #            for bi in booking_items:
-            #                bi.booking_type = 4
-            #                bi.save()
-            #        
-            #        booking_items_current = MooringsiteBooking.objects.filter(booking=booking)
-            #        for bi in booking_items_current:
-            #           if str(bi.id) in booking.override_lines:
-            #              bi.amount = Decimal(booking.override_lines[str(bi.id)])
-            #           bi.save()
-
-            #        msb = MooringsiteBooking.objects.filter(booking=booking).order_by('from_dt')
-            #        from_date = msb[0].from_dt
-            #        to_date = msb[msb.count()-1].to_dt
-            #        timestamp = calendar.timegm(from_date.timetuple())
-            #        local_dt = datetime.fromtimestamp(timestamp)
-            #        from_dt = local_dt.replace(microsecond=from_date.microsecond)
-            #        from_date_converted = from_dt.date()
-            #        timestamp = calendar.timegm(to_date.timetuple())
-            #        local_dt = datetime.fromtimestamp(timestamp)
-            #        to_dt = local_dt.replace(microsecond=to_date.microsecond)
-            #        to_date_converted = to_dt.date()
-            #        booking.arrival = from_date_converted
-            #        booking.departure = to_date_converted
-            #        # set booking to be permanent fixture
-            #        booking.booking_type = 1  # internet booking
-            #        booking.expiry_time = None
-            #        update_payments(invoice_ref)
-            #        #Calculate Admissions and create object
-            #        if booking.admission_payment:
-            #             ad_booking = AdmissionsBooking.objects.get(pk=booking.admission_payment.pk)
-            #             if request.user.__class__.__name__ == 'EmailUser':
-            #                  ad_booking.created_by = request.user
-            #             ad_booking.booking_type=1
-            #             ad_booking.save()
-            #             ad_invoice = AdmissionsBookingInvoice.objects.get_or_create(admissions_booking=ad_booking, invoice_reference=invoice_ref)
-
-            #             for al in ad_booking.override_lines.keys():
-            #                 ad_line = AdmissionsLine.objects.get(id=int(al))
-            #                 ad_line.cost = ad_booking.override_lines[str(al)]
-            #                 ad_line.save()
-            #            # booking.admission_payment = ad_booking
-            #        booking.save()
-            #        #if not request.user.is_staff:
-            #        #    print "USER IS NOT STAFF."
-            #        request.session['ps_last_booking'] = booking.id
-            #        utils.delete_session_booking(request.session)
-            #        # send out the invoice before the confirmation is sent if total is greater than zero
-            #        #if booking.cost_total > 0: 
-            #        emails.send_booking_invoice(booking,request,context_processor)
-            #        # for fully paid bookings, fire off confirmation emaili
-            #        #if booking.invoice_status == 'paid':
-            #        emails.send_booking_confirmation(booking,request, context_processor)
-            #        refund_failed = None
-            #        if RefundFailed.objects.filter(booking=booking).count() > 0:
-            #            refund_failed = RefundFailed.objects.filter(booking=booking)
-            #        # Create/Update Vessel in VesselDetails Table
-            #        try:
-
-            #            if VesselDetail.objects.filter(rego_no=booking.details['vessel_rego']).count() > 0:
-            #                    vd = VesselDetail.objects.filter(rego_no=booking.details['vessel_rego'])
-            #                    p = vd[0]
-            #                    p.vessel_size=booking.details['vessel_size']
-            #                    p.vessel_draft=booking.details['vessel_draft']
-            #                    p.vessel_beam=booking.details['vessel_beam']
-            #                    p.vessel_weight=booking.details['vessel_weight']
-            #                    p.save()
-            #            else:
-            #                    models.VesselDetail.objects.create(rego_no=booking.details['vessel_rego'],
-            #                                                   vessel_size=booking.details['vessel_size'],
-            #                                                   vessel_draft=booking.details['vessel_draft'],
-            #                                                   vessel_beam=booking.details['vessel_beam'],
-            #                                                   vessel_weight=booking.details['vessel_weight']
-            #                                                  )
-            #        except:
-            #            print ("ERROR: create vesseldetails on booking success")
-            #        
-            #        context = {
-            #          'booking': booking,
-            #          'book_inv': [book_inv],
-            #          'refund_failed' : refund_failed
-            #        }
-            #        return render(request, self.template_name, context)
  
         except Exception as e:
-#            if 'ps_booking_internal' in request.COOKIES:
-#                print "INTERNAL REDIRECT"
-#                return redirect('dash-bookings')
+            logger.error('Error in BookingSuccessView: {}'.format(e))
+
             if ('ps_last_booking' in request.session) and Booking.objects.filter(id=request.session['ps_last_booking']).exists():
                 booking = Booking.objects.get(id=request.session['ps_last_booking'])
                 if BookingInvoice.objects.filter(booking=booking).count() > 0:
@@ -3528,7 +3436,8 @@ class ViewBookingHistory(LoginRequiredMixin, TemplateView):
 
     def get_history(self, booking_id, booking_array=[]):
         booking = Booking.objects.get(pk=booking_id)
-        booking.invoices =()
+        # booking.invoices =()
+        booking.invoices.set([])  # Direct assignment to the reverse side of a related set is prohibited. Use invoices.set() instead.
         #booking.invoices = BookingInvoice.objects.filter(booking=booking)
         booking_invoices= BookingInvoice.objects.filter(booking=booking) 
 #        for bi in booking_invoices:
@@ -3547,7 +3456,7 @@ class RefundBookingHistory(LoginRequiredMixin, TemplateView):
         booking_id = kwargs['pk']
         booking = None
         print ("LOADED")
-        if request.user.is_superuser or request.user.groups.filter(name__in=['Payments Officers']).exists():
+        if request.user.is_superuser or request.user.groups().filter(name=['Payments Officers']).exists():
 #            booking = Booking.objects.get(customer=request.user, booking_type__in=(0, 1), is_canceled=False, pk=booking_id)
              booking = Booking.objects.get(pk=booking_id)
              newest_booking = self.get_newest_booking(booking_id)
@@ -3690,7 +3599,7 @@ class RefundAnnualBookingHistory(LoginRequiredMixin, TemplateView):
         booking_id = kwargs['pk']
         booking = None
 
-        if request.user.is_superuser or request.user.groups.filter(name__in=['Payments Officers']).exists():
+        if request.user.is_superuser or request.user.groups().filter(name=['Payments Officers']).exists():
 #            booking = Booking.objects.get(customer=request.user, booking_type__in=(0, 1), is_canceled=False, pk=booking_id)
              newest_booking = models.BookingAnnualAdmission.objects.get(pk=booking_id)
              #newest_booking = self.get_newest_booking(booking_id)
@@ -3879,7 +3788,7 @@ class AdmissionsCostView(TemplateView):
     template_name = 'mooring/admissions/admissions_cost.html'
 
     def get(self, *args, **kwargs):
-        if self.request.user.is_authenticated():
+        if self.request.user.is_authenticated:
             if self.request.user.is_staff:
                 mg_array = []
                 mooring_groups = MooringAreaGroup.objects.filter(members__in=[self.request.user])
@@ -3894,7 +3803,7 @@ class MarinastayRoutingView(TemplateView):
     template_name = 'mooring/index.html'
 
     def get(self, *args, **kwargs):
-        if self.request.user.is_authenticated():
+        if self.request.user.is_authenticated:
             if is_officer(self.request.user):
                 return redirect('dash-campgrounds')
             return redirect('public_my_bookings')
@@ -3906,7 +3815,10 @@ class InvoicePDFView(InvoiceOwnerMixin,View):
         invoice = get_object_or_404(Invoice, reference=self.kwargs['reference'])
         response = HttpResponse(content_type='application/pdf')
         mooring_var = mooring_url(request)
-        response.write(create_invoice_pdf_bytes('invoice.pdf',invoice, mooring_var))
+        api_key = settings.LEDGER_API_KEY
+        url = settings.LEDGER_API_URL + '/ledgergw/invoice-pdf/' + api_key + '/' + invoice.reference
+        invoice_pdf = requests.get(url=url)
+        response.write(invoice_pdf.content)
         return response
 
     def get_object(self):

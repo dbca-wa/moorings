@@ -3,13 +3,28 @@
 	"image": "dbcawa/docker_app_dev:moorings_dev_latest",
 	"remoteUser": "container",
 	"workspaceFolder": "/data/data/projects/moorings",
-	"mounts": ["type=bind,source=/data/,target=/data/",
-	           "type=bind,source=/data/data/containerhome/,target=/home/container/"
+	"mounts": [
+		"type=bind,source=/data/,target=/data/",
+	    "type=bind,source=/data/data/containerhome/,target=/home/container/"
 	          ],	
-	"appPort": [ "7013:8080","9111:9111","9112:9112","9113:9113","9114:9114","9115:9115"],
-	"runArgs": ["--env-file","${localEnv:HOME}/vscode-env/moorings.env",
-		   "--hostname","moorings-dev"
-		   ],
-	"forwardPorts": [9111,9112,9113,9114,9115],
+	"appPort": [
+		"7013:8080",
+		"9111:9111",
+		"9112:9112",
+		"9113:9113",
+		"9114:9114",
+		"9115:9115"
+	],
+	"runArgs": [
+		"--env-file","${localEnv:HOME}/vscode-env/moorings.env",
+		"--hostname","moorings-dev"
+	],
+	"forwardPorts": [
+		9111,
+		9112,
+		9113,
+		9114,
+		9115
+	],
 	"initializeCommand" : "${localEnv:HOME}/docker-scripts-dev/windows_vbox/postgres_docker_load.sh"
 }

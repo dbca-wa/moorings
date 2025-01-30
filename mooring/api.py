@@ -23,25 +23,32 @@ from django.views.decorators.csrf import csrf_exempt
 from django.utils import timezone
 from pytz import timezone as pytimezone
 from rest_framework import viewsets, serializers, status, generics, views
-from django.core import serializers as djangoserializers
-from rest_framework.decorators import detail_route, list_route,renderer_classes,authentication_classes,permission_classes
+# from django.core import serializers as djangoserializers
+# from rest_framework.decorators import detail_route, list_route, renderer_classes, authentication_classes, permission_classes
+from rest_framework.decorators import renderer_classes, authentication_classes, permission_classes
+from rest_framework.decorators import action
 from rest_framework.response import Response
 from rest_framework.renderers import JSONRenderer
 from rest_framework.permissions import IsAuthenticated, AllowAny, IsAdminUser, BasePermission, IsAuthenticatedOrReadOnly
-from rest_framework.pagination import PageNumberPagination
+# from rest_framework.pagination import PageNumberPagination
 from datetime import datetime, timedelta
 from collections import OrderedDict
 from django.core.cache import cache
-from ledger.accounts.models import EmailUser,Address
-from ledger.address.models import Country
-from ledger.payments.models import Invoice, OracleAccountCode
+# from ledger.accounts.models import EmailUser,Address
+from ledger_api_client.ledger_models import EmailUserRO as EmailUser, Address
+# from ledger.address.models import Country
+from ledger_api_client.country_models import Country
+# from ledger.payments.models import Invoice, OracleAccountCode
+from ledger_api_client.ledger_models import Invoice 
+from ledger_api_client.managed_models import SystemGroup
 from django.db.models import Count
 from mooring import utils
 from mooring.helpers import can_view_campground, is_inventory, is_admin, is_payment_officer
 from datetime import datetime,timedelta, date
 from decimal import Decimal
 from django.db.models import Value, ManyToManyField
-from ledger.payments.utils import systemid_check, update_payments
+# from ledger.payments.utils import systemid_check, update_payments
+from ledger_api_client.utils import update_payments
 from mooring.context_processors import mooring_url, template_context
 from mooring import doctopdf
 from mooring import common_iplookup
@@ -156,7 +163,10 @@ from mooring import emails
 from mooring import exceptions
 from django.contrib.gis.geos import Point
 from django.contrib.gis.measure import Distance  
-from ledger.payments.bpoint.models import BpointTransaction, BpointToken
+
+
+logger = logging.getLogger(__name__)
+
 
 # API Views
 class MooringsiteBookingViewSet(viewsets.ModelViewSet):
@@ -261,7 +271,7 @@ class MooringsiteViewSet(viewsets.ModelViewSet):
             print(traceback.print_exc())
             raise serializers.ValidationError(str(e))
 
-    @detail_route(methods=['post'])
+    @action(detail=True, methods=['post'])
     def open_close(self, request, format='json', pk=None):
         try:
             http_status = status.HTTP_200_OK
@@ -303,7 +313,7 @@ class MooringsiteViewSet(viewsets.ModelViewSet):
             except Exception as e:
                 raise
 
-    @list_route(methods=['post'])
+    @action(detail=False, methods=['post',])
     def bulk_close(self, request, format='json', pk=None):
         with transaction.atomic():
             try:
@@ -320,7 +330,7 @@ class MooringsiteViewSet(viewsets.ModelViewSet):
                 raise serializers.ValidationError(str(e[0]))
 
 
-    @detail_route(methods=['get'])
+    @action(detail=True, methods=['get'])
     def status_history(self, request, format='json', pk=None):
         try:
             http_status = status.HTTP_200_OK
@@ -342,7 +352,7 @@ class MooringsiteViewSet(viewsets.ModelViewSet):
             print(traceback.print_exc())
             raise serializers.ValidationError(str(e))
 
-    @detail_route(methods=['get'])
+    @action(detail=True, methods=['get'])
     def stay_history(self, request, format='json', pk=None):
         try:
             http_status = status.HTTP_200_OK
@@ -357,7 +367,7 @@ class MooringsiteViewSet(viewsets.ModelViewSet):
         except Exception as e:
             raise serializers.ValidationError(str(e))
 
-    @detail_route(methods=['get'])
+    @action(detail=True, methods=['get'])
     def price_history(self, request, format='json', pk=None):
         try:
             http_status = status.HTTP_200_OK
@@ -372,7 +382,7 @@ class MooringsiteViewSet(viewsets.ModelViewSet):
         except Exception as e:
             raise serializers.ValidationError(str(e))
 
-    @detail_route(methods=['get'])
+    @action(detail=True, methods=['get'])
     def current_price(self, request, format='json', pk=None):
         try:
             http_status = status.HTTP_200_OK
@@ -635,7 +645,7 @@ def delete_booking(request, *args, **kwargs):
     response_data = {}
     response_data['result'] = 'success'
     response_data['message'] = ''
-    payments_officer_group = request.user.groups.filter(name__in=['Payments Officers']).exists()
+    payments_officer_group = request.user.groups().filter(name=['Payments Officers']).exists()
     nowtime = datetime.strptime(str(datetime.utcnow().strftime('%Y-%m-%d %H:%M:%S')), '%Y-%m-%d %H:%M:%S')+timedelta(hours=8)
     booking = None
     booking_item = request.POST['booking_item']
@@ -769,14 +779,6 @@ def add_booking(request, *args, **kwargs):
         response_data['result'] = 'success'
         response_data['message'] = ''
 
-#    with transaction.atomic():
-#            set_session_booking(request.session,booking)
-
-
-    #booking = Booking.objects.get(pk=request.session['ps_booking']) if 'ps_booking' in request.session else None
-#    if request.user.is_anonymous():
-#        form = AnonymousMakeBookingsForm(request.POST)
-
     return HttpResponse(json.dumps(response_data), content_type='application/json')
 
 def queryset_MooringArea():
@@ -788,7 +790,7 @@ class MooringAreaViewSet(viewsets.ModelViewSet):
     queryset = queryset_MooringArea()
     serializer_class = MooringAreaSerializer
 
-    @list_route(methods=['GET',])
+    @action(detail=False, methods=['get',])
     @renderer_classes((JSONRenderer,))
     def datatable_list(self,request,format=None):
         mooring_groups = MooringAreaGroup.objects.filter(members__in=[self.request.user,])
@@ -1082,7 +1084,7 @@ class MooringAreaViewSet(viewsets.ModelViewSet):
             print(traceback.print_exc())
             raise serializers.ValidationError(str(e))
 
-    @detail_route(methods=['post'])
+    @action(detail=True, methods=['get'])
     def open_close(self, request, format='json', pk=None):
         try:
             http_status = status.HTTP_200_OK
@@ -1133,7 +1135,7 @@ class MooringAreaViewSet(viewsets.ModelViewSet):
             except Exception as e:
                 raise
 
-    @list_route(methods=['post'])
+    @action(detail=False, methods=['post',])
     def bulk_close(self, request, format='json', pk=None):
         with transaction.atomic():
             try:
@@ -1225,7 +1227,7 @@ class MooringAreaViewSet(viewsets.ModelViewSet):
                 errorstr += m
             raise ValueError(errorstr)
 
-    @list_route(methods=['post'])
+    @action(detail=False, methods=['post',])
     def bulk_period(self, request, format='json', pk=None):
         try:
             http_status = status.HTTP_200_OK
@@ -1274,7 +1276,7 @@ class MooringAreaViewSet(viewsets.ModelViewSet):
 
 
 
-    @detail_route(methods=['post'],)
+    @action(detail=True, methods=['post'])
     def addPrice(self, request, format='json', pk=None):
         try:
             http_status = status.HTTP_200_OK
@@ -1332,7 +1334,7 @@ class MooringAreaViewSet(viewsets.ModelViewSet):
             print(traceback.format_exc())
             raise serializers.ValidationError(str(e))
 
-    @detail_route(methods=['post'],)
+    @action(detail=True, methods=['post'])
     def updatePrice(self, request, format='json', pk=None):
         try:
             http_status = status.HTTP_200_OK
@@ -1391,7 +1393,7 @@ class MooringAreaViewSet(viewsets.ModelViewSet):
             print(traceback.print_exc())
             raise serializers.ValidationError(str(e))
 
-    @detail_route(methods=['post'],)
+    @action(detail=True, methods=['post'])
     def deletePrice(self, request, format='json', pk=None):
         try:
             http_status = status.HTTP_200_OK
@@ -1413,7 +1415,7 @@ class MooringAreaViewSet(viewsets.ModelViewSet):
             print(traceback.print_exc())
             raise serializers.ValidationError(str(e))
 
-    @detail_route(methods=['get'])
+    @action(detail=True, methods=['get'])
     def status_history(self, request, format='json', pk=None):
         
         try:
@@ -1436,7 +1438,7 @@ class MooringAreaViewSet(viewsets.ModelViewSet):
             print(traceback.print_exc())
             raise serializers.ValidationError(str(e))
 
-    @detail_route(methods=['get'])
+    @action(detail=True, methods=['get'])
     def campsites(self, request, format='json', pk=None):
         try:
             http_status = status.HTTP_200_OK
@@ -1451,7 +1453,7 @@ class MooringAreaViewSet(viewsets.ModelViewSet):
         except Exception as e:
             raise serializers.ValidationError(str(e))
 
-    @detail_route(methods=['get'])
+    @action(detail=True, methods=['get'])
     def price_history(self, request, format='json', pk=None):
         try:
             http_status = status.HTTP_200_OK
@@ -1472,7 +1474,7 @@ class MooringAreaViewSet(viewsets.ModelViewSet):
         except Exception as e:
             raise serializers.ValidationError(str(e))
 
-    @detail_route(methods=['get'])
+    @action(detail=True, methods=['get'])
     def stay_history(self, request, format='json', pk=None):
         
         try:
@@ -1506,7 +1508,7 @@ class MooringAreaViewSet(viewsets.ModelViewSet):
                 pass
         raise serializers.ValidationError('no valid date format found')
 
-    @detail_route(methods=['get'])
+    @action(detail=True, methods=['get'])
     def available_campsites(self, request, format='json', pk=None):
         try:
             start_date = self.try_parsing_date(request.GET.get('arrival')).date()
@@ -1521,7 +1523,7 @@ class MooringAreaViewSet(viewsets.ModelViewSet):
         except Exception as e:
             raise serializers.ValidationError(str(e))
 
-    @detail_route(methods=['get'])
+    @action(detail=True, methods=['get'])
     def available_campsites_booking(self, request, format='json', pk=None):
         start_date = self.try_parsing_date(request.GET.get('arrival')).date()
         end_date = self.try_parsing_date(request.GET.get('departure')).date()
@@ -1558,7 +1560,7 @@ class MooringAreaViewSet(viewsets.ModelViewSet):
             print(traceback.print_exc())
             raise serializers.ValidationError(str(e))
 
-    @detail_route(methods=['get'])
+    @action(detail=True, methods=['get'])
     def available_campsite_classes(self, request, format='json', pk=None):
         try:
             start_date = datetime.strptime(request.GET.get('arrival'),'%Y/%m/%d').date()
@@ -2395,7 +2397,7 @@ def create_admissions_booking(request, *args, **kwargs):
 
     
     #Lookup customer
-    if request.user.is_anonymous() or request.user.is_staff:
+    if request.user.is_anonymous or request.user.is_staff:
         try:
             customer = EmailUser.objects.get(email=request.POST.get('email').lower())
         except EmailUser.DoesNotExist:
@@ -2533,6 +2535,8 @@ def create_booking(request, *args, **kwargs):
 
     # add the booking to the current session
     request.session['ps_booking'] = booking.pk
+    checkouthash = hashlib.sha256(str(booking.pk).encode('utf-8')).hexdigest()
+    request.session['checkouthash'] = checkouthash
 
     return HttpResponse(geojson.dumps({
         'status': 'success',
@@ -2622,7 +2626,7 @@ class MarinaViewSet(viewsets.ModelViewSet):
             cache.set('parks',data,3600)
         return Response(data)
 
-    @list_route(methods=['get'])
+    @action(detail=False, methods=['get',])
     def price_history(self, request, format='json', pk=None):
         http_status = status.HTTP_200_OK
         try:
@@ -2636,7 +2640,7 @@ class MarinaViewSet(viewsets.ModelViewSet):
 
         return Response(res,status=http_status)
 
-    @detail_route(methods=['get'])
+    @action(detail=True, methods=['get'])
     def current_price(self, request, format='json', pk=None):
         try:
             http_status = status.HTTP_200_OK
@@ -2655,7 +2659,7 @@ class MarinaViewSet(viewsets.ModelViewSet):
             }
         return Response(res,status=http_status)
 
-    @list_route(methods=['post'],)
+    @action(detail=False, methods=['post',])
     def add_price(self, request, format='json', pk=None):
         try:
             http_status = status.HTTP_200_OK
@@ -2709,7 +2713,7 @@ class MooringsiteClassViewSet(viewsets.ModelViewSet):
         return Response(serializer.data)
 
 
-    @detail_route(methods=['get'])
+    @action(detail=True, methods=['get'])
     def price_history(self, request, format='json', pk=None):
         try:
             http_status = status.HTTP_200_OK
@@ -2740,7 +2744,7 @@ class MooringsiteClassViewSet(viewsets.ModelViewSet):
         except Exception as e:
             raise serializers.ValidationError(str(e))
 
-    @detail_route(methods=['post'],)
+    @action(detail=True, methods=['post'])
     def addPrice(self, request, format='json', pk=None):
         try:
             http_status = status.HTTP_200_OK
@@ -2777,7 +2781,7 @@ class MooringsiteClassViewSet(viewsets.ModelViewSet):
         except Exception as e:
             raise serializers.ValidationError(str(e))
 
-    @detail_route(methods=['post'],)
+    @action(detail=True, methods=['post'])
     def updatePrice(self, request, format='json', pk=None):
         try:
             http_status = status.HTTP_200_OK
@@ -2821,7 +2825,7 @@ class MooringsiteClassViewSet(viewsets.ModelViewSet):
             print(traceback.print_exc())
             raise serializers.ValidationError(str(e))
 
-    @detail_route(methods=['post'],)
+    @action(detail=True, methods=['post'])
     def deletePrice(self, request, format='json', pk=None):
         try:
             http_status = status.HTTP_200_OK
@@ -3126,7 +3130,7 @@ class AdmissionsBookingViewSet(viewsets.ModelViewSet):
                 brokenrow_section = "14"
 
                 future_or_admin = False
-                if request.user.groups.filter(name__in=['Mooring Admin']).exists():
+                if request.user.groups().filter(name=['Mooring Admin']).exists():
                     future_or_admin = True
                 else:
                     future_or_admin = ad.in_future
@@ -3213,26 +3217,53 @@ class BookingViewSet(viewsets.ModelViewSet):
                 if search[:2] == 'PS':
                     booking_id_search = search.replace('PS','')
                     filter_query &= Q(id=int(booking_id_search))
-            #print("MLINE 1.03", datetime.now().strftime("%d/%m/%Y %H:%M:%S"))
             booking_query = Booking.objects.filter(filter_query).order_by('-id')
             recordsTotal = Booking.objects.filter(Q(Q(booking_type=1) | Q(booking_type=4))).count()
             recordsFiltered = booking_query.count()
 
-            #print ("COUNT:"+str(recordsFiltered))
-            #print("MLINE 1.04", datetime.now().strftime("%d/%m/%Y %H:%M:%S"))
             # build predata
             booking_items = {}
-            booking_item_query = Q()
-            mooring_name_list = {}
+            # booking_item_query = Q()
             rego_cache = {}
-            for booking in booking_query: 
-                  booking_item_query |= Q(booking_id=booking.id)
-                  booking_items[booking.id] = []
-            #print("MLINE 1.05", datetime.now().strftime("%d/%m/%Y %H:%M:%S"))
+            # for booking in booking_query: 
+            #       booking_item_query |= Q(booking_id=booking.id)
+            #       booking_items[booking.id] = []
+            booking_ids = booking_query.values_list('id', flat=True)
+            booking_items = {id: [] for id in booking_ids}
+            booking_item_query = Q(booking_id__in=booking_ids) if booking_ids else Q()
 
             if len(booking_items) > 0:
-                booking_items_object = MooringsiteBooking.objects.filter(booking_item_query).values('campsite__mooringarea__name','campsite__mooringarea__id','campsite_id','id','to_dt','from_dt','amount','booking_period_option','booking_id','booking','date','campsite__mooringarea__park__district__region__name','campsite__mooringarea__park__district__region__id','campsite__name','booking__customer__email','booking__customer_id','booking_id','booking__customer__phone_number','booking__customer__mobile_number','booking__details','booking__booking_type','booking__canceled_by__first_name','booking__canceled_by__last_name')
-                #bvr = BookingVehicleRego.objects.filter(rego__icontains=search.lower()).values('booking_id','rego','type')
+                booking_items_object = MooringsiteBooking.objects.filter(booking_item_query).values(
+                    'campsite__mooringarea__name',
+                    'campsite__mooringarea__id',
+                    'campsite_id',
+                    'id',
+                    'to_dt',
+                    'from_dt',
+                    'amount',
+                    'booking_period_option',
+                    'booking_id',
+                    'booking',
+                    'date',
+                    'campsite__mooringarea__park__district__region__name',
+                    'campsite__mooringarea__park__district__region__id',
+                    'campsite__name',
+                    # 'booking__customer__email',
+                    'booking__property_cache__customer_email',
+                    # 'booking__customer_id',
+                    'booking__property_cache__customer_id',
+                    'booking_id',
+                    # 'booking__customer__phone_number',
+                    'booking__property_cache__customer_phone_number',
+                    # 'booking__customer__mobile_number',
+                    'booking__property_cache__customer_mobile_number',
+                    'booking__details',
+                    'booking__booking_type',
+                    # 'booking__canceled_by__first_name',
+                    'booking__property_cache__canceled_by_first_name',
+                    # 'booking__canceled_by__last_name'
+                    'booking__property_cache__canceled_by_last_name',
+                )
                 bvr = BookingVehicleRego.objects.filter(booking_item_query).values('booking_id','rego','type')
                 for v in bvr:
                     if v['booking_id'] not in rego_cache:
@@ -3241,11 +3272,38 @@ class BookingViewSet(viewsets.ModelViewSet):
 
                 
                 for bi in booking_items_object:
-                    if bi['booking__canceled_by__first_name']:
-                       cancelled_by = bi['booking__canceled_by__first_name']+' '+bi['booking__canceled_by__last_name']
+                    # if bi['booking__canceled_by__first_name']:
+                    #    cancelled_by = bi['booking__canceled_by__first_name']+' '+bi['booking__canceled_by__last_name']
+                    if bi['booking__property_cache__canceled_by_first_name']:
+                        cancelled_by = bi['booking__property_cache__canceled_by_first_name']+' '+bi['booking__property_cache__canceled_by_last_name']
                     else:
                        cancelled_by = '' 
-                    booking_items[bi['booking_id']].append({'id':bi['id'], 'campsite_id': bi['campsite_id'] , 'date' : bi['date'], 'from_dt': bi['from_dt'], 'to_dt': bi['to_dt'], 'amount': bi['amount'], 'booking_type' : bi['booking__booking_type'], 'booking_period_option' :bi['booking_period_option'], 'campsite_name': bi['campsite__name'], 'region_name': bi['campsite__mooringarea__park__district__region__name'],'mooring_name': bi['campsite__mooringarea__name'], 'region_id': bi['campsite__mooringarea__park__district__region__id'], 'mooringarea_id': bi['campsite__mooringarea__id'],'email': bi['booking__customer__email'], 'customer_id': bi['booking__customer_id'],'booking_id': bi['booking_id'],'phone_number': bi['booking__customer__phone_number'],'mobile_number': bi['booking__customer__mobile_number'], 'details': bi['booking__details'],'cancelled_by': cancelled_by})
+                    booking_items[bi['booking_id']].append({
+                        'id':bi['id'],
+                        'campsite_id': bi['campsite_id'],
+                        'date' : bi['date'],
+                        'from_dt': bi['from_dt'],
+                        'to_dt': bi['to_dt'],
+                        'amount': bi['amount'],
+                        'booking_type' : bi['booking__booking_type'],
+                        'booking_period_option' :bi['booking_period_option'],
+                        'campsite_name': bi['campsite__name'],
+                        'region_name': bi['campsite__mooringarea__park__district__region__name'],
+                        'mooring_name': bi['campsite__mooringarea__name'],
+                        'region_id': bi['campsite__mooringarea__park__district__region__id'],
+                        'mooringarea_id': bi['campsite__mooringarea__id'],
+                        # 'email': bi['booking__customer__email'],
+                        'email': bi['booking__property_cache__customer_email'],
+                        # 'customer_id': bi['booking__customer_id'],
+                        'customer_id': bi['booking__property_cache__customer_id'],
+                        'booking_id': bi['booking_id'],
+                        # 'phone_number': bi['booking__customer__phone_number'],
+                        'phone_number': bi['booking__property_cache__customer_phone_number'],
+                        # 'mobile_number': bi['booking__customer__mobile_number'],
+                        'mobile_number': bi['booking__property_cache__customer_mobile_number'],
+                        'details': bi['booking__details'],
+                        # 'cancelled_by': cancelled_by
+                    })
             #print("LINE 1.06", datetime.now().strftime("%d/%m/%Y %H:%M:%S"))
             clean_data = []
             booking_data = []
@@ -3351,9 +3409,9 @@ class BookingViewSet(viewsets.ModelViewSet):
                         show_row = False
                 if show_row is True:
                     bk_list={}
-                    get_property_cache = booking.get_property_cache()
-                    if 'active_invoices' not in get_property_cache or 'invoices' not in get_property_cache:
-                        get_property_cache = booking.update_property_cache()
+                    property_cache = booking.get_property_cache()
+                    if 'active_invoices' not in property_cache or 'invoices' not in property_cache:
+                        property_cache = booking.update_property_cache()
                     #print("MLINE 1.08.01", datetime.now().strftime("%d/%m/%Y %H:%M:%S"))
                     booking_editable = False
                     if is_staff is True:
@@ -3368,24 +3426,25 @@ class BookingViewSet(viewsets.ModelViewSet):
                     if bitem['booking_type'] == 4:
                         bk_list['status'] = 'Cancelled'
                     else:
-                        bk_list['status'] = get_property_cache['status']
+                        bk_list['status'] = property_cache['status']
                     #booking_invoices= booking.invoices.all()
                     #print("MLINE 1.08.03", datetime.now().strftime("%d/%m/%Y %H:%M:%S"))
 
                     bk_list['booking_type'] = bitem['booking_type']
                     bk_list['has_history'] = 0 #booking.has_history
                     bk_list['cost_total'] = booking.cost_total
-                    bk_list['amount_paid'] = get_property_cache['amount_paid'] #booking.amount_paid
-                    bk_list['invoice_status'] = get_property_cache['invoice_status'] #booking.invoice_status
-                    bk_list['vehicle_payment_status'] = get_property_cache['vehicle_payment_status'] #booking.vehicle_payment_status
-                    bk_list['refund_status'] = get_property_cache['refund_status'] #booking.refund_status
+                    bk_list['amount_paid'] = property_cache['amount_paid'] #booking.amount_paid
+                    bk_list['invoice_status'] = property_cache['invoice_status'] #booking.invoice_status
+                    bk_list['vehicle_payment_status'] = property_cache['vehicle_payment_status'] #booking.vehicle_payment_status
+                    bk_list['refund_status'] = property_cache['refund_status'] #booking.refund_status
                     bk_list['is_canceled'] = 'Yes' if booking.is_canceled else 'No'
                     bk_list['cancelation_reason'] = booking.cancellation_reason
-                    bk_list['canceled_by'] = bitem['cancelled_by'] 
+                    # bk_list['canceled_by'] = bitem['cancelled_by'] 
+                    bk_list['canceled_by'] = f'{property_cache["canceled_by_first_name"]} {property_cache["canceled_by_last_name"]}' if 'canceled_by_first_name' in property_cache else ''
                     bk_list['cancelation_time'] = booking.cancelation_time if booking.cancelation_time else ''
-                    bk_list['paid'] = get_property_cache['paid'] #booking.paid
-                    bk_list['invoices'] = get_property_cache['invoices'] #[i.invoice_reference for i in booking_invoices]
-                    bk_list['active_invoices'] = get_property_cache['active_invoices'] #[ i.invoice_reference for i in booking_invoices if i.active]
+                    bk_list['paid'] = property_cache['paid'] #booking.paid
+                    bk_list['invoices'] = property_cache['invoices'] #[i.invoice_reference for i in booking_invoices]
+                    bk_list['active_invoices'] = property_cache['active_invoices'] #[ i.invoice_reference for i in booking_invoices if i.active]
                     bk_list['guests'] = booking.guests
                     bk_list['admissions'] = { 'id': booking.admission_payment.id, 'amount': booking.admission_payment.totalCost } if booking.admission_payment else None
 
@@ -3457,10 +3516,10 @@ class BookingViewSet(viewsets.ModelViewSet):
                 ('results',booking_data)
             ]),status=status.HTTP_200_OK)
         except serializers.ValidationError:
-            print(traceback.print_exc())
+            logger.error(e)
             raise
         except Exception as e:
-            print(traceback.print_exc())
+            logger.error('An error occurred', exc_info=True)
             raise serializers.ValidationError(str(e))
 
     def create(self, request, format=None):
@@ -3647,7 +3706,7 @@ class BookingViewSet(viewsets.ModelViewSet):
             raise serializers.ValidationError(str(e))
 
     @csrf_exempt
-    @detail_route(permission_classes=[PaymentCallbackPermission],methods=['GET','POST'])
+    @action(detail=True, methods=['get', 'post',], permission_classes=[PaymentCallbackPermission])
     def payment_callback(self, request, *args, **kwargs):
         from django.utils import timezone
         http_status = status.HTTP_200_OK
@@ -3694,7 +3753,7 @@ class BookingViewSet(viewsets.ModelViewSet):
             print(traceback.print_exc())
             raise serializers.ValidationError(str(e))
 
-    @detail_route(permission_classes=[],methods=['GET'])
+    @action(detail=True, methods=['get',], permission_classes=[])
     def booking_checkout_status(self, request, *args, **kwargs):
         from django.utils import timezone
         http_status = status.HTTP_200_OK
@@ -3724,7 +3783,7 @@ class BookingViewSet(viewsets.ModelViewSet):
             print(traceback.print_exc())
             raise serializers.ValidationError(str(e))
 
-    @detail_route(methods=['GET'])
+    @action(detail=True, methods=['get',])
     def history(self, request, *args, **kwargs):
         http_status = status.HTTP_200_OK
         try:
@@ -4098,7 +4157,7 @@ class UsersViewSet(viewsets.ModelViewSet):
         serializer = self.get_serializer(queryset,many=True)
         return Response(serializer.data)
 
-    @detail_route(methods=['POST',])
+    @action(detail=True, methods=['post',])
     def update_personal(self, request, *args, **kwargs):
         try:
             instance = self.get_object()
@@ -4117,7 +4176,7 @@ class UsersViewSet(viewsets.ModelViewSet):
             print(traceback.print_exc())
             raise serializers.ValidationError(str(e))
 
-    @detail_route(methods=['POST',])
+    @action(detail=True, methods=['post',])
     def update_contact(self, request, *args, **kwargs):
         try:
             instance = self.get_object()
@@ -4136,7 +4195,7 @@ class UsersViewSet(viewsets.ModelViewSet):
             print(traceback.print_exc())
             raise serializers.ValidationError(str(e))
 
-    @detail_route(methods=['POST',])
+    @action(detail=True, methods=['post',])
     def update_address(self, request, *args, **kwargs):
         try:
             instance = self.get_object()
@@ -4215,7 +4274,7 @@ class AdmissionsRatesViewSet(viewsets.ModelViewSet):
     serializer_class = AdmissionsRateSerializer
     permission_classes = (IsAuthenticatedOrReadOnly,)
 
-    @detail_route(methods=['GET'])
+    @action(detail=True, methods=['get',])
     def get_price(self, request, format='json', pk=None):
         http_status = status.HTTP_200_OK
         try:
@@ -4237,7 +4296,7 @@ class AdmissionsRatesViewSet(viewsets.ModelViewSet):
             }
         return Response(res, status=http_status)
 
-    @list_route(methods=['get'])
+    @action(detail=False, methods=['get',])
     def get_price_by_location(self, request, format='json', pk=None):
         http_status = status.HTTP_200_OK
         res = ""
@@ -4266,7 +4325,7 @@ class AdmissionsRatesViewSet(viewsets.ModelViewSet):
         return Response(res, status=http_status)
 
 
-    @list_route(methods=['get'])
+    @action(detail=False, methods=['get',])
     def price_history(self, request, format='json', pk=None):
         http_status = status.HTTP_200_OK
         try:
@@ -4284,7 +4343,7 @@ class AdmissionsRatesViewSet(viewsets.ModelViewSet):
 
         return Response(res,status=http_status)
 
-    @list_route(methods=['post'],)
+    @action(detail=False, methods=['post',])
     def add_price(self, request, format='json', pk=None):
         try:
             http_status = status.HTTP_200_OK
@@ -4783,7 +4842,7 @@ def cancel_annual_admissions(request):
         else:
            raise ValidationError('Permission Denied')
 
-        payments_officer_group = request.user.groups.filter(name__in=['Payments Officers']).exists()
+        payments_officer_group = request.user.groups().filter(name=['Payments Officers']).exists()
 
         if payments_officer_group is True:
              
@@ -4850,7 +4909,7 @@ def update_sticker_admission_booking(request):
            pass
         else:
            raise ValidationError('Permission Denied')
-        payments_officer_group = request.user.groups.filter(name__in=['Payments Officers']).exists()
+        payments_officer_group = request.user.groups().filter(name=['Payments Officers']).exists()
 
         if payments_officer_group is True:
              nowdt = datetime.now()
@@ -5183,57 +5242,66 @@ def get_annual_admission_pricing_old(request, annual_booking_period_id, vessel_s
 
 
 def get_current_booking(ongoing_booking, request): 
-     #ongoing_booking = Booking.objects.get(pk=request.session['ps_booking']) if 'ps_booking' in request.session else None
-     timer = None
-     expiry = None
-     if ongoing_booking:
-         #expiry_time = ongoing_booking.expiry_time
-         timer = (ongoing_booking.expiry_time-timezone.now()).seconds if ongoing_booking else -1
-         expiry = ongoing_booking.expiry_time.isoformat() if ongoing_booking else ''
-     payments_officer_group = request.user.groups.filter(name__in=['Payments Officers']).exists()
+    #ongoing_booking = Booking.objects.get(pk=request.session['ps_booking']) if 'ps_booking' in request.session else None
+    timer = None
+    expiry = None
+    try:
+        if ongoing_booking:
+            #expiry_time = ongoing_booking.expiry_time
+            timer = (ongoing_booking.expiry_time-timezone.now()).seconds if ongoing_booking else -1
+            expiry = ongoing_booking.expiry_time.isoformat() if ongoing_booking else ''
+        # payments_officer_group = request.user.groups().filter(name__in=['Payments Officers']).exists()
+        payments_officer_group = SystemGroup.objects.filter(name=['Payments Officers',]).exists()
+        # er_groups = request.u #ser.groups()
+        # user_groups = user_groups.filter(name__in=['Payments Officers'])
+        # payments_officer_group = user_groups.filter(name__in=['Payments Officers']).exists()
+    except Exception as e:
+        logger.disabled = False
+        logger.error(f'Error getting current booking: {e}')
+        raise
 
-     ms_booking = MooringsiteBooking.objects.filter(booking=ongoing_booking).order_by('from_dt')
-     cb = {'current_booking':[], 'total_price': '0.00'}
-     current_booking = []
-#     total_price = Decimal('0.00')
-     total_price = Decimal('0.00')
-     for ms in ms_booking:
-         row = {}
-         row['id'] = ms.id
-           #print ms.from_dt.astimezone(pytimezone('Australia/Perth'))
-         row['item'] = ms.campsite.name + ' from '+ms.from_dt.astimezone(pytimezone('Australia/Perth')).strftime('%d/%m/%y %H:%M %p')+' to '+ms.to_dt.astimezone(pytimezone('Australia/Perth')).strftime('%d/%m/%y %H:%M %p')
-         row['amount'] = str(ms.amount)
-         
-         row['past_booking'] = False
-#         if ms.from_dt.date() <= datetime.now().date():
-         ms_from_ft = datetime.strptime(ms.from_dt.strftime('%Y-%m-%d %H:%M:%S'), '%Y-%m-%d %H:%M:%S')
-         #+timedelta(hours=8)
-#         print datetime.utcnow()+timedelta(hours=8)
-         nowtime = datetime.strptime(str(datetime.utcnow().strftime('%Y-%m-%d %H:%M:%S')), '%Y-%m-%d %H:%M:%S')
-         #+timedelta(hours=8)
-         if ms_from_ft <= nowtime:
-              
-              if ms_from_ft.date() == nowtime.date():
-                 if ongoing_booking.old_booking is None:
-                     pass 
-                 else:
-                     row['past_booking'] = True              
-              else:
-                  row['past_booking'] = True
-              if payments_officer_group is True: 
-                  row['past_booking'] = False
-#           row['item'] = ms.campsite.name
-         total_price = str(Decimal(total_price) +Decimal(ms.amount))
-         current_booking.append(row)
-     cb['current_booking'] = current_booking
-     cb['total_price'] = str(total_price)
-     cb['ongoing_booking'] = True if ongoing_booking else False,
-     cb['ongoing_booking_id'] = ongoing_booking.id if ongoing_booking else None,
-     cb['details'] = ongoing_booking.details if ongoing_booking else [],
-     cb['expiry'] = expiry
-     cb['timer'] = timer
+    ms_booking = MooringsiteBooking.objects.filter(booking=ongoing_booking).order_by('from_dt')
+    cb = {'current_booking':[], 'total_price': '0.00'}
+    current_booking = []
+#    total_price = Decimal('0.00')
+    total_price = Decimal('0.00')
+    for ms in ms_booking:
+        row = {}
+        row['id'] = ms.id
+          #print ms.from_dt.astimezone(pytimezone('Australia/Perth'))
+        row['item'] = ms.campsite.name + ' from '+ms.from_dt.astimezone(pytimezone('Australia/Perth')).strftime('%d/%m/%y %H:%M %p')+' to '+ms.to_dt.astimezone(pytimezone('Australia/Perth')).strftime('%d/%m/%y %H:%M %p')
+        row['amount'] = str(ms.amount)
+        
+        row['past_booking'] = False
+#        if ms.from_dt.date() <= datetime.now().date():
+        ms_from_ft = datetime.strptime(ms.from_dt.strftime('%Y-%m-%d %H:%M:%S'), '%Y-%m-%d %H:%M:%S')
+        #+timedelta(hours=8)
+#        print datetime.utcnow()+timedelta(hours=8)
+        nowtime = datetime.strptime(str(datetime.utcnow().strftime('%Y-%m-%d %H:%M:%S')), '%Y-%m-%d %H:%M:%S')
+        #+timedelta(hours=8)
+        if ms_from_ft <= nowtime:
+             
+             if ms_from_ft.date() == nowtime.date():
+                if ongoing_booking.old_booking is None:
+                    pass 
+                else:
+                    row['past_booking'] = True              
+             else:
+                 row['past_booking'] = True
+             if payments_officer_group is True: 
+                 row['past_booking'] = False
+#          row['item'] = ms.campsite.name
+        total_price = str(Decimal(total_price) +Decimal(ms.amount))
+        current_booking.append(row)
+    cb['current_booking'] = current_booking
+    cb['total_price'] = str(total_price)
+    cb['ongoing_booking'] = True if ongoing_booking else False,
+    cb['ongoing_booking_id'] = ongoing_booking.id if ongoing_booking else None,
+    cb['details'] = ongoing_booking.details if ongoing_booking else [],
+    cb['expiry'] = expiry
+    cb['timer'] = timer
 
-     return cb
+    return cb
 
 
 class CheckOracleCodeView(views.APIView):
@@ -5261,7 +5329,7 @@ class AnnualAdmissionRefundOracleView(views.APIView):
     #def get(self, request, format='json'):
 
         try:
-           if request.user.is_superuser or request.user.groups.filter(name__in=['Payments Officers']).exists():
+           if request.user.is_superuser or request.user.groups().filter(name=['Payments Officers']).exists():
 
                 money_from = request.POST.get('money_from',[])
                 money_to = request.POST.get('money_to',[])
@@ -5375,7 +5443,7 @@ class RefundOracleView(views.APIView):
     #def get(self, request, format='json'):
         
         try:
-           if request.user.is_superuser or request.user.groups.filter(name__in=['Payments Officers']).exists():
+           if request.user.is_superuser or request.user.groups().filter(name=['Payments Officers']).exists():
  
                 money_from = request.POST.get('money_from',[])
                 money_to = request.POST.get('money_to',[])

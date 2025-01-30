@@ -5,10 +5,9 @@ from decimal import *
 import json
 import calendar
 import geojson
-import requests
 import io
 from django.conf import settings
-from django.core.urlresolvers import reverse, reverse_lazy
+from django.urls import reverse, reverse_lazy
 from django.core.exceptions import ValidationError
 from django.db import transaction
 from django.db.models import Q
@@ -17,16 +16,23 @@ from django.shortcuts import redirect
 from django.utils import timezone
 from dateutil.tz.tz import tzoffset
 from pytz import timezone as pytimezone
-from ledger.payments.models import Invoice,OracleInterface,CashTransaction
-from ledger.payments.utils import oracle_parser_on_invoice,update_payments
-from ledger.checkout.utils import create_basket_session, create_checkout_session, place_order_submission, get_cookie_basket
+# from ledger.payments.models import Invoice,OracleInterface,CashTransaction
+from ledger_api_client.ledger_models import Invoice, Basket
+# from ledger.payments.utils import oracle_parser_on_invoice,update_payments
+from ledger_api_client.utils import oracle_parser, update_payments
+# from ledger.checkout.utils import create_basket_session, create_checkout_session, place_order_submission, get_cookie_basket
+from ledger_api_client.utils import create_basket_session, create_checkout_session, place_order_submission
 from mooring.models import (MooringArea, Mooringsite, MooringsiteRate, MooringsiteBooking, Booking, BookingInvoice, MooringsiteBookingRange, Rate, MooringAreaBookingRange,MooringAreaStayHistory, MooringsiteRate, MarinaEntryRate, BookingVehicleRego, AdmissionsBooking, AdmissionsOracleCode, AdmissionsRate, AdmissionsLine, ChangePricePeriod, CancelPricePeriod, GlobalSettings, MooringAreaGroup, AdmissionsLocation, ChangeGroup, CancelGroup, BookingPeriod, BookingPeriodOption, AdmissionsBookingInvoice, BookingAnnualAdmission)
 from mooring import models
 from mooring.serialisers import BookingRegoSerializer, MooringsiteRateSerializer, MarinaEntryRateSerializer, RateSerializer, MooringsiteRateReadonlySerializer, AdmissionsRateSerializer
 from mooring.emails import send_booking_invoice,send_booking_confirmation
 from mooring import emails
-from ledger.order.models import Order
-from ledger.payments.invoice import utils
+# from ledger.order.models import Order
+# from ledger.payments.invoice import utils
+# from ledger_api_client.order import Order
+from ledger_api_client.utils import Order
+from ledger_api_client import utils
+
 from mooring import models
 
 logger = logging.getLogger('booking_checkout')
@@ -1132,6 +1138,23 @@ def calculate_price_admissions_change(adBooking, change_fees):
 
     return change_fees
 
+
+def get_basket_by_basket_hash(basket_hash):
+    basket_hash_split = basket_hash.split("|")
+    basket = Basket.objects.get(id=basket_hash_split[0])
+    return basket
+
+
+def convert_decimal_to_float(obj):
+    if isinstance(obj, dict):
+        return {k: convert_decimal_to_float(v) for k, v in obj.items()}
+    elif isinstance(obj, (list, tuple)):
+        return [convert_decimal_to_float(x) for x in obj]
+    elif isinstance(obj, Decimal):
+        return float(obj)
+    return obj
+
+
 def price_or_lineitems(request,booking,campsite_list,lines=True,old_booking=None):
     total_price = Decimal(0)
     booking_mooring = MooringsiteBooking.objects.filter(booking=booking)
@@ -1149,9 +1172,13 @@ def price_or_lineitems(request,booking,campsite_list,lines=True,old_booking=None
             for ob in booking_mooring_old:
                 if bm.campsite == ob.campsite and ob.from_dt == bm.from_dt and ob.to_dt == bm.to_dt and ob.booking_period_option == bm.booking_period_option:
                       line_status = 2
-            invoice_lines.append({'ledger_description':'Mooring {} ({} - {})'.format(bm.campsite.mooringarea.name,bm.from_dt.astimezone(pytimezone('Australia/Perth')).strftime('%d/%m/%Y %H:%M %p'),bm.to_dt.astimezone(pytimezone('Australia/Perth')).strftime('%d/%m/%Y %H:%M %p')),"quantity":1,"price_incl_tax":amount,"oracle_code":bm.campsite.mooringarea.oracle_code, 'line_status': line_status})
-
-
+            invoice_lines.append({
+                'ledger_description':'Mooring {} ({} - {})'.format(bm.campsite.mooringarea.name,bm.from_dt.astimezone(pytimezone('Australia/Perth')).strftime('%d/%m/%Y %H:%M %p'),bm.to_dt.astimezone(pytimezone('Australia/Perth')).strftime('%d/%m/%Y %H:%M %p')),
+                "quantity": 1,
+                "price_incl_tax": float(amount),
+                "oracle_code": bm.campsite.mooringarea.oracle_code,
+                'line_status': line_status
+            })
 
 #            invoice_lines.append({'ledger_description':'Mooring {} ({} - {})'.format(bm.campsite.mooringarea.name,bm.from_dt.astimezone(pytimezone('Australia/Perth')).strftime('%d/%m/%Y %H:%M %p'),bm.to_dt.astimezone(pytimezone('Australia/Perth')).strftime('%d/%m/%Y %H:%M %p')),"quantity":1,"price_incl_tax":bm.amount,"oracle_code":bm.campsite.mooringarea.oracle_code})
         return invoice_lines
@@ -1425,14 +1452,14 @@ def create_temp_bookingupdate(request,arrival,departure,booking_details,old_book
     # Check if the booking is a legacy booking and doesn't have an invoice
     if old_booking.legacy_id and old_booking.invoices.count() < 1:
         # Create a cash transaction in order to fix the outstnding invoice payment
-        CashTransaction.objects.create(
-            invoice = Invoice.objects.get(reference=new_invoice.invoice_reference),
-            amount = old_booking.cost_total,
-            type = 'move_in',
-            source = 'cash',
-            details = 'Transfer of funds from migrated booking',
-            movement_reference='Migrated Booking Funds'
-        )
+        # CashTransaction.objects.create(
+        #     invoice = Invoice.objects.get(reference=new_invoice.invoice_reference),
+        #     amount = old_booking.cost_total,
+        #     type = 'move_in',
+        #     source = 'cash',
+        #     details = 'Transfer of funds from migrated booking',
+        #     movement_reference='Migrated Booking Funds'
+        # )
         # Update payment details for the new invoice
         update_payments(new_invoice.invoice_reference)
 
@@ -1742,8 +1769,9 @@ def admissionsCheckout(request, admissionsBooking, lines, invoice_text=None, vou
         'custom_basket': True,
         'booking_reference': 'AD-'+str(admissionsBooking.id)
     }
-    
-    basket, basket_hash = create_basket_session(request, basket_params)
+
+    basket_params = convert_decimal_to_float(basket_params)
+    basket_hash = create_basket_session(request, request.user.id, basket_params)
     checkout_params = {
         'system': settings.PS_PAYMENT_SYSTEM_ID,
         'fallback_url': request.build_absolute_uri('/'),
@@ -1754,7 +1782,7 @@ def admissionsCheckout(request, admissionsBooking, lines, invoice_text=None, vou
         'invoice_text': invoice_text,
     }
     
-    if internal or request.user.is_anonymous():
+    if internal or request.user.is_anonymous:
         checkout_params['basket_owner'] = admissionsBooking.customer.id
     create_checkout_session(request, checkout_params)
 
@@ -1778,7 +1806,6 @@ def get_basket(request):
     return get_cookie_basket(settings.OSCAR_BASKET_COOKIE_OPEN,request)
 
 def annual_admission_checkout(request, booking, lines, invoice_text=None, vouchers=[], internal=False):
-
     basket_params = {
         'products': lines,
         'vouchers': vouchers,
@@ -1786,7 +1813,8 @@ def annual_admission_checkout(request, booking, lines, invoice_text=None, vouche
         'custom_basket': True,
         'booking_reference': 'AA-'+str(booking.id)
     }
-    basket, basket_hash = create_basket_session(request, basket_params)
+    basket_params = convert_decimal_to_float(basket_params)
+    basket_hash = create_basket_session(request, booking.customer.id, basket_params)
     checkout_params = {
         'system': settings.PS_PAYMENT_SYSTEM_ID,
         'fallback_url': request.build_absolute_uri('/'),
@@ -1796,7 +1824,7 @@ def annual_admission_checkout(request, booking, lines, invoice_text=None, vouche
         'proxy': True if internal else False,
         'invoice_text': invoice_text,
     }
-    if internal or request.user.is_anonymous():
+    if internal or request.user.is_anonymous:
         checkout_params['basket_owner'] = booking.customer.id
 
     create_checkout_session(request, checkout_params)
@@ -1842,8 +1870,9 @@ def checkout(request, booking, lines, invoice_text=None, vouchers=[], internal=F
         'custom_basket': True,
         'booking_reference': 'PS-'+str(booking.id)
     }
- 
-    basket, basket_hash = create_basket_session(request, basket_params)
+
+    basket_params = convert_decimal_to_float(basket_params)
+    basket_hash = create_basket_session(request, booking.customer.id, basket_params)
     checkout_params = {
         'system': settings.PS_PAYMENT_SYSTEM_ID,
         'fallback_url': request.build_absolute_uri('/'),
@@ -1852,26 +1881,21 @@ def checkout(request, booking, lines, invoice_text=None, vouchers=[], internal=F
         'force_redirect': True,
         'proxy': True if internal else False,
         'invoice_text': invoice_text,
+        'session_type': 'ledger_api',
+        'basket_owner': booking.customer.id
     }
-#    if not internal:
-#        checkout_params['check_url'] = request.build_absolute_uri('/api/booking/{}/booking_checkout_status.json'.format(booking.id))
-    if internal or request.user.is_anonymous():
+
+    if internal or request.user.is_anonymous:
         checkout_params['basket_owner'] = booking.customer.id
 
-    print ("BOOKING ID 3")
-    print (request.session['ps_booking'])
-
     create_checkout_session(request, checkout_params)
-    print ("BOOKING ID 4")
-    print (request.session['ps_booking'])
 
-
-
-#    if internal:
-#        response = place_order_submission(request)
-#    else:
-    #response = HttpResponseRedirect(reverse('checkout:index'))
-    response = HttpResponse("<script> window.location='"+reverse('checkout:index')+"';</script> <a href='"+reverse('checkout:index')+"'> Redirecting please wait: "+reverse('checkout:index')+"</a>")
+    # response = HttpResponse("<script> window.location='"+reverse('checkout:index')+"';</script> <a href='"+reverse('checkout:index')+"'> Redirecting please wait: "+reverse('checkout:index')+"</a>")
+    response = HttpResponse(
+        "<script> window.location='" + reverse('ledgergw-payment-details') + "';</script> <a href='" + reverse(
+            'ledgergw-payment-details'
+            ) + "'> Redirecting please wait: " + reverse('ledgergw-payment-details') + "</a>"
+        )
 
     # inject the current basket into the redirect response cookies
     # or else, anonymous users will be directionless
@@ -1916,8 +1940,9 @@ def allocate_failedrefund_to_unallocated(request, booking, lines, invoice_text=N
             'custom_basket': True,
             'booking_reference': booking_reference
         }
-
-        basket, basket_hash = create_basket_session(request, basket_params)
+        basket_params = convert_decimal_to_float(basket_params)
+        basket_hash = create_basket_session(request, booking.customer.id, basket_params)
+        basket = get_basket_by_basket_hash(basket_hash)
         ci = utils.CreateInvoiceBasket()
         order  = ci.create_invoice_and_order(basket, total=None, shipping_method='No shipping required',shipping_charge=False, user=user, status='Submitted', invoice_text='Refund Allocation Pool', )
         #basket.status = 'Submitted'
@@ -1952,8 +1977,9 @@ def allocate_refund_to_invoice(request, booking, lines, invoice_text=None, inter
             'custom_basket': True,
             'booking_reference': booking_reference
         }
-
-        basket, basket_hash = create_basket_session(request, basket_params)
+        basket_params = convert_decimal_to_float(basket_params)
+        basket_hash = create_basket_session(request, booking.customer.id, basket_params)
+        basket = get_basket_by_basket_hash(basket_hash)
         ci = utils.CreateInvoiceBasket()
         order  = ci.create_invoice_and_order(basket, total=None, shipping_method='No shipping required',shipping_charge=False, user=user, status='Submitted', invoice_text='Oracle Allocation Pools', )
         #basket.status = 'Submitted'
@@ -2121,7 +2147,7 @@ def daterange(start_date, end_date):
 
 def oracle_integration(date,override):
     system = '0516'
-    oracle_codes = oracle_parser_on_invoice(date,system,'Mooring Booking',override=override)
+    oracle_codes = oracle_parser(date,system,'Mooring Booking',override=override)
 
 def admissions_lines(booking_mooring):
     lines = []
@@ -2245,7 +2271,7 @@ def check_mooring_admin_access(request):
     if request.user.is_superuser is True:
         return True
     else:
-      if request.user.groups.filter(name__in=['Mooring Admin']).exists():
+      if request.user.groups().filter(name=['Mooring Admin']).exists():
           return True
     return False
 
@@ -2271,7 +2297,7 @@ def get_provinces(country_code):
 def booking_success(basket, booking, context_processor):
 
     print("MLINE 1.01", datetime.now().strftime("%d/%m/%Y %H:%M:%S"))
-    order = Order.objects.get(basket=basket[0])
+    order = Order.objects.get(basket_id=basket[0].id)
     invoice = Invoice.objects.get(order_number=order.number)
     print("MLINE 1.02", datetime.now().strftime("%d/%m/%Y %H:%M:%S"))
     invoice_ref = invoice.reference
@@ -2282,9 +2308,9 @@ def booking_success(basket, booking, context_processor):
         print("MLINE 2.01", datetime.now().strftime("%d/%m/%Y %H:%M:%S"))
         try:
             inv = Invoice.objects.get(reference=invoice_ref)
-            order = Order.objects.get(number=inv.order_number)
-            order.user = booking.customer
-            order.save()
+            # order = Order.objects.get(number=inv.order_number)
+            # order.user = booking.customer
+            # order.save()
         except Invoice.DoesNotExist:
             print ("INVOICE ERROR")
             logger.error('{} tried making a booking with an incorrect invoice'.format('User {} with id {}'.format(booking.customer.get_full_name(),booking.customer.id) if booking.customer else 'An anonymous user'))
@@ -2336,7 +2362,7 @@ def booking_success(basket, booking, context_processor):
             booking.booking_type = 1  # internet booking
             booking.expiry_time = None
             print("MLINE 7.01", datetime.now().strftime("%d/%m/%Y %H:%M:%S"))
-            update_payments(invoice_ref)
+            # update_payments(invoice_ref)
             print("MLINE 8.01", datetime.now().strftime("%d/%m/%Y %H:%M:%S"))
             #Calculate Admissions and create object
             if booking.admission_payment:
