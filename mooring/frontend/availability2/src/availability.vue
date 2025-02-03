@@ -198,7 +198,7 @@
                 <div class="dropdown-pane" id="guests-dropdown" data-dropdown data-auto-focus="true">
                     <div class="row">
                         <div class="small-6 columns">
-                            <label for="num_adults" class="text-right">Adults (ages 12+)</label>
+                            <label for="num_adults" class="text-right">Adults</label>
                         </div><div class="small-6 columns">
                             <input type="number" id="numAdults" name="num_adults" @change="checkGuests()" v-model="numAdults" min="0" max="16"/>
                         </div>
@@ -219,14 +219,14 @@
                     </div>
                     <div class="row">
                         <div class="small-6 columns">
-                            <label for="num_children" class="text-right">Children (ages 4-12)</label>
+                            <label for="num_children" class="text-right">Children (4-16)</label>
                         </div><div class="small-6 columns">
                             <input type="number" id="numChildren" name="num_children" @change="checkGuests()" v-model="numChildren" min="0" max="16"/>
                         </div>
                     </div>
                     <div class="row">
                         <div class="small-6 columns">
-                            <label for="num_infants" class="text-right">Infants (ages 0-4)</label>
+                            <label for="num_infants" class="text-right">Infants (under 4)</label>
                         </div><div class="small-6 columns">
                             <input type="number" id="numInfants" name="num_infants" @change="checkGuests()" v-model="numInfants" min="0" max="16"/>
                         </div>
