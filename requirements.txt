@@ -1,6 +1,6 @@
 Django~=5.0.8
 git+https://github.com/dbca-wa/ledger_api_client.git
-django-extensions==1.9.8
+django-extensions==3.2.3
 git+https://github.com/dbca-wa/dbca-utils.git#egg=dbca-utils
 git+https://github.com/dbca-wa/webtemplate2.git#egg=webtemplate_dbca
 coverage==4.3.1
@@ -11,19 +11,20 @@ django-utils-six==2.0
 django_bootstrap3==23.6
 django-braces>=1.8.1
 django-datatables-view==1.13.0
-django-reversion==3.0.0
+django-reversion==5.0.12
 django-reversion-compare==0.8.6
 django-countries==7.6.1
-django-cron==0.5.1
+# django-cron==0.5.1
+git+https://github.com/Tivix/django-cron#egg=django-cron
 django-dynamic-fixture==1.9.1
 openpyxl==3.0.7
 datapackage==1.15.2
 # jsontableschema==0.10.1
 python-dateutil==2.6.1
 py4j==0.10.2.1
-djangorestframework==3.15.1
+djangorestframework==3.15.2
 djangorestframework-gis==1.1
-djangorestframework-csv==3.0.1
+djangorestframework-csv==3.0.2
 pycountry==17.1.8
 six>=1.10.0
 django-ical==1.4
@@ -31,9 +32,9 @@ django-taggit==4.0.0
 geojson==3.1.0
 unicodecsv==0.14.1
 PyPDF2==1.26.0
-django-extra-fields==0.9
-django-crispy-forms==2.0
-django-reset-migrations==0.3.1
+django-extra-fields==3.0.2
+django-crispy-forms==2.3
+django-reset-migrations==0.4.0
 django-ckeditor==5.4.0
 djangorestframework-datatables==0.4.0
 django-confy==1.0.4
@@ -42,16 +43,17 @@ xlsxwriter==1.1.2
 gunicorn==23.0.0
 dj-static==0.0.6
 mixer==6.1.3
-django-dirtyfields==1.4.1
+django-dirtyfields==1.9.3
 python-docx==1.1.2
 docxtpl==0.10.0
 dj-database-url==0.5.0
 psutil==5.7.0
 ipython==7.16.0
 jedi==0.17.2
-django-treebeard==4.3.1
+django-treebeard==4.7.1
 phonenumbers==8.12.15
-psycopg2==2.8.6
+# psycopg2==2.8.6
+psycopg2-binary>=2.9.4
 git+https://github.com/dbca-wa/appmonitor_client.git#egg=appmonitor_client
 python-decouple==3.8
 click==6.7
