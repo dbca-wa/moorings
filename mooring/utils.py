@@ -1,3 +1,4 @@
+from datetime import timezone as timezone_dt
 from datetime import datetime, timedelta, date, timezone as datetimetimezone
 import logging
 import traceback
@@ -563,7 +564,7 @@ def get_campsite_availability(campsites_qs, start_date, end_date, ongoing_bookin
         # Release booking availablity on Expired Bookings
         if b.booking.booking_type == 3 or b.booking.booking_type == 5:
              if b.booking.expiry_time is not None:
-                 if b.booking.expiry_time < datetime.now(tz=timezone.utc):
+                 if b.booking.expiry_time < datetime.now(tz=timezone_dt.utc):
                     continue
 
         for i in range(duration):
