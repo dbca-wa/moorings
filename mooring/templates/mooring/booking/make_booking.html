@@ -791,6 +791,7 @@
                 vm.updateLocalStorage();
             },
             searchRego: function(rego){
+                console.log('in searchRego()')
                 let vm = this;
                 if (rego){
                     var reg = rego;
@@ -1248,7 +1249,7 @@
                 console.log(vm.rego);
                 vm.vehicles = [[0, vm.rego, true]];
                 console.log(vm.vehicles)
-                vm.searchRego(vm.rego);
+                // vm.searchRego(vm.rego);
             }
             
             $.get("/api/discountReasons/",function (data) {
