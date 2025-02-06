@@ -1,3 +1,4 @@
+from datetime import timezone as timezone_dt
 import traceback
 import base64
 import geojson
@@ -765,8 +766,10 @@ def add_booking(request, *args, **kwargs):
 
     from_dt_utc = datetime.strptime(str(start_booking_date)+' '+str(booking_period.start_time), '%Y-%m-%d %H:%M:%S') - timedelta(hours=8)
     to_dt_utc =  datetime.strptime(str(finish_booking_date)+' '+str(booking_period.finish_time), '%Y-%m-%d %H:%M:%S') - timedelta(hours=8)
-    from_dt_utc = from_dt_utc.replace(tzinfo=timezone.utc).isoformat()
-    to_dt_utc =  to_dt_utc.replace(tzinfo=timezone.utc).isoformat()
+    # from_dt_utc = from_dt_utc.replace(tzinfo=timezone.utc).isoformat()
+    # to_dt_utc =  to_dt_utc.replace(tzinfo=timezone.utc).isoformat()
+    from_dt_utc = from_dt_utc.replace(tzinfo=timezone_dt.utc).isoformat()
+    to_dt_utc =  to_dt_utc.replace(tzinfo=timezone_dt.utc).isoformat()
     #to_dt__lte=to_dt_utc
     existing_booking_check = utils.check_mooring_available_by_time(mooringsite.id,from_dt_utc,to_dt_utc)
     if existing_booking_check is True:
