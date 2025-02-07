@@ -758,166 +758,166 @@ class CancelAdmissionsBookingView(TemplateView):
         booking.save()
         return HttpResponseRedirect(reverse('public_admission_booking_cancelled', args=(booking.id,)))
 
-class RefundPaymentView(TemplateView):
-    template_name = 'mooring/booking/refund_booking.html'
+# class RefundPaymentView(TemplateView):
+#     template_name = 'mooring/booking/refund_booking.html'
 
-    def get_booking_info(self, request, *args, **kwargs):
+#     def get_booking_info(self, request, *args, **kwargs):
       
-        booking = Booking.objects.get(pk=request.session['ps_booking']) if 'ps_booking' in request.session else None
-        bpoint_id = None
-        form_context = {
-        }
-        form = MakeBookingsForm(form_context)
+#         booking = Booking.objects.get(pk=request.session['ps_booking']) if 'ps_booking' in request.session else None
+#         bpoint_id = None
+#         form_context = {
+#         }
+#         form = MakeBookingsForm(form_context)
 
-        booking_invoice = BookingInvoice.objects.filter(booking=booking.old_booking)
-        for bi in booking_invoice:
-            inv = Invoice.objects.filter(reference=bi.invoice_reference)
-            for i in inv:
-                for b in i.bpoint_transactions:
-                   if b.action == 'payment':
-                      bpoint_id = b.id
+#         booking_invoice = BookingInvoice.objects.filter(booking=booking.old_booking)
+#         for bi in booking_invoice:
+#             inv = Invoice.objects.filter(reference=bi.invoice_reference)
+#             for i in inv:
+#                 for b in i.bpoint_transactions:
+#                    if b.action == 'payment':
+#                       bpoint_id = b.id
 
-        return booking,bpoint_id
+#         return booking,bpoint_id
 
-    def get(self, request, *args, **kwargs):
+#     def get(self, request, *args, **kwargs):
 
-        booking = Booking.objects.get(pk=request.session['ps_booking']) if 'ps_booking' in request.session else None
-        if request.user.is_staff or request.user.is_superuser or Booking.objects.filter(customer=request.user,pk=booking.id).count() == 1:    
-            basket = utils.get_basket(request)
-            #basket_total = [sum(Decimal(b.line_price_incl_tax)) for b in basket.all_lines()] 
-            basket_total = Decimal('0.00')
-            for b in basket.all_lines():
-               basket_total = basket_total + b.line_price_incl_tax
-            booking,bpoint_id = self.get_booking_info(request, *args, **kwargs)
+#         booking = Booking.objects.get(pk=request.session['ps_booking']) if 'ps_booking' in request.session else None
+#         if request.user.is_staff or request.user.is_superuser or Booking.objects.filter(customer=request.user,pk=booking.id).count() == 1:    
+#             basket = utils.get_basket(request)
+#             #basket_total = [sum(Decimal(b.line_price_incl_tax)) for b in basket.all_lines()] 
+#             basket_total = Decimal('0.00')
+#             for b in basket.all_lines():
+#                basket_total = basket_total + b.line_price_incl_tax
+#             booking,bpoint_id = self.get_booking_info(request, *args, **kwargs)
 
-            #    return self.render_page(request, booking, form)
-            return render(request, self.template_name, {'basket': basket})
-        else:
-            return HttpResponseRedirect(reverse('home'))
+#             #    return self.render_page(request, booking, form)
+#             return render(request, self.template_name, {'basket': basket})
+#         else:
+#             return HttpResponseRedirect(reverse('home'))
 
-    def post(self, request, *args, **kwargs):
-         context_processor = template_context(request)
-         booking = Booking.objects.get(pk=request.session['ps_booking']) if 'ps_booking' in request.session else None
-         if request.user.is_staff or request.user.is_superuser or Booking.objects.filter(customer=request.user,pk=booking.id).count() == 1:
+#     def post(self, request, *args, **kwargs):
+#          context_processor = template_context(request)
+#          booking = Booking.objects.get(pk=request.session['ps_booking']) if 'ps_booking' in request.session else None
+#          if request.user.is_staff or request.user.is_superuser or Booking.objects.filter(customer=request.user,pk=booking.id).count() == 1:
 
-             bpoint = None
-             invoice = None
-             refund  = None
-             failed_refund = False
-             basket = utils.get_basket(request)
-             booking,bpoint_id = self.get_booking_info(request, *args, **kwargs)
-             basket_total = Decimal('0.00')
-             for b in basket.all_lines():
-                 basket_total = basket_total + b.line_price_incl_tax
+#              bpoint = None
+#              invoice = None
+#              refund  = None
+#              failed_refund = False
+#              basket = utils.get_basket(request)
+#              booking,bpoint_id = self.get_booking_info(request, *args, **kwargs)
+#              basket_total = Decimal('0.00')
+#              for b in basket.all_lines():
+#                  basket_total = basket_total + b.line_price_incl_tax
 
-             b_total =  Decimal('{:.2f}'.format(float(basket_total - basket_total - basket_total)))
-             info = {'amount': Decimal('{:.2f}'.format(float(basket_total - basket_total - basket_total))), 'details' : 'Refund via system'}
+#              b_total =  Decimal('{:.2f}'.format(float(basket_total - basket_total - basket_total)))
+#              info = {'amount': Decimal('{:.2f}'.format(float(basket_total - basket_total - basket_total))), 'details' : 'Refund via system'}
              
-             try:  
-                bpoint = BpointTransaction.objects.get(id=bpoint_id)      
-                refund = bpoint.refund(info,request.user)
-                invoice = Invoice.objects.get(reference=bpoint.crn1)
-                update_payments(invoice.reference)
-                emails.send_refund_completed_email_customer(booking, context_processor)
-             except:
-                failed_refund = True
-                emails.send_refund_failure_email(booking, context_processor)
-                emails.send_refund_failure_email_customer(booking, context_processor)
-                booking_invoice = BookingInvoice.objects.filter(booking=booking.old_booking).order_by('id')
-                for bi in booking_invoice:
-                    invoice = Invoice.objects.get(reference=bi.invoice_reference)
-                RefundFailed.objects.create(booking=booking, invoice_reference=invoice.reference, refund_amount=b_total,status=0)
-             order_response = place_order_submission(request)
-             new_order = Order.objects.get(basket=basket)
-             new_invoice = Invoice.objects.get(order_number=new_order.number)
-             new_invoice.settlement_date = None
-             new_invoice.save()
+#              try:  
+#                 bpoint = BpointTransaction.objects.get(id=bpoint_id)      
+#                 refund = bpoint.refund(info,request.user)
+#                 invoice = Invoice.objects.get(reference=bpoint.crn1)
+#                 update_payments(invoice.reference)
+#                 emails.send_refund_completed_email_customer(booking, context_processor)
+#              except:
+#                 failed_refund = True
+#                 emails.send_refund_failure_email(booking, context_processor)
+#                 emails.send_refund_failure_email_customer(booking, context_processor)
+#                 booking_invoice = BookingInvoice.objects.filter(booking=booking.old_booking).order_by('id')
+#                 for bi in booking_invoice:
+#                     invoice = Invoice.objects.get(reference=bi.invoice_reference)
+#                 RefundFailed.objects.create(booking=booking, invoice_reference=invoice.reference, refund_amount=b_total,status=0)
+#              order_response = place_order_submission(request)
+#              new_order = Order.objects.get(basket=basket)
+#              new_invoice = Invoice.objects.get(order_number=new_order.number)
+#              new_invoice.settlement_date = None
+#              new_invoice.save()
               
-#             book_inv, created = BookingInvoice.objects.create(booking=booking, invoice_reference=invoice.reference)
+# #             book_inv, created = BookingInvoice.objects.create(booking=booking, invoice_reference=invoice.reference)
 
-             BookingInvoice.objects.get_or_create(booking=booking, invoice_reference=new_invoice.reference)
-             if refund:
-                 invoice.voided = True
-                 invoice.save()
-                 bpoint_refund = BpointTransaction.objects.get(txn_number=refund.txn_number)
-                 bpoint_refund.crn1 = new_invoice.reference
-                 bpoint_refund.save()
-                 update_payments(invoice.reference)
-             update_payments(new_invoice.reference)
-
-
-             ## Send booking confirmation and invoice
-             #emails.send_booking_invoice(booking,request,context_processor)
-             #emails.send_booking_confirmation(booking,request, context_processor)
+#              BookingInvoice.objects.get_or_create(booking=booking, invoice_reference=new_invoice.reference)
+#              if refund:
+#                  invoice.voided = True
+#                  invoice.save()
+#                  bpoint_refund = BpointTransaction.objects.get(txn_number=refund.txn_number)
+#                  bpoint_refund.crn1 = new_invoice.reference
+#                  bpoint_refund.save()
+#                  update_payments(invoice.reference)
+#              update_payments(new_invoice.reference)
 
 
-             if failed_refund is True:
-                 # Refund Failed Assign Refund amount to allocation pool.
-                 lines = [{'ledger_description':'Refund assigned to unallocated pool',"quantity":1,"price_incl_tax":abs(info['amount']),"oracle_code":settings.UNALLOCATED_ORACLE_CODE, 'line_status': 1}]
-                 utils.allocate_failedrefund_to_unallocated(request, booking, lines, invoice_text=None, internal=False,order_total=abs(info['amount']),user=booking.customer)
-
-             return HttpResponseRedirect('/success/')
-         else:
-             return HttpResponseRedirect(reverse('home'))
+#              ## Send booking confirmation and invoice
+#              #emails.send_booking_invoice(booking,request,context_processor)
+#              #emails.send_booking_confirmation(booking,request, context_processor)
 
 
-class ZeroBookingView(TemplateView):
-    template_name = 'mooring/booking/no_booking_payment.html'
+#              if failed_refund is True:
+#                  # Refund Failed Assign Refund amount to allocation pool.
+#                  lines = [{'ledger_description':'Refund assigned to unallocated pool',"quantity":1,"price_incl_tax":abs(info['amount']),"oracle_code":settings.UNALLOCATED_ORACLE_CODE, 'line_status': 1}]
+#                  utils.allocate_failedrefund_to_unallocated(request, booking, lines, invoice_text=None, internal=False,order_total=abs(info['amount']),user=booking.customer)
 
-    def get_booking_info(self, request, *args, **kwargs):
+#              return HttpResponseRedirect('/success/')
+#          else:
+#              return HttpResponseRedirect(reverse('home'))
 
-        booking = Booking.objects.get(pk=request.session['ps_booking']) if 'ps_booking' in request.session else None
-        form_context = {
-        }
-        form = MakeBookingsForm(form_context)
 
-        #booking_invoice = BookingInvoice.objects.filter(booking=booking.old_booking)
-        return booking
+# class ZeroBookingView(TemplateView):
+#     template_name = 'mooring/booking/no_booking_payment.html'
 
-    def get(self, request, *args, **kwargs):
-        booking = Booking.objects.get(pk=request.session['ps_booking']) if 'ps_booking' in request.session else None
-        if request.user.is_staff or request.user.is_superuser or Booking.objects.filter(pk=booking.id).count() == 1:
-            basket = utils.get_basket(request)
-            #basket_total = [sum(Decimal(b.line_price_incl_tax)) for b in basket.all_lines()]
-            basket_total = Decimal('0.00')
-            for b in basket.all_lines():
-               basket_total = basket_total + b.line_price_incl_tax
-            booking = self.get_booking_info(request, *args, **kwargs)
-            #    return self.render_page(request, booking, form)
-            return render(request, self.template_name, {'basket': basket})
-        else:
-            return HttpResponseRedirect(reverse('home'))
+#     def get_booking_info(self, request, *args, **kwargs):
 
-    def post(self, request, *args, **kwargs):
-         context_processor = template_context(request)
-         booking = Booking.objects.get(pk=request.session['ps_booking']) if 'ps_booking' in request.session else None
-         if request.user.is_staff or request.user.is_superuser or Booking.objects.filter(pk=booking.id).count() == 1:
+#         booking = Booking.objects.get(pk=request.session['ps_booking']) if 'ps_booking' in request.session else None
+#         form_context = {
+#         }
+#         form = MakeBookingsForm(form_context)
 
-             bpoint = None
-             invoice = None
-             basket = utils.get_basket(request)
-             booking = self.get_booking_info(request, *args, **kwargs)
-             basket_total = Decimal('0.00')
-             for b in basket.all_lines():
-                 basket_total = basket_total + b.line_price_incl_tax
+#         #booking_invoice = BookingInvoice.objects.filter(booking=booking.old_booking)
+#         return booking
 
-             b_total =  Decimal('{:.2f}'.format(float(basket_total - basket_total - basket_total)))
-             info = {'amount': Decimal('{:.2f}'.format(float(basket_total - basket_total - basket_total))), 'details' : 'Refund via system'}
-             booking_invoice = BookingInvoice.objects.filter(booking=booking.old_booking).order_by('id')
-             for bi in booking_invoice:
-                 invoice = Invoice.objects.get(reference=bi.invoice_reference)
+#     def get(self, request, *args, **kwargs):
+#         booking = Booking.objects.get(pk=request.session['ps_booking']) if 'ps_booking' in request.session else None
+#         if request.user.is_staff or request.user.is_superuser or Booking.objects.filter(pk=booking.id).count() == 1:
+#             basket = utils.get_basket(request)
+#             #basket_total = [sum(Decimal(b.line_price_incl_tax)) for b in basket.all_lines()]
+#             basket_total = Decimal('0.00')
+#             for b in basket.all_lines():
+#                basket_total = basket_total + b.line_price_incl_tax
+#             booking = self.get_booking_info(request, *args, **kwargs)
+#             #    return self.render_page(request, booking, form)
+#             return render(request, self.template_name, {'basket': basket})
+#         else:
+#             return HttpResponseRedirect(reverse('home'))
 
-             order_response = place_order_submission(request)
-             new_order = Order.objects.get(basket=basket)
-             new_invoice = Invoice.objects.get(order_number=new_order.number)
+#     def post(self, request, *args, **kwargs):
+#          context_processor = template_context(request)
+#          booking = Booking.objects.get(pk=request.session['ps_booking']) if 'ps_booking' in request.session else None
+#          if request.user.is_staff or request.user.is_superuser or Booking.objects.filter(pk=booking.id).count() == 1:
 
-             # Send booking confirmation and invoice
-             #emails.send_booking_invoice(booking,request,context_processor)
-             #emails.send_booking_confirmation(booking,request, context_processor)
+#              bpoint = None
+#              invoice = None
+#              basket = utils.get_basket(request)
+#              booking = self.get_booking_info(request, *args, **kwargs)
+#              basket_total = Decimal('0.00')
+#              for b in basket.all_lines():
+#                  basket_total = basket_total + b.line_price_incl_tax
 
-             return HttpResponseRedirect('/success/')
-         else:
-             return HttpResponseRedirect(reverse('home'))
+#              b_total =  Decimal('{:.2f}'.format(float(basket_total - basket_total - basket_total)))
+#              info = {'amount': Decimal('{:.2f}'.format(float(basket_total - basket_total - basket_total))), 'details' : 'Refund via system'}
+#              booking_invoice = BookingInvoice.objects.filter(booking=booking.old_booking).order_by('id')
+#              for bi in booking_invoice:
+#                  invoice = Invoice.objects.get(reference=bi.invoice_reference)
+
+#              order_response = place_order_submission(request)
+#              new_order = Order.objects.get(basket=basket)
+#              new_invoice = Invoice.objects.get(order_number=new_order.number)
+
+#              # Send booking confirmation and invoice
+#              #emails.send_booking_invoice(booking,request,context_processor)
+#              #emails.send_booking_confirmation(booking,request, context_processor)
+
+#              return HttpResponseRedirect('/success/')
+#          else:
+#              return HttpResponseRedirect(reverse('home'))
 
 
 class MakeBookingsView(TemplateView):
