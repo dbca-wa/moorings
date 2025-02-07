@@ -1918,22 +1918,22 @@ def checkout(request, booking, lines, invoice_text=None, vouchers=[], internal=F
             secure=settings.OSCAR_BASKET_COOKIE_SECURE, httponly=True
     )
 
-    if booking.cost_total < 0:
-        response = HttpResponseRedirect('/refund-payment')
-        response.set_cookie(
-            settings.OSCAR_BASKET_COOKIE_OPEN, basket_hash,
-            max_age=settings.OSCAR_BASKET_COOKIE_LIFETIME,
-            secure=settings.OSCAR_BASKET_COOKIE_SECURE, httponly=True
-        )
+    # if booking.cost_total < 0:
+    #     response = HttpResponseRedirect('/refund-payment')
+    #     response.set_cookie(
+    #         settings.OSCAR_BASKET_COOKIE_OPEN, basket_hash,
+    #         max_age=settings.OSCAR_BASKET_COOKIE_LIFETIME,
+    #         secure=settings.OSCAR_BASKET_COOKIE_SECURE, httponly=True
+    #     )
 
-    # Zero booking costs
-    if booking.cost_total < 1 and booking.cost_total > -1:
-        response = HttpResponseRedirect('/no-payment')
-        response.set_cookie(
-            settings.OSCAR_BASKET_COOKIE_OPEN, basket_hash,
-            max_age=settings.OSCAR_BASKET_COOKIE_LIFETIME,
-            secure=settings.OSCAR_BASKET_COOKIE_SECURE, httponly=True
-        )
+    # # Zero booking costs
+    # if booking.cost_total < 1 and booking.cost_total > -1:
+    #     response = HttpResponseRedirect('/no-payment')
+    #     response.set_cookie(
+    #         settings.OSCAR_BASKET_COOKIE_OPEN, basket_hash,
+    #         max_age=settings.OSCAR_BASKET_COOKIE_LIFETIME,
+    #         secure=settings.OSCAR_BASKET_COOKIE_SECURE, httponly=True
+    #     )
     return response
 
 
