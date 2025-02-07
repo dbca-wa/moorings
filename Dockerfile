@@ -40,7 +40,7 @@ RUN git config --global --add safe.directory /app
 COPY requirements.txt ./
 RUN pip install --upgrade pip
 RUN touch /app/git_hash
-# RUN pip install --no-cache-dir -r requirements.txt  # <==== Reenable when python install is working
+# RUN pip install --no-cache-dir -r requirements.txt
 
 # Install the project (ensure that frontend projects have been built prior to this step).
 FROM python_libs_moorings
@@ -48,7 +48,7 @@ FROM python_libs_moorings
 COPY gunicorn.ini manage_mo.py ./
 RUN touch /app/.env
 COPY --chown=oim:oim mooring ./mooring
-# RUN python manage_mo.py collectstatic --noinput  # <==== Reenable when python install is working
+# RUN python manage_mo.py collectstatic --noinput
 
 RUN mkdir /app/tmp/
 RUN chmod 777 /app/tmp/

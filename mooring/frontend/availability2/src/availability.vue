@@ -930,6 +930,7 @@ export default {
                 'rego': reg
             }
             if(reg && not_null && vm.searchedRego != reg){
+                console.log('in searchRego2');
                 $.ajax({
                     url: "/api/registeredVessels/",
                     dataType: 'json',

@@ -1,3 +1,4 @@
+from datetime import timezone as timezone_dt
 from datetime import datetime, timedelta, date, timezone as datetimetimezone
 import logging
 import traceback
@@ -6,6 +7,7 @@ import json
 import calendar
 import geojson
 import io
+import hashlib
 from django.conf import settings
 from django.urls import reverse, reverse_lazy
 from django.core.exceptions import ValidationError
@@ -38,6 +40,8 @@ from mooring import models
 logger = logging.getLogger('booking_checkout')
 
 def create_booking_by_class(campground_id, campsite_class_id, start_date, end_date, num_adult=0, num_concession=0, num_child=0, num_infant=0, num_mooring=0, vessel_size=0):
+    logger.info(f'in create_booking_by_class: {campground_id}, {campsite_class_id}, {start_date}, {end_date}, {num_adult}, {num_concession}, {num_child}, {num_infant}, {num_mooring}, {vessel_size}')
+
     """Create a new temporary booking in the system."""
     # get campground
     campground = MooringArea.objects.get(pk=campground_id)
@@ -111,6 +115,8 @@ def create_booking_by_class(campground_id, campsite_class_id, start_date, end_da
     return booking
 
 def create_booking_by_site(sites_qs, start_date, end_date, num_adult=0, num_concession=0, num_child=0, num_infant=0, num_mooring=0, vessel_size=0, cost_total=0, override_price=None, override_reason=None, override_reason_info=None, send_invoice=False, overridden_by=None, customer=None, updating_booking=False, override_checks=False):
+    logger.info(f'in create_booking_by_site: {sites_qs}, {start_date}, {end_date}, {num_adult}, {num_concession}, {num_child}, {num_infant}, {num_mooring}, {vessel_size}, {cost_total}, {override_price}, {override_reason}, {override_reason_info}, {send_invoice}, {overridden_by}, {customer}, {updating_booking}, {override_checks}')
+
     """Create a new temporary booking in the system for a set of specific campsites."""
 
     # the CampsiteBooking table runs the risk of a race condition,
@@ -179,62 +185,62 @@ def create_booking_by_site(sites_qs, start_date, end_date, num_adult=0, num_conc
     # On success, return the temporary booking
     return booking
 
-def ooolldcreate_booking_by_site(campsite_id, start_date, end_date, num_adult=0, num_concession=0, num_child=0, num_infant=0,num_mooring=0,vessel_size=0,cost_total=0,customer=None,updating_booking=False):
-    """Create a new temporary booking in the system for a specific campsite."""
-    # get campsite
-    sites_qs = Mooringsite.objects.filter(pk=campsite_id)
-    campsite = sites_qs.first()
-    # TODO: date range check business logic
-    # TODO: number of people check? this is modifiable later, don't bother
+# def ooolldcreate_booking_by_site(campsite_id, start_date, end_date, num_adult=0, num_concession=0, num_child=0, num_infant=0,num_mooring=0,vessel_size=0,cost_total=0,customer=None,updating_booking=False):
+#     """Create a new temporary booking in the system for a specific campsite."""
+#     # get campsite
+#     sites_qs = Mooringsite.objects.filter(pk=campsite_id)
+#     campsite = sites_qs.first()
+#     # TODO: date range check business logic
+#     # TODO: number of people check? this is modifiable later, don't bother
 
-    # the MooringsiteBooking table runs the risk of a race condition,
-    # wrap all this behaviour up in a transaction
-    with transaction.atomic():
-        # get availability for campsite, error out if booked/closed
-        availability = get_campsite_availability(sites_qs, start_date, end_date)
-        for site_id, dates in availability.items():
-            if updating_booking:
-                if not all([v[0] in ['open','tooearly'] for k, v in dates.items()]):
-                    raise ValidationError('Mooringsite unavailable for specified time period.')
-            else:
-                if not all([v[0] == 'open' for k, v in dates.items()]):
-                    raise ValidationError('Mooringsite unavailable for specified time period.')
+#     # the MooringsiteBooking table runs the risk of a race condition,
+#     # wrap all this behaviour up in a transaction
+#     with transaction.atomic():
+#         # get availability for campsite, error out if booked/closed
+#         availability = get_campsite_availability(sites_qs, start_date, end_date)
+#         for site_id, dates in availability.items():
+#             if updating_booking:
+#                 if not all([v[0] in ['open','tooearly'] for k, v in dates.items()]):
+#                     raise ValidationError('Mooringsite unavailable for specified time period.')
+#             else:
+#                 if not all([v[0] == 'open' for k, v in dates.items()]):
+#                     raise ValidationError('Mooringsite unavailable for specified time period.')
 
-        # Prevent booking if max people passed
-        total_people = num_adult + num_concession + num_child + num_infant + num_mooring
-        if total_people > campsite.max_people:
-            raise ValidationError('Maximum number of people exceeded for the selected campsite')
-        # Prevent booking if less than min people 
-        if total_people < campsite.min_people:
-            raise ValidationError('Number of people is less than the minimum allowed for the selected campsite')
+#         # Prevent booking if max people passed
+#         total_people = num_adult + num_concession + num_child + num_infant + num_mooring
+#         if total_people > campsite.max_people:
+#             raise ValidationError('Maximum number of people exceeded for the selected campsite')
+#         # Prevent booking if less than min people 
+#         if total_people < campsite.min_people:
+#             raise ValidationError('Number of people is less than the minimum allowed for the selected campsite')
 
-        # Create a new temporary booking with an expiry timestamp (default 20mins)
-        booking =   Booking.objects.create(
-                        booking_type=3,
-                        arrival=start_date,
-                        departure=end_date,
-                        details={
-                            'num_adult': num_adult,
-                            'num_concession': num_concession,
-                            'num_child': num_child,
-                            'num_infant': num_infant,
-                            'num_mooring': num_mooring,
-                            'vessel_size': vessel_size
-                        },
-                        cost_total= Decimal(cost_total),
-                        expiry_time=timezone.now()+timedelta(seconds=settings.BOOKING_TIMEOUT),
-                        mooringarea=campsite.mooringarea,
-                        customer = customer
-                    )
-        for i in range((end_date-start_date).days):
-            cb =    MooringsiteBooking.objects.create(
-                        campsite=campsite,
-                        booking_type=3,
-                        date=start_date+timedelta(days=i),
-                        booking=booking
-                    )
-    # On success, return the temporary booking
-    return booking
+#         # Create a new temporary booking with an expiry timestamp (default 20mins)
+#         booking =   Booking.objects.create(
+#                         booking_type=3,
+#                         arrival=start_date,
+#                         departure=end_date,
+#                         details={
+#                             'num_adult': num_adult,
+#                             'num_concession': num_concession,
+#                             'num_child': num_child,
+#                             'num_infant': num_infant,
+#                             'num_mooring': num_mooring,
+#                             'vessel_size': vessel_size
+#                         },
+#                         cost_total= Decimal(cost_total),
+#                         expiry_time=timezone.now()+timedelta(seconds=settings.BOOKING_TIMEOUT),
+#                         mooringarea=campsite.mooringarea,
+#                         customer = customer
+#                     )
+#         for i in range((end_date-start_date).days):
+#             cb =    MooringsiteBooking.objects.create(
+#                         campsite=campsite,
+#                         booking_type=3,
+#                         date=start_date+timedelta(days=i),
+#                         booking=booking
+#                     )
+#     # On success, return the temporary booking
+#     return booking
 
 def check_mooring_available_by_time(campsite_id, start_date_time, end_date_time):
 
@@ -404,10 +410,14 @@ def generate_mooring_rate(mooringsites_qs,start_date, end_date, duration):
 def get_campsite_availability(campsites_qs, start_date, end_date, ongoing_booking, request=None):
     """Fetch the availability of each mooring in a queryset over a range of visit dates."""
     # fetch all of the single-day MooringsiteBooking objects within the date range for the sites
+    logger.info(f'Fetching the availability of each mooring in a queryset over a range of visit dates...')
 
     end_date =end_date+timedelta(days=1)
     start_date_time = datetime.strptime(str(start_date)+str(' 00:00'), '%Y-%m-%d %H:%M')
     end_date_time = datetime.strptime(str(end_date)+str(' 23:59'), '%Y-%m-%d %H:%M')
+    # start_date_time = timezone.make_aware(datetime.strptime(str(start_date)+str(' 00:00'), '%Y-%m-%d %H:%M'))
+    # end_date_time = timezone.make_aware(datetime.strptime(str(end_date)+str(' 23:59'), '%Y-%m-%d %H:%M'))
+
     booking_id = None
     booking_period_option = None
     today = date.today()
@@ -554,7 +564,7 @@ def get_campsite_availability(campsites_qs, start_date, end_date, ongoing_bookin
         # Release booking availablity on Expired Bookings
         if b.booking.booking_type == 3 or b.booking.booking_type == 5:
              if b.booking.expiry_time is not None:
-                 if b.booking.expiry_time < datetime.now(tz=timezone.utc):
+                 if b.booking.expiry_time < datetime.now(tz=timezone_dt.utc):
                     continue
 
         for i in range(duration):
@@ -621,7 +631,6 @@ def get_campsite_availability(campsites_qs, start_date, end_date, ongoing_bookin
                  
     mooring_map = {cg[0]: [cs.pk for cs in campsites_qs if cs.mooringarea.pk == cg[0]] for cg in campsites_qs.distinct('mooringarea').values_list('mooringarea')}
     today = date.today()
-    print ("GLOBA 1")
     # strike out days after the max_advance_booking
     for site in campsites_qs:
         max_advance = None
@@ -1497,66 +1506,68 @@ def get_annual_admissions_pricing_info(annual_booking_period_id,vessel_size):
     return annual_admissions
 
 
-def iiiicreate_temp_bookingupdate(request,arrival,departure,booking_details,old_booking,total_price):
-    # delete all the campsites in the old moving so as to transfer them to the new booking
-    old_booking.campsites.all().delete()
-    booking = create_booking_by_site(booking_details['campsites'][0],
-            start_date = arrival,
-            end_date = departure,
-            num_adult = booking_details['num_adult'],
-            num_concession= booking_details['num_concession'],
-            num_child= booking_details['num_child'],
-            num_infant= booking_details['num_infant'],
-            num_mooring = booking_details['num_mooring'],
-            cost_total = total_price,
-            customer = old_booking.customer,
-            updating_booking = True
-    )
+# def iiiicreate_temp_bookingupdate(request,arrival,departure,booking_details,old_booking,total_price):
+#     # delete all the campsites in the old moving so as to transfer them to the new booking
+#     old_booking.campsites.all().delete()
+#     booking = create_booking_by_site(booking_details['campsites'][0],
+#             start_date = arrival,
+#             end_date = departure,
+#             num_adult = booking_details['num_adult'],
+#             num_concession= booking_details['num_concession'],
+#             num_child= booking_details['num_child'],
+#             num_infant= booking_details['num_infant'],
+#             num_mooring = booking_details['num_mooring'],
+#             cost_total = total_price,
+#             customer = old_booking.customer,
+#             updating_booking = True
+#     )
 
-    # Move all the vehicles to the new booking
-    for r in old_booking.regos.all():
-        r.booking = booking
-        r.save()
+#     # Move all the vehicles to the new booking
+#     for r in old_booking.regos.all():
+#         r.booking = booking
+#         r.save()
     
-    lines = price_or_lineitems(request,booking,booking.campsite_id_list)
-    booking_arrival = booking.arrival.strftime('%d-%m-%Y')
-    booking_departure = booking.departure.strftime('%d-%m-%Y')
-    reservation = "Reservation for {} from {} to {} at {}".format('{} {}'.format(booking.customer.first_name,booking.customer.last_name),booking_arrival,booking_departure,booking.mooringarea.name)
+#     lines = price_or_lineitems(request,booking,booking.campsite_id_list)
+#     booking_arrival = booking.arrival.strftime('%d-%m-%Y')
+#     booking_departure = booking.departure.strftime('%d-%m-%Y')
+#     reservation = "Reservation for {} from {} to {} at {}".format('{} {}'.format(booking.customer.first_name,booking.customer.last_name),booking_arrival,booking_departure,booking.mooringarea.name)
 
-    # Proceed to generate invoice
-    checkout_response = checkout(request,booking,lines,invoice_text=reservation,internal=True)
-    internal_create_booking_invoice(booking, checkout_response)
+#     # Proceed to generate invoice
+#     checkout_response = checkout(request,booking,lines,invoice_text=reservation,internal=True)
+#     internal_create_booking_invoice(booking, checkout_response)
     
-    # Get the new invoice
-    new_invoice = booking.invoices.first()
+#     # Get the new invoice
+#     new_invoice = booking.invoices.first()
 
-    # Check if the booking is a legacy booking and doesn't have an invoice
-    if old_booking.legacy_id and old_booking.invoices.count() < 1:
-        # Create a cash transaction in order to fix the outstnding invoice payment
-        CashTransaction.objects.create(
-            invoice = Invoice.objects.get(reference=new_invoice.invoice_reference),
-            amount = old_booking.cost_total,
-            type = 'move_in',
-            source = 'cash',
-            details = 'Transfer of funds from migrated booking',
-            movement_reference='Migrated Booking Funds'
-        )
-        # Update payment details for the new invoice
-        update_payments(new_invoice.invoice_reference)
+#     # Check if the booking is a legacy booking and doesn't have an invoice
+#     if old_booking.legacy_id and old_booking.invoices.count() < 1:
+#         # Create a cash transaction in order to fix the outstnding invoice payment
+#         CashTransaction.objects.create(
+#             invoice = Invoice.objects.get(reference=new_invoice.invoice_reference),
+#             amount = old_booking.cost_total,
+#             type = 'move_in',
+#             source = 'cash',
+#             details = 'Transfer of funds from migrated booking',
+#             movement_reference='Migrated Booking Funds'
+#         )
+#         # Update payment details for the new invoice
+#         update_payments(new_invoice.invoice_reference)
 
-    # Attach new invoices to old booking
-    for i in old_booking.invoices.all():
-        inv = Invoice.objects.get(reference=i.invoice_reference)
-        inv.voided = True
-        #transfer to the new invoice
-        inv.move_funds(inv.transferable_amount,Invoice.objects.get(reference=new_invoice.invoice_reference),'Transfer of funds from {}'.format(inv.reference))
-        inv.save()
-    # Change the booking for the selected invoice
-    new_invoice.booking = old_booking
-    new_invoice.save()
-    return booking
+#     # Attach new invoices to old booking
+#     for i in old_booking.invoices.all():
+#         inv = Invoice.objects.get(reference=i.invoice_reference)
+#         inv.voided = True
+#         #transfer to the new invoice
+#         inv.move_funds(inv.transferable_amount,Invoice.objects.get(reference=new_invoice.invoice_reference),'Transfer of funds from {}'.format(inv.reference))
+#         inv.save()
+#     # Change the booking for the selected invoice
+#     new_invoice.booking = old_booking
+#     new_invoice.save()
+#     return booking
 
-def update_booking(request,old_booking,booking_details):
+def update_booking(request, old_booking, booking_details):
+    logger.info(f'in update_booking(old_booking:[{old_booking}], booking_details: [{booking_details}]')
+
     same_dates = False
     same_campsites = False
     same_campground = False
@@ -1689,7 +1700,9 @@ def update_booking(request,old_booking,booking_details):
             print(traceback.print_exc())
             raise
 
-def create_or_update_booking(request,booking_details,updating=False,override_checks=False):
+def create_or_update_booking(request, booking_details, updating=False, override_checks=False):
+    logger.info(f'in create_or_update_booking(booking_details: [{booking_details}], updating: [{updating}], override_checks: [{override_checks}]')
+
     booking = None
     if not updating:
         booking = create_booking_by_site(booking_details['campsites'],
@@ -1728,38 +1741,38 @@ def create_or_update_booking(request,booking_details,updating=False,override_che
         booking.save()
     return booking
 
-def old_create_or_update_booking(request,booking_details,updating=False):
-    booking = None
-    if not updating:
-        booking = create_booking_by_site(campsite_id= booking_details['campsite_id'],
-            start_date = booking_details['start_date'],
-            end_date=booking_details['end_date'],
-            num_adult=booking_details['num_adult'],
-            num_concession=booking_details['num_concession'],
-            num_child=booking_details['num_child'],
-            num_infant=booking_details['num_infant'],
-            num_mooring=booking_details['num_mooring'],
-            vessel_size=booking_details['vessel_size'],
-            cost_total=booking_details['cost_total'],
-            customer=booking_details['customer'])
+# def old_create_or_update_booking(request,booking_details,updating=False):
+#     booking = None
+#     if not updating:
+#         booking = create_booking_by_site(campsite_id= booking_details['campsite_id'],
+#             start_date = booking_details['start_date'],
+#             end_date=booking_details['end_date'],
+#             num_adult=booking_details['num_adult'],
+#             num_concession=booking_details['num_concession'],
+#             num_child=booking_details['num_child'],
+#             num_infant=booking_details['num_infant'],
+#             num_mooring=booking_details['num_mooring'],
+#             vessel_size=booking_details['vessel_size'],
+#             cost_total=booking_details['cost_total'],
+#             customer=booking_details['customer'])
         
-        booking.details['first_name'] = booking_details['first_name']
-        booking.details['last_name'] = booking_details['last_name']
-        booking.details['phone'] = booking_details['phone']
-        booking.details['country'] = booking_details['country']
-        booking.details['postcode'] = booking_details['postcode']
+#         booking.details['first_name'] = booking_details['first_name']
+#         booking.details['last_name'] = booking_details['last_name']
+#         booking.details['phone'] = booking_details['phone']
+#         booking.details['country'] = booking_details['country']
+#         booking.details['postcode'] = booking_details['postcode']
 
-        # Add booking regos
-        if request.data.get('parkEntry').get('regos'):
-            regos = request.data['parkEntry'].pop('regos')
-            for r in regos:
-                r[u'booking'] = booking.id
-            regos_serializers = [BookingRegoSerializer(data=r) for r in regos]
-            for r in regos_serializers:
-                r.is_valid(raise_exception=True)
-                r.save()
-        booking.save()
-    return booking
+#         # Add booking regos
+#         if request.data.get('parkEntry').get('regos'):
+#             regos = request.data['parkEntry'].pop('regos')
+#             for r in regos:
+#                 r[u'booking'] = booking.id
+#             regos_serializers = [BookingRegoSerializer(data=r) for r in regos]
+#             for r in regos_serializers:
+#                 r.is_valid(raise_exception=True)
+#                 r.save()
+#         booking.save()
+#     return booking
 
 def admissionsCheckout(request, admissionsBooking, lines, invoice_text=None, vouchers=[], internal=False):
     basket_params = {
@@ -1863,12 +1876,17 @@ def annual_admission_checkout(request, booking, lines, invoice_text=None, vouche
 
 
 def checkout(request, booking, lines, invoice_text=None, vouchers=[], internal=False):
+    old_booking = '' 
+    if booking.old_booking:
+        old_booking = 'PS-'+str(booking.old_booking.id)
+     
     basket_params = {
         'products': lines,
         'vouchers': vouchers,
         'system': settings.PS_PAYMENT_SYSTEM_ID,
         'custom_basket': True,
-        'booking_reference': 'PS-'+str(booking.id)
+        'booking_reference': 'PS-'+str(booking.id),
+        'booking_reference_link': old_booking  # Format: 'PS-<booking_id>'
     }
 
     basket_params = convert_decimal_to_float(basket_params)
@@ -1899,28 +1917,28 @@ def checkout(request, booking, lines, invoice_text=None, vouchers=[], internal=F
 
     # inject the current basket into the redirect response cookies
     # or else, anonymous users will be directionless
-    response.set_cookie(
-            settings.OSCAR_BASKET_COOKIE_OPEN, basket_hash,
-            max_age=settings.OSCAR_BASKET_COOKIE_LIFETIME,
-            secure=settings.OSCAR_BASKET_COOKIE_SECURE, httponly=True
-    )
+    # response.set_cookie(
+    #         settings.OSCAR_BASKET_COOKIE_OPEN, basket_hash,
+    #         max_age=settings.OSCAR_BASKET_COOKIE_LIFETIME,
+    #         secure=settings.OSCAR_BASKET_COOKIE_SECURE, httponly=True
+    # )
 
-    if booking.cost_total < 0:
-        response = HttpResponseRedirect('/refund-payment')
-        response.set_cookie(
-            settings.OSCAR_BASKET_COOKIE_OPEN, basket_hash,
-            max_age=settings.OSCAR_BASKET_COOKIE_LIFETIME,
-            secure=settings.OSCAR_BASKET_COOKIE_SECURE, httponly=True
-        )
+    # if booking.cost_total < 0:
+    #     response = HttpResponseRedirect('/refund-payment')
+    #     response.set_cookie(
+    #         settings.OSCAR_BASKET_COOKIE_OPEN, basket_hash,
+    #         max_age=settings.OSCAR_BASKET_COOKIE_LIFETIME,
+    #         secure=settings.OSCAR_BASKET_COOKIE_SECURE, httponly=True
+    #     )
 
-    # Zero booking costs
-    if booking.cost_total < 1 and booking.cost_total > -1:
-        response = HttpResponseRedirect('/no-payment')
-        response.set_cookie(
-            settings.OSCAR_BASKET_COOKIE_OPEN, basket_hash,
-            max_age=settings.OSCAR_BASKET_COOKIE_LIFETIME,
-            secure=settings.OSCAR_BASKET_COOKIE_SECURE, httponly=True
-        )
+    # # Zero booking costs
+    # if booking.cost_total < 1 and booking.cost_total > -1:
+    #     response = HttpResponseRedirect('/no-payment')
+    #     response.set_cookie(
+    #         settings.OSCAR_BASKET_COOKIE_OPEN, basket_hash,
+    #         max_age=settings.OSCAR_BASKET_COOKIE_LIFETIME,
+    #         secure=settings.OSCAR_BASKET_COOKIE_SECURE, httponly=True
+    #     )
     return response
 
 
@@ -1998,17 +2016,17 @@ def allocate_refund_to_invoice(request, booking, lines, invoice_text=None, inter
 
         return order
 
-def old_internal_create_booking_invoice(booking, checkout_response):
-    if not checkout_response.history:
-        raise Exception('There was a problem retrieving the invoice for this booking')
-    last_redirect = checkout_response.history[-2]
-    reference = last_redirect.url.split('=')[1]
-    try:
-        Invoice.objects.get(reference=reference)
-    except Invoice.DoesNotExist:
-        raise Exception("There was a problem attaching an invoice for this booking")
-    book_inv = BookingInvoice.objects.get_or_create(booking=booking,invoice_reference=reference)
-    return book_inv
+# def old_internal_create_booking_invoice(booking, checkout_response):
+#     if not checkout_response.history:
+#         raise Exception('There was a problem retrieving the invoice for this booking')
+#     last_redirect = checkout_response.history[-2]
+#     reference = last_redirect.url.split('=')[1]
+#     try:
+#         Invoice.objects.get(reference=reference)
+#     except Invoice.DoesNotExist:
+#         raise Exception("There was a problem attaching an invoice for this booking")
+#     book_inv = BookingInvoice.objects.get_or_create(booking=booking,invoice_reference=reference)
+#     return book_inv
 
 def internal_create_booking_invoice(booking, reference):
     try:
@@ -2020,7 +2038,9 @@ def internal_create_booking_invoice(booking, reference):
 
 
 
-def internal_booking(request,booking_details,internal=True,updating=False):
+def internal_booking(request, booking_details, internal=True, updating=False):
+    logger.info(f'in internal_booking(booking_details: [{booking_details}])')
+
     json_booking = request.data
     booking = None
     try:
@@ -2060,7 +2080,9 @@ def internal_booking(request,booking_details,internal=True,updating=False):
         raise
 
 
-def old_internal_booking(request,booking_details,internal=True,updating=False):
+def old_internal_booking(request, booking_details,internal=True,updating=False):
+    logger.info(f'in old_internal_booking(booking_details: [{booking_details}]')
+
     json_booking = request.data
     booking = None
     try:
@@ -2091,6 +2113,29 @@ def old_internal_booking(request,booking_details,internal=True,updating=False):
 def set_session_booking(session, booking):
     session['ps_booking'] = booking.id
     session.modified = True
+    logger.info(f"session['ps_booking'] has been set to the booking.id: [{booking.id}]")
+
+def calculate_checkouthash_from_booking_id(booking_id):
+    # Retrieve MooringsiteBooking ids for this booking as a list
+    booking = Booking.objects.get(id=booking_id)
+    mooringsite_booking_ids = booking.campsites.all().order_by('id').values_list('id', flat=True)
+    if mooringsite_booking_ids.count() < 1:
+        # No MooringsiteBooking objects found for this booking
+        checkouthash = None
+    else:
+        checkouthash = hashlib.sha256(str(mooringsite_booking_ids).encode('utf-8')).hexdigest()
+    return checkouthash
+
+def set_session_checkouthash(session, hash):
+    session['checkouthash'] = hash
+    session.modified = True
+    logger.info(f"session['checkouthash'] has been set to the hash: [{hash}]")
+
+def delete_session_booking(session):
+    if 'ps_booking' in session:
+        del session['ps_booking']
+        session.modified = True
+        logger.info(f"session['ps_booking'] has been deleted")
 
 def get_session_admissions_booking(session):
     if 'ad_booking' in session:
@@ -2135,15 +2180,9 @@ def get_session_booking(session):
     except Booking.DoesNotExist:
         raise Exception('Booking not found for booking_id {}'.format(booking_id))
 
-def delete_session_booking(session):
-    if 'ps_booking' in session:
-        del session['ps_booking']
-        session.modified = True
-
 def daterange(start_date, end_date):
     for n in range(int ((end_date - start_date).days)):
         yield start_date + timedelta(n)
-
 
 def oracle_integration(date,override):
     system = '0516'

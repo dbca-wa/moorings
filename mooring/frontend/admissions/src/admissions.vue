@@ -517,6 +517,8 @@ export default {
 	    this.validateVesselReg();
         },
         validateVesselReg: function() {
+            console.log('in validateVesselReg()')
+
             let vm = this;
             vm.vesselReg = vm.vesselReg.toUpperCase();
             vm.vesselReg = vm.vesselReg.replace(/\s/g,"");

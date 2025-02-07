@@ -69,7 +69,7 @@ class MooringsiteClassAdmin(admin.ModelAdmin):
     list_filter = ('name',)
 
 @admin.register(models.MarinePark)
-class MarinaAdmin(admin.GeoModelAdmin):
+class MarinaAdmin(admin.GISModelAdmin):
     list_display = ('name','district','mooring_group')
     ordering = ('name',)
     list_filter = ('district',)
@@ -98,7 +98,7 @@ class MarinaAdmin(admin.GeoModelAdmin):
         super(MarinaAdmin, self).save_model(request, obj, form, change)
 
 @admin.register(models.MooringArea)
-class MooringAreaAdmin(admin.GeoModelAdmin):
+class MooringAreaAdmin(admin.GISModelAdmin):
     list_display = ('name','park','promo_area','mooring_type','max_advance_booking','mooring_specification')
     ordering = ('name',)
     search_fields = ('name',)
@@ -165,7 +165,7 @@ class MooringAreaGroupAdmin(admin.ModelAdmin):
         return qs.filter(id__in=group)
 
 @admin.register(models.Mooringsite)
-class MooringsiteAdmin(admin.GeoModelAdmin):
+class MooringsiteAdmin(admin.GISModelAdmin):
     list_display = ('name','mooringarea',)
     ordering = ('name',)
     list_filter = ('mooringarea',)
@@ -546,7 +546,7 @@ class BookingPeriodOption(admin.ModelAdmin):
     search_fields = ('option_description', 'period_name',)
 
 @admin.register(models.Region)
-class Region(admin.GeoModelAdmin):
+class Region(admin.GISModelAdmin):
     list_display = ('name',)
     ordering = ('name',)
     search_fields = ('name',)
@@ -608,7 +608,7 @@ admin.site.register(models.Rate)
 #admin.site.register(models.District)
 #admin.site.register(models.PromoArea)
 @admin.register(models.PromoArea)
-class PromoArea(admin.GeoModelAdmin):
+class PromoArea(admin.GISModelAdmin):
     list_display = ('name',)
     ordering = ('name',)
     openlayers_url = 'https://cdnjs.cloudflare.com/ajax/libs/openlayers/2.13.1/OpenLayers.js'
