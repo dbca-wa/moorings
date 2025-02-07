@@ -1876,12 +1876,17 @@ def annual_admission_checkout(request, booking, lines, invoice_text=None, vouche
 
 
 def checkout(request, booking, lines, invoice_text=None, vouchers=[], internal=False):
+    old_booking = '' 
+    if booking.old_booking:
+        old_booking = 'PS-'+str(booking.old_booking.id)
+     
     basket_params = {
         'products': lines,
         'vouchers': vouchers,
         'system': settings.PS_PAYMENT_SYSTEM_ID,
         'custom_basket': True,
-        'booking_reference': 'PS-'+str(booking.id)
+        'booking_reference': 'PS-'+str(booking.id),
+        'booking_reference_link': old_booking  # Format: 'PS-<booking_id>'
     }
 
     basket_params = convert_decimal_to_float(basket_params)
@@ -1912,11 +1917,11 @@ def checkout(request, booking, lines, invoice_text=None, vouchers=[], internal=F
 
     # inject the current basket into the redirect response cookies
     # or else, anonymous users will be directionless
-    response.set_cookie(
-            settings.OSCAR_BASKET_COOKIE_OPEN, basket_hash,
-            max_age=settings.OSCAR_BASKET_COOKIE_LIFETIME,
-            secure=settings.OSCAR_BASKET_COOKIE_SECURE, httponly=True
-    )
+    # response.set_cookie(
+    #         settings.OSCAR_BASKET_COOKIE_OPEN, basket_hash,
+    #         max_age=settings.OSCAR_BASKET_COOKIE_LIFETIME,
+    #         secure=settings.OSCAR_BASKET_COOKIE_SECURE, httponly=True
+    # )
 
     # if booking.cost_total < 0:
     #     response = HttpResponseRedirect('/refund-payment')
