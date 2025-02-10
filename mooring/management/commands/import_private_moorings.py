@@ -1,6 +1,7 @@
 from django.core.management.base import BaseCommand
 import pandas as pd
 import numpy as np
+from mooring.models import MooringArea, MarinePark, MooringAreaGroup
 
 COLUMN_MAPPINGS = {
     "Mooring Name": "name",
@@ -10,6 +11,18 @@ COLUMN_MAPPINGS = {
     "Maximum Vessel Size (Metres)": "vessel_size",
     "Maximum Vessel Draft (Metres)": "vessel_draft",
     "Maximum Vessel Weight (Tonnes)": "vessel_weight",
+}
+
+MOORING_PHYSICAL_TYPE_CHOICES = {
+    'Mooring': 0,
+    'Jetty Pen': 1,
+    'Beach Pen': 2,
+}
+
+MOORING_CLASS_CHOICES = {
+    'Small': 'small',
+    'Medium': 'medium',
+    'Large': 'large',
 }
 
 class Command(BaseCommand):
@@ -30,7 +43,50 @@ class Command(BaseCommand):
 
         for index, row in data.iterrows():
             try:
-                pass
+
+                #vessel weight limit is optional, size and draft limits are not
+                vessel_weight = float(row["vessel_weight"]) if row["vessel_weight"] else 0
+                if not row["vessel_size"]:
+                    errors.append("Vessel size limit not provided")
+                    continue
+                if not row["vessel_draft"]:
+                    errors.append("Vessel draft limit not provided")
+                    continue
+
+                parks_qs = MarinePark.objects.filter(name=row["park"])
+                if not parks_qs.exists():
+                    errors.append("Park {} does not exists".format(row["park"]))
+                    continue
+                else:
+                    park = parks_qs.first()                
+
+                moorings_qs = MooringArea.objects.filter(name=row["name"])
+                if moorings_qs.exists():
+                    #update
+                    mooring_area = moorings_qs.first()
+                    mooring_area.name = row["name"]
+                    mooring_area.park = park
+                    mooring_area.mooring_physical_type = MOORING_PHYSICAL_TYPE_CHOICES[row["physical_type"]]
+                    mooring_area.mooring_class = MOORING_CLASS_CHOICES[row["class"]]
+                    mooring_area.vessel_size_limit = float(row["vessel_size"])
+                    mooring_area.vessel_draft_limit = float(row["vessel_draft"])
+                    mooring_area.vessel_weight_limit = vessel_weight
+                    mooring_area.save()
+                    updated.append(row["name"])
+                else:
+                    #create
+                    MooringArea.objects.create(
+                        mooring_specification = 2,
+                        mooring_type = 1,
+                        name = row["name"],
+                        park = park,
+                        mooring_physical_type = MOORING_PHYSICAL_TYPE_CHOICES[row["physical_type"]],
+                        mooring_class = MOORING_CLASS_CHOICES[row["class"]],
+                        vessel_size_limit = float(row["vessel_size"]),
+                        vessel_draft_limit = float(row["vessel_draft"]),
+                        vessel_weight_limit = vessel_weight,
+                    )
+                    new.append(row["name"])
             except Exception as e:
                 errors.append(e)
 
