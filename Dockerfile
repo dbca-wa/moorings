@@ -69,13 +69,6 @@ RUN chmod 755 /startup.sh
 RUN wget https://raw.githubusercontent.com/dbca-wa/wagov_utils/main/wagov_utils/bin/health_check.sh -O /bin/health_check.sh
 RUN chmod 755 /bin/health_check.sh
 
-#install azcopy in docker image
-RUN mkdir /tmp/azcopy/
-RUN wget https://aka.ms/downloadazcopy-v10-linux -O /tmp/azcopy/azcopy.tar.gz
-RUN cd /tmp/azcopy/ ; tar -xzvf azcopy.tar.gz
-RUN cp /tmp/azcopy/azcopy_linux_amd64_10.25.1/azcopy /bin/azcopy
-RUN chmod 755 /bin/azcopy
-
 EXPOSE 8080
 HEALTHCHECK --interval=1m --timeout=5s --start-period=10s --retries=3 CMD ["wget", "-q", "-O", "-", "http://localhost:8080/"]
 CMD ["/startup.sh"]
