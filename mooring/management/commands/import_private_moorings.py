@@ -1,18 +1,25 @@
 from django.core.management.base import BaseCommand
 import pandas as pd
 import numpy as np
-from tqdm import tqdm
 
-COLUMN_MAPPINGS = []
+COLUMN_MAPPINGS = {
+    "Mooring Name": "name",
+    "Mooring Park": "park",
+    "Mooring Physical Type": "physical_type",
+    "Mooring Class": "class",
+    "Maximum Vessel Size (Metres)": "vessel_size",
+    "Maximum Vessel Draft (Metres)": "vessel_draft",
+    "Maximum Vessel Weight (Tonnes)": "vessel_weight",
+}
 
 class Command(BaseCommand):
     help = 'Import private moorings from file.'
 
     def handle(self, *args, **options):
-        filepath = ""
+        filepath = "tmp/test.csv"
         data=pd.read_csv(filepath, delimiter=',', dtype=str)
 
-        data = self.data.rename(columns=COLUMN_MAPPINGS)
+        data = data.rename(columns=COLUMN_MAPPINGS)
         data[data.columns] = data.apply(lambda x: x.str.strip() if isinstance(x, str) else x)
         data.fillna('', inplace=True)
         data.replace({np.nan: ''}, inplace=True)
@@ -21,7 +28,7 @@ class Command(BaseCommand):
         new = []
         updated = []
 
-        for index, row in tqdm(data.iterrows(), total=data.shape[0]):
+        for index, row in data.iterrows():
             try:
                 pass
             except Exception as e:
