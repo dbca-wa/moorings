@@ -56,6 +56,8 @@ class Command(BaseCommand):
 
         for index, row in data.iterrows():
             try:
+                
+                mooring_class = MOORING_CLASS_CHOICES[row["class"]] if row["class"] else 0
 
                 #vessel weight limit is optional, size and draft limits are not
                 vessel_weight = float(row["vessel_weight"]) if row["vessel_weight"] else 0
@@ -80,7 +82,7 @@ class Command(BaseCommand):
                     mooring_area.name = row["name"]
                     mooring_area.park = park
                     mooring_area.mooring_physical_type = MOORING_PHYSICAL_TYPE_CHOICES[row["physical_type"]]
-                    mooring_area.mooring_class = MOORING_CLASS_CHOICES[row["class"]]
+                    mooring_area.mooring_class = mooring_class
                     mooring_area.vessel_size_limit = float(row["vessel_size"])
                     mooring_area.vessel_draft_limit = float(row["vessel_draft"])
                     mooring_area.vessel_weight_limit = vessel_weight
@@ -94,7 +96,7 @@ class Command(BaseCommand):
                         name = row["name"],
                         park = park,
                         mooring_physical_type = MOORING_PHYSICAL_TYPE_CHOICES[row["physical_type"]],
-                        mooring_class = MOORING_CLASS_CHOICES[row["class"]],
+                        mooring_class = mooring_class,
                         vessel_size_limit = float(row["vessel_size"]),
                         vessel_draft_limit = float(row["vessel_draft"]),
                         vessel_weight_limit = vessel_weight,
