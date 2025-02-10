@@ -2,6 +2,7 @@ from django.core.management.base import BaseCommand
 import pandas as pd
 import numpy as np
 from mooring.models import MooringArea, MarinePark, MooringAreaGroup
+from confy import env
 
 COLUMN_MAPPINGS = {
     "Mooring Name": "name",
@@ -26,11 +27,23 @@ MOORING_CLASS_CHOICES = {
 }
 
 class Command(BaseCommand):
-    help = 'Import private moorings from file.'
+    help = 'Import private moorings from file.\n'\
+    'python manage_mo.py import_private_moorings --path tmp/moorings.csv'
+
+    def add_arguments(self, parser):
+        parser.add_argument('--path', type=str)
 
     def handle(self, *args, **options):
-        filepath = "tmp/test.csv"
-        data=pd.read_csv(filepath, delimiter=',', dtype=str)
+
+        filepath = options['path']
+        if not filepath:
+            filepath = env('IMPORT_MOORINGS_PATH', 'tmp/moorings.csv')
+
+        try:
+            data=pd.read_csv(filepath, delimiter=',', dtype=str)
+        except Exception as e:
+            print(e)
+            return
 
         data = data.rename(columns=COLUMN_MAPPINGS)
         data[data.columns] = data.apply(lambda x: x.str.strip() if isinstance(x, str) else x)
