@@ -103,7 +103,7 @@ class Command(BaseCommand):
                     )
                     new.append(row["name"])
             except Exception as e:
-                errors.append(e)
+                errors.append(str(index) + " " + str(e))
 
         print("New moorings added",len(new))
         print("Moorings updated", len(updated))
