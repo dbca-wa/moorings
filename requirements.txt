@@ -66,3 +66,4 @@ requests==2.32.3
 pillow==10.3.0
 idna==3.7
 cryptography==42.0.8
+pandas==2.0.3
