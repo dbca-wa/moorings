@@ -52,7 +52,8 @@ class Command(BaseCommand):
 
         errors = []
         new = []
-        updated = []
+        #updated = []
+        exists = []
 
         for index, row in data.iterrows():
             try:
@@ -78,16 +79,18 @@ class Command(BaseCommand):
                 moorings_qs = MooringArea.objects.filter(name=row["name"])
                 if moorings_qs.exists():
                     #update
-                    mooring_area = moorings_qs.first()
-                    mooring_area.name = row["name"]
-                    mooring_area.park = park
-                    mooring_area.mooring_physical_type = MOORING_PHYSICAL_TYPE_CHOICES[row["physical_type"]]
-                    mooring_area.mooring_class = mooring_class
-                    mooring_area.vessel_size_limit = float(row["vessel_size"])
-                    mooring_area.vessel_draft_limit = float(row["vessel_draft"])
-                    mooring_area.vessel_weight_limit = vessel_weight
-                    mooring_area.save()
-                    updated.append(row["name"])
+                    #NOTE refrain from updating (could make this an option)
+                    #mooring_area = moorings_qs.first()
+                    #mooring_area.name = row["name"]
+                    #mooring_area.park = park
+                    #mooring_area.mooring_physical_type = MOORING_PHYSICAL_TYPE_CHOICES[row["physical_type"]]
+                    #mooring_area.mooring_class = mooring_class
+                    #mooring_area.vessel_size_limit = float(row["vessel_size"])
+                    #mooring_area.vessel_draft_limit = float(row["vessel_draft"])
+                    #mooring_area.vessel_weight_limit = vessel_weight
+                    #mooring_area.save()
+                    #updated.append(row["name"])
+                    exists.append(row["name"])
                 else:
                     #create
                     MooringArea.objects.create(
@@ -106,7 +109,7 @@ class Command(BaseCommand):
                 errors.append(str(index) + " " + str(e))
 
         print("New moorings added",len(new))
-        print("Moorings updated", len(updated))
+        print("Mooring aleady exists", len(exists))
 
         if errors:
             print("\nErrors\n")
