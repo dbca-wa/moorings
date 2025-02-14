@@ -188,26 +188,6 @@ class BookingAbortTestCase(TestSetup):
         response = self.client.get(url, HTTP_HOST="website.domain")
         self.assertEqual(response.status_code, 302)
 
-#        self.assertContains(response, "Your session has expired");
-
-    # def test_not_logged_in_with_booking(self):
-    #     """Test that the booking abort view will load whilst not logged in and booking.
-    #     """
-    #     url = '/booking/abort/'
-    #     park = mixer.blend(MarinePark, oracle_code="0516", zoom_level=0)
-    #     start = datetime.now() - timedelta(days=1)
-    #     end = start + timedelta(days=3)
-    #     # bRange = BookingRange.objects.create(created=datetime.now(), updated_on=datetime.now(), status=0, closure_reason=None, open_reason=None, details=None, range_start=start, range_end=end)
-    #     openReason = OpenReason.objects.create(text="blahsohaipheaf", detailRequired=False, editable=True)
-    #     area = mixer.blend(MooringArea, park=park, open_reason_id=openReason.id)
-
-    #     booking = mixer.blend(Booking, mooringarea=area)
-    #     session = self.client.session
-    #     session['ps_booking'] = booking.id
-    #     session.save()
-    #     response = self.client.get(url, HTTP_HOST="website.domain")
-    #     self.assertEqual(response.status_code, 200)
-
     def test_logged_in_admin_no_booking(self):
         """Test that the booking abort view will display an error whilst logged in as admin and no booking.
         """
@@ -217,26 +197,6 @@ class BookingAbortTestCase(TestSetup):
         self.assertEqual(response.status_code, 302)
         #self.assertContains(response, "Your session has expired")
     
-    # def test_logged_in_admin_with_booking(self):
-    #     """Test that the booking abort view will load whilst logged in as admin and booking.
-    #     """
-    #     url = '/booking/abort/'
-    #     park = mixer.blend(MarinePark, oracle_code="0516", zoom_level=0)
-    #     start = datetime.now() - timedelta(days=1)
-    #     end = start + timedelta(days=3)
-    #     openReason = OpenReason.objects.create(text="blahsohaipheaf", detailRequired=False, editable=True)
-    #     area = mixer.blend(MooringArea, park=park, open_reason_id=openReason.id)
-    #     booking = mixer.blend(Booking, mooringarea=area)
-
-    #     self.client.login(username=self.adminUN, password="pass")
-    #     session = self.client.session
-    #     session['ps_booking'] = booking.id
-    #     session.save()
-
-    #     response = self.client.get(url, HTTP_HOST="website.domain")
-    #     self.assertEqual(response.status_code, 200)
-    #     self.assertContains(response, "Your session has expired")
-
     def test_logged_in_non_admin_no_booking(self):
         """Test that the booking abort view will display an error whilst logged in as non-admin and no booking.
         """
@@ -246,15 +206,6 @@ class BookingAbortTestCase(TestSetup):
         self.assertEqual(response.status_code,302)
  #       self.assertContains(response, "Your session has expired");
 
-    # def test_logged_in_non_admin_with_booking(self):
-    #     """Test that the booking abort view will redirect whilst logged in as non-admin and booking.
-    #     """
-    #     url = '/booking/abort/'
-    #     self.client.login(username=self.nonAdminUN, password="pass")
-    #     booking = mixer.blend(Booking)
-    #     request.session['ps_booking'] = booking.id
-    #     response = self.client.get(url, HTTP_HOST="website.domain")
-    #     self.assertEqual(response.status_code, 200)
 
 class CreatedBasketTestCase(TestSetup):
     def test_not_logged_in_no_basket(self):

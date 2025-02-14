@@ -7,8 +7,10 @@ from django.contrib import messages
 from django.urls import reverse
 from django.http import Http404, HttpResponse, JsonResponse, HttpResponseRedirect
 from django.utils import timezone
-from mooring.models import Booking
+from mooring.models import AdmissionsBooking, Booking, BookingAnnualAdmission
 import hashlib
+
+from mooring.utils import calculate_checkouthash_from_booking_id, delete_session_booking
 
 
 logger = logging.getLogger(__name__)
@@ -137,14 +139,9 @@ class BookingTimerMiddleware(object):
             self.get_response = get_response
 
     def process_view(self, request, view_func, view_args, view_kwargs):
-
-
-    # def process_request(self, request):
-        #print ("REQUEST SESSION")
-        #print request.session['ps_booking']
-        print ("LOADING MIDDLE WARE")
+        logger.info("in BookingTimerMiddleware.process_view()...")
         if 'ad_booking' in request.session:
-            print ("ADMISSION MIDDLE WARE")
+            logger.info(f"session['ad_booking']: [{request.session['ad_booking']}] exists.")
             try:
                 booking = AdmissionsBooking.objects.get(pk=request.session['ad_booking'])
             except:
@@ -158,9 +155,11 @@ class BookingTimerMiddleware(object):
                 # safeguard against e.g. part 1 of the multipart checkout confirmation process passing, then part 2 timing out.
                 # on POST boosts remaining time to at least 2 minutes
                 booking.save()
+        else:
+            logger.info('session[ad_booking] does not exist.')
 
         if 'annual_admission_booking' in request.session:
-            print ("ANNUAL ADMISSION MIDDLE WARE")
+            logger.info(f"session['annual_admission_booking']: [{request.session['annual_admission_booking']}] exists.")
             try:
                 booking = BookingAnnualAdmission.objects.get(pk=request.session['annual_admission_booking'])
             except:
@@ -174,51 +173,75 @@ class BookingTimerMiddleware(object):
                 # safeguard against e.g. part 1 of the multipart checkout confirmation process passing, then part 2 timing out.
                 # on POST boosts remaining time to at least 2 minutes
                 booking.save()
-            print ("END ANNUAL")
+        else:
+            logger.info(f'session[annual_admission_booking] does not exist.')
+
         if 'ps_booking' in request.session:
-            print ("YES PS BOOKING")
-            print (request.session['ps_booking'])
-        #    print ("BOOKING SESSION : "+str(request.session['ps_booking']))
+            logger.info(f"session['ps_booking']: [{request.session['ps_booking']}] exists.")
+
+            # Only when user is going to make payment, compare the checkouthash stored in the cookie (sent from the page) with the checkouthash
+            # dynamically calculated on the backend to prevent issues caused by users attempting to place orders
+            # using multiple browser tabs.
+            checkouthash = calculate_checkouthash_from_booking_id(int(request.session["ps_booking"]))
+            checkouthash_cookie = request.COOKIES.get('checkouthash')
+            logger.info(f'checkouthash dynamically calc: [{checkouthash}]')
+            logger.info(f'checkouthash stored in cookie: [{checkouthash_cookie}]')
+            if checkouthash_cookie != checkouthash:
+                # Checkouthash mismatch which implies the user is handling multiple browser tabs with different booking details,
+                # redirect user to the booking page
+                logger.warning(f"checkouthashs are mismatched!")
+
+                if request.path.startswith("/ledger-api/process-payment") or request.path.startswith('/ledger-api/payment-details'):
+                    # Redirect user to the booking page when attempting payment processing
+                    # due to mismatch between backend booking data and frontend submitted data,
+                    # likely caused by multiple browser tabs being open.
+                    logger.warning(f"Redirecting user: [{request.user}] to the booking page due to mismatch of the booking data between the one stored in the backend and the one sent from the frontend.")
+                    url_redirect = reverse('public_make_booking')
+                    response = HttpResponse("<script> window.location='" + url_redirect + "';</script> <center><div class='container'><div class='alert alert-primary' role='alert'><a href='" + url_redirect + "'> Redirecting please wait: " + url_redirect + "</a><div></div></center>")
+                    return response 
+
             try:
                 booking = Booking.objects.get(pk=request.session['ps_booking'])
             except:
                 # no idea what object is in self.request.session['ps_booking'], ditch it
-                del request.session['ps_booking']
+                delete_session_booking(request.session)
                 return
+
             if booking.booking_type != 3:
                 # booking in the session is not a temporary type, ditch it
-                del request.session['ps_booking']
+                delete_session_booking(request.session)
             elif timezone.now() > booking.expiry_time:
                 # expiry time has been hit, destroy the Booking then ditch it
                 #booking.delete()
-                del request.session['ps_booking']
+                delete_session_booking(request.session)
             elif CHECKOUT_PATH.match(request.path) and request.method == 'POST':
                 # safeguard against e.g. part 1 of the multipart checkout confirmation process passing, then part 2 timing out.
                 # on POST boosts remaining time to at least 2 minutes
                 booking.expiry_time = max(booking.expiry_time, timezone.now()+datetime.timedelta(minutes=3))
                 booking.save()
+        else:
+            logger.info('session[ps_booking] does not exist.')
 
         if CHECKOUT_PATH.match(request.path):
-            # basket = utils.get_basket(request)
-            booking = Booking.objects.get(pk=request.session['ps_booking'])
-            # booking_reference = basket.booking_reference
-            booking_reference = 'PS' + str(booking.id)
-            print (booking_reference[:2])
-            if booking_reference[:2] == 'PS':
-                   booking_id = booking_reference.split("-")
-                   print ("parkstay booking")
-                   try:
-                       del request.session['ad_booking']
-                       del request.session['annual_admission_booking']
-                   except:
-                       pass
-                #    booking = Booking.objects.get(pk=int(booking_id[1]))
-                   if timezone.now() > booking.expiry_time:
-                       try:
-                           del request.session['ps_booking']
-                       except:
-                           pass
-                       return HttpResponseRedirect(reverse('public_make_booking'))
+            try:
+                booking = Booking.objects.get(pk=request.session['ps_booking'])
+            except:
+                # no idea what object is in self.request.session['ps_booking'], ditch it
+                delete_session_booking(request.session)
+                return HttpResponseRedirect(reverse('public_make_booking'))
+
+            try:
+                del request.session['ad_booking']
+                del request.session['annual_admission_booking']
+            except:
+                pass
+
+            if timezone.now() > booking.expiry_time:
+                try:
+                    delete_session_booking(request.session)
+                except:
+                    pass
+                return HttpResponseRedirect(reverse('public_make_booking'))
 
         # force a redirect if in the checkout
         if ('ps_booking_internal' not in request.COOKIES) and CHECKOUT_PATH.match(request.path):
@@ -226,7 +249,6 @@ class BookingTimerMiddleware(object):
                 return HttpResponseRedirect(reverse('public_make_booking'))
             else:
                 return
-            return HttpResponseRedirect(reverse('public_make_booking'))
         return
 
     def __call__(self, request):            
