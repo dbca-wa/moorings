@@ -59,7 +59,7 @@ stages:
       displayName: Build an image and Push for Working Segregation
       inputs:
         command: buildAndPush
-        dockerfile: '$(Build.SourcesDirectory)/Dockerfile.working-segregation'
+        dockerfile: '$(Build.SourcesDirectory)/Dockerfile'
         tags: |
               working_segregation_latest
               working_segregation_$(tagDate)
