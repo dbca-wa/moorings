@@ -4,7 +4,6 @@
 
 trigger:
 - master
-- working-segregation
 
 resources:
 - repo: self
@@ -13,7 +12,6 @@ variables:
   tag: '$(Build.BuildId)'
   tagDate: $[ format('{0:yyyy}.{0:MM}.{0:dd}.{0:HH}.{0:mm}{0:ss}', pipeline.startTime) ]
   isMain: $[eq(variables['Build.SourceBranch'], 'refs/heads/master')]
-  isWorkingSegregation: $[eq(variables['Build.SourceBranch'], 'refs/heads/working-segregation')]
 
 stages:
 - stage: Build
@@ -47,23 +45,5 @@ stages:
               moorings_dev_$(tagDate)
         containerRegistry: DockerHub
         repository: dbcawa/docker_app_dev
-      env:
-        DOCKER_BUILDKIT: 1
-  - job: BuildWorkingSegregation
-    displayName: Build Working Segregation
-    condition: and(succeeded(), eq(variables.isWorkingSegregation, 'true'))
-    pool:
-      vmImage: ubuntu-latest
-    steps:
-    - task: Docker@2
-      displayName: Build an image and Push for Working Segregation
-      inputs:
-        command: buildAndPush
-        dockerfile: '$(Build.SourcesDirectory)/Dockerfile'
-        tags: |
-              working_segregation_latest
-              working_segregation_$(tagDate)
-        containerRegistry: DockerHub
-        repository: dbcawa/working_segregation
       env:
         DOCKER_BUILDKIT: 1
