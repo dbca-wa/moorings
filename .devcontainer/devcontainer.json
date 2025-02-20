@@ -1,7 +1,6 @@
 {
 	"name": "Moorings Development",
-	// "image": "dbcawa/docker_app_dev:moorings_dev_latest",
-	"image": "my_moorings_dev_image",
+	"image": "dbcawa/docker_app_dev:moorings_dev_latest",
 	"remoteUser": "container",
 	"workspaceFolder": "/data/data/projects/moorings",
 	"mounts": [
