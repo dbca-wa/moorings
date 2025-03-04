@@ -1,5 +1,6 @@
 # Prepare the base environment.
 FROM dbcawa/moorings:latest as builder_base_dockerdev
+# FROM my_moorings_image:latest as builder_base_dockerdev
 USER root
 RUN apt-get update
 RUN apt-get install --no-install-recommends -y patch
