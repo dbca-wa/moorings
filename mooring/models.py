@@ -1271,7 +1271,7 @@ class MooringsiteBooking(models.Model):
     from_dt = models.DateTimeField(blank=True, null=True)
     to_dt = models.DateTimeField(blank=True, null=True)
     amount = models.DecimalField(max_digits=8, decimal_places=2, default='0.00', blank=True, null=True, unique=False) 
-    booking = models.ForeignKey('Booking',related_name="campsites", on_delete=models.CASCADE, null=True)
+    booking = models.ForeignKey('Booking', related_name="campsites", on_delete=models.CASCADE, null=True)
     booking_type = models.SmallIntegerField(choices=BOOKING_TYPE_CHOICES, default=0)
     booking_period_option = models.ForeignKey('BookingPeriodOption', related_name="booking_period_option", on_delete=models.PROTECT, null=True)
 
@@ -1473,7 +1473,7 @@ class Booking(models.Model):
 
 
     def save(self, *args,**kwargs):
-        self.updated = datetime.now()
+        self.updated = timezone.now()
         self.property_cache_stale = True
         if 'cache_updated' in kwargs:
             if kwargs['cache_updated'] is True:
@@ -2000,7 +2000,7 @@ class RegisteredVesselsMooringLicensing(models.Model):
     created = models.DateTimeField(default=timezone.now, editable=False)
 
     def save(self, *args,**kwargs):
-        self.updated = datetime.now()
+        self.updated = timezone.now()
         UpdateLog.objects.create(model_name='RegisteredVesselsMooringLicensing', json_context={'rego_no':self.rego_no,'vessel_size': self.vessel_size, 'vessel_draft': self.vessel_draft, 'vessel_beam': self.vessel_beam, 'vessel_weight':self.vessel_weight,})
         super(RegisteredVesselsMooringLicensing,self).save(*args,**kwargs)
 
@@ -2891,7 +2891,7 @@ class VesselLicence(models.Model):
     created = models.DateTimeField(default=timezone.now, editable=False)
 
     def save(self, *args,**kwargs):
-        self.updated = datetime.now()
+        self.updated = timezone.now()
         UpdateLog.objects.create(model_name='VesselLicence', json_context={'vessel_rego':self.vessel_rego,'licence_id': self.licence_id, 'licence_type': dict(self.LICENCE_TYPE).get(self.licence_type), 'licence_type_id': self.licence_type,'start_date': self.start_date, 'expiry_date':self.expiry_date,'status': dict(self.STATUS).get(self.status), 'status_id': self.status  })
         super(VesselLicence, self).save(*args,**kwargs)
 

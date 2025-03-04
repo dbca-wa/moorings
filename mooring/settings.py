@@ -114,7 +114,7 @@ LOGGING['handlers']['booking_checkout'] = {
             'level': 'INFO',
             'class': 'logging.handlers.RotatingFileHandler',
             'filename': os.path.join(BASE_DIR, 'logs', 'mooring_booking_checkout.log'),
-            'formatter': 'verbose',
+            'formatter': 'verbose2',
             'maxBytes': 5242880
         }
 LOGGING['loggers']['booking_checkout'] = {
@@ -124,9 +124,9 @@ LOGGING['loggers']['booking_checkout'] = {
 LOGGING['loggers']['django']['propagate'] = True
 LOGGING['loggers']['']['level'] = 'DEBUG'
 
-from pprint import pprint
-print("\n=== LOGGING Configuration ===\n")
-pprint(LOGGING, indent=2, width=80)
+# from pprint import pprint
+# print("\n=== LOGGING Configuration ===\n")
+# pprint(LOGGING, indent=2, width=80)
 
 #PS_PAYMENT_SYSTEM_ID = env('PS_PAYMENT_SYSTEM_ID', 'S019')
 PS_PAYMENT_SYSTEM_ID = env('PS_PAYMENT_SYSTEM_ID', 'S516')

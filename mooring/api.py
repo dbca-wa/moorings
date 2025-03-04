@@ -1,3 +1,4 @@
+from datetime import timezone as timezone_dt
 import traceback
 import base64
 import geojson
@@ -5,10 +6,8 @@ import decimal
 import logging
 import json
 import calendar
-import time
 import math
 import hashlib
-import io
 from six.moves.urllib.parse import urlparse
 from wsgiref.util import FileWrapper
 from django.db.models import Q, Min
@@ -460,17 +459,17 @@ class MooringAreaMapViewSet(viewsets.ReadOnlyModelViewSet):
 
 
 def mooring_map_view(request, *args, **kwargs):
-     from django.core import serializers
-     dumped_data = cache.get('MooringAreaMapViewSet')
-     if dumped_data is None:
-         print ("Recreating Campground Cache")
-         queryset = MooringArea.objects.exclude(mooring_type=3)
-         queryset_obj = serializers.serialize('json', queryset)
-         serializer_camp = MooringAreaMapSerializer(data=queryset, many=True)
-         serializer_camp.is_valid()
-         dumped_data = geojson.dumps(serializer_camp.data)
-         cache.set('MooringAreaMapViewSet', dumped_data,  900)
-     return HttpResponse(dumped_data, content_type='application/json')
+    from django.core import serializers
+    dumped_data = cache.get('MooringAreaMapViewSet')
+    if dumped_data is None:
+        logger.info("Recreating MooringArea Cache...")
+        queryset = MooringArea.objects.exclude(mooring_type=3)
+        queryset_obj = serializers.serialize('json', queryset)
+        serializer_camp = MooringAreaMapSerializer(data=queryset, many=True)
+        serializer_camp.is_valid()
+        dumped_data = geojson.dumps(serializer_camp.data)
+        cache.set('MooringAreaMapViewSet', dumped_data,  900)
+    return HttpResponse(dumped_data, content_type='application/json')
 
 class MarineParksRegionMapViewSet(viewsets.ReadOnlyModelViewSet):
 #    queryset = MooringArea.objects.values('park_id__name','park_id__wkb_geometry').annotate(total=Count('park'))
@@ -623,6 +622,10 @@ def current_booking(request, *args, **kwargs):
     response_data['result'] = 'success'
     response_data['message'] = ''
     ongoing_booking = Booking.objects.get(pk=request.session['ps_booking']) if 'ps_booking' in request.session else None
+    if ongoing_booking:
+        logger.info(f'ongoing_booking: [{ongoing_booking}] has been retrieved.')
+    else:
+        logger.info('No ongoing_booking found.')
     response_data['current_booking'] = get_current_booking(ongoing_booking, request)
     return HttpResponse(json.dumps(response_data), content_type='application/json')
 
@@ -639,6 +642,7 @@ def search_suggest(request, *args, **kwargs):
     for x in Region.objects.filter(wkb_geometry__isnull=False).values_list('id', 'name', 'wkb_geometry','zoom_level'):
         entries.append(geojson.Point((x[2].x, x[2].y), properties={'type': 'Region', 'id': x[0], 'name': x[1], 'zoom_level': x[3]}))
     return HttpResponse(geojson.dumps(geojson.FeatureCollection(entries)), content_type='application/json')
+
 
 @csrf_exempt
 def delete_booking(request, *args, **kwargs):
@@ -666,23 +670,20 @@ def delete_booking(request, *args, **kwargs):
                      else:
                          response_data['result'] = 'error'
                          response_data['message'] = 'Unable to delete booking'
-
                  else:
-
                      response_data['result'] = 'error'
                      response_data['message'] = 'Unable to delete booking'
     return HttpResponse(json.dumps(response_data), content_type='application/json')
 
+
 @csrf_exempt
-#@require_http_methods(['GET'])
-#@require_http_methods(['POST'])
 def add_booking(request, *args, **kwargs):
+    logger.info('in add_booking()...')
+
     response_data = {}
     response_data['result'] = 'error'
     response_data['message'] = ''
     booking_date = request.POST['date']
-#    booking_period_start = request.POST['booking_start']
-#    booking_period_finish = request.POST['booking_finish']
     booking_period_start = datetime.strptime(request.POST['booking_start'], "%d/%m/%Y").date()
     booking_period_finish = datetime.strptime(request.POST['booking_finish'], "%d/%m/%Y").date()
     num_adults = request.POST.get('num_adult', 0)
@@ -700,8 +701,10 @@ def add_booking(request, *args, **kwargs):
     booking = None
     if 'ps_booking' in request.session:
         booking_id = request.session['ps_booking']
+        logger.info(f"session['ps_booking']: [{booking_id}] exists.")
         if booking_id:
             booking = Booking.objects.get(id=booking_id)
+            logger.info(f"Booking: [{booking}] has been retrieved.")
             booking.arrival = booking_period_start
             booking.departure = booking_period_finish
             if not booking.details:
@@ -715,6 +718,7 @@ def add_booking(request, *args, **kwargs):
             booking.details['vessel_weight'] = vessel_weight
             booking.details['vessel_rego'] = vessel_rego
             booking.save()
+            logger.info(f"Booking: [{booking}] has been updated.")
     else:
         details = {
            'num_adults' : num_adults,
@@ -727,9 +731,16 @@ def add_booking(request, *args, **kwargs):
            'vessel_rego' : vessel_rego,
         }
         mooringarea = MooringArea.objects.get(id=request.POST['mooring_id'])
-        booking = Booking.objects.create(mooringarea=mooringarea,booking_type=3,expiry_time=timezone.now()+timedelta(seconds=settings.BOOKING_TIMEOUT),details=details,arrival=booking_period_start,departure=booking_period_finish)
-        request.session['ps_booking'] = booking.id
-        request.session.modified = True
+        booking = Booking.objects.create(
+            mooringarea=mooringarea,
+            booking_type=3,
+            expiry_time=timezone.now() + timedelta(seconds=settings.BOOKING_TIMEOUT),
+            details=details,
+            arrival=booking_period_start,
+            departure=booking_period_finish
+        )
+        logger.info(f'New Booking: [{booking}] has been created.')
+        utils.set_session_booking(request.session, booking)
 
     #print BookingPeriodOption.objects.all()
     mooringsite = Mooringsite.objects.get(id=request.POST['site_id'])
@@ -737,9 +748,9 @@ def add_booking(request, *args, **kwargs):
     booking_period = BookingPeriodOption.objects.get(id=int(request.POST['bp_id'])) 
 
     if booking_period.start_time > booking_period.finish_time:
-            finish_bd = datetime.strptime(finish_booking_date, "%Y-%m-%d").date()
-            finish_booking_date = str(finish_bd+timedelta(days=1))
-            #print finish_bd
+        finish_bd = datetime.strptime(finish_booking_date, "%Y-%m-%d").date()
+        finish_booking_date = str(finish_bd+timedelta(days=1))
+        #print finish_bd
 
     mooring_class = mooringsite.mooringarea.mooring_class
     amount = '0.00'
@@ -755,29 +766,32 @@ def add_booking(request, *args, **kwargs):
 
     from_dt_utc = datetime.strptime(str(start_booking_date)+' '+str(booking_period.start_time), '%Y-%m-%d %H:%M:%S') - timedelta(hours=8)
     to_dt_utc =  datetime.strptime(str(finish_booking_date)+' '+str(booking_period.finish_time), '%Y-%m-%d %H:%M:%S') - timedelta(hours=8)
-    from_dt_utc = from_dt_utc.replace(tzinfo=timezone.utc).isoformat()
-    to_dt_utc =  to_dt_utc.replace(tzinfo=timezone.utc).isoformat()
+    # from_dt_utc = from_dt_utc.replace(tzinfo=timezone.utc).isoformat()
+    # to_dt_utc =  to_dt_utc.replace(tzinfo=timezone.utc).isoformat()
+    from_dt_utc = from_dt_utc.replace(tzinfo=timezone_dt.utc).isoformat()
+    to_dt_utc =  to_dt_utc.replace(tzinfo=timezone_dt.utc).isoformat()
     #to_dt__lte=to_dt_utc
     existing_booking_check = utils.check_mooring_available_by_time(mooringsite.id,from_dt_utc,to_dt_utc)
     if existing_booking_check is True:
         response_data['result'] = 'error'
         response_data['message'] = 'Sorry booking has already been taken by another booking.' 
-
-    
     else:
-        cb =    MooringsiteBooking.objects.create(
-                  campsite=mooringsite,
-                  booking_type=3,
-                  date=booking_date,
-                  from_dt=start_booking_date+' '+str(booking_period.start_time),
-                  to_dt=finish_booking_date+' '+str(booking_period.finish_time),
-                  booking=booking,
-                  amount=amount,
-                  booking_period_option=booking_period 
-                  )
+        cb = MooringsiteBooking.objects.create(
+            campsite=mooringsite,
+            booking_type=3,
+            date=booking_date,
+            from_dt=start_booking_date+' '+str(booking_period.start_time),
+            to_dt=finish_booking_date+' '+str(booking_period.finish_time),
+            booking=booking,
+            amount=amount,
+            booking_period_option=booking_period 
+        )
 
         response_data['result'] = 'success'
         response_data['message'] = ''
+
+    checkouthash = utils.calculate_checkouthash_from_booking_id(booking.pk)
+    logger.info(f"checkouthash: [{checkouthash}] has been generated from the booking.pk: [{booking.pk}].")
 
     return HttpResponse(json.dumps(response_data), content_type='application/json')
 
@@ -2451,6 +2465,8 @@ def create_admissions_booking(request, *args, **kwargs):
 @csrf_exempt
 @require_http_methods(['POST'])
 def create_booking(request, *args, **kwargs):
+    logger.info(f'in create_booking()')
+
     """Create a temporary booking and link it to the current session"""
     data = {
         'arrival': request.POST.get('arrival'),
@@ -2534,9 +2550,10 @@ def create_booking(request, *args, **kwargs):
         }), status=400, content_type='application/json')
 
     # add the booking to the current session
-    request.session['ps_booking'] = booking.pk
-    checkouthash = hashlib.sha256(str(booking.pk).encode('utf-8')).hexdigest()
-    request.session['checkouthash'] = checkouthash
+    utils.set_session_booking(request.session, booking)
+    checkouthash = utils.calculate_checkouthash_from_booking_id(booking.pk)
+    logger.info(f"checkouthash: [{checkouthash}] has been generated from the booking.pk: [{booking.pk}].")
+    # utils.set_session_checkouthash(request.session, checkouthash)
 
     return HttpResponse(geojson.dumps({
         'status': 'success',
@@ -3527,7 +3544,7 @@ class BookingViewSet(viewsets.ModelViewSet):
         userCreated = False
         try:
             if 'ps_booking' in request.session:
-                del request.session['ps_booking']
+                utils.delete_session_booking(request.session)
 #            start_date = datetime.strptime(request.data['arrival'],'%Y/%m/%d').date()
 #            end_date = datetime.strptime(request.data['departure'],'%Y/%m/%d').date()
 #            guests = request.data['guests']
@@ -5261,6 +5278,7 @@ def get_current_booking(ongoing_booking, request):
         raise
 
     ms_booking = MooringsiteBooking.objects.filter(booking=ongoing_booking).order_by('from_dt')
+    logger.info(f'MooringsiteBooking queryset: {ms_booking} has been retrieved for the current booking by the ongoing_booking: [{ongoing_booking}]')
     cb = {'current_booking':[], 'total_price': '0.00'}
     current_booking = []
 #    total_price = Decimal('0.00')

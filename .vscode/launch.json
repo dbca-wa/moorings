@@ -16,7 +16,10 @@
             ],
             "django": true,
             "autoStartBrowser": false,
-            "justMyCode": false
+            "justMyCode": false,
+            // "env": {
+            //     "LEDGER_API_URL": "http://10.17.0.10:9021"
+            // }
         }
     ]
 }
