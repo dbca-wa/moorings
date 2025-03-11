@@ -9,7 +9,7 @@ RUN apt-get clean
 RUN apt-get update
 RUN apt-get install --no-install-recommends -y software-properties-common
 RUN apt-get upgrade -y
-RUN apt-get install --no-install-recommends -y wget git libmagic-dev gcc g++ binutils libproj-dev gdal-bin tzdata cron rsyslog gunicorn libreoffice gpg-agent 
+RUN apt-get install --no-install-recommends -y wget git libmagic-dev gcc g++ binutils libproj-dev gdal-bin tzdata rsyslog gunicorn libreoffice gpg-agent 
 RUN apt-get install --no-install-recommends -y libpq-dev patch virtualenv
 RUN apt-get install --no-install-recommends -y postgresql-client mtr htop vim ssh
 RUN apt-get install --no-install-recommends -y postfix syslog-ng syslog-ng-core
@@ -40,7 +40,7 @@ RUN git config --global --add safe.directory /app
 COPY requirements.txt ./
 RUN pip install --upgrade pip
 RUN touch /app/git_hash
-# RUN pip install --no-cache-dir -r requirements.txt
+RUN pip install --no-cache-dir -r requirements.txt
 
 # Install the project (ensure that frontend projects have been built prior to this step).
 FROM python_libs_moorings
@@ -48,11 +48,12 @@ FROM python_libs_moorings
 COPY gunicorn.ini manage_mo.py ./
 RUN touch /app/.env
 COPY --chown=oim:oim mooring ./mooring
-# RUN python manage_mo.py collectstatic --noinput
+RUN python manage_mo.py collectstatic --noinput
 
 RUN mkdir /app/tmp/
 RUN chmod 777 /app/tmp/
 
+COPY --chown=oim:oim  python-cron ./
 COPY --chown=oim:oim startup.sh /
 RUN chmod 755 /startup.sh
 # cron end
