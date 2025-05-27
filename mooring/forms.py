@@ -6,6 +6,7 @@ from mooring import utils
 from crispy_forms.helper import FormHelper
 from crispy_forms.layout import Layout, Submit, HTML, Fieldset, MultiField, Div, Button
 from django.forms import Form, ModelForm, ChoiceField, FileField, CharField, Textarea, ClearableFileInput, HiddenInput, Field, RadioSelect, ModelChoiceField, Select, CheckboxInput
+from django.utils.safestring import mark_safe
 import re
 
 class BaseFormHelper(FormHelper):
@@ -275,7 +276,7 @@ class AnnualAdmissionForm(forms.ModelForm):
               discount_reason.append([d.id,d.text])
         self.fields['override_reason'].choices = discount_reason 
         vessel_tooltip = '<div align="left" class="tooltip2"><span class="tooltiptext" style="top: -60px;">Length must have two decimal places i.e. 9.00 metres or 12.35 metres</span><img height="14px" style="margin-bottom: 2px;" src="/static/img/information_icon.png"></div>'
-        self.fields['vessel_length'].label = "Registered Vessel Length (meters) "+vessel_tooltip
+        self.fields['vessel_length'].label = mark_safe("Registered Vessel Length (meters) "+vessel_tooltip)
         dynamic_selections = HTML('{% include "mooring/booking/annual_admission_form_js.html" %}')
 
         override_box = Div()
