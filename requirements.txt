@@ -35,7 +35,8 @@ geojson==3.1.0
 unicodecsv==0.14.1
 # PyPDF2==1.26.0
 django-extra-fields==3.0.2
-django-crispy-forms==2.3
+django-crispy-forms==2.4
+crispy-bootstrap5==2025.4
 django-reset-migrations==0.4.0
 django-ckeditor==5.4.0
 djangorestframework-datatables==0.4.0

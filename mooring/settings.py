@@ -31,6 +31,7 @@ INSTALLED_APPS += [
     'ledger_api_client',
     'appmonitor_client',
     'crispy_forms',
+    'crispy_bootstrap5',
 ]
 
 MIDDLEWARE_CLASSES += [
@@ -173,3 +174,6 @@ DEFAULT_AUTO_FIELD = 'django.db.models.AutoField'
 
 CSRF_TRUSTED_ORIGINS_STRING = decouple.config("CSRF_TRUSTED_ORIGINS", default='[]')
 CSRF_TRUSTED_ORIGINS = json.loads(str(CSRF_TRUSTED_ORIGINS_STRING))
+
+CRISPY_ALLOWED_TEMPLATE_PACKS = 'bootstrap5'
+CRISPY_TEMPLATE_PACK = 'bootstrap5'
