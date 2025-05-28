@@ -11,8 +11,8 @@ import re
 
 class BaseFormHelper(FormHelper):
     form_class = 'form-horizontal'
-    label_class = 'col-xs-12 col-sm-4 col-md-3 col-lg-2'
-    field_class = 'col-xs-12 col-sm-8 col-md-6 col-lg-4'
+    label_class = 'col-xs-12 col-sm-12 col-md-12 col-lg-12'
+    field_class = 'col-xs-12 col-sm-12 col-md-12 col-lg-12'
 
 
 class LoginForm(forms.Form):
