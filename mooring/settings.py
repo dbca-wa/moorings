@@ -1,5 +1,6 @@
 import os
-from confy import env
+# from confy import env
+import decouple
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 # confy.read_environment_file(BASE_DIR+"/.env")
 os.environ.setdefault("BASE_DIR", BASE_DIR)
@@ -7,7 +8,7 @@ from ledger_api_client.settings_base import *
 from decimal import Decimal
 
 BASE_DIR = None
-BASE_DIR_ENV = env('BASE_DIR',None)
+BASE_DIR_ENV = decouple.config('BASE_DIR', default=None)
 if BASE_DIR_ENV is None:
    BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 else:
@@ -90,10 +91,10 @@ CACHES = {
 STATICFILES_DIRS.append(os.path.join(os.path.join(BASE_DIR, 'mooring', 'static')))
 
 
-BPAY_ALLOWED = env('BPAY_ALLOWED',False)
+BPAY_ALLOWED = decouple.config('BPAY_ALLOWED', default=False)
 OSCAR_BASKET_COOKIE_OPEN = 'mooring_basket'
-OSCAR_BASKET_COOKIE_LIFETIME = env('OSCAR_BASKET_COOKIE_LIFETIME', 7 * 24 * 60 * 60)
-OSCAR_BASKET_COOKIE_SECURE = env('OSCAR_BASKET_COOKIE_SECURE', False)
+OSCAR_BASKET_COOKIE_LIFETIME = decouple.config('OSCAR_BASKET_COOKIE_LIFETIME',  default=(7 * 24 * 60 * 60))
+OSCAR_BASKET_COOKIE_SECURE = decouple.config('OSCAR_BASKET_COOKIE_SECURE', default=False)
 
 CRON_CLASSES = [
     #'mooring.cron.SendBookingsConfirmationCronJob',
@@ -130,22 +131,22 @@ LOGGING['loggers']['']['level'] = 'DEBUG'
 # pprint(LOGGING, indent=2, width=80)
 
 #PS_PAYMENT_SYSTEM_ID = env('PS_PAYMENT_SYSTEM_ID', 'S019')
-PS_PAYMENT_SYSTEM_ID = env('PS_PAYMENT_SYSTEM_ID', 'S516')
+PS_PAYMENT_SYSTEM_ID = decouple.config('PS_PAYMENT_SYSTEM_ID', default='S516')
 PAYMENT_SYSTEM_ID = PS_PAYMENT_SYSTEM_ID
 if not VALID_SYSTEMS:
     VALID_SYSTEMS = [PS_PAYMENT_SYSTEM_ID]
 
-SYSTEM_NAME = env('SYSTEM_NAME', 'Mooring Rental System')
-SYSTEM_NAME_SHORT = env('SYSTEM_NAME_SHORT', 'mooring')
-CAMPGROUNDS_EMAIL = env('CAMPGROUNDS_EMAIL','mooringbookings@dbca.wa.gov.au')
-ROTTNEST_EMAIL = env('ROTTNEST_EMAIL', 'mooringbookings@dbca.wa.gov.au')
-DEFAULT_FROM_EMAIL = env('EMAIL_FROM','no-reply@dbca.wa.gov.au')
-EXPLORE_PARKS_URL = env('EXPLORE_PARKS_URL','https://mooring.dbca.wa.gov.au/')
-PARKSTAY_EXTERNAL_URL = env('PARKSTAY_EXTERNAL_URL','https://mooring.dbca.wa.gov.au/')
-DEV_STATIC = env('DEV_STATIC',False)
-DEV_STATIC_URL = env('DEV_STATIC_URL')
-ROTTNEST_ISLAND_URL = env('ROTTNEST_URL', [])
-DEPT_DOMAINS = env('DEPT_DOMAINS', ['dpaw.wa.gov.au', 'dbca.wa.gov.au'])
+SYSTEM_NAME = decouple.config('SYSTEM_NAME', default='Mooring Rental System')
+SYSTEM_NAME_SHORT = decouple.config('SYSTEM_NAME_SHORT', default='mooring')
+CAMPGROUNDS_EMAIL = decouple.config('CAMPGROUNDS_EMAIL', default='mooringbookings@dbca.wa.gov.au')
+ROTTNEST_EMAIL = decouple.config('ROTTNEST_EMAIL', default='mooringbookings@dbca.wa.gov.au')
+DEFAULT_FROM_EMAIL = decouple.config('EMAIL_FROM', default='no-reply@dbca.wa.gov.au')
+EXPLORE_PARKS_URL = decouple.config('EXPLORE_PARKS_URL', default='https://mooring.dbca.wa.gov.au/')
+PARKSTAY_EXTERNAL_URL = decouple.config('PARKSTAY_EXTERNAL_URL', default='https://mooring.dbca.wa.gov.au/')
+DEV_STATIC = decouple.config('DEV_STATIC', default=False)
+DEV_STATIC_URL = decouple.config('DEV_STATIC_URL')
+ROTTNEST_ISLAND_URL = decouple.config('ROTTNEST_URL', default=[])
+DEPT_DOMAINS = decouple.config('DEPT_DOMAINS', ['dpaw.wa.gov.au', default='dbca.wa.gov.au'])
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
 # Use git commit hash for purging cache in browser for deployment changes
@@ -164,7 +165,7 @@ UNALLOCATED_ORACLE_CODE = 'NNP449 GST'
 
 DATA_UPLOAD_MAX_NUMBER_FIELDS = 10240 
 BOOKING_PROPERTY_CACHE_VERSION = '2.00'
-ML_ADMISSION_PAID_CHECK=env('ML_ADMISSION_PAID_CHECK', False)
+ML_ADMISSION_PAID_CHECK=decouple.config('ML_ADMISSION_PAID_CHECK', default=False)
 #os.environ.setdefault("UPDATE_PAYMENT_ALLOCATION", True)
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 X_FRAME_OPTIONS = 'SAMEORIGIN'

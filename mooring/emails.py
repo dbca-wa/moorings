@@ -16,7 +16,8 @@ from django.core.mail import EmailMessage, EmailMultiAlternatives
 # from ledger.emails.emails import EmailBase2
 from ledger_api_client.emails import EmailBase2 
 from django.template.loader import render_to_string, get_template
-from confy import env
+# from confy import env
+import decouple
 #from django.template import Context
 # from ledger.accounts.models import Document
 from ledger_api_client.ledger_models import Document
@@ -39,11 +40,11 @@ class TemplateEmailBase(EmailBase2):
     txt_template = 'mooring/email/base_email.txt'
 
 def sendHtmlEmail(to,subject,context,template,cc,bcc,from_email,template_group,attachments=None):
-    email_delivery = env('EMAIL_DELIVERY', 'off')
-    override_email = env('OVERRIDE_EMAIL', None)
-    email_instance = env('EMAIL_INSTANCE','DEV')
-    context['default_url'] = env('DEFAULT_HOST', '')
-    context['default_url_internal'] = env('DEFAULT_URL_INTERNAL', '')
+    email_delivery = decouple.config('EMAIL_DELIVERY', default='off')
+    override_email = decouple.config('OVERRIDE_EMAIL', default=None)
+    email_instance = decouple.config('EMAIL_INSTANCE', default='DEV')
+    context['default_url'] = decouple.config('DEFAULT_HOST', default='')
+    context['default_url_internal'] = decouple.config('DEFAULT_URL_INTERNAL', default='')
     log_hash = int(hashlib.sha1(str(datetime.datetime.now()).encode('utf-8')).hexdigest(), 16) % (10 ** 8)
     email_log(str(log_hash)+' '+subject+":"+str(to)+":"+template_group)
     if email_delivery != 'on':
