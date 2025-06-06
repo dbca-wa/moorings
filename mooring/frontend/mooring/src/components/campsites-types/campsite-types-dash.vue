@@ -53,7 +53,6 @@ from '../../hooks.js';
 import datatable from '../utils/datatable.vue'
 import confirmbox from '../utils/confirmbox.vue'
 import loader from '../utils/loader.vue'
-import closureHistory from '../utils/closureHistory.vue'
 import priceHistory from '../utils/priceHistory/priceHistory.vue'
 export default {
     name: 'campsite',
