@@ -144,9 +144,11 @@ DEFAULT_FROM_EMAIL = decouple.config('EMAIL_FROM', default='no-reply@dbca.wa.gov
 EXPLORE_PARKS_URL = decouple.config('EXPLORE_PARKS_URL', default='https://mooring.dbca.wa.gov.au/')
 PARKSTAY_EXTERNAL_URL = decouple.config('PARKSTAY_EXTERNAL_URL', default='https://mooring.dbca.wa.gov.au/')
 DEV_STATIC = decouple.config('DEV_STATIC', default=False)
-DEV_STATIC_URL = decouple.config('DEV_STATIC_URL')
+DEV_STATIC_URL = decouple.config('DEV_STATIC_URL', default='')
+if DEV_STATIC and not DEV_STATIC_URL:
+    raise ImproperlyConfigured('If running in DEV_STATIC, DEV_STATIC_URL has to be set')
 ROTTNEST_ISLAND_URL = decouple.config('ROTTNEST_URL', default=[])
-DEPT_DOMAINS = decouple.config('DEPT_DOMAINS', ['dpaw.wa.gov.au', default='dbca.wa.gov.au'])
+DEPT_DOMAINS = decouple.config('DEPT_DOMAINS', default=['dpaw.wa.gov.au', 'dbca.wa.gov.au'])
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
 # Use git commit hash for purging cache in browser for deployment changes
