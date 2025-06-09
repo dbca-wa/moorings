@@ -47,6 +47,7 @@ FROM python_libs_moorings
 
 COPY gunicorn.ini manage_mo.py ./
 RUN touch /app/.env
+COPY .git ./.git
 COPY --chown=oim:oim mooring ./mooring
 RUN python manage_mo.py collectstatic --noinput
 
