@@ -1,6 +1,5 @@
 from django.http import HttpResponse, JsonResponse
 from django.views.decorators.csrf import csrf_exempt
-from django.contrib.auth.models import Group
 from mooring import models
 from mooring import common_iplookup 
 from django.db.models import Q

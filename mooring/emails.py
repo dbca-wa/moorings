@@ -9,6 +9,7 @@ from mooring.models import MooringsiteBooking, AdmissionsBooking, AdmissionsLine
 # from mooring.invoice_pdf import create_invoice_pdf_bytes
 # from ledger.payments.models import Invoice
 from ledger_api_client.ledger_models import Invoice
+from ledger_api_client.managed_models import SystemGroup
 from mooring import settings 
 from mooring.helpers import is_inventory, is_admin
 from django.core.mail import EmailMessage, EmailMultiAlternatives
@@ -21,8 +22,6 @@ import decouple
 #from django.template import Context
 # from ledger.accounts.models import Document
 from ledger_api_client.ledger_models import Document
-from django.contrib.auth.models import Group
-# from ledger.accounts.models import EmailUser
 from ledger_api_client.ledger_models import EmailUserRO as EmailUser
 
 import datetime
@@ -509,8 +508,8 @@ def send_refund_failure_email_admissions(booking, context_processor):
        to = settings.NON_PROD_EMAIL
        sendHtmlEmail([to],subject,context,template,cc,bcc,from_email,template_group,attachments=None)
     else:
-       pa = Group.objects.get(name='Payments Officers')
-       ma = Group.objects.get(name="Mooring Admin")
+       pa = SystemGroup.objects.get(name='Payments Officers')
+       ma = SystemGroup.objects.get(name="Mooring Admin")
        user_list = EmailUser.objects.filter(groups__in=[ma,]).distinct()
 
        for u in user_list:
@@ -556,8 +555,8 @@ def send_refund_failure_email(booking, context_processor):
        sendHtmlEmail([to],subject,context,template,cc,bcc,from_email,template_group,attachments=None)
     else:
 
-       pa = Group.objects.get(name='Payments Officers')
-       ma = Group.objects.get(name="Mooring Admin")
+       pa = SystemGroup.objects.get(name='Payments Officers')
+       ma = SystemGroup.objects.get(name="Mooring Admin")
        user_list = EmailUser.objects.filter(groups__in=[ma,]).distinct()
 
        for u in user_list:
@@ -612,8 +611,8 @@ def send_refund_failure_email_old(booking):
         'booking': booking,
     }
 
-    pa = Group.objects.get(name='Payments Officers')
-    ma = Group.objects.get(name="Mooring Admin")
+    pa = SystemGroup.objects.get(name='Payments Officers')
+    ma = SystemGroup.objects.get(name="Mooring Admin")
     user_list = EmailUser.objects.filter(groups__in=[ma,]).distinct()
 
     ### REMOVE ###

@@ -3,11 +3,13 @@ from django.conf import settings
 from django.urls import include, re_path
 from django.conf.urls.static import static
 from rest_framework import routers
-from mooring import views, api
+from mooring import are_migrations_running, views, api
 from mooring.admin import admin
 
 # from ledger.urls import urlpatterns as ledger_patterns
 from ledger_api_client.urls import urlpatterns as ledger_patterns
+from mooring.default_data_manager import DefaultDataManager
+
 
 # API patterns
 router = routers.DefaultRouter()
@@ -191,3 +193,6 @@ urlpatterns = [
 
 if settings.DEBUG:  # Serve media locally in development.
     urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
+
+if not are_migrations_running():
+    DefaultDataManager()
