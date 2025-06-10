@@ -9,6 +9,7 @@ from mooring.models import MooringsiteBooking, AdmissionsBooking, AdmissionsLine
 # from mooring.invoice_pdf import create_invoice_pdf_bytes
 # from ledger.payments.models import Invoice
 from ledger_api_client.ledger_models import Invoice
+from ledger_api_client.managed_models import SystemGroup
 from mooring import settings 
 from mooring.helpers import is_inventory, is_admin
 from django.core.mail import EmailMessage, EmailMultiAlternatives
@@ -16,12 +17,11 @@ from django.core.mail import EmailMessage, EmailMultiAlternatives
 # from ledger.emails.emails import EmailBase2
 from ledger_api_client.emails import EmailBase2 
 from django.template.loader import render_to_string, get_template
-from confy import env
+# from confy import env
+import decouple
 #from django.template import Context
 # from ledger.accounts.models import Document
 from ledger_api_client.ledger_models import Document
-from django.contrib.auth.models import Group
-# from ledger.accounts.models import EmailUser
 from ledger_api_client.ledger_models import EmailUserRO as EmailUser
 
 import datetime
@@ -39,11 +39,11 @@ class TemplateEmailBase(EmailBase2):
     txt_template = 'mooring/email/base_email.txt'
 
 def sendHtmlEmail(to,subject,context,template,cc,bcc,from_email,template_group,attachments=None):
-    email_delivery = env('EMAIL_DELIVERY', 'off')
-    override_email = env('OVERRIDE_EMAIL', None)
-    email_instance = env('EMAIL_INSTANCE','DEV')
-    context['default_url'] = env('DEFAULT_HOST', '')
-    context['default_url_internal'] = env('DEFAULT_URL_INTERNAL', '')
+    email_delivery = decouple.config('EMAIL_DELIVERY', default='off')
+    override_email = decouple.config('OVERRIDE_EMAIL', default=None)
+    email_instance = decouple.config('EMAIL_INSTANCE', default='DEV')
+    context['default_url'] = decouple.config('DEFAULT_HOST', default='')
+    context['default_url_internal'] = decouple.config('DEFAULT_URL_INTERNAL', default='')
     log_hash = int(hashlib.sha1(str(datetime.datetime.now()).encode('utf-8')).hexdigest(), 16) % (10 ** 8)
     email_log(str(log_hash)+' '+subject+":"+str(to)+":"+template_group)
     if email_delivery != 'on':
@@ -508,8 +508,8 @@ def send_refund_failure_email_admissions(booking, context_processor):
        to = settings.NON_PROD_EMAIL
        sendHtmlEmail([to],subject,context,template,cc,bcc,from_email,template_group,attachments=None)
     else:
-       pa = Group.objects.get(name='Payments Officers')
-       ma = Group.objects.get(name="Mooring Admin")
+       pa = SystemGroup.objects.get(name='Payments Officers')
+       ma = SystemGroup.objects.get(name="Mooring Admin")
        user_list = EmailUser.objects.filter(groups__in=[ma,]).distinct()
 
        for u in user_list:
@@ -555,8 +555,8 @@ def send_refund_failure_email(booking, context_processor):
        sendHtmlEmail([to],subject,context,template,cc,bcc,from_email,template_group,attachments=None)
     else:
 
-       pa = Group.objects.get(name='Payments Officers')
-       ma = Group.objects.get(name="Mooring Admin")
+       pa = SystemGroup.objects.get(name='Payments Officers')
+       ma = SystemGroup.objects.get(name="Mooring Admin")
        user_list = EmailUser.objects.filter(groups__in=[ma,]).distinct()
 
        for u in user_list:
@@ -611,8 +611,8 @@ def send_refund_failure_email_old(booking):
         'booking': booking,
     }
 
-    pa = Group.objects.get(name='Payments Officers')
-    ma = Group.objects.get(name="Mooring Admin")
+    pa = SystemGroup.objects.get(name='Payments Officers')
+    ma = SystemGroup.objects.get(name="Mooring Admin")
     user_list = EmailUser.objects.filter(groups__in=[ma,]).distinct()
 
     ### REMOVE ###

@@ -12,8 +12,6 @@ from django.core.files.base import ContentFile
 from django.core.exceptions import ValidationError
 from django.db.models import Q
 from django.contrib.gis.db import models
-# from django.contrib.auth.models import Group
-# from django.contrib.postgres.fields import JSONField
 from django.db import models as django_models
 from django.db import IntegrityError, transaction, connection
 from django.utils import timezone
@@ -2340,7 +2338,7 @@ class GlobalSettings(models.Model):
     def clean(self):
         if self.key == 18:
             import re
-            r = re.compile('^\d\d:\d\d$')
+            r = re.compile(r'^\d\d:\d\d$')
             print ("MATCH")
             print (r.match(self.value))
             if r.match(self.value) is None:

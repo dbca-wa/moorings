@@ -111,7 +111,6 @@ import editor from '../utils/editor.vue'
 import select_panel from '../utils/select-panel.vue'
 import confirmbox from '../utils/confirmbox.vue'
 import loader from '../utils/loader.vue'
-import closureHistory from '../utils/closureHistory.vue'
 import priceHistory from '../utils/priceHistory/priceHistory.vue'
 export default {
     name: 'campsite-type',

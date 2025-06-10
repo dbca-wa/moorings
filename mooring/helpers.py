@@ -3,6 +3,7 @@ from __future__ import unicode_literals
 from ledger_api_client.ledger_models import EmailUserRO
 from django.core.cache import cache
 from ledger_api_client.managed_models import SystemGroup, SystemGroupPermission
+from mooring import settings
 import logging
 
 logger = logging.getLogger(__name__)
@@ -35,13 +36,13 @@ def is_officer(user):
     return user.is_authenticated and user.is_staff
 
 def is_inventory(user):
-    return user.is_authenticated and belongs_to(user, "Mooring Inventory")
+    return user.is_authenticated and belongs_to(user, settings.GROUP_NAME_MOORING_INVENTORY)
 
 def is_admin(user):
-    return user.is_authenticated and belongs_to(user, "Mooring Admin")
+    return user.is_authenticated and belongs_to(user, settings.GROUP_NAME_MOORING_ADMIN)
 
 def is_payment_officer(user):
-    return user.is_authenticated and belongs_to(user, "Payments Officers")
+    return user.is_authenticated and belongs_to(user, settings.GROUP_NAME_PAYMENTS_OFFICERS)
 
 def is_customer(user):
     """
