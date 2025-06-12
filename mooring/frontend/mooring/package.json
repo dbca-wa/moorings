@@ -9,6 +9,7 @@
     "dev": "node build/build-inplace.js"
   },
   "dependencies": {
+    "@vue/cli-service": "^5.0.8",
     "awesomplete": "^1.1.1",
     "bootstrap": "^3.3.7",
     "bootstrap-daterangepicker": "^2.1.24",
@@ -23,6 +24,8 @@
     "lodash": "^4.17.4",
     "moment": "2.19.3",
     "moment-range": "^3.0.3",
+    "ol": "4.5.0",
+    "openlayers": "4.0.1",
     "quill": "^1.1.5",
     "quill-render": "^1.0.5",
     "select2": "4.0.5",
@@ -33,9 +36,7 @@
     "vue-resource": "^1.0.3",
     "vue-router": "^2.0.1",
     "vuex": "^2.2.1",
-    "webpack-dev-server": "^2.9.1",
-    "openlayers": "4.0.1",
-    "ol": "4.5.0"
+    "webpack-dev-server": "^2.9.1"
   },
   "devDependencies": {
     "autoprefixer": "^6.7.2",
