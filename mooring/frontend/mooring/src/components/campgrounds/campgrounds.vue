@@ -105,7 +105,8 @@ import bulkClose from '../utils/closureHistory/bulk-close.vue'
 import bulkBooking from '../utils/priceHistory/bulkPriceHistory.vue'
 import {bus} from '../utils/eventBus.js'
 import { mapGetters } from 'vuex'
-module.exports = {
+
+export default {
     name: 'pk-campgrounds',
     data: function() {
         let vm =this;

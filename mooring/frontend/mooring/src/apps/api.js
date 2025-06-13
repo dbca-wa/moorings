@@ -1,5 +1,5 @@
 
-module.exports = {
+export default {
     status_history:function(id) {
         return process.env.PARKSTAY_URL + "/api/mooring-areas/" + id + "/status_history.json?closures=True";
     },

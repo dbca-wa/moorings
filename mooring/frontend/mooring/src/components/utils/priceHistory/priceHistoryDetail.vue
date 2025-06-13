@@ -149,7 +149,8 @@ import reason from '../reasons.vue'
 import { $, datetimepicker,api_endpoints, validate, helpers, bus } from '../../../hooks'
 import alert from '../alert.vue'
 import { mapGetters } from 'vuex'
-module.exports = {
+
+export default {
     name: 'PriceHistoryDetail',
     props: {
         priceHistory: {

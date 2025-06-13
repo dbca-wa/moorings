@@ -1,4 +1,4 @@
-var mix = module.exports ={
+export default {
     methods:{
 
     }

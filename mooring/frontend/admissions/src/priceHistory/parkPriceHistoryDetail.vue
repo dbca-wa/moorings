@@ -137,7 +137,8 @@ import bootstrapModal from '../utils/bootstrap-modal.vue'
 import reason from '../utils/reasons.vue'
 import { api_endpoints, validate, helpers, bus } from '../hooks'
 import alert from '../utils/alert.vue'
-module.exports = {
+
+export default {
     name: 'ParkPriceHistoryDetail',
     props: {
         priceHistory: {

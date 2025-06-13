@@ -1,6 +1,7 @@
 import $ from 'jquery'
 import _ from 'lodash'
-module.exports = {
+
+export default {
     apiError: function(resp){
         var error_str = '';
         if (resp.status === 400) {
