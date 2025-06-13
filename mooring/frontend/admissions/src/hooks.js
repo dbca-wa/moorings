@@ -1,25 +1,27 @@
 // module for all third party dependencies
 
 import $ from 'jquery'
-var DataTable = require('datatables.net');
-var DataTableBs = require('datatables.net-bs');
-var DataTableRes = require('datatables.net-responsive-bs');
-var bootstrap = require('bootstrap');
-var moment = require('moment/moment.js');
-var MomentRange = require('moment-range');
-var datetimepicker = require('eonasdan-bootstrap-datetimepicker');
-var validate = require('jquery-validation');
-var slick = require('slick-carousel-browserify');
-var select2 = require('select2');
-var awesomplete = require('awesomplete');
-var daterangepicker = require('bootstrap-daterangepicker');
-// var formValidate = require('./utils/validator.js');
+import DataTable from 'datatables.net';
+import DataTableBs from 'datatables.net-bs';
+import DataTableRes from 'datatables.net-responsive-bs';
+import bootstrap from 'bootstrap';
+import moment from 'moment/moment.js';
+import MomentRange from 'moment-range';
+import datetimepicker from 'eonasdan-bootstrap-datetimepicker';
+import validate from 'jquery-validation';
+import slick from 'slick-carousel-browserify';
+import select2 from 'select2';
+import awesomplete from 'awesomplete';
+import daterangepicker from 'bootstrap-daterangepicker';
+// var formValidate = require('./utils/validator.js';
 var Moment = MomentRange.extendMoment(moment);
-var swal = require('sweetalert2');
+import swal from 'sweetalert2';
 import api_endpoints from './api.js';
 import store from './utils/store';
 import helpers from './utils/helpers.js';
 import {bus} from './utils/eventBus.js';
+
+export default {}
 export {
     $,
     DataTable,
@@ -35,7 +37,6 @@ export {
     select2,
     daterangepicker,
     awesomplete,
-    // formValidate,
     swal,
     store
 }
