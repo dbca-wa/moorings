@@ -28,7 +28,7 @@
                 </div>
             </div>
 
-            <div class="row" style='display: none'>
+            <div class="row" style='display: none;'>
                 <div class="form-group">
                     <div class="col-md-2">
                         <label>Adult Price: </label>
@@ -38,7 +38,7 @@
                     </div>
                 </div>
             </div>
-            <div class="row" style='display: none'>
+            <div class="row" style='display: none;'>
                 <div class="form-group">
                     <div class="col-md-2">
                         <label>Concession Price: </label>
@@ -48,7 +48,7 @@
                     </div>
                 </div>
             </div>
-            <div class="row" style='display: none'>
+            <div class="row" style='display: none;'>
                 <div class="form-group">
                     <div class="col-md-2">
                         <label>Child Price: </label>
@@ -58,7 +58,7 @@
                     </div>
                 </div>
             </div>
-            <div class="row" style='display: none'>
+            <div class="row" style='display: none;'>
                 <div class="form-group">
                     <div class="col-md-2">
                         <label>Infant Price: </label>

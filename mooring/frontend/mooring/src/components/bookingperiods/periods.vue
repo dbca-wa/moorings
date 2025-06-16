@@ -12,7 +12,7 @@
                         <div class="col-lg-12">
                             <div class="row">
                                 <div class="col-md-2">
-                                    <button type="button" class="btn btn-primary" style="width:100%;" @click.prevent="newOption()" style='display: none'>Add New Option</button>
+                                    <button type="button" class="btn btn-primary" style="width:100%; display: none;" @click.prevent="newOption()">Add New Option</button>
                                 </div>
                                 <div class="col-md-8"/>
                                 <div class="col-md-2">
@@ -21,12 +21,12 @@
                             </div>
                             <div class="row">
                                 <div class="col-md-2">
-                                    <button type="button" class="btn btn-primary" style="width:100%;" @click.prevent="editOption()"  style='display: none'>Edit Option</button>
+                                    <button type="button" class="btn btn-primary" style="width:100%; display: none;" @click.prevent="editOption()">Edit Option</button>
                                 </div>
                             </div>
                             <div class="row">
                                 <div class="col-md-2">
-                                    <button type="button" class="btn btn-danger" style="width:100%;" @click.prevent="deleteOption()"  style='display: none'>Delete Option</button>
+                                    <button type="button" class="btn btn-danger" style="width:100%; display: none;" @click.prevent="deleteOption()">Delete Option</button>
                                 </div>
                             </div>
                             <div class="row">
@@ -208,7 +208,7 @@
                 </div>
             </div>
             <div class="row" style="text-align:center;">
-                <p>Are you sure you would like to delete {{delName}}?
+                <p>Are you sure you would like to delete {{delName}}?</p>
             </div>
             <div slot="footer">
                 <button type="button" v-on:click="closeDelConfirmModal()" class="btn btn-default" style="width:180px;font-weight:bold;">Close</button>

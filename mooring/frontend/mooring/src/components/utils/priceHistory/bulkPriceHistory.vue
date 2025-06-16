@@ -61,7 +61,7 @@
                             </div>
                         </div>
                     </div>
-                    <reason type="price" v-model="reason" :wide="true" :wide="true"></reason>
+                    <reason type="price" v-model="reason" :wide="true"></reason>
                     <div vshow-dis="requireDetails" class="row">
                         <div class="form-group">
                             <div class="col-md-2">

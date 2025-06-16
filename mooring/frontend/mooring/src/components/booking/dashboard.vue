@@ -87,7 +87,7 @@
                         </div>
 
 
-                        <div style='display: none' class="col-md-4" iv-if="filterCanceled == 'True'">
+                        <div style='display: none;' class="col-md-4" iv-if="filterCanceled == 'True'">
                             <div class="form-group">
                             <label for="">Refund Status</label>
                             <select class="form-control" v-model="filterRefundStatus" id="filterRefundStatus">

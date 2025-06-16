@@ -114,7 +114,7 @@ export default {
             grounds: [],
             rows: [],
             mooring_specification: [],
-            title: 'Moorings',
+            title: 'Moorings2',
             selected_status: 'All',
             selected_region: 'All',
             selected_park: 'All',
