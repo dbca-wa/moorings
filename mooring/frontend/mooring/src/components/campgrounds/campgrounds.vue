@@ -106,6 +106,8 @@ import bulkBooking from '../utils/priceHistory/bulkPriceHistory.vue'
 import {bus} from '../utils/eventBus.js'
 import { mapGetters } from 'vuex'
 
+console.log({api_endpoints})
+
 export default {
     name: 'pk-campgrounds',
     data: function() {
@@ -114,7 +116,7 @@ export default {
             grounds: [],
             rows: [],
             mooring_specification: [],
-            title: 'Moorings2',
+            title: 'Moorings',
             selected_status: 'All',
             selected_region: 'All',
             selected_park: 'All',

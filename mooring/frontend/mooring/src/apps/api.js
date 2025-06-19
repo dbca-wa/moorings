@@ -24,7 +24,7 @@ export default {
     },
     // Campgrounds
     campgrounds:process.env.PARKSTAY_URL + "/api/mooring-areas.json",
-    campgrounds_datatable:process.env.PARKSTAY_URL + "/api/mooring-areas/datatable_list.json",
+    campgrounds_datatable:process.env.VUE_APP_PARKSTAY_URL + "/api/mooring-areas/datatable_list.json",
     bulk_close:process.env.PARKSTAY_URL + "/api/mooring-areas/bulk_close.json",
     bulk_period:process.env.PARKSTAY_URL + "/api/mooring-areas/bulk_period.json",
     campground:function (id) {
