@@ -58,19 +58,15 @@
                                             </select>
                                         </div>
                                     </div>
-
                                     <div class="col-md-2">
                                         <div class="form-group">
                                             <label for="applications-filter-region">Specification: </label>
                                             <select class="form-control" v-model="selected_specification">
                                                 <option value="All">All</option>
                                                 <option v-for="m in mooring_specification" :value="m.name" >{{m.name}}</option>
-
                                             </select>
                                         </div>
                                     </div>
-
-
                                 </div>
                                 <div class="col-md-4">
                                     <div class="form-group pull-right">
@@ -105,8 +101,6 @@ import bulkClose from '../utils/closureHistory/bulk-close.vue'
 import bulkBooking from '../utils/priceHistory/bulkPriceHistory.vue'
 import {bus} from '../utils/eventBus.js'
 import { mapGetters } from 'vuex'
-
-console.log({api_endpoints})
 
 export default {
     name: 'pk-campgrounds',
@@ -173,37 +167,35 @@ export default {
                         var current_closure_text  ='';
                         if (current_closure_split.length > 1) {
                                current_closure_text = current_closure_split[0] + "<BR>"+current_closure_split[1];
-			}
+                        }
                         var status = (data == true) ? "Open" : "Temporarily Closed";
                         var column = "<td >__Status__</td>";
                         column += data ? "" : "<br/><br/>"+current_closure_text;
                         return column.replace('__Status__', status);
                     }
-                },{
+                }, {
                     "data": "region"
-                },{
+                }, {
                     "data": "district"
-                },{
+                }, {
                     "data": "park"
-                },{ "data": "park",
+                }, { "data": "park",
                      "mRender": function(data, type, full){
                               return full.mooring_specification;
                       }
-                },{
+                }, {
                     data: 'id',
                     mRender: function(data, type, full) {
                         var id = full.id;
-//                        var addBooking = "<br/><a href='#' class='addBooking' data-campground=\"__ID__\" >Add Booking</a>";
                         var addBooking = "";
                         var today = vm.date_today(0);
                         var today_week_later = vm.date_today(7);
-                        // var availability_admin = "<br/><a target='_blank' href='/availability_admin/?site_id=__ID__' >Availability</a>";
                         var availability_admin = "<a target='_blank' href='/availability2/?site_id=__ID__&arrival="+today+"&departure="+today_week_later+"&gear_type=all&num_adult=2&num_child=0&num_concession=0&num_infant=0&vessel_size=0.1&vessel_draft=0.1&vessel_beam=0.1&vessel_weight=0.1' >Availability</a>";
                         var column = "";
                         if(full.noinvent) {
-                            column = "<td ><a href='#' class='detailRoute' data-campground=\"__ID__\" >View</a><br/>";
+                            column = "<td><a href='#' class='detailRoute' data-campground=\"__ID__\" >View</a><br/>";
                         } else {
-                            column = "<td ><a href='__ID__' class='detailRoute' data-campground=\"__ID__\" >Edit</a><br/>";
+                            column = "<td><a href='__ID__' class='detailRoute' data-campground=\"__ID__\" >Edit</a><br/>";
                             if (full.active) {
                                 column += "<a href='#' class='statusCG' data-status='close' data-campground=\"__ID__\" > Close </a><br/>";
                             } else {
@@ -217,7 +209,7 @@ export default {
                         column = column.replace(/__Current_Closure__/,full.current_closure);
                         return column.replace(/__ID__/g, id);
                     }
-                }, ],
+                }],
                 processing: true
             }
         }
@@ -231,11 +223,11 @@ export default {
         "bulk-booking": bulkBooking
     },
     computed:{
-       ...mapGetters([
-         'regions',
-         'districts',
-         'parks'
-       ]),
+        ...mapGetters([
+            'regions',
+            'districts',
+            'parks'
+        ]),
     },
     watch: {
         showBulkClose:function () {
@@ -286,7 +278,6 @@ export default {
                 vm.$refs.dtGrounds.vmDataTable.columns(6).search('').draw();
             }
         }
-
     },
     methods: {
         flagFormat: function(flag) {
@@ -304,23 +295,23 @@ export default {
             });
         },
         date_today(days) {
-           var today = new Date();
-           var res = today.setTime(today.getTime() + (days * 24 * 60 * 60 * 1000));
+            var today = new Date();
+            var res = today.setTime(today.getTime() + (days * 24 * 60 * 60 * 1000));
         
-           var today = new Date(res);
-           var dd = today.getDate();
-           var mm = today.getMonth() + 1; //January is 0!
+            var today = new Date(res);
+            var dd = today.getDate();
+            var mm = today.getMonth() + 1; //January is 0!
            
-           var yyyy = today.getFullYear();
-           if (dd < 10) {
-             dd = '0' + dd;
-           } 
-           if (mm < 10) {
-             mm = '0' + mm;
-           } 
-           //var today = yyyy + '/' + mm + '/'+ dd + '/';
-           var today = yyyy + '/' + mm + '/'+ dd; 
-           return today
+            var yyyy = today.getFullYear();
+            if (dd < 10) {
+              dd = '0' + dd;
+            } 
+            if (mm < 10) {
+              mm = '0' + mm;
+            } 
+            //var today = yyyy + '/' + mm + '/'+ dd + '/';
+            var today = yyyy + '/' + mm + '/'+ dd; 
+            return today
         },
         updateTable: function() {
             var vm = this;
@@ -359,7 +350,6 @@ export default {
            }, (error) => {
                    console.log(error);
            });
-
         },
         fetchParks: function() {
             let vm = this;
@@ -423,7 +413,7 @@ export default {
                     vm.invent = true;
                 }
                 if(!vm.invent){
-                    
+
                 }
             }
         });
