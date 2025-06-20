@@ -92,7 +92,7 @@ from '../utils/eventBus.js';
 // import ol from 'openlayers';
 import TileLayer from 'ol/layer/tile.js'
 import OSM from 'ol/source/osm.js'
-import transform from 'ol/proj/transforms.js'
+import { transform } from 'ol/proj'
 import Feature from 'ol/feature.js'
 import Point from 'ol/geom/point.js'
 import VectorSource from 'ol/source/vector.js'
@@ -254,7 +254,6 @@ export default {
             }
         }
         var coords = transform([lat,lon], 'EPSG:4326', 'EPSG:3857');
-        // var coords = ol.proj.transform([-106.63694687814734,42.46614905892275], 'EPSG:4326', 'EPSG:3857');
 
         var iconFeature;
         if (lat == 0 && lon == 0) { 
