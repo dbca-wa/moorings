@@ -20,59 +20,63 @@
                     <div class="panel-body">
                         <div id="groundsList">
                             <form class="form" id="campgrounds-filter-form">
-                                <div class="col-md-8">
-                                    <div class="col-md-2">
-                                        <div class="form-group">
-                                            <label for="campgrounds-filter-status">Status: </label>
-                                            <select v-model="selected_status" class="form-control" name="status" id="campgrounds-filter-status">
-                                            <option value="All">All</option>
-                                            <option value="Open">Open</option>
-                                            <option value="Temporarily Closed">Temporarily Closed</option>
-                                        </select>
+                                <div class="row">
+                                    <div class="col-md-8">
+                                        <div class="row">
+                                            <div class="col-md-2">
+                                                <div class="form-group">
+                                                    <label for="campgrounds-filter-status">Status: </label>
+                                                    <select v-model="selected_status" class="form-control" name="status" id="campgrounds-filter-status">
+                                                    <option value="All">All</option>
+                                                    <option value="Open">Open</option>
+                                                    <option value="Temporarily Closed">Temporarily Closed</option>
+                                                </select>
+                                                </div>
+                                            </div>
+                                            <div class="col-md-2">
+                                                <div class="form-group">
+                                                    <label for="applications-filter-region">Region: </label>
+                                                    <select class="form-control" v-model="selected_region">
+                                                        <option value="All">All</option>
+                                                        <option v-for="region in regions" :value="region.name">{{ region.name }}</option>
+                                                    </select>
+                                                </div>
+                                            </div>
+                                            <div class="col-md-2">
+                                                <div class="form-group">
+                                                    <label for="applications-filter-region">District: </label>
+                                                    <select class="form-control" v-model="selected_district">
+                                                        <option value="All">All</option>
+                                                        <option v-for="district in districts" :value="district.name">{{ district.name }}</option>
+                                                    </select>
+                                                </div>
+                                            </div>
+                                            <div class="col-md-3">
+                                                <div class="form-group">
+                                                    <label for="applications-filter-region">Park: </label>
+                                                    <select class="form-control" v-model="selected_park">
+                                                        <option value="All">All</option>
+                                                        <option v-for="park in parks" :value="park.name">{{ park.name }}</option>
+                                                    </select>
+                                                </div>
+                                            </div>
+                                            <div class="col-md-3">
+                                                <div class="form-group">
+                                                    <label for="applications-filter-region">Specification: </label>
+                                                    <select class="form-control" v-model="selected_specification">
+                                                        <option value="All">All</option>
+                                                        <option v-for="m in mooring_specification" :value="m.name" >{{m.name}}</option>
+                                                    </select>
+                                                </div>
+                                            </div>
                                         </div>
                                     </div>
-                                    <div class="col-md-2">
+                                    <div class="col-md-4 text-right">
                                         <div class="form-group">
-                                            <label for="applications-filter-region">Region: </label>
-                                            <select class="form-control" v-model="selected_region">
-                                                <option value="All">All</option>
-                                                <option v-for="region in regions" :value="region.name">{{ region.name }}</option>
-                                            </select>
+                                            <a v-if="invent" class="btn btn-primary" @click="addCampground()">Add Mooring</a>
+                                            <a v-if="invent" class="btn btn-primary" @click="showBulkClose = true">Close Moorings</a>
+                                            <a v-if="invent" class="btn btn-primary" @click="showBulkBookingPeriod = true">Set Periods</a>
                                         </div>
-                                    </div>
-                                    <div class="col-md-2">
-                                        <div class="form-group">
-                                            <label for="applications-filter-region">District: </label>
-                                            <select class="form-control" v-model="selected_district">
-                                                <option value="All">All</option>
-                                                <option v-for="district in districts" :value="district.name">{{ district.name }}</option>
-                                            </select>
-                                        </div>
-                                    </div>
-                                    <div class="col-md-2">
-                                        <div class="form-group">
-                                            <label for="applications-filter-region">Park: </label>
-                                            <select class="form-control" v-model="selected_park">
-                                                <option value="All">All</option>
-                                                <option v-for="park in parks" :value="park.name">{{ park.name }}</option>
-                                            </select>
-                                        </div>
-                                    </div>
-                                    <div class="col-md-2">
-                                        <div class="form-group">
-                                            <label for="applications-filter-region">Specification: </label>
-                                            <select class="form-control" v-model="selected_specification">
-                                                <option value="All">All</option>
-                                                <option v-for="m in mooring_specification" :value="m.name" >{{m.name}}</option>
-                                            </select>
-                                        </div>
-                                    </div>
-                                </div>
-                                <div class="col-md-4">
-                                    <div class="form-group pull-right">
-                                        <a style="margin-top: 20px;" v-if="invent" class="btn btn-primary" @click="addCampground()">Add Mooring</a>
-                                        <a style="margin-top: 20px;" v-if="invent" class="btn btn-primary" @click="showBulkClose = true">Close Moorings</a>
-                                        <a style="margin-top: 20px;" v-if="invent" class="btn btn-primary" @click="showBulkBookingPeriod = true">Set Periods</a>
                                     </div>
                                 </div>
                             </form>
