@@ -103,7 +103,8 @@ export default {
             set_period_range_start:'set_period_range_start'+vm._uid,
             selected_campgrounds:[],
             selected_period: [],
-            form: null
+            form: null,
+            details: ''
         }
     },
     computed:{

@@ -119,7 +119,8 @@ export default {
             close_cg_range_start_time: 'close_cg_range_start_time'+vm.id,
             selected_campgrounds:[],
             errorStringClose: null,
-            form: null
+            form: null,
+            details: ''
         }
     },
     computed:{
