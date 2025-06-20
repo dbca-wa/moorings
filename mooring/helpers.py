@@ -36,7 +36,11 @@ def is_officer(user):
     return user.is_authenticated and user.is_staff
 
 def is_inventory(user):
-    return user.is_authenticated and belongs_to(user, settings.GROUP_NAME_MOORING_INVENTORY)
+    isAuthenticated = user.is_authenticated
+    belongsTo = belongs_to(user, settings.GROUP_NAME_MOORING_INVENTORY)
+    isInventory = isAuthenticated and belongsTo
+    logger.debug(f'is_authenticated: {isAuthenticated} and belongs_to: {belongsTo}, therefore is_inventory: {isInventory}')
+    return isInventory
 
 def is_admin(user):
     return user.is_authenticated and belongs_to(user, settings.GROUP_NAME_MOORING_ADMIN)
