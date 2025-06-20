@@ -90,17 +90,17 @@ import {
 from '../utils/eventBus.js';
 // import OpenLayers from 'openlayers';
 // import ol from 'openlayers';
-import TileLayer from 'ol/layer/tile.js'
-import OSM from 'ol/source/osm.js'
+import TileLayer from 'ol/layer/Tile.js'
+import OSM from 'ol/source/OSM.js'
 import { transform } from 'ol/proj'
-import Feature from 'ol/feature.js'
-import Point from 'ol/geom/point.js'
-import VectorSource from 'ol/source/vector.js'
-import VectorLayer from 'ol/layer/vector.js'
-import Map from 'ol/map.js'
-import View from 'ol/view.js'
-import Draw from 'ol/interaction/draw.js'
-import GeometryType from 'ol/geom/geometrytype.js'
+import Feature from 'ol/Feature'
+import Point from 'ol/geom/Point.js'
+import VectorSource from 'ol/source/Vector.js'
+import VectorLayer from 'ol/layer/Vector.js'
+import Map from 'ol/Map.js'
+import View from 'ol/View.js'
+import Draw from 'ol/interaction/Draw.js'
+// import GeometryType from 'ol/geom/geometrytype.js'
 
 import Editor from 'quill';
 import loader from '../utils/loader.vue'
@@ -294,7 +294,7 @@ export default {
                 var geometryFunction;
                     draw = new Draw({
                         source: source,
-                        type: /** @type {GeometryType} */(typeSelect.value),
+                        type: typeSelect.value,
                     });
 
                     draw.on('drawend', function (e) {
