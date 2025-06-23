@@ -261,10 +261,6 @@ export default {
                             return "";
                         }
                     }
-//                }, {
-//                    data: 'concession'
-//                }, {
-//                    data: 'child'
                 }, {
                     data: 'details',
                     mRender: function(data, type, full) {

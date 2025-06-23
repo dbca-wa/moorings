@@ -438,11 +438,8 @@ export default {
                             return "";
                         }
                     }
-//                }, {
-//                    data: 'concession'
-//                }, {
-//                    data: 'child'
                 }, {
+                    // Comment
                     data: 'details',
                     mRender: function(data, type, full) {
                         if (data){
@@ -451,7 +448,8 @@ export default {
                         return '';
                     }
                 }, {
-                    data: 'editable',
+                    // Action
+                    data: 'id',
                     mRender: function(data, type, full) {
                         if (data) {
                             var id = full.id;
@@ -486,7 +484,8 @@ export default {
                     url: api_endpoints.campgroundCampsites(this.$route.params.id),
                     dataSrc: ''
                 },
-                columnDefs: [{
+                columnDefs: [
+                {
                     responsivePriority: 1,
                     targets: 0
                 }, {
@@ -520,7 +519,7 @@ export default {
                 }, {
                     data: 'price'
                 }, {
-                    data: 'editable',
+                    data: 'name',
                     mRender: function(data, type, full) {
                         var id = full.id;
                         if (full.active) {
