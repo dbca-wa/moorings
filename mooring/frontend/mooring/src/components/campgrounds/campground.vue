@@ -449,7 +449,7 @@ export default {
                     }
                 }, {
                     // Action
-                    data: 'id',
+                    data: 'details',
                     mRender: function(data, type, full) {
                         if (data) {
                             var id = full.id;
