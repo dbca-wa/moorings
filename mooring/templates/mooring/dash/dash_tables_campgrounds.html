@@ -51,7 +51,7 @@
                                 </a>
                             </li>
                             <li class="dropdown">
-                                <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">
+                                <a href="#" class="dropdown-toggle" data-bs-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">
                                     Options
                                     <span class="caret"></span>
                                 </a>
@@ -82,11 +82,11 @@
         </nav>
     </div>
 </div>
-
 {% endblock %}
+
 {% block vue-component %}
+    This is dash_tables_campgrounds.html
     <div id="app">
-	   
       <alert :show="showAlert" :type="alertType" :data-alert="alertMessage" :duration="5000">
           <p :text-content.prop="alertMessage"></p>
       </alert>
@@ -95,13 +95,14 @@
 {% endblock %}
 
 {% block custom_js %}
-{% if not DEV_STATIC %}
-    {% comment %} <script type="text/javascript" src="{% static 'parkstay/js/manifest.js' %}?ver={{ GIT_COMMIT_HASH }}"></script>
-    <script type="text/javascript" src="{% static 'parkstay/js/vendor.js' %}?ver={{ GIT_COMMIT_HASH }}"></script>
-    <script type="text/javascript" src="{% static 'parkstay/js/parkstay.js' %}?ver={{ GIT_COMMIT_HASH }}"></script> {% endcomment %}
-    <script type="text/javascript" src="{% static 'moorings_vue/js/chunk-vendors.js' %}?ver={{ GIT_COMMIT_HASH }}"></script>
-    <script type="text/javascript" src="{% static 'moorings_vue/js/main.js' %}?ver={{ GIT_COMMIT_HASH }}"></script>
-{% else %}
-    <script type="text/javascript" src="{{ DEV_STATIC_URL }}"></script>
-{% endif %}
+    {% if not DEV_STATIC %}
+        {% comment %} <script type="text/javascript" src="{% static 'parkstay/js/manifest.js' %}?ver={{ GIT_COMMIT_HASH }}"></script>
+        <script type="text/javascript" src="{% static 'parkstay/js/vendor.js' %}?ver={{ GIT_COMMIT_HASH }}"></script>
+        <script type="text/javascript" src="{% static 'parkstay/js/parkstay.js' %}?ver={{ GIT_COMMIT_HASH }}"></script> {% endcomment %}
+        <script src="/static/common/js/bootstrap.bundle.min.js?ver={{ GIT_COMMIT_HASH }}"></script> {% comment %} This is for Bootstrap dropdowns.  Somehow this is not bundled even if it is imported in the main.js/hooks.js. {% endcomment %}
+        <script type="text/javascript" src="{% static 'moorings_vue/js/chunk-vendors.js' %}?ver={{ GIT_COMMIT_HASH }}"></script>
+        <script type="text/javascript" src="{% static 'moorings_vue/js/main.js' %}?ver={{ GIT_COMMIT_HASH }}"></script>
+    {% else %}
+        <script type="text/javascript" src="{{ DEV_STATIC_URL }}"></script>
+    {% endif %}
 {% endblock %}
