@@ -303,47 +303,6 @@ export default {
                 }
             });
         },
-        // addFormValidations: function() {
-        //     this.form.validate({
-        //     ignore:'div.ql-editor',
-        //     rules: {
-        //         name: "required",
-        //         park: "required",
-        //         campground_type: "required",
-        //         campground_type_physical: "required",
-        //         campground_class: "required",
-        //     },
-        //     messages: {
-        //         name: "Enter a mooring name",
-        //         park: "Select a park from the options",
-        //         campground_type: "Select a booking type from the options",
-        //         campground_type_physical: "Select a mooring type from the options",
-        //         campground_class: "Select a mooring class from the options",
-        //     },
-        //     showErrors: function(errorMap, errorList) {
-        //         $.each(this.validElements(), function(index, element) {
-        //             var $element = $(element);
-
-        //             $element.attr("data-original-title", "").parents('.form-group').removeClass('has-error');
-        //         });
-
-        //         // destroy tooltips on valid elements
-        //         $("." + this.settings.validClass).tooltip("destroy");
-
-        //         // add or update tooltips
-        //         for (var i = 0; i < errorList.length; i++) {
-        //             var error = errorList[i];
-        //             $('#' + error.element.id).focus();
-        //             $(error.element)
-        //                 .tooltip({
-        //                     trigger: "focus"
-        //                 })
-        //                 .attr("data-original-title", error.message)
-        //                 .parents('.form-group').addClass('has-error');
-        //         }
-        //     }
-        // });
-        // },
     },
     mounted: function() {
         let vm = this;

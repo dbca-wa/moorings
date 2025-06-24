@@ -28,6 +28,7 @@ export {
     DataTable,
     DataTableBs,
     DataTableRes,
+    bootstrap,
     Moment,
     datetimepicker,
     api_endpoints,

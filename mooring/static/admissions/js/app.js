@@ -17871,22 +17871,8 @@ module.exports = {
                     comments: "Details required if certain reasons are selected"
                 },
                 showErrors: function showErrors(errorMap, errorList) {
-
-                    $.each(this.validElements(), function (index, element) {
-                        var $element = $(element);
-                        $element.attr("data-original-title", "").parents('.form-group').removeClass('has-error');
-                    });
-
-                    // destroy tooltips on valid elements
-                    $("." + this.settings.validClass).tooltip("destroy");
-
-                    // add or update tooltips
-                    for (var i = 0; i < errorList.length; i++) {
-                        var error = errorList[i];
-                        $(error.element).tooltip({
-                            trigger: "focus"
-                        }).attr("data-original-title", error.message).parents('.form-group').addClass('has-error');
-                    }
+                    const { showErrors } = helpers.useFormErrors();
+                    showErrors(errorMap, errorList, this.validElements());
                 }
             });
         }

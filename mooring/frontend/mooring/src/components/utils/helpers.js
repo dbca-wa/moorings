@@ -1,5 +1,6 @@
 import $ from 'jquery'
 import _ from 'lodash'
+import { Tooltip } from 'bootstrap';
 
 export default {
     apiError: function(resp){
@@ -95,6 +96,59 @@ export default {
                 e.preventDefault();
                 return true;
             });
-    }
+    },
 
+    /**
+     * Provides a reusable showErrors function for form validation.
+     */
+    useFormErrors: function() {
+        /**
+         * Displays validation errors using Bootstrap 5 tooltips.
+         * @param {Object} errorMap - Not used, but passed for compatibility.
+         * @param {Array} errorList - List of validation errors.
+         * @param {HTMLElement[] | jQuery} validElements - List of valid elements (can be jQuery object).
+         */
+        function showErrors(errorMap, errorList, validElements) {
+            const elements = Array.from(validElements);
+
+            // Clear tooltips and error classes from valid elements
+            elements.forEach(element => {
+                element.removeAttribute("title");
+
+                const tooltip = Tooltip.getInstance(element);
+                if (tooltip) {
+                    tooltip.dispose();
+                }
+
+                const formGroup = element.closest('.form-group');
+                if (formGroup) {
+                    formGroup.classList.remove('has-error');
+                }
+            });
+
+            // Add or update tooltips for invalid elements
+            for (let i = 0; i < errorList.length; i++) {
+                const error = errorList[i];
+                const el = error.element;
+
+                const existingTooltip = Tooltip.getInstance(el);
+                if (existingTooltip) {
+                    existingTooltip.dispose();
+                }
+
+                el.setAttribute("title", error.message);
+
+                new Tooltip(el, {
+                    trigger: "focus"
+                });
+
+                const formGroup = el.closest('.form-group');
+                if (formGroup) {
+                    formGroup.classList.add('has-error');
+                }
+            }
+        }
+
+        return { showErrors };
+    }
 };
