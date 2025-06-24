@@ -137,7 +137,8 @@
         {% endblock %}
         {% block custom_js %}
         <script src="/static/common/js/jquery.min.js?ver={{ GIT_COMMIT_HASH }}"></script>
-        <script src="/static/common/css/bootstrap.min.js?ver={{ GIT_COMMIT_HASH }}"></script>
+        {% comment %} <script src="/static/common/css/bootstrap.min.js?ver={{ GIT_COMMIT_HASH }}"></script> {% endcomment %}
+        <script src="/static/common/js/bootstrap.bundle.min.js?ver={{ GIT_COMMIT_HASH }}"></script>
         <script src="/static/common/js/datatables.js"></script>
         <script src="/static/common/js/dataTables.bootstrap.min.js"></script>
         <script src="/static/common/js/date-dd-MMM-yyyy.js"></script>
