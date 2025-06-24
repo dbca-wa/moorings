@@ -5,6 +5,7 @@ import Vue from 'vue'
 if (process.env.VUE_APP_NODE_ENV == "development") {
     Vue.config.devtools = true;
 }
+import $ from '../hooks'
 import resource from 'vue-resource'
 import Campgrounds from '../components/campgrounds/campgrounds.vue'
 import Campground from '../components/campgrounds/campground.vue'
@@ -26,7 +27,6 @@ import Profile from '../components/user/profile.vue'
 import alert from '../components/utils/alert.vue'
 import store from './store'
 import { mapGetters } from 'vuex'
-import $ from '../hooks'
 var css = require('../hooks-css.js');
 Vue.use(Router);
 Vue.use(resource);
