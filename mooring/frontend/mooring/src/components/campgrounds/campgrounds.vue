@@ -188,7 +188,7 @@ export default {
                               return full.mooring_specification;
                       }
                 }, {
-                    data: 'name',
+                    data: 'id',
                     mRender: function(data, type, full) {
                         var id = full.id;
                         var addBooking = "";
