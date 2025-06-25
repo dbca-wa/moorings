@@ -76532,7 +76532,7 @@ __webpack_require__(335)
   // =========================
 
   var backdrop = '.dropdown-backdrop'
-  var toggle   = '[data-toggle="dropdown"]'
+  var toggle   = '[data-bs-toggle="dropdown"]'
   var Dropdown = function (element) {
     $(element).on('click.bs.dropdown', this.toggle)
   }

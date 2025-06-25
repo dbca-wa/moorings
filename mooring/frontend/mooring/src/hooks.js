@@ -4,7 +4,6 @@ import $, { extend } from 'jquery'
 import DataTable from 'datatables.net';
 import DataTableBs from 'datatables.net-bs';
 import DataTableRes from 'datatables.net-responsive-bs';
-import bootstrap from 'bootstrap';
 import moment from 'moment/moment.js';
 import { extendMoment } from 'moment-range';
 import datetimepicker from 'eonasdan-bootstrap-datetimepicker';
@@ -28,7 +27,7 @@ export {
     DataTable,
     DataTableBs,
     DataTableRes,
-    bootstrap,
+    // bootstrap,
     Moment,
     datetimepicker,
     api_endpoints,

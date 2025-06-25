@@ -27,6 +27,7 @@ import Profile from '../components/user/profile.vue'
 import alert from '../components/utils/alert.vue'
 import store from './store'
 import { mapGetters } from 'vuex'
+
 var css = require('../hooks-css.js');
 Vue.use(Router);
 Vue.use(resource);

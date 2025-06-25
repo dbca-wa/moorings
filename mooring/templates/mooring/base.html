@@ -78,7 +78,7 @@
                                         </a>
                                     </li>
                                     <li class="dropdown">
-                                        <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">
+                                        <a href="#" class="dropdown-toggle" data-bs-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">
                                             Options
                                             <span class="caret"></span>
                                         </a>
@@ -115,8 +115,10 @@
             </div>
         </div>
         {% endblock %}
+
         {% block breadcrumbs %}
         {% endblock %}
+
         {% block messages %}
             <div class="container">
                 <div class="row">
@@ -131,21 +133,23 @@
                 </div>
             </div>
         {% endblock %}
+
         {% block content %}
         {% endblock %}
+
         {% block modals %}
         {% endblock %}
+
         {% block custom_js %}
-        <script src="/static/common/js/jquery.min.js?ver={{ GIT_COMMIT_HASH }}"></script>
-        <script src="/static/common/js/bootstrap.min.js?ver={{ GIT_COMMIT_HASH }}"></script>
-        {% comment %} <script src="/static/common/js/bootstrap.bundle.min.js?ver={{ GIT_COMMIT_HASH }}"></script> {% endcomment %}
-        <script src="/static/common/js/datatables.js"></script>
-        <script src="/static/common/js/dataTables.bootstrap.min.js"></script>
-        <script src="/static/common/js/date-dd-MMM-yyyy.js"></script>
-        <script src="/static/common/js/natural-sorting-datatables.js"></script>
-        <script src="/static/common/js/moment.min.js?ver={{ GIT_COMMIT_HASH }}"></script>
-        <script src="/static/common/js/bootstrap-datetimepicker.min.js?ver={{ GIT_COMMIT_HASH }}"></script>
-        <script src="/static/common/js/promise.min.js?ver={{ GIT_COMMIT_HASH }}"></script>
+            <script src="/static/common/js/jquery.min.js?ver={{ GIT_COMMIT_HASH }}"></script>
+            <script src="/static/common/js/bootstrap.bundle.min.js?ver={{ GIT_COMMIT_HASH }}"></script>
+            <script src="/static/common/js/datatables.js"></script>
+            <script src="/static/common/js/dataTables.bootstrap.min.js"></script>
+            <script src="/static/common/js/date-dd-MMM-yyyy.js"></script>
+            <script src="/static/common/js/natural-sorting-datatables.js"></script>
+            <script src="/static/common/js/moment.min.js?ver={{ GIT_COMMIT_HASH }}"></script>
+            <script src="/static/common/js/bootstrap-datetimepicker.min.js?ver={{ GIT_COMMIT_HASH }}"></script>
+            <script src="/static/common/js/promise.min.js?ver={{ GIT_COMMIT_HASH }}"></script>
         {% endblock %}
 	<!-- Global site tag (gtag.js) - Google Analytics -->
 	<script async src="https://www.googletagmanager.com/gtag/js?id=UA-190340053-1"></script>

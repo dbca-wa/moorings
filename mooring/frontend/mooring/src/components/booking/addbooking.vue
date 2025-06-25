@@ -47,7 +47,7 @@
                                             <label class="col-md-2 control-label pull-left required"  for="Campground">Guests: </label>
                                             <div class="col-md-8">
                                                   <div class="dropdown guests">
-                                                      <input type="text" class="form-control dropdown-toggle" name="guests" placeholder="Guests" data-toggle="dropdown" aria-haspopup="true" aria-expanded="true" v-model="guestsText">
+                                                      <input type="text" class="form-control dropdown-toggle" name="guests" placeholder="Guests" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="true" v-model="guestsText">
                                                       <ul class="dropdown-menu" aria-labelledby="dropdownMenu1">
                                                           <li v-for="guest in guestsPicker">
                                                               <div class="row">
@@ -210,7 +210,7 @@
                                       <div class="form-group">
                                           <label for="vehicles" class="required">Number of Vehicles</label>
                                           <div class="dropdown guests">
-                                              <input type="number" min="0" max="10" name="vehicles" class="form-control dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="true" readonly="true" v-model="booking.parkEntry.vehicles" @change="updatePrices()">
+                                              <input type="number" min="0" max="10" name="vehicles" class="form-control dropdown-toggle" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="true" readonly="true" v-model="booking.parkEntry.vehicles" @change="updatePrices()">
                                               <ul class="dropdown-menu" aria-labelledby="dropdownMenu1">
                                                   <li v-for="park_entry in parkEntryPicker">
                                                       <div class="row">

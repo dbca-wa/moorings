@@ -27,7 +27,7 @@
                           <form class="form-inline" name="guest">
                               <div class="form-group">
                                 <div class="dropdown">
-                                    <input type="text" class="form-control dropdown-toggle" name="guests" placeholder="Guest" data-toggle="dropdown" aria-haspopup="true" aria-expanded="true" v-model="guestsText">
+                                    <input type="text" class="form-control dropdown-toggle" name="guests" placeholder="Guest" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="true" v-model="guestsText">
                                     <ul class="dropdown-menu" aria-labelledby="dropdownMenu1">
                                         <li v-for="guest in guestsPicker">
                                             <div class="row">
