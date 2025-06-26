@@ -6,6 +6,14 @@ if (process.env.VUE_APP_NODE_ENV == "development") {
     Vue.config.devtools = true;
 }
 import $ from '../hooks'
+window.$ = $;
+window.jquery = $;
+global.$ = $
+// import 'bootstrap'
+// import 'bootstrap/dist/css/bootstrap.min.css'
+// import 'datatables.net-bs5'
+// import 'datatables.net-bs5/css/dataTables.bootstrap5.min.css'
+
 import resource from 'vue-resource'
 import Campgrounds from '../components/campgrounds/campgrounds.vue'
 import Campground from '../components/campgrounds/campground.vue'
@@ -54,7 +62,6 @@ global.debounce = function (func, wait, immediate) {
     }
 };
 
-global.$ = $
 
 const routes = [
     {
