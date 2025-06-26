@@ -247,7 +247,7 @@ export default {
         outline:none;
         background-size: 100% 2px,100% 1px;
     }
-    .dropdown-menu:before {
+    /* .dropdown-menu:before {
       position: absolute;
       top: -12px;
       left: 12px;
@@ -261,7 +261,7 @@ export default {
     .dropdown-menu{
         top:120%;
         width: 300px;
-    }
+    } */
     .dropdown-menu li{
         padding: 10px;
         margin-right: 10px;
