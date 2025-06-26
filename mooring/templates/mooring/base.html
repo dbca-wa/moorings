@@ -1,5 +1,5 @@
 
-{% load bootstrap3 %}
+{% load django_bootstrap5 %}
 
 {% load static %}
 
@@ -124,7 +124,13 @@
                 <div class="row">
                     <div class="col-md-12">
                         {% for message in messages %}
-                            <div class="{{ message|bootstrap_message_classes }} alert-dismissable">
+                            {% comment %} <div class="{{ message|bootstrap_message_classes }} alert-dismissable"> {% endcomment %}
+                            <div class="alert 
+                                {% if message.tags == 'error' %}alert-danger
+                                {% elif message.tags == 'warning' %}alert-warning
+                                {% elif message.tags == 'success' %}alert-success
+                                {% else %}alert-info{% endif %}
+                                alert-dismissible fade show" role="alert">
                                 <button type="button" class="close" data-dismiss="alert" aria-hidden="true">&#215;</button>
                                 {{ message|safe }}
                             </div>
