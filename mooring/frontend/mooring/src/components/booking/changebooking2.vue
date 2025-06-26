@@ -973,7 +973,7 @@ export default {
     .awesomplete{
         width:100%;
     }
-    .dropdown-menu:before {
+    /* .dropdown-menu:before {
       position: absolute;
       top: -12px;
       left: 12px;
@@ -987,7 +987,7 @@ export default {
     .dropdown-menu{
         top:120%;
         width: 300px;
-    }
+    } */
     .guests li{
         padding: 10px;
         margin-right: 10px;

@@ -1058,7 +1058,7 @@ export default {
     .awesomplete{
         width:100%;
     }
-    .dropdown-menu:before {
+    /* .dropdown-menu:before {
       position: absolute;
       top: -12px;
       left: 12px;
@@ -1068,11 +1068,11 @@ export default {
       border-left: 12px solid transparent;
       border-bottom-color: rgba(46, 109, 164, 1);
       content: '';
-    }
-    .dropdown-menu{
+    } */
+    /* .dropdown-menu{
         top:120%;
         width: 300px;
-    }
+    } */
     .guests li{
         padding: 10px;
         margin-right: 10px;
