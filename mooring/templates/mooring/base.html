@@ -1,16 +1,19 @@
 
-{% load django_bootstrap5 %}
+{% extends "webtemplate_dbca/base_b5_auth_session.html" %}
 
 {% load static %}
 
 {% load users %}
+
+{% block header_top_menu %}
+{% endblock %}
 
 <!DOCTYPE html>
 <html lang="en">
     <head>
         <meta charset="UTF-8"/>
         <meta http-equiv="X-UA-Compatible" content="IE=edge"/>
-	{% bootstrap_css %} 
+	{% comment %} {% bootstrap_css %}  {% endcomment %}
                 <link type="text/css" href="{% static 'mooring/css/base.css' %}?ver={{ GIT_COMMIT_HASH }}" rel="stylesheet"/>
                 <link href="/static/common/css/font-awesome.css?ver={{ GIT_COMMIT_HASH }}" rel="stylesheet"/>
 
@@ -148,7 +151,7 @@
 
         {% block custom_js %}
             <script src="/static/common/js/jquery.min.js?ver={{ GIT_COMMIT_HASH }}"></script>
-            <script src="/static/common/js/bootstrap.bundle.min.js?ver={{ GIT_COMMIT_HASH }}"></script>
+            {% comment %} <script src="/static/common/js/bootstrap.bundle.min.js?ver={{ GIT_COMMIT_HASH }}"></script> {% endcomment %}
             <script src="/static/common/js/datatables.js"></script>
             <script src="/static/common/js/dataTables.bootstrap.min.js"></script>
             <script src="/static/common/js/date-dd-MMM-yyyy.js"></script>

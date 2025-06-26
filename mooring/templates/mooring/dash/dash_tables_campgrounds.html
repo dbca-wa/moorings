@@ -120,7 +120,7 @@
         <script type="text/javascript" src="{% static 'parkstay/js/parkstay.js' %}?ver={{ GIT_COMMIT_HASH }}"></script> {% endcomment %}
 
         {% comment %} This is for Bootstrap dropdowns for the main menu.  Somehow this is not bundled even if it is imported in the main.js. {% endcomment %}
-        <script type="text/javascript" src="{% static 'common/js/bootstrap.bundle.min.js' %}?ver={{ GIT_COMMIT_HASH }}"></script>
+        {% comment %} <script type="text/javascript" src="{% static 'common/js/bootstrap.bundle.min.js' %}?ver={{ GIT_COMMIT_HASH }}"></script> {% endcomment %}
         <script type="text/javascript" src="{% static 'moorings_vue/js/chunk-vendors.js' %}?ver={{ GIT_COMMIT_HASH }}"></script>
         <script type="text/javascript" src="{% static 'moorings_vue/js/main.js' %}?ver={{ GIT_COMMIT_HASH }}"></script>
     {% else %}
