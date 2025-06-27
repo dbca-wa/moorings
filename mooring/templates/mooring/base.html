@@ -1,44 +1,26 @@
-
 {% extends "webtemplate_dbca/base_b5_auth_session.html" %}
-
 {% load static %}
-
 {% load users %}
 
+{% comment %} header_top_menu is defined in the webtemplate_dbca/base_b5_auth_session.html {% endcomment %}
 {% block header_top_menu %}
 {% endblock %}
 
-<!DOCTYPE html>
-<html lang="en">
-    <head>
-        <meta charset="UTF-8"/>
-        <meta http-equiv="X-UA-Compatible" content="IE=edge"/>
-	{% comment %} {% bootstrap_css %}  {% endcomment %}
-                <link type="text/css" href="{% static 'mooring/css/base.css' %}?ver={{ GIT_COMMIT_HASH }}" rel="stylesheet"/>
-                <link href="/static/common/css/font-awesome.css?ver={{ GIT_COMMIT_HASH }}" rel="stylesheet"/>
+        {% block extra_css %}
+        {% endblock %}
 
-		<link href="/static/common/css/common.css?ver={{ GIT_COMMIT_HASH }}" rel="stylesheet"/>
+        {% block extra_js %}
+        {% endblock %}
 
-            {% block extra_css %}
-            {% endblock %}
-            {% block extra_js %}
-            {% endblock %}
-            <title>
-                {% block title %}
-                    Mooring - Department of Biodiversity, Conservation and Attractions 
-                {% endblock %}
-            </title>
+        {% block title %}
+            Mooring - Department of Biodiversity, Conservation and Attractions 
+        {% endblock %}
 
-        <meta name="viewport" content="width=device-width, initial-scale=1" />
         <link rel="icon" type="image/svg+xml" href="{% static 'mooring/img/favicon.svg' %}">
-        <input type='hidden' id='template_group' name='template_group' value='{{ TEMPLATE_GROUP }}'>
-    </head>
-    <body>
-        <header class="{% if TEMPLATE_GROUP == 'rottnest' %}topmast-rottnest{% else %}topmast{% endif %}">
             {% block header %}
                 {% include 'mooring/header.html' %}
             {% endblock %}
-        </header>
+
         {% block menu %}
         <div class="topbar">
             <div class="container-fluid">
@@ -160,14 +142,3 @@
             <script src="/static/common/js/bootstrap-datetimepicker.min.js?ver={{ GIT_COMMIT_HASH }}"></script>
             <script src="/static/common/js/promise.min.js?ver={{ GIT_COMMIT_HASH }}"></script>
         {% endblock %}
-	<!-- Global site tag (gtag.js) - Google Analytics -->
-	<script async src="https://www.googletagmanager.com/gtag/js?id=UA-190340053-1"></script>
-	<script>
-		  window.dataLayer = window.dataLayer || [];
-  function gtag(){dataLayer.push(arguments);}
-  gtag('js', new Date());
-
-  gtag('config', 'UA-190340053-1');
-	</script>
-    </body>
-</html>
