@@ -1,17 +1,9 @@
 <template>
-  <div id="app">
+  <div class="app">
     <campgrounds></campgrounds>
   </div>
 </template>
 
-<script>
-import campgrounds from './components/campgrounds.vue'
-
-export default {
-  name: 'app',
-  components: {
-    campgrounds
-  }
-
-};
+<script setup>
+import campgrounds from '../components/campgrounds/campgrounds.vue'
 </script>
