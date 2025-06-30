@@ -2,22 +2,31 @@
 <div id="groundsList">
     <pkCgClose></pkCgClose>
     <pkCgOpen></pkCgOpen>
-    <div class="panel-group" id="returns-accordion" role="tablist" aria-multiselectable="true">
-        <div class="row">
-            <div class="panel panel-default" id="returns">
-                <div class="panel-heading" role="tab" id="returns-heading">
-                    <h4 class="panel-title">
-                        <a role="button" data-toggle="collapse" href="#returns-collapse"
-                            aria-expanded="true" aria-controls="collapseOne" style="outline:none;">
+    <div class="accordion-group" id="returns-accordion" role="tablist" aria-multiselectable="true">
+
+
+<button class="btn btn-primary" type="button" data-bs-toggle="collapse" data-bs-target="#collapseExample" aria-expanded="false" aria-controls="collapseExample">
+    Button with data-bs-target
+</button>
+<div class="collapse" id="collapseExample">
+    <div class="card card-body">
+        Some placeholder content for the collapse component. This panel is hidden by default but revealed when the user activates the relevant trigger.
+    </div>
+</div>
+
+        <div class="accordion" id="accordionReturns">
+            <div class="accordion-item">
+                <div class="accordion-header" role="tab" id="returns-heading">
+                    <button class="accordion-button" role="button" data-bs-toggle="collapse" data-bs-target="#returns-collapse"
+                        aria-expanded="true" aria-controls="returns-collapse" style="outline:none;">
                             <div>
                                 <h3 style="display:inline;">{{title}}</h3>
                                 <span id="collapse_returns_span" class="glyphicon glyphicon-menu-up" style="float:right;"></span>
                             </div>
-                        </a>
-                    </h4>
+                    </button>
                 </div>
-                <div id="returns-collapse" class="panel-collapse collapse in" role="tabpanel" aria-labelledby="returns-heading">
-                    <div class="panel-body">
+                <div id="returns-collapse" class="accordion-collapse collapse show" aria-labelledby="returns-heading" data-bs-parent="#accordionReturns">
+                    <div class="accordion-body">
                         <div id="groundsList">
                             <form class="form" id="campgrounds-filter-form">
                                 <div class="row">
@@ -80,7 +89,12 @@
                                     </div>
                                 </div>
                             </form>
-                            <datatable :dtHeaders="['Mooring','Type', 'Status','Region','District','Park','Specification','Action']" :dtOptions="dtoptions" ref="dtGrounds" id="campground-table" ></datatable>
+                            <datatable
+                                :dtHeaders="['Mooring','Type', 'Status','Region','District','Park','Specification','Action']"
+                                :dtOptions="dtoptions"
+                                ref="dtGrounds"
+                                id="campground-table"
+                            ></datatable>
                         </div>
                     </div>
                 </div>

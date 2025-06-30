@@ -1,6 +1,7 @@
 {% extends 'mooring/dash/dash_tables.html' %}
 {% load static %}
 {% load users %}
+
 {% block extra_css %}
     {{ block.super }}
     <style>
@@ -9,6 +10,7 @@
         }
     </style>
 {% endblock %}
+
 {% block menu %}
 <div class="topbar row" id="menu" v-cloak>
     <div class="container-fluid">
@@ -104,7 +106,6 @@
 {% endblock %}
 
 {% block vue-component %}
-    This is dash_tables_campgrounds.html
     <div id="app">
       <alert :show="showAlert" :type="alertType" :data-alert="alertMessage" :duration="5000">
           <p :text-content.prop="alertMessage"></p>

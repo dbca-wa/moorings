@@ -4,7 +4,7 @@
             <div class="panel panel-default" style="overflow:auto;">
                 <div class="panel-heading" role="tab">
                     <h4 class="panel-title">
-                        <h3 style="display:inline;">Booking Periods</h3>
+                        <span style="display:inline;">Booking Periods</span>
                     </h4>
                 </div>
                 <div id="details-collapse" class="panel-collapse collapse in" role="tabpanel" aria-labelledby="details-heading">

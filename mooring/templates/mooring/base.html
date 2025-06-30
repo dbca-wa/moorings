@@ -2,143 +2,148 @@
 {% load static %}
 {% load users %}
 
-{% comment %} header_top_menu is defined in the webtemplate_dbca/base_b5_auth_session.html {% endcomment %}
+{% block extra_css %}
+{% endblock %}
+
+{% block extra_js %}
+{% endblock %}
+
+{% block title %}
+    Mooring - Department of Biodiversity, Conservation and Attractions 
+{% endblock %}
+
+{% block extra_hidden_inputs %}
+    <link rel="icon" type="image/svg+xml" href="{% static 'mooring/img/favicon.svg' %}">
+{% endblock %}
+
+{% block header %}
+    {% include 'mooring/header.html' %}
+{% endblock %}
+
+{% block menu_spacer %}
+{% endblock %}
+
 {% block header_top_menu %}
 {% endblock %}
 
-        {% block extra_css %}
-        {% endblock %}
-
-        {% block extra_js %}
-        {% endblock %}
-
-        {% block title %}
-            Mooring - Department of Biodiversity, Conservation and Attractions 
-        {% endblock %}
-
-        <link rel="icon" type="image/svg+xml" href="{% static 'mooring/img/favicon.svg' %}">
-            {% block header %}
-                {% include 'mooring/header.html' %}
-            {% endblock %}
-
-        {% block menu %}
-        <div class="topbar">
-            <div class="container-fluid">
-                <nav class="navbar navbar-default">
-                    <div class="container">
-                        <div class="navbar-header">
-                            <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#navbar" aria-expanded="false" aria-controls="navbar">
-                                <span class="sr-only">Toggle navigation</span>
-                                <span class="icon-bar"></span>
-                                <span class="icon-bar"></span>
-                                <span class="icon-bar"></span>
-                            </button>
-                            {% if request.user.is_staff %}<a class="navbar-brand" href="{% url 'dash-campgrounds' %}"><div style="inline">{% if TEMPLATE_GROUP == 'rottnest' %}{% else %}<img src="{% static 'wl/img/dpaw_small.png' %}">{% endif %}Moorings</div></a>{% else %}<a class="navbar-brand" href="{% url 'home' %}"><div style="inline">{% if TEMPLATE_GROUP == 'rottnest' %}{% else %}<img src="{% static 'wl/img/dpaw_small.png' %}">{% endif %}My Bookings</div></a>{% endif %}
-                        </div>
-                        <div id="navbar" class="navbar-collapse collapse">
-                            <ul class="nav navbar-nav">
-                                {% block left_menu_items %}
-                                    {% if request.user.is_staff %}
-                                    {% include 'mooring/admin_nav_menu.html' %}
-                                    {% else %}
-                                    
-                                    {% endif %}
-                                    <li><a href="{{EXPLORE_PARKS_SEARCH}}">Search For A Mooring</a></li>
-                                {% endblock %}
-                            </ul>
-                            <ul class="nav navbar-nav navbar-right">
-                                {% if request.user.is_authenticated %}
-                                    <li>
-                                        <a>
-                                        Welcome
-                                        <strong>
-                                            {% if request.user.first_name %}
-                                                {{ request.user.get_short_name }}
-                                            {% elif request.user.last_name %}
-                                                {{ request.user.last_name }}
-                                            {% else %}
-                                                {{ request.user.email }}
-                                            {% endif %}
-                                        </strong>
-                                        </a>
-                                    </li>
-                                    <li class="dropdown">
-                                        <a href="#" class="dropdown-toggle" data-bs-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">
-                                            Options
-                                            <span class="caret"></span>
-                                        </a>
-                                        <ul class="dropdown-menu">
-                                            {% if request.user|is_admin or request.user.is_superuser %}
-                                                <li><a href="{% url 'admin:index' %}">Admin</a></li>
-                                                <li><a href="/dashboard/reports">Reports</a></li>
-
-                                                <li><a  class="dropdown-item" href="{{ LEDGER_UI_URL }}/reports?system_id={{ LEDGER_SYSTEM_ID }} ">Financial Reports</a></li>
-                                                <li><a  class="dropdown-item" href="{{ LEDGER_UI_URL }}/ledger/payments/oracle/payment-totals?system_id={{ LEDGER_SYSTEM_ID }}">Payment Totals</a></li>
-                                                <li><a  class="dropdown-item" href="{{ LEDGER_UI_URL }}/ledger/payments/oracle/failed-transactions?system_id={{ LEDGER_SYSTEM_ID }}">Failed Refunds {% if ledger_totals.total_failed > 0 %}<span class="badge bg-danger">{{ ledger_totals.total_failed }}</span>{% endif %}</li>
-
-                                                <li role="separator" class="divider"></li>
-                                                {% include 'mooring/admin_menu.html' %}
-                                                <li role="separator" class="divider"></li>
-                                            {% endif %}
-                                            <li><a href="{% url 'account' %}">Manage Account</a></li>
-                                            <li role="separator" class="divider"></li>
-                                            <li><a href="{% url 'logout' %}?next=/">Logout</a></li>
-                                        </ul>
-                                    </li>
-                                {% else %}
-                                        <div style="padding-top:6px;">
-                                        <a href="/ssologin" class="btn btn-primary" >Login</a>
-                                        </div>
-                                    
-                                {% endif %}
-                                {% block right_menu_items %}
-                                {% endblock %}
-                            </ul>
-                        </div>
-                    </div>
-                </nav>
-            </div>
-        </div>
-        {% endblock %}
-
-        {% block breadcrumbs %}
-        {% endblock %}
-
-        {% block messages %}
+{% block menu %}
+<div class="topbar">
+    <div class="container-fluid">
+        <nav class="navbar navbar-default">
             <div class="container">
-                <div class="row">
-                    <div class="col-md-12">
-                        {% for message in messages %}
-                            {% comment %} <div class="{{ message|bootstrap_message_classes }} alert-dismissable"> {% endcomment %}
-                            <div class="alert 
-                                {% if message.tags == 'error' %}alert-danger
-                                {% elif message.tags == 'warning' %}alert-warning
-                                {% elif message.tags == 'success' %}alert-success
-                                {% else %}alert-info{% endif %}
-                                alert-dismissible fade show" role="alert">
-                                <button type="button" class="close" data-dismiss="alert" aria-hidden="true">&#215;</button>
-                                {{ message|safe }}
-                            </div>
-                        {% endfor %}
-                    </div>
+                <div class="navbar-header">
+                    <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#navbar" aria-expanded="false" aria-controls="navbar">
+                        <span class="sr-only">Toggle navigation</span>
+                        <span class="icon-bar"></span>
+                        <span class="icon-bar"></span>
+                        <span class="icon-bar"></span>
+                    </button>
+                    {% if request.user.is_staff %}<a class="navbar-brand" href="{% url 'dash-campgrounds' %}"><div style="inline">{% if TEMPLATE_GROUP == 'rottnest' %}{% else %}<img src="{% static 'wl/img/dpaw_small.png' %}">{% endif %}Moorings</div></a>{% else %}<a class="navbar-brand" href="{% url 'home' %}"><div style="inline">{% if TEMPLATE_GROUP == 'rottnest' %}{% else %}<img src="{% static 'wl/img/dpaw_small.png' %}">{% endif %}My Bookings</div></a>{% endif %}
+                </div>
+                <div id="navbar" class="navbar-collapse collapse">
+                    <ul class="nav navbar-nav">
+                        {% block left_menu_items %}
+                            {% if request.user.is_staff %}
+                            {% include 'mooring/admin_nav_menu.html' %}
+                            {% else %}
+                            
+                            {% endif %}
+                            <li><a href="{{EXPLORE_PARKS_SEARCH}}">Search For A Mooring</a></li>
+                        {% endblock %}
+                    </ul>
+                    <ul class="nav navbar-nav navbar-right">
+                        {% if request.user.is_authenticated %}
+                            <li>
+                                <a>
+                                Welcome
+                                <strong>
+                                    {% if request.user.first_name %}
+                                        {{ request.user.get_short_name }}
+                                    {% elif request.user.last_name %}
+                                        {{ request.user.last_name }}
+                                    {% else %}
+                                        {{ request.user.email }}
+                                    {% endif %}
+                                </strong>
+                                </a>
+                            </li>
+                            <li class="dropdown">
+                                <a href="#" class="dropdown-toggle" data-bs-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">
+                                    Options
+                                    <span class="caret"></span>
+                                </a>
+                                <ul class="dropdown-menu">
+                                    {% if request.user|is_admin or request.user.is_superuser %}
+                                        <li><a href="{% url 'admin:index' %}">Admin</a></li>
+                                        <li><a href="/dashboard/reports">Reports</a></li>
+
+                                        <li><a  class="dropdown-item" href="{{ LEDGER_UI_URL }}/reports?system_id={{ LEDGER_SYSTEM_ID }} ">Financial Reports</a></li>
+                                        <li><a  class="dropdown-item" href="{{ LEDGER_UI_URL }}/ledger/payments/oracle/payment-totals?system_id={{ LEDGER_SYSTEM_ID }}">Payment Totals</a></li>
+                                        <li><a  class="dropdown-item" href="{{ LEDGER_UI_URL }}/ledger/payments/oracle/failed-transactions?system_id={{ LEDGER_SYSTEM_ID }}">Failed Refunds {% if ledger_totals.total_failed > 0 %}<span class="badge bg-danger">{{ ledger_totals.total_failed }}</span>{% endif %}</li>
+
+                                        <li role="separator" class="divider"></li>
+                                        {% include 'mooring/admin_menu.html' %}
+                                        <li role="separator" class="divider"></li>
+                                    {% endif %}
+                                    <li><a href="{% url 'account' %}">Manage Account</a></li>
+                                    <li role="separator" class="divider"></li>
+                                    <li><a href="{% url 'logout' %}?next=/">Logout</a></li>
+                                </ul>
+                            </li>
+                        {% else %}
+                                <div style="padding-top:6px;">
+                                <a href="/ssologin" class="btn btn-primary" >Login</a>
+                                </div>
+                            
+                        {% endif %}
+                        {% block right_menu_items %}
+                        {% endblock %}
+                    </ul>
                 </div>
             </div>
-        {% endblock %}
+        </nav>
+    </div>
+</div>
+{% endblock %}
 
-        {% block content %}
-        {% endblock %}
+{% block breadcrumbs %}
+{% endblock %}
 
-        {% block modals %}
-        {% endblock %}
+{% block messages %}
+    <div class="container">
+        <div class="row">
+            <div class="col-md-12">
+                {% for message in messages %}
+                    {% comment %} <div class="{{ message|bootstrap_message_classes }} alert-dismissable"> {% endcomment %}
+                    <div class="alert 
+                        {% if message.tags == 'error' %}alert-danger
+                        {% elif message.tags == 'warning' %}alert-warning
+                        {% elif message.tags == 'success' %}alert-success
+                        {% else %}alert-info{% endif %}
+                        alert-dismissible fade show" role="alert">
+                        <button type="button" class="close" data-dismiss="alert" aria-hidden="true">&#215;</button>
+                        {{ message|safe }}
+                    </div>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+{% endblock %}
 
-        {% block custom_js %}
-            <script src="/static/common/js/jquery.min.js?ver={{ GIT_COMMIT_HASH }}"></script>
-            {% comment %} <script src="/static/common/js/bootstrap.bundle.min.js?ver={{ GIT_COMMIT_HASH }}"></script> {% endcomment %}
-            <script src="/static/common/js/datatables.js"></script>
-            <script src="/static/common/js/dataTables.bootstrap.min.js"></script>
-            <script src="/static/common/js/date-dd-MMM-yyyy.js"></script>
-            <script src="/static/common/js/natural-sorting-datatables.js"></script>
-            <script src="/static/common/js/moment.min.js?ver={{ GIT_COMMIT_HASH }}"></script>
-            <script src="/static/common/js/bootstrap-datetimepicker.min.js?ver={{ GIT_COMMIT_HASH }}"></script>
-            <script src="/static/common/js/promise.min.js?ver={{ GIT_COMMIT_HASH }}"></script>
-        {% endblock %}
+{% block content %}
+{% endblock %}
+
+{% block modals %}
+{% endblock %}
+
+{% block custom_js %}
+    {% comment %} <script src="/static/common/js/jquery.min.js?ver={{ GIT_COMMIT_HASH }}"></script> {% endcomment %}
+    {% comment %} <script src="/static/common/js/bootstrap.bundle.min.js?ver={{ GIT_COMMIT_HASH }}"></script> {% endcomment %}
+    {% comment %} <script src="/static/common/js/datatables.js"></script>
+    <script src="/static/common/js/dataTables.bootstrap.min.js"></script>
+    <script src="/static/common/js/date-dd-MMM-yyyy.js"></script>
+    <script src="/static/common/js/natural-sorting-datatables.js"></script>
+    <script src="/static/common/js/moment.min.js?ver={{ GIT_COMMIT_HASH }}"></script>
+    <script src="/static/common/js/bootstrap-datetimepicker.min.js?ver={{ GIT_COMMIT_HASH }}"></script>
+    <script src="/static/common/js/promise.min.js?ver={{ GIT_COMMIT_HASH }}"></script> {% endcomment %}
+{% endblock %}
