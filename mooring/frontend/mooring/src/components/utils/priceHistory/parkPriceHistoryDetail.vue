@@ -198,9 +198,14 @@ export default {
             vm.priceHistory.period_start = picker.data('DateTimePicker').date().format('YYYY-MM-DD');
         });
         vm.addFormValidations();
-        bus.$once('priceReasons',setReasons => {
+        // bus.$once('priceReasons',setReasons => {
+        //     vm.reasons = setReasons;
+        // });
+        const onDataLoadedOnce = (setReasons) => {
             vm.reasons = setReasons;
-        });
+            bus.off('priceReasons', onDataLoadedOnce);
+        };
+        bus.on('priceReasons', onDataLoadedOnce);
     }
 };
 </script>
