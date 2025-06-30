@@ -7,7 +7,7 @@
 				<p>Mooring successfully updated</p>
 			</alert>
 			<alert :show.sync="showError" type="danger">
-				<p>{{errorString}}<p/>
+				<p>{{errorString}}</p>
 			</alert>
 					<div class="row">
 						<div class="col-lg-12">
