@@ -328,7 +328,8 @@ export default {
                     vm.deleteHistory = $(btn).data('rate');
                 }
 
-                bus.$emit('showAlert', 'deleteHistory');
+                // bus.$emit('showAlert', 'deleteHistory');
+                bus.emit('showAlert', 'deleteHistory');
             });
         },
     },

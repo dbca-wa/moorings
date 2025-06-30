@@ -79,8 +79,7 @@
 
 <script>
 import bootstrapModal from '../utils/bootstrap-modal.vue'
-import {bus} from '../utils/eventBus.js'
-import { $, datetimepicker,api_endpoints, Moment, validate, helpers } from '../../hooks'
+import { $, bus, datetimepicker,api_endpoints, Moment, validate, helpers } from '../../hooks'
 import alert from '../utils/alert.vue'
 import reason from '../utils/reasons.vue'
 
@@ -161,7 +160,8 @@ export default {
                 dataType: 'json',
                 success: function(data, stat, xhr) {
                     vm.close();
-                    bus.$emit('refreshCGTable');
+                    // bus.$emit('refreshCGTable');
+                    bus.emit('refreshCGTable');
                 },
                 error:function (data){
                     vm.errors = true;
@@ -202,7 +202,7 @@ export default {
     },
     mounted: function() {
         var vm = this;
-        bus.$on('openclose', function(data){
+        bus.on('openclose', function(data){
             vm.status = data.status;
             vm.id = data.id;
         });
@@ -242,9 +242,14 @@ export default {
         
         vm.form = $('#closeCGForm');
         vm.addFormValidations();
-        bus.$once('closeReasons',setReasons => {
+        // bus.once('closeReasons',setReasons => {
+        //     vm.reasons = setReasons;
+        // });
+        const onDataLoadedOnce = (setReasons) => {
             vm.reasons = setReasons;
-        });
+            bus.off('closeReasons', onDataLoadedOnce);
+        };
+        bus.on('closeReasons', onDataLoadedOnce);
     }
 };
 </script>

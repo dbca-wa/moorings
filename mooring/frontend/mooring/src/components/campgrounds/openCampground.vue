@@ -136,7 +136,8 @@ export default {
                 dataType: 'json',
                 success: function(data, stat, xhr) {
                     vm.close();
-                    bus.$emit('refreshCGTable');
+                    // bus.$emit('refreshCGTable');
+                    bus.emit('refreshCGTable');
                 },
                 error:function (data){
                     vm.errors = true;
@@ -199,7 +200,7 @@ export default {
     },
     mounted: function() {
         var vm = this;
-        bus.$on('openclose', function(data){
+        bus.on('openclose', function(data){
             vm.status = data.status;
             vm.id = data.id;
             vm.current_closure = data.closure;
@@ -222,9 +223,14 @@ export default {
 
         vm.form = $('#openCGForm');
         vm.addFormValidations();
-        bus.$once('openReasons',setReasons => {
+        // bus.$once('openReasons',setReasons => {
+        //     vm.reasons = setReasons;
+        // });
+        const onDataLoadedOnce = (setReasons) => {
             vm.reasons = setReasons;
-        });
+            bus.off('openReasons', onDataLoadedOnce);
+        };
+        bus.on('openReasons', onDataLoadedOnce);
     }
 };
 </script>

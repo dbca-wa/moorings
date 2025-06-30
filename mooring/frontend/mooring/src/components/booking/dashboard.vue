@@ -805,6 +805,7 @@ export default {
                     })
                 })
                 //bus.$emit('showAlert', 'cancelBooking');
+                bus.emit('showAlert', 'cancelBooking');
             });
             vm.dateToPicker.on('dp.change', function(e){
                 if (vm.dateToPicker.data('DateTimePicker').date()) {

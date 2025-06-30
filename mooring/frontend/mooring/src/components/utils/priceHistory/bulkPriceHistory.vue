@@ -303,9 +303,9 @@ export default {
         let vm = this;
         vm.form = $(document.forms.periodForm);
         vm.events();
-        bus.$once('priceReasons',setReasons => {
-            vm.reasons = setReasons;
-        });
+        // bus.$once('priceReasons',setReasons => {
+        //     vm.reasons = setReasons;
+        // });
     }
 }
 

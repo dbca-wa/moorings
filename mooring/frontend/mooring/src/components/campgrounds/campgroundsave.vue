@@ -393,7 +393,8 @@ export default {
                 async: false,
                 success: function(data, stat, xhr) {
                     vm.campground = data;
-                    bus.$emit('campgroundFetched');
+                    // bus.$emit('campgroundFetched');
+                    bus.emit('campgroundFetched');
                 }
             });
         },
@@ -495,7 +496,8 @@ export default {
                 success: function(data, stat, xhr) {
                     vm.campground = data;
                     vm.fetchCampsites();
-                    bus.$emit('campgroundFetched');
+                    // bus.$emit('campgroundFetched');
+                    bus.emit('campgroundFetched');
                 }
             });
         }

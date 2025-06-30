@@ -136,7 +136,8 @@ export default {
             vm.$emit('save', url, method, reload, "images");
         },
         showAlert: function() {
-            bus.$emit('showAlert', 'alert1');
+            // bus.$emit('showAlert', 'alert1');
+            bus.emit('showAlert', 'alert1');
         },
     },
     mounted: function() {

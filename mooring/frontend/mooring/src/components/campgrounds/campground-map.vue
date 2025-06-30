@@ -204,7 +204,8 @@ export default {
             vm.$emit('save', url, method, reload, "map");
         },
         showAlert: function() {
-            bus.$emit('showAlert', 'alert1');
+            // bus.$emit('showAlert', 'alert1');
+            bus.emit('showAlert', 'alert1');
         },
         setCoordinates: function() { 
             var longitude = $('#longitude').val();

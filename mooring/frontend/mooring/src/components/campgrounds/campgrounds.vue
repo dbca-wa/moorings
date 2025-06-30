@@ -384,7 +384,8 @@ export default {
                     'id': id,
                     'closure': current_closure
                 }
-                bus.$emit('openclose', data);
+                // bus.$emit('openclose', data);
+                bus.emit('openclose', data);
                 if (status === 'open'){
                     vm.showOpenOpenCG();
                 }else if (status === 'close'){
@@ -401,7 +402,7 @@ export default {
                     }
                 });
             });
-            bus.$on('refreshCGTable', function(){
+            bus.on('refreshCGTable', function(){
                 vm.$refs.dtGrounds.vmDataTable.ajax.reload();
             });
         }

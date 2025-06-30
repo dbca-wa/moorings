@@ -720,7 +720,8 @@ export default {
                 success: function(data, stat, xhr) {
                     vm.campground = data;
                     vm.fetchCampsites();
-                    bus.$emit('campgroundFetched');
+                    // bus.$emit('campgroundFetched');
+                    bus.emit('campgroundFetched');
                     for (var i = 0; i < data.features.length; i++){
                         vm.features_selected.push(data.features[i].id);
                     }

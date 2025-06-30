@@ -230,7 +230,8 @@ export default {
                 e.preventDefault();
                 var id = $(this).attr('data-stay_period');
                 vm.deleteStay = id;
-                bus.$emit('showAlert', 'deleteStay');
+                // bus.$emit('showAlert', 'deleteStay');
+                bus.emit('showAlert', 'deleteStay');
             });
         },
     },

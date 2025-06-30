@@ -183,7 +183,8 @@ export default {
                 e.preventDefault();
                 var id = $(this).data('campsite-type');
                 vm.deleteCampsiteType = id;
-                bus.$emit('showAlert', 'deleteCampsiteType');
+                // bus.$emit('showAlert', 'deleteCampsiteType');
+                bus.emit('showAlert', 'deleteCampsiteType');
             });
         }
     },

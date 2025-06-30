@@ -392,9 +392,14 @@ export default {
 
 
         vm.addFormValidations();
-        bus.$once('reasons',setReasons => {
+        // bus.once('reasons',setReasons => {
+        //     vm.reasons = setReasons;
+        // });
+        const onDataLoadedOnce = (setReasons) => {
             vm.reasons = setReasons;
-        });
+            bus.off('reasons', onDataLoadedOnce);
+        };
+        bus.on('reasons', onDataLoadedOnce);
     }
 };
 </script>

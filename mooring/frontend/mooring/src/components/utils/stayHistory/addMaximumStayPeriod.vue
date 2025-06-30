@@ -195,9 +195,14 @@ export default {
         });
         vm.form = $('#addMaxStayForm');
         vm.addFormValidations();
-        bus.$once('maxStayReasons',setReasons => {
+        // bus.$once('maxStayReasons',setReasons => {
+        //     vm.reasons = setReasons;
+        // });
+        const onDataLoadedOnce = (setReasons) => {
             vm.reasons = setReasons;
-        });
+            bus.off('maxStayReasons', onDataLoadedOnce);
+        };
+        bus.on('maxStayReasons', onDataLoadedOnce);
     }
 };
 </script>

@@ -236,7 +236,8 @@ export default {
                 e.preventDefault();
                 var id = $(this).data('range');
                 vm.deleteClosure = id;
-                bus.$emit('showAlert', 'deleteClosure');
+                // bus.$emit('showAlert', 'deleteClosure');
+                bus.emit('showAlert', 'deleteClosure');
             });
         },
     },

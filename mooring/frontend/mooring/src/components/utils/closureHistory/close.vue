@@ -236,9 +236,14 @@ export default {
         });
         vm.form = $(document.forms.closeForm);
         vm.addFormValidations();
-        bus.$once('closeReasons',setReasons => {
+        // bus.$once('closeReasons',setReasons => {
+        //     vm.reasons = setReasons;
+        // });
+        const onDataLoadedOnce = (setReasons) => {
             vm.reasons = setReasons;
-        });
+            bus.off('closeReasons', onDataLoadedOnce);
+        };
+        bus.on('closeReasons', onDataLoadedOnce);
     },
 };
 </script>

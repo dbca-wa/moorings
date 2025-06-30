@@ -59,28 +59,32 @@ export default {
             let vm = this;
             $.get(api_endpoints.openReasons(),function (data) {
                 vm.reasons = data;
-                bus.$emit('openReasons', vm.reasons);
+                // bus.$emit('openReasons', vm.reasons);
+                bus.emit('openReasons', vm.reasons);
             });
         },
         fetchClosureReasons:function () {
             let vm = this;
             $.get(api_endpoints.closureReasons(),function (data) {
                 vm.reasons = data;
-                bus.$emit('closeReasons', vm.reasons);
+                // bus.$emit('closeReasons', vm.reasons);
+                bus.emit('closeReasons', vm.reasons);
             });
         },
         fetchMaxStayReasons:function () {
             let vm = this;
             $.get(api_endpoints.maxStayReasons(),function (data) {
                 vm.reasons = data;
-                bus.$emit('maxStayReasons', vm.reasons);
+                // bus.$emit('maxStayReasons', vm.reasons);
+                bus.emit('maxStayReasons', vm.reasons);
             });
         },
         fetchPriceReasons:function () {
             let vm = this;
             $.get(api_endpoints.priceReasons(),function (data) {
                 vm.reasons = data;
-                bus.$emit('priceReasons', vm.reasons);
+                // bus.$emit('priceReasons', vm.reasons);
+                bus.emit('priceReasons', vm.reasons);
             });
         }
     },

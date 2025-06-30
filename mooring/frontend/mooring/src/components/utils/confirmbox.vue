@@ -115,7 +115,7 @@ export default {
    mounted:function () {
        var vm = this;
        vm.confirmBox(this.options);
-       bus.$on('showAlert', function(id){
+       bus.on('showAlert', function(id){
           if(id === vm.id){
               $("#"+vm.confirmModal).modal('show');
           }

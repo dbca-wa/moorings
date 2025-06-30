@@ -174,7 +174,7 @@ export default {
     mounted: function() {
         let vm = this;
         vm.slick_init();
-        bus.$on('campgroundFetched',function(){
+        bus.on('campgroundFetched',function(){
             if (vm.images){
                 $('.upload').slick('unslick');
                 vm.imageLoaderText='Loading Images...'

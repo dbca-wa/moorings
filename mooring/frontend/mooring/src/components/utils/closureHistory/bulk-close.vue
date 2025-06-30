@@ -309,9 +309,14 @@ export default {
         let vm = this;
         vm.form = $(document.forms.closeForm);
         vm.events();
-        bus.$once('closeReasons',setReasons => {
+        // bus.$once('closeReasons',setReasons => {
+        //     vm.reasons = setReasons;
+        // });
+        const onDataLoadedOnce = (setReasons) => {
             vm.reasons = setReasons;
-        });
+            bus.off('closeReasons', onDataLoadedOnce);
+        };
+        bus.on('closeReasons', onDataLoadedOnce);
     }
 }
 

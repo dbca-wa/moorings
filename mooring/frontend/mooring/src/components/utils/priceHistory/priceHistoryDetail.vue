@@ -336,9 +336,14 @@ export default {
 
         vm.addFormValidations();
         vm.fetchRates();
-        bus.$once('priceReasons',setReasons => {
+        // bus.$once('priceReasons',setReasons => {
+        //     vm.reasons = setReasons;
+        // });
+        const onDataLoadedOnce = (setReasons) => {
             vm.reasons = setReasons;
-        });
+            bus.off('priceReasons', onDataLoadedOnce);
+        };
+        bus.on('priceReasons', onDataLoadedOnce);
     }
 };
 </script>

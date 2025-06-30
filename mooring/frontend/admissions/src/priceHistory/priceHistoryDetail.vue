@@ -265,9 +265,14 @@ export default {
         });
         vm.addFormValidations();
         vm.fetchRates();
-        bus.$once('reasons',setReasons => {
+        // bus.$once('reasons',setReasons => {
+        //     vm.reasons = setReasons;
+        // });
+        const onDataLoadedOnce = (setReasons) => {
             vm.reasons = setReasons;
-        });
+            bus.off('priceReasons', onDataLoadedOnce);
+        };
+        bus.on('priceReasons', onDataLoadedOnce);
     }
 };
 </script>

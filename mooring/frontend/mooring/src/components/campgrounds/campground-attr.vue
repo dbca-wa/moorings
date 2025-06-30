@@ -486,7 +486,8 @@ export default {
             });
         },
         showAlert: function() {
-            bus.$emit('showAlert', 'alert1');
+            // bus.$emit('showAlert', 'alert1');
+            bus.emit('showAlert', 'alert1');
         },
         loadParks: function() {
             var vm = this;
