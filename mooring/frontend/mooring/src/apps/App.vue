@@ -1,6 +1,7 @@
 <template>
-  <div class="app">
+  <div id="app">
     <campgrounds></campgrounds>
+    <router-view></router-view>
   </div>
 </template>
 
