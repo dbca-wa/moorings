@@ -102,7 +102,7 @@ import View from 'ol/View.js'
 import Draw from 'ol/interaction/Draw.js'
 // import GeometryType from 'ol/geom/geometrytype.js'
 
-import Editor from 'quill';
+import Quill from 'quill';
 import loader from '../utils/loader.vue'
 import alert from '../utils/alert.vue'
 export default {
@@ -221,7 +221,7 @@ export default {
         let vm = this;
         vm.isLoading = true;
 
-        vm.editor = new Editor('#editorhidden', {
+        vm.editor = new Quill('#editorhidden', {
             modules: {
                 toolbar: true
             },

@@ -70,7 +70,7 @@ import {
     bus,
 }
 from '../utils/eventBus.js';
-import Editor from 'quill';
+import Quill from 'quill';
 import Render from 'quill-render';
 import loader from '../utils/loader.vue'
 import alert from '../utils/alert.vue'
@@ -188,7 +188,7 @@ export default {
     },
     mounted: function() {
         let vm = this;
-        vm.editor = new Editor('#editor', {
+        vm.editor = new Quill('#editor', {
             modules: {
                 toolbar: true
             },

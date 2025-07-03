@@ -26,7 +26,7 @@
     "moment": "2.30.1",
     "moment-range": "^4.0.2",
     "ol": "10.6.1",
-    "quill": "^1.1.5",
+    "quill": "^2.0.3",
     "quill-render": "^1.0.5",
     "select2": "4.0.5",
     "select2-bootstrap-theme": "0.1.0-beta.10",
