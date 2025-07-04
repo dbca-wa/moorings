@@ -167,44 +167,9 @@ export default {
             this.selected_campgrounds = "";
             this.reason = "";
             this.errorStringClose = null;
-			this.closeStartPicker.data('DateTimePicker').date(new Date());
-            this.closeStartTimePicker.data('DateTimePicker').clear();
-			this.closeEndPicker.data('DateTimePicker').clear();
-            this.closeEndTimePicker.data('DateTimePicker').clear();
         },
         events:function () {
             let vm = this;
-            // vm.closeEndPicker = $('#'+vm.close_cg_range_end);
-            // vm.closeStartPicker = $('#'+vm.close_cg_range_start).datetimepicker({
-            //     format: 'DD/MM/YYYY',
-            //     minDate: new Date()
-            // });
-            // vm.closeStartTimePicker = $('#'+vm.close_cg_range_start_time).datetimepicker({
-            //     format: 'HH:mm',
-            // });
-            // vm.closeEndPicker.datetimepicker({
-            //     format: 'DD/MM/YYYY',
-            //     useCurrent: false
-            // });
-            // vm.closeEndTimePicker = $('#'+vm.close_cg_range_end_time).datetimepicker({
-            //     format: 'HH:mm'
-            // });
-            // vm.closeStartPicker.on('dp.change', function(e){
-            //     vm.range_start = vm.closeStartPicker.data('DateTimePicker').date().format('DD/MM/YYYY');
-            //     vm.closeEndPicker.data("DateTimePicker").minDate(e.date);
-            // });
-            // vm.closeStartTimePicker.on('dp.change', function(e){
-            //     vm.range_start_time = vm.closeStartTimePicker.data('DateTimePicker').date().format('HH:mm');
-            // });
-            // vm.closeEndPicker.on('dp.change', function(e){
-            //     var date = vm.closeEndPicker.data('DateTimePicker').date();
-            //     vm.range_end = (date) ? date.format('DD/MM/YYYY') : null;
-            // });
-            // vm.closeEndTimePicker.on('dp.change', function(e){
-            //     vm.range_end_time = vm.closeEndTimePicker.data('DateTimePicker').date().format('HH:mm');
-            // });
-            // vm.range_start_time = '00:00';
-            // vm.range_end_time = '23:59';
 
             vm.addFormValidations();
             vm.fetchCampgrounds();
