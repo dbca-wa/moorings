@@ -26,7 +26,10 @@
 {% block header_top_menu %}
 {% endblock %}
 
-{% block menu %}
+{% block menu_items_left_brand %}
+{% endblock %}
+
+{% comment %} {% block menu %}
 <div class="topbar">
     <div class="container-fluid">
         <nav class="navbar navbar-default">
@@ -48,7 +51,7 @@
                             {% else %}
                             
                             {% endif %}
-                            <li><a href="{{EXPLORE_PARKS_SEARCH}}">Search For A Mooring</a></li>
+                            <li><a href="{{EXPLORE_PARKS_SEARCH}}">Search For A Mooring1</a></li>
                         {% endblock %}
                     </ul>
                     <ul class="nav navbar-nav navbar-right">
@@ -104,7 +107,7 @@
         </nav>
     </div>
 </div>
-{% endblock %}
+{% endblock %} {% endcomment %}
 
 {% block breadcrumbs %}
 {% endblock %}
