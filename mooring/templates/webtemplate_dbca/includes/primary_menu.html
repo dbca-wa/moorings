@@ -23,8 +23,8 @@
 {% endif %}
         
 {% if request.user.is_staff %}
-{% include 'mooring/admin_nav_menu.html' %}
+    {% include 'mooring/admin_nav_menu.html' %}
 {% else %}
-
 {% endif %}
+
 <li class="nav-item"><a class="nav-link " href="{{EXPLORE_PARKS_SEARCH}}">Search For A Mooring</a></li>
