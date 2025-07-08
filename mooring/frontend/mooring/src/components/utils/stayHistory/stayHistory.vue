@@ -1,16 +1,15 @@
 <template id="stayHistory">
-<div class="row">
     <StayHistoryDetail :stay="stay" :mooringarea="mooringarea" ref="addMaxStayModal" @addCgStayHistory="addStayHistory()" @updateStayHistory="updateStayHistory()"></StayHistoryDetail>
-    <div class="col-sm-12">
+    <div class="row">
         <alert ref="retrieveStayAlert" :show.sync="retrieve_stay.error" type="danger" :duration="retrieve_stay.timeout">{{retrieve_stay.errorString}}</alert>
-        <div class="col-sm-8" v-if="invent"/>
-        <div class="col-sm-4" v-if="invent">
-            <button @click="showAddStay()" class="btn btn-primary pull-right table_btn">Add Max Stay Period</button>
+        <div class="row" v-if="invent">
+            <div class="col-12 text-end">
+                <button @click="showAddStay()" class="btn btn-primary pull-right table_btn">Add Max Stay Period</button>
+            </div>
         </div>
         <datatable ref="addMaxStayDT" :dtHeaders ="msh_headers" :dtOptions="msh_options" id="stay_history"></datatable>
-     </div>
+    </div>
     <confirmbox id="deleteStay" :options="deleteStayPrompt"></confirmbox>
-</div>
 </template>
 
 <script>

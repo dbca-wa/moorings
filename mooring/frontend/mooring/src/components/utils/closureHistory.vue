@@ -1,15 +1,14 @@
 <template id="closureHistory">
-<div class="row">
     <Close ref="closeModal" @closeRange="addClosure()" @updateRange="updateClosure()" :title="getTitle" :statusHistory="closure"></Close>
-    <div class="col-sm-12">
-        <div class="col-sm-8" v-if="invent"/>
-        <div class="col-sm-4" v-if="invent">
-            <button @click="showClose()" class="btn btn-primary pull-right table_btn">Add Closure Period</button>
+    <div class="row">
+        <div class="row">
+            <div class="col-12 text-end">
+                <button @click="showClose()" class="btn btn-primary pull-right table_btn">Add Closure Period</button>
+            </div>
         </div>
         <datatable ref="closure_dt" :dtHeaders ="ch_headers" :dtOptions="ch_options" id="cg_table"></datatable>
     </div>
     <confirmbox id="deleteClosure" :options="deleteClosurePrompt"></confirmbox>
-</div>
 </template>
 
 <script>

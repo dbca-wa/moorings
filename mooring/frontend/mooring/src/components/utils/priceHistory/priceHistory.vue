@@ -1,19 +1,18 @@
 <template id="priceHistory">
-<div class="row">
     <parkPriceHistory v-if="addParkPrice" ref="historyModal" @addParkPriceHistory="addParkHistory()" @updateParkPriceHistory="updateParkHistory()" :priceHistory="parkPrice" @cancel="closeHistory()"/>
     <PriceHistoryDetail v-else ref="historyModal" @addPriceHistory="addHistory()" @updatePriceHistory="updateHistory()" :priceHistory="price"></PriceHistoryDetail>
-    <div class="col-sm-12">
-        <div class="col-sm-4" v-if="invent">
-            <a :href="'/mooringsiteratelog/'+object_id+'/'"><button class="btn btn-primary pull-left table_btn">View Log</button></a>
-        </div>
-        <div class="col-sm-4" v-if="invent"/>
-        <div class="col-sm-4" v-if="invent">
-            <button v-show="showAddBtn" @click="showHistory()" class="btn btn-primary pull-right table_btn">Add Booking Period</button>
+    <div class="row">
+        <div class="row">
+            <div class="col-sm-4" v-if="invent">
+                <a :href="'/mooringsiteratelog/'+object_id+'/'"><button class="btn btn-primary pull-left table_btn">View Log</button></a>
+            </div>
+            <div class="col-sm-8 text-end" v-if="invent">
+                <button v-show="showAddBtn" @click="showHistory()" class="btn btn-primary pull-right table_btn">Add Booking Period</button>
+            </div>
         </div>
         <datatable ref="history_dt" :dtHeaders ="dt_headers" :dtOptions="dt_options" id="ph_table"></datatable>
     </div>
     <confirmbox id="deleteHistory" :options="deleteHistoryPrompt"></confirmbox>
-</div>
 </template>
 
 <script>
