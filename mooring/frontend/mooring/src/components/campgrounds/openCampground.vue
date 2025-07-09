@@ -149,8 +149,8 @@ export default {
             var data = this.formdata;
             // data.range_start = this.picker.data('DateTimePicker').date().format('DD/MM/YYYY');
             // data.range_start_time = this.picker_time.data('DateTimePicker').date().format('HH:mm');
-            data.range_start = formatDateToDDMMYYYY(this.formdata.range_start);
-            data.range_start_time = this.formdata.range_start_time;
+            data.range_start = vm.formatDateToDDMMYYYY(this.formdata.range_start);
+            data.range_start_time = vm.this.formdata.range_start_time;
             data.status = 0;
             $.ajax({
                 url: api_endpoints.opencloseCG(vm.id),
