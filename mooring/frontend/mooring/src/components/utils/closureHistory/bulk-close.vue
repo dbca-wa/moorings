@@ -2,7 +2,9 @@
     <div id="bulk-close">
         <modal okText="Close Moorings" @ok="closeCampgrounds" :force="true">
             <template #header>
-                <h4 class="modal-title">Bulk Close Moorings</h4>
+                <div class="modal-header">
+                    <h4 class="modal-title">Bulk Close Moorings</h4>
+                </div>
             </template>
 
             <div class="modal-body">
@@ -20,13 +22,6 @@
                         </div>
                     </div>
 
-                    <!--
-                        NOTE on Date/Time Pickers:
-                        The original code likely used a jQuery-based datepicker.
-                        This has been replaced with native HTML5 `<input type="date">` and `<input type="time">` for a modern, dependency-free approach.
-                        The `<script>` section will need to handle the `YYYY-MM-DD` and `HH:mm` formats.
-                        Default values like '00:00' should now be set in the component's `data()` or `setup()` script.
-                    -->
                     <div class="row mb-3">
                         <label for="closure_start_date" class="col-md-2 col-form-label">Closure start:</label>
                         <div class="col-md-4">
@@ -40,11 +35,9 @@
                                 :max="range_end ? range_end : null"
                             />
                         </div>
-                        <!-- [LAYOUT] This empty div is kept to maintain the original visual spacing between date and time fields. -->
                         <div class="col-md-1"></div>
                         <label for="closure_start_time" class="col-md-2 col-form-label">Start time:</label>
                         <div class="col-md-3">
-                            <!-- [VUE-BEST-PRACTICE] Removed the static `value` attribute. `v-model` is the single source of truth. -->
                             <input id="closure_start_time" name="closure_start_time" v-model="range_start_time" type="time" class="form-control" />
                         </div>
                     </div>
@@ -201,6 +194,8 @@ export default {
         closeCampgrounds:function () {
             let vm =this;
 
+            console.log('1')
+
             // you must convert the 'YYYY-MM-DD' values before sending.
             const formatToDdMmYyyy = (isoDate) => {
                 if (!isoDate || typeof isoDate !== 'string') return null;
@@ -210,7 +205,10 @@ export default {
                 return `${day}/${month}/${year}`;
             };
 
+            console.log('2')
+
             if (vm.form.valid() && vm.selected_campgrounds.length>0){
+                console.log('3')
                 let vm = this;
                 let data = {
                     // range_start: vm.range_start,
@@ -228,6 +226,7 @@ export default {
                 if (vm.reason == '1') {
                     data.details = vm.details
                 }
+                console.log('4')
                 $.ajax({
                     url:api_endpoints.bulk_close,
                     method: 'POST',
