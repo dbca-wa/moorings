@@ -194,8 +194,6 @@ export default {
         closeCampgrounds:function () {
             let vm =this;
 
-            console.log('1')
-
             // you must convert the 'YYYY-MM-DD' values before sending.
             const formatToDdMmYyyy = (isoDate) => {
                 if (!isoDate || typeof isoDate !== 'string') return null;
@@ -205,10 +203,7 @@ export default {
                 return `${day}/${month}/${year}`;
             };
 
-            console.log('2')
-
             if (vm.form.valid() && vm.selected_campgrounds.length>0){
-                console.log('3')
                 let vm = this;
                 let data = {
                     // range_start: vm.range_start,
@@ -226,7 +221,6 @@ export default {
                 if (vm.reason == '1') {
                     data.details = vm.details
                 }
-                console.log('4')
                 $.ajax({
                     url:api_endpoints.bulk_close,
                     method: 'POST',
