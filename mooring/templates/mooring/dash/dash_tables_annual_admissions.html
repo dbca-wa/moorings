@@ -3,11 +3,11 @@
 {% load users %}
 
 {% block extra_css %}
-  <link href="/static/common/css/bootstrap.min.css" rel="stylesheet" />
-  <link href="/static/common/css/dataTables.bootstrap5.min.css?ver={{ GIT_COMMIT_HASH }}" rel="stylesheet" />
-  <link href="/static/common/css/select2.min.css?ver={{ GIT_COMMIT_HASH }}" rel="stylesheet" />
-  <link href="/static/common/css/select2-bootstrap.css?ver={{ GIT_COMMIT_HASH }}" rel="stylesheet" />
-  <link href="/static/common/css/font-awesome.css?ver={{ GIT_COMMIT_HASH }}" rel="stylesheet" />
+  <link href="{% static 'common/css/bootstrap.min.css' %}" rel="stylesheet" />
+  <link href="{% static 'common/css/dataTables.bootstrap5.min.css' %}?ver={{ GIT_COMMIT_HASH }}" rel="stylesheet" />
+  <link href="{% static 'common/css/select2.min.css' %}?ver={{ GIT_COMMIT_HASH }}" rel="stylesheet" />
+  <link href="{% static 'common/css/select2-bootstrap.css' %}?ver={{ GIT_COMMIT_HASH }}" rel="stylesheet" />
+  <link href="{% static 'common/css/font-awesome.css' %}?ver={{ GIT_COMMIT_HASH }}" rel="stylesheet" />
   <link href="{% static 'mooring/css/dashboard.css' %}?ver={{ GIT_COMMIT_HASH }}" rel="stylesheet"/>
   <style>
       #table-abb > tbody > tr > td.details-control:before {

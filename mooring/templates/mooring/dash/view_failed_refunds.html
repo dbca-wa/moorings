@@ -18,37 +18,34 @@
 
 {% block content %}
 <div class="container" id="dashboard-table-container">
-    <div class="panel panel-default">
-        <div class="panel-heading" role="tab" id="title_heading">
-            <h3 class="panel-title">
-                <a
-                    role="button"
-                    data-toggle="collapse"
-                    href="#search_person_company_collapse"
-                    aria-expanded="false"
+    <div class="card">
+        <div class="card-header" id="title_heading" role="tab">
+            <h2 class="mb-0">
+                <button
+                    class="btn d-flex justify-content-between align-items-center w-100 text-start"
+                    type="button"
+                    data-bs-toggle="collapse"
+                    data-bs-target="#search_person_company_collapse"
+                    :aria-expanded="true"
                     aria-controls="search_person_company_collapse"
                 >
-                    Failed Refunds
-                </a>
-            </h3>
+                    <h3 class="mb-0">Failed Refunds</h3>
+                    <span><i class="bi bi-chevron-down"></i></span>
+                </button>
+            </h2>
         </div>
 
         <div
-            class="panel-collapse collapse in"
             id="search_person_company_collapse"
+            class="collapse show"
             role="tabpanel"
             aria-labelledby="search_person_company_heading"
         >
-            <div class="panel-body">
-                <div class="col-lg-12">
-                    <form
-                        onsubmit="searchRefunds(); return false;"
-                        method="GET"
-                    >
+            <div class="card-body">
+                    <form onsubmit="searchRefunds(); return false;" method="GET">
                         <div class="row">
-                            <div class="col-lg-6"></div>
                             <div class="col-lg-3">
-                                <label for="">Keyword</label>
+                                <label for="keyword" class="form-label">Keyword</label>
                                 <input
                                     value="{{ keyword }}"
                                     id="keyword"
@@ -58,38 +55,33 @@
                                 />
                             </div>
                             <div class="col-lg-3">
-                                <span style="display: none" class="pull-right"
-                                    ><a
-                                        href="{% url 'dash-failed_refunds_completed' %}"
-                                        type="button"
-                                        class="btn btn-primary"
-                                        style=""
-                                        >Completed Refunds</a
-                                    ></span
-                                >
-                                <div class="form-group">
-                                    <label for="">Status</label>
-                                    <select id="status" class="form-control">
-                                        <option value="ALL">All</option>
-                                        <option value="0">Pending</option>
-                                        <option value="1">
-                                            Completed Refunds
-                                        </option>
-                                    </select>
+                                <span style="display: none" class="pull-right">
+                                    <a href="{% url 'dash-failed_refunds_completed' %}" type="button" class="btn btn-primary" style="">
+                                        Completed Refunds
+                                    </a>
+                                </span>
+                                <label for="status" class="form-label">Status</label>
+                                <select id="status" class="form-select">
+                                    <option value="ALL">All</option>
+                                    <option value="0">Pending</option>
+                                    <option value="1">
+                                        Completed Refunds
+                                    </option>
+                                </select>
+                            </div>
+                            <div class="col-lg-3">
+                                <label for="" class="form-label">&nbsp;</label>
+                                <div class="col-lg-12">
+                                    <span class="">
+                                        <button onclick="searchRefunds();" type="button" class="btn btn-primary" style="">
+                                            Filter
+                                        </button>
+                                    </span >
                                 </div>
-                                <span class="pull-right"
-                                    ><button
-                                        onclick="searchRefunds();"
-                                        type="button"
-                                        class="btn btn-primary"
-                                        style=""
-                                    >
-                                        Filter
-                                    </button></span
-                                >
                             </div>
                         </div>
                     </form>
+
                     <table
                         width="100%"
                         id="table-policy"
@@ -115,19 +107,13 @@
                             <tr>
                                 <td>{{ row.fr.id }}</td>
                                 <td>
-                                    {% if row.fr.booking %}PS{{
-                                    row.fr.booking.id }}{% endif %} {% if
-                                    row.fr.admission_booking %}AD{{
-                                    row.fr.admission_booking.id }}{% endif %}
+                                    {% if row.fr.booking %}PS{{ row.fr.booking.id }}{% endif %} {% if row.fr.admission_booking %}AD{{ row.fr.admission_booking.id }}{% endif %}
                                 </td>
                                 <td>${{ row.fr.refund_amount }}</td>
                                 {% if show == "TRUE" %}
                                 <!-- only works with cancelled booking not changed booking, work in progress -->
                                 <td>
-                                    {% for mg in row.mgsplit %} {% if mg.amount
-                                    > 0 %} {{ mg.name }} : ${{ mg.amount }}
-                                    <br />
-                                    {% endif %} {% endfor %}
+                                    {% for mg in row.mgsplit %} {% if mg.amount > 0 %} {{ mg.name }} : ${{ mg.amount }} <br /> {% endif %} {% endfor %}
                                 </td>
                                 {% endif %}
                                 <td>{{ row.fr.get_status_display }}</td>
@@ -156,40 +142,43 @@
                             {% endfor %}
                         </tbody>
                     </table>
-                </div>
             </div>
-            <script>
-                function loadTable() {
-                    $("#table-policy").dataTable({
-                        searching: false,
-                        paging: true,
-                        pageLength: 25,
-                        order: [[0, "asc"]],
-                        columnDefs: [
-                            { type: "natural-nohtml", targets: 0 },
-                            { aTargets: 1 },
-                            { aTargets: 2 },
-                            { type: "natural-nohtml", targets: 3 },
-                        ],
-                    });
-                }
 
-                function searchRefunds() {
-                    var status = $("#status").val();
-                    var keyword = $("#keyword").val();
-
-                    window.location =
-                        "{% url 'dash-failedrefunds' %}/?status=" +
-                        status +
-                        "&keyword=" +
-                        keyword;
-                }
-                window.onload = function () {
-                    $("#status").val("{{ status }}");
-                    loadTable();
-                };
-            </script>
-            {% endblock %}
         </div>
     </div>
 </div>
+
+<script>
+    function loadTable() {
+        $("#table-policy").dataTable({
+            searching: false,
+            paging: true,
+            pageLength: 25,
+            order: [[0, "asc"]],
+            columnDefs: [
+                { type: "natural-nohtml", targets: 0 },
+                { aTargets: 1 },
+                { aTargets: 2 },
+                { type: "natural-nohtml", targets: 3 },
+            ],
+        });
+    }
+
+    function searchRefunds() {
+        var status = $("#status").val();
+        var keyword = $("#keyword").val();
+
+        window.location =
+            "{% url 'dash-failedrefunds' %}/?status=" +
+            status +
+            "&keyword=" +
+            keyword;
+    }
+    window.onload = function () {
+        $("#status").val("{{ status }}");
+        loadTable();
+    };
+</script>
+<script src="{% static '/common/js/dataTables.min.js' %}?ver={{ GIT_COMMIT_HASH }}" />
+<script src="{% static '/common/js/dataTables.bootstrap5.min.js' %}?ver={{ GIT_COMMIT_HASH }}" />
+{% endblock %}
