@@ -5,7 +5,7 @@
                 <div class="panel panel-default">
                   <div class="panel-heading">
                     <h3 class="panel-title">ooPersonal Details <small>Provide your personal details</small>
-                        <a class="panelClicker" :href="'#'+pBody" data-toggle="collapse"  data-parent="#userInfo" expanded="true" :aria-controls="pBody">
+                        <a class="panelClicker" :href="'#'+pBody" data-bs-toggle="collapse"  data-parent="#userInfo" expanded="true" :aria-controls="pBody">
                             <span class="glyphicon glyphicon-chevron-up pull-right "></span>
                         </a>
                     </h3>
@@ -40,7 +40,7 @@
                 <div class="panel panel-default">
                   <div class="panel-heading">
                     <h3 class="panel-title">Address Details <small>Provide your address details</small>
-                        <a class="panelClicker" :href="'#'+adBody" data-toggle="collapse" expanded="false"  data-parent="#userInfo" :aria-controls="adBody">
+                        <a class="panelClicker" :href="'#'+adBody" data-bs-toggle="collapse" expanded="false"  data-parent="#userInfo" :aria-controls="adBody">
                             <span class="glyphicon glyphicon-chevron-down pull-right "></span>
                         </a>
                     </h3>
@@ -95,7 +95,7 @@
                     <i v-if="showCompletion && profile.contact_details" class="fa fa-check fa-2x pull-left" style="color:green"></i>
                     <i v-else-if="showCompletion && !profile.contact_details" class="fa fa-times fa-2x pull-left" style="color:red"></i>
                     <h3 class="panel-title">Contact Details <small>Provide your contact details</small>
-                        <a class="panelClicker" :href="'#'+cBody" data-toggle="collapse"  data-parent="#userInfo" expanded="false" :aria-controls="cBody">
+                        <a class="panelClicker" :href="'#'+cBody" data-bs-toggle="collapse"  data-parent="#userInfo" expanded="false" :aria-controls="cBody">
                             <span class="glyphicon glyphicon-chevron-down pull-right "></span>
                         </a>
                     </h3>
@@ -135,7 +135,7 @@
 </template>
 
 <script>
-import Vue from 'vue'
+// import Vue from 'vue'
 import {$,api_endpoints,helpers,swal} from "../../hooks.js"
 export default {
     name: 'Profile',
@@ -227,7 +227,8 @@ export default {
         },
     },
     beforeRouteEnter: function(to,from,next){
-        Vue.http.get(api_endpoints.profile,{
+        // Vue.http.get(api_endpoints.profile,{
+        fetch(api_endpoints.profile,{
             headers: {
                 'X-CSRFToken': helpers.getCookie('csrftoken')
             },
@@ -243,7 +244,7 @@ export default {
     mounted: function(){
         this.fetchCountries();
         this.personal_form = document.forms.personal_form;
-        $('.panelClicker[data-toggle="collapse"]').on('click', function () {
+        $('.panelClicker[data-bs-toggle="collapse"]').on('click', function () {
             var chev = $(this).children()[0];
             window.setTimeout(function () {
                 $(chev).toggleClass("glyphicon-chevron-down glyphicon-chevron-up");

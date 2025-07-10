@@ -22,7 +22,7 @@
             <div class="row" style="display:none;">
                 <div class="form-group">
                     <div class="col-md-2">
-                        <label><i class="fa fa-question-circle"data-toggle="tooltip" data-placement="bottom" title="Select a rate to prefill the price fields otherwise use the manual entry"></i>Select Rate: </label>
+                        <label><i class="fa fa-question-circle"data-bs-toggle="tooltip" data-placement="bottom" title="Select a rate to prefill the price fields otherwise use the manual entry"></i>Select Rate: </label>
                     </div>
                     <div class="col-md-4">
                         <select name="rate" v-model="selected_rate" class="form-control">
@@ -149,6 +149,7 @@ import reason from '../reasons.vue'
 import { $, datetimepicker,api_endpoints, validate, helpers, bus } from '../../../hooks'
 import alert from '../alert.vue'
 import { mapGetters } from 'vuex'
+import 'bootstrap/dist/js/bootstrap.bundle.min.js';
 
 export default {
     name: 'PriceHistoryDetail',
@@ -308,7 +309,8 @@ export default {
         var vm = this;
         $('#pricehistory_error').html("");
         vm.$store.dispatch("fetchBookingPeriods");
-        $('[data-toggle="tooltip"]').tooltip()
+        // $('[data-bs-toggle="tooltip"]').tooltip()
+        [...(document.querySelectorAll('[data-bs-toggle="tooltip"]') || [])].map(tooltipTriggerEl => new bootstrap.Tooltip(tooltipTriggerEl))
         vm.form = document.forms.priceForm;
         var picker = $(vm.form.period_start).closest('.date');
         var picker2 = $(vm.form.period_end).closest('.date');

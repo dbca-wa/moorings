@@ -183,7 +183,7 @@ export default {
     },
     mounted: function() {
         var vm = this;
-        $('[data-toggle="tooltip"]').tooltip()
+        $('[data-bs-toggle="tooltip"]').tooltip()
         vm.form = document.forms.priceForm;
         var picker = $(vm.form.period_start).closest('.date');
         var today = new Date();
