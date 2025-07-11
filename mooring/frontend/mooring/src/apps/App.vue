@@ -5,5 +5,4 @@
 </template>
 
 <script setup>
-import campgrounds from '../components/campgrounds/campgrounds.vue'
 </script>
