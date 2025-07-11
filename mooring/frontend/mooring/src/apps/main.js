@@ -18,7 +18,9 @@ import { routes } from './routes.js';
 import filters from "../components/utils/filters.js";
 import { mapGetters } from 'vuex';
 import '../hooks-css.js';
+import 'bootstrap-icons/font/bootstrap-icons.css';
 import App from './App.vue';
+import 'bootstrap/dist/js/bootstrap.bundle.min.js';
 
 // Define global variables
 global.debounce = function (func, wait, immediate) {
