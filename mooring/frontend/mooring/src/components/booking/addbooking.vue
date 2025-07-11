@@ -87,8 +87,8 @@
                                     Click <a target="_blank" :href="campground.campground_map">here</a> to open the map of the campground to help you select the preferred campsite
                                 </p>
                                 <ul class="nav nav-tabs">
-                                    <li :class="{active:campground.site_type == 0}" v-show="campground.site_type == 0" ><a data-toggle="tab" href="#campsite-booking" @click.prevent="booking_type=booking_types.CAMPSITE">Campsite</a></li>
-                                    <li :class="{active:(campground.site_type == 1) || (campground.site_type == 2)}" v-show="campground.site_type == 1" ><a data-toggle="tab" href="#campsite-class-booking" @click.prevent="booking_type=booking_types.CLASS">Campsite Type </a></li>
+                                    <li :class="{active:campground.site_type == 0}" v-show="campground.site_type == 0" ><a data-bs-toggle="tab" href="#campsite-booking" @click.prevent="booking_type=booking_types.CAMPSITE">Campsite</a></li>
+                                    <li :class="{active:(campground.site_type == 1) || (campground.site_type == 2)}" v-show="campground.site_type == 1" ><a data-bs-toggle="tab" href="#campsite-class-booking" @click.prevent="booking_type=booking_types.CLASS">Campsite Type </a></li>
                                 </ul>
                                 <div class="tab-content">
                                     <div id="campsite-booking" class="tab-pane fade in active" v-if="campground.site_type == 0">
@@ -292,7 +292,7 @@
                 </div>
             </div>
             <div slot="footer">
-                <button id="okBtn" type="button" class="btn btn-default" @click="finishBooking()">Finalize Booking</button>
+                <button id="okBtn" type="button" class="btn btn-primary" @click="finishBooking()">Finalize Booking</button>
             </div>
         </modal>
     </div>
