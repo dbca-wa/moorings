@@ -1,75 +1,81 @@
 <template lang="html">
     <div id="bulk-period">
         <modal okText="Set Periods" @ok="setPeriods()" :force="true">
-            <h4 slot="title">Bulk Booking Periods</h4>
+            <template #header>
+                <div class="modal-header">
+                    <h4 class="modal-title">Bulk Booking Periods</h4>
+                </div>
+            </template>
+
             <div class="modal-body">
                 <form name="periodForm" class="form-horizontal" style="overflow:visible;">
                     <div class="row" v-if="showErrorPeriods">
                         <div class="danger-message">&nbsp;{{errorStringPeriods}}</div>
                     </div>
-                    <div class="row">
-                        <div class="form-group">
-                            <div class="col-md-2">
-                                <label for="Moorings">Moorings</label>
-                            </div>
-                            <div class="col-md-10">
-                                <select name="campgrounds" id="bp-campgrounds" v-model="selected_campgrounds" class="form-control" multiple>
-                                    <option v-for="c in campgrounds" :value="c.id">{{ c.name }}</option>
-                                </select>
-                            </div>
+                    <div class="row mb-3">
+                        <label for="bp-campgrounds" class="col-md-2 col-form-label">Moorings</label>
+                        <div class="col-md-10">
+                            <select
+                                v-model="selected_campgrounds"
+                                id="bp-campgrounds"
+                                class="form-select"
+                                multiple
+                            >
+                                <option v-for="c in campgrounds" :value="c.id" :key="c.id">
+                                    {{ c.name }}
+                                </option>
+                            </select>
                         </div>
                     </div>
-                    <div class="row">
-                        <div class="form-group">
-                            <div class="col-md-2">
-                                <label>Booking Period:</label>
-                            </div>
-                            <div class="col-md-10">
-                                <select name="period" id="bp-periods" v-model="selected_period" class="form-control">
-                                    <option v-for="per in booking_periods" :value="per.id"> {{ per.name }}</option>
-                                </select>
-                            </div>
+                    <div class="row mb-3">
+                        <label for="bp-periods" class="col-md-2 col-form-label">Booking Period:</label>
+                        <div class="col-md-10">
+                            <select
+                                v-model="selected_period"
+                                id="bp-periods"
+                                class="form-select"
+                            >
+                                <option v-for="per in booking_periods" :value="per.id" :key="per.id">
+                                    {{ per.name }}
+                                </option>
+                            </select>
                         </div>
                     </div>
-                    <div class="row">
-                        <div class="form-group">
-                            <div class="col-md-2">
-                                <label for="set_period_range_start">Period start: </label>
-                            </div>
-                            <div class="col-md-4">
-                                <div class='input-group date' :id='set_period_range_start'>
-                                    <input  name="period_start"  v-model="range_start" type='text' class="form-control" />
-                                    <span class="input-group-addon">
-                                        <span class="glyphicon glyphicon-calendar"></span>
-                                    </span>
-                                </div>
-                            </div>
+                    <div class="row mb-3">
+                        <label for="set_period_range_start" class="col-md-3 col-form-label">Period start: </label>
+                        <div class="col-md-6">
+                            <input
+                                v-model="range_start"
+                                type="date"
+                                class="form-control"
+                                name="period_start"
+                                id="set_period_range_start"
+                            />
                         </div>
                     </div>
-                    <div class="row">
-                        <div class="form-group">
-                            <div class="col-md-2">
-                                <label for="set_period_range_end">Period End: </label>
-                            </div>
-                            <div class="col-md-4">
-                                <div class='input-group date' :id='set_period_range_end'>
-                                    <input name="period_end" v-model="range_end" type='text' class="form-control" />
-                                    <span class="input-group-addon">
-                                        <span class="glyphicon glyphicon-calendar"></span>
-                                    </span>
-                                </div>
-                            </div>
+                    <div class="row mb-3">
+                        <label for="set_period_range_end" class="col-md-3 col-form-label">Period End: </label>
+                        <div class="col-md-6">
+                            <input
+                                v-model="range_end"
+                                type='date'
+                                class="form-control"
+                                name="period_end"
+                                id="set_period_range_end"
+                            />
                         </div>
                     </div>
                     <reason type="price" v-model="reason" :wide="true"></reason>
-                    <div vshow-dis="requireDetails" class="row">
-                        <div class="form-group">
-                            <div class="col-md-2">
-                                <label>Details: </label>
-                            </div>
-                            <div class="col-md-10">
-                                <textarea name="period_details" v-model="details" class="form-control" id="period_details"></textarea>
-                            </div>
+                    <div vshow-dis="requireDetails" class="row mb-3">
+                        <label for="period_details" class="col-md-2 col-form-label">Details: </label>
+                        <div class="col-md-10">
+                            <textarea
+                                v-model="details"
+                                class="form-control"
+                                id="period_details"
+                                name="period_details"
+                                rows="3"
+                            ></textarea>
                         </div>
                     </div>
                 </form>
@@ -83,7 +89,7 @@ import alert from '../alert.vue'
 import modal from '../bootstrap-modal.vue'
 import reason from '../reasons.vue'
 import { mapGetters } from 'vuex'
-import { $, datetimepicker,api_endpoints, validate, helpers, bus } from '../../../hooks'
+import { $, api_endpoints, validate, helpers, bus } from '../../../hooks'
 
 export default {
     name:"bulk-period",
@@ -143,28 +149,28 @@ export default {
             this.booking_periods = "";
             this.reason = "";
             this.errorStringPeriods = null;
-			this.periodStartPicker.data('DateTimePicker').date(new Date());
-			this.periodEndPicker.data('DateTimePicker').clear();
+			// this.periodStartPicker.data('DateTimePicker').date(new Date());
+			// this.periodEndPicker.data('DateTimePicker').clear();
         },
         events:function () {
             let vm = this;
-            vm.periodEndPicker = $('#'+vm.set_period_range_end);
-            vm.periodStartPicker = $('#'+vm.set_period_range_start).datetimepicker({
-                format: 'DD/MM/YYYY',
-                minDate: new Date()
-            });
-            vm.periodEndPicker.datetimepicker({
-                format: 'DD/MM/YYYY',
-                useCurrent: false
-            });
-            vm.periodStartPicker.on('dp.change', function(e){
-                vm.range_start = vm.periodStartPicker.data('DateTimePicker').date().format('DD/MM/YYYY');
-                vm.periodEndPicker.data("DateTimePicker").minDate(e.date);
-            });
-            vm.periodEndPicker.on('dp.change', function(e){
-                var date = vm.periodEndPicker.data('DateTimePicker').date();
-                vm.range_end = (date) ? date.format('DD/MM/YYYY') : null;
-            });
+            // vm.periodEndPicker = $('#'+vm.set_period_range_end);
+            // vm.periodStartPicker = $('#'+vm.set_period_range_start).datetimepicker({
+            //     format: 'DD/MM/YYYY',
+            //     minDate: new Date()
+            // });
+            // vm.periodEndPicker.datetimepicker({
+            //     format: 'DD/MM/YYYY',
+            //     useCurrent: false
+            // });
+            // vm.periodStartPicker.on('dp.change', function(e){
+            //     vm.range_start = vm.periodStartPicker.data('DateTimePicker').date().format('DD/MM/YYYY');
+            //     vm.periodEndPicker.data("DateTimePicker").minDate(e.date);
+            // });
+            // vm.periodEndPicker.on('dp.change', function(e){
+            //     var date = vm.periodEndPicker.data('DateTimePicker').date();
+            //     vm.range_end = (date) ? date.format('DD/MM/YYYY') : null;
+            // });
             vm.addFormValidations();
             vm.fetchCampgrounds();
             vm.fetchPeriods();

@@ -227,7 +227,7 @@
 												<div class="form-group pull-right">
 													<a href="#" v-if="createCampground" class="btn btn-primary" @click.prevent="create">Create</a>
 													<a href="#" v-else class="btn btn-primary" @click.prevent="update">Update</a>
-													<a href="#" class="btn btn-default" @click.prevent="goBack">Cancel</a>
+													<a href="#" class="btn btn-primary" @click.prevent="goBack">Cancel</a>
 												</div>
 											</div>
 										</div>
@@ -276,7 +276,7 @@ import Draw from 'ol/interaction/draw.js'
 import GeometryType from 'ol/geom/geometrytype.js'
 
 import imagePicker from '../utils/images/imagePicker.vue'
-import Editor from 'quill'
+import Quill from 'quill'
 import loader from '../utils/loader.vue'
 import alert from '../utils/alert.vue'
 import {mapGetters} from 'vuex'
@@ -610,7 +610,7 @@ export default {
         vm.fetchCampground();
         vm.loadMooringGroups();
 
-        vm.editor = new Editor('#editor', {
+        vm.editor = new Quill('#editor', {
             modules: {
                 toolbar: true
             },

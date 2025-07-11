@@ -1171,12 +1171,13 @@ class MooringAreaViewSet(viewsets.ModelViewSet):
                 self.close_campgrounds(data,campgrounds)
                 cache.delete('campgrounds_dt')
                 return Response('All Selected MooringAreas Closed')
-            except serializers.ValidationError as e:
-                print(traceback.print_exc())
-                raise serializers.ValidationError(str(e[0]))
             except Exception as e:
-                print(traceback.print_exc())
-                raise serializers.ValidationError(str(e[0]))
+                logger.error(f"An exception occurred in bulk_close: {e}")
+                logger.error(f"Exception type: {type(e)}")
+                logger.error(f"Exception arguments: {e.args}")
+                
+                error_message = str(e.args[0]) if e.args else str(e)
+                raise serializers.ValidationError(error_message)
 
     def set_periods(self, request, period_data, moorings):
         http_status = status.HTTP_200_OK
@@ -1245,7 +1246,7 @@ class MooringAreaViewSet(viewsets.ModelViewSet):
     def bulk_period(self, request, format='json', pk=None):
         try:
             http_status = status.HTTP_200_OK
-            period_data = request.data.copy();
+            period_data = request.data.copy()
             moorings = period_data.pop('moorings[]')
 
             start = period_data['period_start']

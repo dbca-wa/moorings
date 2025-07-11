@@ -109,7 +109,7 @@ export default {
                    })
                });
             }
-            $(buttons).append("<button type=\"button\" data-dismiss=\"modal\" class=\"btn btn-default\" style='margin-bottom:10px;'>"+vm.cancelText+"</button>");
+            $(buttons).append("<button type=\"button\" data-dismiss=\"modal\" class=\"btn btn-primary\" style='margin-bottom:10px;'>"+vm.cancelText+"</button>");
         }
    },
    mounted:function () {

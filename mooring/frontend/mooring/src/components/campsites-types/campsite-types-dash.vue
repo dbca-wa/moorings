@@ -3,7 +3,7 @@
        <div class="panel panel-default" id="applications">
          <div class="panel-heading" role="tab" id="applications-heading">
              <h4 class="panel-title">
-                 <a role="button" data-toggle="collapse" href="#applications-collapse"
+                 <a role="button" data-bs-toggle="collapse" href="#applications-collapse"
                     aria-expanded="false" aria-controls="applications-collapse">
                      <h3>Camp Site Types</h3>
                  </a>
@@ -115,7 +115,7 @@ export default {
                             var max_length = 120;
                             var popover_class = (data.length > max_length) ? "class='name_popover'" : "";
                             var name = (data.length > max_length) ? data.substring(0,max_length-1)+'...' : data;
-                            var column = '<td> <div '+popover_class+'tabindex="0" data-toggle="popover" data-placement="top" data-content="__NAME__" >'+ name +'</div></td>';
+                            var column = '<td> <div '+popover_class+'tabindex="0" data-bs-toggle="popover" data-placement="top" data-bs-content="__NAME__" >'+ name +'</div></td>';
                             return column.replace('__NAME__', data);
                         }
                     },

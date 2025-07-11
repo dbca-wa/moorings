@@ -91,10 +91,27 @@ export default {
     },
     dtPopoverCellFn: function(cell){
         $(cell).find('[data-toggle="popover"]')
-            .popover()
-            .on('click', function (e) {
-                e.preventDefault();
-                return true;
+            // 1. Find elements that trigger popovers using jQuery.
+            //    The selector is updated to 'data-bs-toggle' for Bootstrap 5.
+            const popoverTriggerList = $(cell).find('[data-bs-toggle="popover"]');
+
+            // 2. Iterate over each of the found elements.
+            popoverTriggerList.each(function () {
+                // 'this' refers to the current DOM element in the loop.
+
+                // 3. Initialize the Popover using the Bootstrap 5 JavaScript API.
+                const popover = new window.bootstrap.Popover(this, {
+                    // Options are not specified here, so they will be read
+                    // from the element's data-bs-* attributes in the HTML.
+                });
+
+                // 4. Replicate the original click event handler.
+                //    We can still use jQuery's .on() method for this.
+                $(this).on('click', function (e) {
+                    // Prevent the default action of the click event (e.g., following a link).
+                    e.preventDefault();
+                    // The original 'return true;' is not necessary for preventDefault to work.
+                });
             });
     },
 

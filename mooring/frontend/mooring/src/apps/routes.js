@@ -17,17 +17,13 @@ import Profile from '../components/user/profile.vue'
 import { RouterView} from 'vue-router';
 
 export const routes = [
-    {
-        path: '/',
-        component: RouterView,
-        children: [
             {
-                path: "account",
+                path: "/account",
                 name: "profile",
                 component: Profile
             },
             {
-                path:'dashboard',
+                path:'/dashboard',
                 component: RouterView,
                 children: [
                     {
@@ -45,7 +41,7 @@ export const routes = [
                         component: RouterView,
                         children: [
                             {
-                                path: '/',
+                                path: '',
                                 name: 'campsite-type',
                                 component: Campsite_type_dash
                             },
@@ -66,7 +62,7 @@ export const routes = [
                         component: RouterView,
                         children:[
                             {
-                                path: '/',
+                                path: '',
                                 name: 'cg_main',
                                 component: Campgrounds,
                             },
@@ -92,7 +88,7 @@ export const routes = [
                         component: BookingIndex,
                         children:[
                             {
-                                path: '/',
+                                path: '',
                                 name: 'booking-dashboard',
                                 component: bookingDashboard,
                             },
@@ -121,18 +117,16 @@ export const routes = [
                 ]
             },
             {
-                path:'booking',
+                path:'/booking',
                 component: RouterView,
                 children:[
                     {
-                        path:'/',
+                        path:'',
                         name:'fl-search',
                         component: firstLevelSearch
                     }
                 ]
-            }
-        ]
-    },
+            },
     {
         path: '/404',
         name: '404',

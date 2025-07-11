@@ -3,7 +3,7 @@
        <div class="panel panel-default" id="applications">
          <div class="panel-heading" role="tab" id="applications-heading">
              <h4 class="panel-title">
-                 <a role="button" data-toggle="collapse" href="#applications-collapse"
+                 <a role="button" data-bs-toggle="collapse" href="#applications-collapse"
                     aria-expanded="false" aria-controls="applications-collapse">
                      <h3>Bulk Pricing</h3>
                  </a>
@@ -88,7 +88,7 @@
                                       </div>
                                       <div class="form-group">
                                           <div class="col-md-2">
-                                              <label><i class="fa fa-question-circle" data-toggle="tooltip" data-placement="bottom" title="Select a rate to prefill the price fields otherwise use the manual entry">&nbsp;</i>Select Rate: </label>
+                                              <label><i class="fa fa-question-circle" data-bs-toggle="tooltip" data-placement="bottom" title="Select a rate to prefill the price fields otherwise use the manual entry">&nbsp;</i>Select Rate: </label>
 
                                           </div>
                                           <div class="col-sm-4">
@@ -148,7 +148,7 @@
                                       </div>
                                       <div class="btn-group btn-group-sm">
                                           <button type="button" class="btn btn-primary" style="margin-right:10px;" @click.prevent="sendData()">Save</button>
-                                          <button type="button" class="btn btn-default" @click="goBack()" >Cancel</button>
+                                          <button type="button" class="btn btn-secondary" @click="goBack()" >Cancel</button>
                                       </div>
                                     </form>
                                 </div>
@@ -160,7 +160,7 @@
         <div class="panel panel-default">
             <div class="panel-heading" role="tab" id="parkentry-heading">
                 <h4 class="panel-title">
-                    <a role="button" data-toggle="collapse" href="#parkentry-collapse"
+                    <a role="button" data-bs-toggle="collapse" href="#parkentry-collapse"
                        aria-expanded="false" aria-controls="parkentry-collapse">
                         <h3>Park Entry</h3>
                     </a>

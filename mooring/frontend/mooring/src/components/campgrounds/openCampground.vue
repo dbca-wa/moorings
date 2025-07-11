@@ -1,68 +1,84 @@
 <template id="pkCgOpen">
-<bootstrapModal title="Open mooring" :large=true @ok="addOpen()">
+<modal :large=true @ok="addOpen()">
+    <template #header>
+        <div class="modal-header">
+            <h4 class="modal-title">Open mooring</h4>
+        </div>
+    </template>
 
     <div class="modal-body">
         <form id="openCGForm" class="form-horizontal">
-            <div class="row">
-			    <alert :show.sync="showError" type="danger"></alert>
-                <div class="form-group">
-                    <div class="col-md-2">
-                        <label for="open_cg_current_closure">Current Closure: </label>
-                    </div>
-                    <div class="col-md-4">
-                        <input id='open_cg_current_closure' v-model="current_closure" disabled type='text' class="form-control" />
-                    </div>
+            <div class="row" v-if="showError">
+                <div class="col-12">
+                    <alert v-model:show="showError" type="danger"></alert>
                 </div>
             </div>
-            <div class="row">
-                <div class="form-group">
-                    <div class="col-md-2">
-                        <label for="open_cg_range_start">Open per: </label>
-                    </div>
-                    <div class="col-md-3">
-                        <div class='input-group date' id='open_cg_range_start'>
-                            <input name="open_start" v-model="formdata.range_start" type='text' class="form-control" />
-                            <span class="input-group-addon">
-                                <span class="glyphicon glyphicon-calendar"></span>
-                            </span>
-                        </div>
-                    </div>
-                    <div class="col-md-1" />
-                    <div class="col-md-2">
-                        <label for="open_cg_range_start_time"> Open time: </label>
-                    </div>
-                    <div class="col-md-3">
-                        <div class='input-group date' id='open_cg_range_start_time'>
-                            <input  name="open_start_time" v-model="formdata.range_start_time" type='text' class="form-control" />
-                            <span class="input-group-addon">
-                                <span class="glyphicon glyphicon-time"></span>
-                            </span>
-                        </div>
-                    </div>
+
+            <div class="row mb-3">
+                <label for="open_cg_current_closure" class="col-md-3 col-form-label">
+                    Current Closure:
+                </label>
+                <div class="col-md-8">
+                    <input 
+                        v-model="current_closure"
+                        type="text" 
+                        class="form-control" 
+                        id="open_cg_current_closure" 
+                        disabled 
+                    />
                 </div>
             </div>
-            <reason type="open" v-model="formdata.reason" ></reason>
-            <div v-show="requireDetails" class="row">
-                <div class="form-group">
-                    <div class="col-md-2">
-                        <label for="open_cg_details">Details: </label>
-                    </div>
-                    <div class="col-md-5">
-                        <textarea name="open_details" v-model="formdata.details" class="form-control" id="open_cg_details"></textarea>
-                    </div>
+
+            <div class="row mb-3 align-items-center">
+                <!-- Date Picker: Period Start -->
+                <label for="open_cg_range_start" class="col-md-3 col-form-label">Open from:</label>
+                <div class="col-md-3">
+                    <input 
+                        v-model="formdata.range_start"
+                        type="date" 
+                        class="form-control" 
+                        id="open_cg_range_start"
+                        name="open_start"
+                    />
+                </div>
+
+                <!-- Time Picker: Period Start Time -->
+                <label for="open_cg_range_start_time" class="col-md-2 col-form-label text-md-end">Time:</label>
+                <div class="col-md-3">
+                    <input 
+                        v-model="formdata.range_start_time"
+                        type="time" 
+                        class="form-control" 
+                        id="open_cg_range_start_time"
+                        name="open_start_time"
+                    />
+                </div>
+            </div>
+
+            <reason type="open" v-model="formdata.reason" :threenine="true"></reason>
+            <div v-if="requireDetails" class="row mb-3">
+                <label for="open_cg_details" class="col-md-2 col-form-label">Details:</label>
+                <div class="col-md-5">
+                    <textarea 
+                        v-model="formdata.details"
+                        class="form-control" 
+                        id="open_cg_details" 
+                        name="open_details"
+                        rows="3"
+                    ></textarea>
                 </div>
             </div>
         </form>
     </div>
 
-</bootstrapModal>
+</modal>
 </template>
 
 <script>
-import bootstrapModal from '../utils/bootstrap-modal.vue'
+import modal from '../utils/bootstrap-modal.vue'
 import reason from '../utils/reasons.vue'
-import {bus} from '../utils/eventBus.js'
-import { $, datetimepicker, api_endpoints, validate, helpers } from '../../hooks'
+import { bus } from '../utils/eventBus.js'
+import { $, api_endpoints, validate, helpers } from '../../hooks'
 import alert from '../utils/alert.vue'
 import 'bootstrap/dist/js/bootstrap.bundle.min.js';
 
@@ -81,8 +97,8 @@ export default {
                 details: ''
             },
             reasons: [],
-            picker: '',
-            picker_time: '',
+            // picker: '',
+            // picker_time: '',
             errors: false,
             errorString: '',
             form: ''
@@ -107,7 +123,7 @@ export default {
         }
     },
     components: {
-        bootstrapModal,
+        modal,
         alert,
         reason
     },
@@ -121,11 +137,20 @@ export default {
                 this.sendData();
             }
         },
+        formatDateToDDMMYYYY: function(isoDate) {
+            if (!isoDate) {
+                return '';
+            }
+            const [year, month, day] = isoDate.split('-');
+            return `${day}/${month}/${year}`;
+        },
         sendData: function() {
             let vm = this;
             var data = this.formdata;
-            data.range_start = this.picker.data('DateTimePicker').date().format('DD/MM/YYYY');
-            data.range_start_time = this.picker_time.data('DateTimePicker').date().format('HH:mm');
+            // data.range_start = this.picker.data('DateTimePicker').date().format('DD/MM/YYYY');
+            // data.range_start_time = this.picker_time.data('DateTimePicker').date().format('HH:mm');
+            data.range_start = vm.formatDateToDDMMYYYY(this.formdata.range_start);
+            data.range_start_time = vm.this.formdata.range_start_time;
             data.status = 0;
             $.ajax({
                 url: api_endpoints.opencloseCG(vm.id),
@@ -205,21 +230,21 @@ export default {
             vm.id = data.id;
             vm.current_closure = data.closure;
         });
-        vm.picker = $('#open_cg_range_start');
-        vm.picker.datetimepicker({
-            format: 'DD/MM/YYYY'
-        });
-        vm.picker.on('dp.change', function(e){
-            vm.formdata.range_start = vm.picker.data('DateTimePicker').date().format('DD/MM/YYYY');
-        });
+        // vm.picker = $('#open_cg_range_start');
+        // vm.picker.datetimepicker({
+        //     format: 'DD/MM/YYYY'
+        // });
+        // vm.picker.on('dp.change', function(e){
+        //     vm.formdata.range_start = vm.picker.data('DateTimePicker').date().format('DD/MM/YYYY');
+        // });
 
-        vm.picker_time = $('#open_cg_range_start_time');
-        vm.picker_time.datetimepicker({
-            format: 'HH:mm'
-        });
-        vm.picker_time.on('dp.change', function(e){
-            vm.formdata.range_start_time = vm.picker_time.data('DateTimePicker').date().format('HH:mm');
-        });
+        // vm.picker_time = $('#open_cg_range_start_time');
+        // vm.picker_time.datetimepicker({
+        //     format: 'HH:mm'
+        // });
+        // vm.picker_time.on('dp.change', function(e){
+        //     vm.formdata.range_start_time = vm.picker_time.data('DateTimePicker').date().format('HH:mm');
+        // });
 
         vm.form = $('#openCGForm');
         vm.addFormValidations();

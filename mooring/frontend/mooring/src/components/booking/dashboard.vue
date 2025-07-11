@@ -1,26 +1,33 @@
 <template lang="html" id="booking-dashboard">
-<div class="panel-group" id="bookings-accordion" role="tablist" aria-multiselectable="true">
-    <div class="row" v-show="!isLoading">
-        <div class="panel panel-default" style="overflow:visible;">
-            <div class="panel-heading" role="tab" id="bookings-heading">
-                <h4 class="panel-title">
-                    <a role="button" data-toggle="collapse" href="#bookings-collapse"
-                    aria-expanded="false" aria-controls="bookings-collapse" style="outline:none;">
-                        <div>
-                            <h3 style="display:inline;">Bookings</h3>
-                            <span id="collapse_bookings_span" class="glyphicon glyphicon-menu-up" style="float:right;"></span>
-                        </div>
-                    </a>
-                </h4>
+    <div v-if="!isLoading">
+        <div class="card">
+            <div class="card-header" id="bookings-heading">
+                <h2 class="mb-0">
+                    <button 
+                        class="btn d-flex justify-content-between align-items-center w-100 text-start text-decoration-none"
+                        type="button"
+                        :aria-expanded="isExpanded"
+                        aria-controls="bookings-collapse"
+                        @click="toggleCollapse"
+                    >
+                        <h3 class="mb-0">Bookings</h3>
+                        <i :class="['bi', isExpanded ? 'bi-chevron-up' : 'bi-chevron-down', 'fs-4', 'fw-bold']"></i>
+                    </button>
+                </h2>
             </div>
-            <div id="bookings-collapse" class="panel-collapse collapse in" role="tabpanel" aria-labelledby="bookings-heading">
-                <div class="panel-body">
+            <div 
+                id="bookings-collapse"
+                class="collapse show"  
+                aria-labelledby="bookings-heading"
+                ref="collapseElement"
+            >
+                <div class="card-body">
                     <div class="row">
                         <div class="col-md-12">
-                            <button v-if="!exportingCSV" type="button" class="btn btn-default pull-right" id="print-btn" @click="print()">
+                            <button v-if="!exportingCSV" type="button" class="btn btn-primary pull-right" id="print-btn" @click="print()">
                                 <i class="fa fa-file-excel-o" aria-hidden="true"></i> Export to CSV
                             </button>
-                            <button v-else type="button" class="btn btn-default pull-right" disabled>
+                            <button v-else type="button" class="btn btn-primary pull-right" disabled>
                                 <i class="fa fa-circle-o-notch fa-spin" aria-hidden="true"></i> Exporting to CSV
                             </button>
                         </div>
@@ -108,31 +115,41 @@
                     <bookingHistory ref="bookingHistory" :booking_id="selected_booking" />
                 </div>
             </div>
-        <loader :isLoading="isLoading" >{{loading.join(' , ')}}</loader>
         </div>
     </div>
+    <div v-else>
+        <loader :isLoading="isLoading">{{ loading.join(', ') }}</loader>
+    </div>
 
-    <div class="row" v-show="!isLoading2">
-        <div class="panel panel-default" style="overflow:visible;margin-top:20px;">
-            <div class="panel-heading" role="tab" id="admissions-heading">
-                <h4 class="panel-title">
-                    <a role="button" data-toggle="collapse" href="#admissions-collapse"
-                    aria-expanded="false" aria-controls="admissions-collapse" style="outline:none;">
-                        <div>
-                            <h3 style="display:inline;">Admission Fee Payments</h3>
-                            <span id="collapse_admissions_span" class="glyphicon glyphicon-menu-up" style="float:right;"></span>
-                        </div>
-                    </a>
-                </h4>
+    <div v-if="!isLoading2" class="mt-3">
+        <div class="card">
+            <div class="card-header" id="admissions-heading">
+                <h2 class="mb-0">
+                    <button 
+                        class="btn d-flex justify-content-between align-items-center w-100 text-start text-decoration-none"
+                        type="button"
+                        :aria-expanded="isExpanded2"
+                        aria-controls="admissions-collapse"
+                        @click="toggleCollapse2"
+                    >
+                        <h3 class="mb-0">Admission Fee Payments</h3>
+                        <i :class="['bi', isExpanded2 ? 'bi-chevron-up' : 'bi-chevron-down', 'fs-4', 'fw-bold']"></i>
+                    </button>
+                </h2>
             </div>
-            <div id="admissions-collapse" class="panel-collapse collapse in" role="tabpanel" aria-labelledby="admissions-heading">
-                <div class="panel-body">
+            <div 
+                id="admissions-collapse"
+                class="collapse show"  
+                aria-labelledby="admissions-heading"
+                ref="collapseElement2"
+            >
+                <div class="card-body">
                     <div class="row">
                         <div class="col-md-12">
-                            <button v-if="!exportingCSV2" type="button" class="btn btn-default pull-right" id="print-btn" @click="print2()">
+                            <button v-if="!exportingCSV2" type="button" class="btn btn-primary pull-right" id="print-btn" @click="print2()">
                                 <i class="fa fa-file-excel-o" aria-hidden="true"></i> Export to CSV
                             </button>
-                            <button v-else type="button" class="btn btn-default pull-right" disabled>
+                            <button v-else type="button" class="btn btn-primary pull-right" disabled>
                                 <i class="fa fa-circle-o-notch fa-spin" aria-hidden="true"></i> Exporting to CSV
                             </button>
                         </div>
@@ -181,10 +198,11 @@
                     </div>
                 </div>
             </div>
-            <loader :isLoading2="isLoading2" >{{loading2.join(' , ')}}</loader>
         </div>
     </div>
-</div>
+    <div v-else>
+        <loader :isLoading2="isLoading2">{{ loading2.join(', ') }}</loader>
+    </div>
 </template>
 
 
@@ -297,7 +315,7 @@ export default {
                              var max_length = 25;
                              var short_name = (name.length > max_length) ? name.substring(0,max_length-1)+'...' : name;
                              var popover =  (name.length > max_length) ? "class=\"name_popover\"":"";
-                             var column = '<td ><div '+popover+' tabindex="0" data-toggle="popover" data-placement="top" data-content="__NAME__">'+short_name+'</div>';
+                             var column = '<td ><div '+popover+' tabindex="0" data-bs-toggle="popover" data-placement="top" data-bs-content="__NAME__">'+short_name+'</div>';
 
                              column += '<BR>'+ full.booking_phone_number;
                              column += '</td>';
@@ -346,20 +364,6 @@ export default {
                         orderable:false,
                         searchable:false
                     },
-//                    {
-//                        data:"campground_site_type",
-//                        mRender:function (data,type,full) {
-//                            if (data){
-//                                var max_length = 15;
-//                                var name = (data.length > max_length) ? data.substring(0,max_length-1)+'...' : data;
-//                                var column = '<td> <div class="name_popover" tabindex="0" data-toggle="popover" data-placement="top" data-content="__NAME__" >'+ name +'</div></td>';
-//                                return column.replace('__NAME__', data);
-//                            }
-//                            return '';
-//                        },
-//                        orderable:false,
-//                        searchable:false
-//                   },
                     {
                         orderable:false,
                         searchable:false,
@@ -633,7 +637,13 @@ export default {
             filterDateTo2:"",
             filterCanceled2: 'False',
             filterBookingKeyword: '',
-            filterAdmissionKeyword: ''
+            filterAdmissionKeyword: '',
+
+            isExpanded: true,
+            isExpanded2: true,
+            collapseInstance: null,
+            collapseInstance2: null,
+
         }
     },
     watch:{
@@ -1250,6 +1260,20 @@ export default {
                 })
             });
         },
+        toggleCollapse: function() {
+            console.log('toggleCollapse()')
+            if (this.collapseInstance) {
+                console.log('Toggling collapse instance');
+                this.collapseInstance.toggle();
+            }
+        },
+        toggleCollapse2: function() {
+            console.log('toggleCollapse2()')
+            if (this.collapseInstance2) {
+                console.log('Toggling collapse instance2');
+                this.collapseInstance2.toggle();
+            }
+        }
     },
     created: function(){
         let vm = this;
@@ -1266,6 +1290,33 @@ export default {
     },
     mounted:function () {
         let vm = this;
+
+        const collapseEl = vm.$refs.collapseElement;
+        if (collapseEl) {
+            vm.collapseInstance = new bootstrap.Collapse(collapseEl, {
+                toggle: false
+            });
+        }
+        collapseEl.addEventListener('show.bs.collapse', () => {
+            vm.isExpanded = true;
+        });
+        collapseEl.addEventListener('hide.bs.collapse', () => {
+            vm.isExpanded = false;
+        });
+        
+        const collapseEl2 = vm.$refs.collapseElement2;
+        if (collapseEl2) {
+            vm.collapseInstance2 = new bootstrap.Collapse(collapseEl2, {
+                toggle: false
+            });
+        }
+        collapseEl2.addEventListener('show.bs.collapse', () => {
+            vm.isExpanded2 = true;
+        });
+        collapseEl2.addEventListener('hide.bs.collapse', () => {
+            vm.isExpanded2 = false;
+        });
+
         vm.dateFromPicker = $('#booking-date-from').datetimepicker(vm.datepickerOptions);
         vm.dateToPicker = $('#booking-date-to').datetimepicker(vm.datepickerOptions);
         vm.dateFromPicker2 = $('#admission-date-from').datetimepicker(vm.datepickerOptions);
@@ -1298,13 +1349,10 @@ export default {
                vm.$refs.bookings_table.vmDataTable.ajax.reload();
         });
 
-
         $('#AdmissionKeyword').on('change', function() { 
                vm.$refs.admissions_bookings_table.vmDataTable.ajax.reload(); 
         }); 
-
     }
-
 }
 </script>
 

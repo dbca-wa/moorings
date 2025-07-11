@@ -120,7 +120,7 @@
                 </div>
             </div>
             <div slot="footer">
-                <button type="button" v-on:click="closeEditOptionModal()" class="btn btn-default" style="width:180px;font-weight:bold;">Close</button>
+                <button type="button" v-on:click="closeEditOptionModal()" class="btn btn-primary" style="width:180px;font-weight:bold;">Close</button>
                 <button type="button" v-on:click="saveOption()" class="btn btn-success" style="width:180px;font-weight:bold;">Save</button>
             </div>
         </modal>
@@ -141,7 +141,7 @@
                 </div>
             </div>
             <div slot="footer">
-                <button type="button" v-on:click="closeSelectorModal()" class="btn btn-default" style="width:180px;font-weight:bold;">Close</button>
+                <button type="button" v-on:click="closeSelectorModal()" class="btn btn-primary" style="width:180px;font-weight:bold;">Close</button>
                 <button type="button" v-on:click="editOption()" class="btn btn-success" style="width:180px;font-weight:bold;">Edit</button>
             </div>
         </modal>
@@ -167,7 +167,7 @@
                 </div>
             </div>
             <div slot="footer">
-                <button type="button" v-on:click="closeDeleteModal()" class="btn btn-default" style="width:180px;font-weight:bold;">Close</button>
+                <button type="button" v-on:click="closeDeleteModal()" class="btn btn-primary" style="width:180px;font-weight:bold;">Close</button>
                 <button type="button" v-on:click="deleteOption()" class="btn btn-danger" style="width:180px;font-weight:bold;">Delete</button>
             </div>
         </modal>
@@ -196,7 +196,7 @@
                 </div>
             </div>
             <div slot="footer">
-                <button type="button" v-on:click="closeEditPeriodModal()" class="btn btn-default" style="width:180px;font-weight:bold;">Close</button>
+                <button type="button" v-on:click="closeEditPeriodModal()" class="btn btn-primary" style="width:180px;font-weight:bold;">Close</button>
                 <button type="button" v-on:click="savePeriod()" class="btn btn-success" style="width:180px;font-weight:bold;">Save</button>
             </div>
         </modal>
@@ -211,7 +211,7 @@
                 <p>Are you sure you would like to delete {{delName}}?</p>
             </div>
             <div slot="footer">
-                <button type="button" v-on:click="closeDelConfirmModal()" class="btn btn-default" style="width:180px;font-weight:bold;">Close</button>
+                <button type="button" v-on:click="closeDelConfirmModal()" class="btn btn-primary" style="width:180px;font-weight:bold;">Close</button>
                 <button type="button" v-on:click="deletePeriod()" class="btn btn-danger" style="width:180px;font-weight:bold;">Delete</button>
             </div>
         </modal>

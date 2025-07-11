@@ -43,7 +43,7 @@
                                     <div class="form-group pull-right">
                                         <a href="#" v-if="createCampground" class="btn btn-primary" @click.prevent="create">Create</a>
                                         <a href="#" v-else class="btn btn-primary" @click.prevent="update">Update</a>
-                                        <a href="#" class="btn btn-default" @click.prevent="goBack">Cancel</a>
+                                        <a href="#" class="btn btn-primary" @click.prevent="goBack">Cancel</a>
                                     </div>
                                 </div>
                             </div>
@@ -200,6 +200,19 @@ export default {
             // bus.$emit('showAlert', 'alert1');
             bus.emit('showAlert', 'alert1');
         },
+        async fetchContacts() {
+            const url = api_endpoints.contacts;
+            try {
+                const response = await fetch(url);
+                if (!response.ok) {
+                    throw new Error(`HTTP error! Status: ${response.status}`);
+                }
+                const data = await response.json();
+                this.contacts = data;
+            } catch (error) {
+                console.error('Failed to fetch contacts:', error);
+            }
+        }
     },
     mounted: function() {
         let vm = this;
@@ -207,11 +220,12 @@ export default {
   
         vm.form = $('#contactForm');
         // vm.addFormValidations();
-		vm.$http.get(api_endpoints.contacts).then((response) => {
-			vm.contacts = response.body
-		}, (error) => {
-			console.log(error);
-		});
+		// vm.$http.get(api_endpoints.contacts).then((response) => {
+		// 	vm.contacts = response.body
+		// }, (error) => {
+		// 	console.log(error);
+		// });
+        vm.fetchContacts();
         $('.form-control').blur(function(){
             vm.$emit('updated', vm.campground);
         });

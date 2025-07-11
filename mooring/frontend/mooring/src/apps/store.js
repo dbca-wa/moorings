@@ -1,12 +1,14 @@
-import Vuex from 'vuex'
-import Vue from 'vue'
+import { createStore } from 'vuex'
+// import Vue from 'vue'
 
-Vue.use(Vuex)
+
+// Vue.use(Vuex)
 import {
     $,
     api_endpoints
 } from '../hooks'
-var store = new Vuex.Store({
+// var store = new Vuex.Store({
+var store = createStore({
     state: {
         alert:{
             visible:false,
@@ -85,15 +87,32 @@ var store = new Vuex.Store({
                 context.commit('SETDISTRICTS',data);
             });
         },
-        fetchCampgrounds(context){
-            return new Promise((resolve,reject) => {
-                Vue.http.get(api_endpoints.campgrounds).then((response) => {
-                    context.commit('SETCAMPGROUNDS',response.body);
-                    resolve(response.body);
-                }, (error) => {
-                    reject(error);
-                });
-            });
+        async fetchCampgrounds(context){
+            try {
+                // 1. Send a request to the API endpoint and wait for the response
+                const response = await fetch(api_endpoints.campgrounds);
+
+                // 2. Check for HTTP errors (e.g., 404 Not Found, 500 Server Error)
+                if (!response.ok) {
+                    // If an error occurred, stop execution here and jump to the catch block
+                    throw new Error(`API Error: ${response.status} ${response.statusText}`);
+                }
+
+                // 3. Parse the response body as JSON and wait for it to be converted to a JavaScript object/array
+                const campgroundsData = await response.json();
+
+                // 4. Commit the converted data to a mutation to update the state
+                context.commit('SETCAMPGROUNDS', campgroundsData);
+
+                // 5. (Optional) Return the data to the caller of this action
+                return campgroundsData;
+
+            } catch (error) {
+                // Catch any network errors or errors thrown above
+                console.error("Failed to fetch campgrounds:", error);
+                // Re-throw the error to allow for further error handling by the caller
+                throw error;
+            }
         },
         fetchCampsiteClasses(context){
             $.get(api_endpoints.campsite_classes,function(data){
@@ -152,3 +171,4 @@ var store = new Vuex.Store({
 });
 
 export default store;
+export const useStore = () => store;

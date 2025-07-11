@@ -35,7 +35,7 @@
                                         <div class="form-group pull-right">
                                             <a href="#" v-if="createCampground" class="btn btn-primary" @click.prevent="create">Create</a>
                                             <a href="#" v-else class="btn btn-primary" @click.prevent="update">Update</a>
-                                            <a href="#" class="btn btn-default" @click.prevent="goBack">Cancel</a>
+                                            <a href="#" class="btn btn-primary" @click.prevent="goBack">Cancel</a>
                                         </div>
                                     </div>
                                 </div>
@@ -70,7 +70,7 @@ import {
     bus,
 }
 from '../utils/eventBus.js';
-import Editor from 'quill';
+import Quill from 'quill';
 import Render from 'quill-render';
 import loader from '../utils/loader.vue'
 import alert from '../utils/alert.vue'
@@ -188,7 +188,7 @@ export default {
     },
     mounted: function() {
         let vm = this;
-        vm.editor = new Editor('#editor', {
+        vm.editor = new Quill('#editor', {
             modules: {
                 toolbar: true
             },
