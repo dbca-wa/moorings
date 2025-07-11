@@ -7,6 +7,7 @@ import binascii
 import hashlib
 import calendar
 import json
+import logging
 from decimal import Decimal as D
 from django.core.files.base import ContentFile
 from django.core.exceptions import ValidationError
@@ -29,6 +30,8 @@ from django.core.files.storage import FileSystemStorage
 from django.core import serializers
 from django.utils.crypto import get_random_string
 from ledger_api_client import utils as ledger_api_utils
+
+logger = logging.getLogger(__name__)
 
 #today = datetime.now()
 #today_path = today.strftime("%Y/%m/%d/%H")
@@ -434,23 +437,28 @@ class MooringArea(models.Model):
             b.save()
 
     def close(self, data):
-        b = MooringAreaBookingRange(**data)
+        mooring_area_booking_range = MooringAreaBookingRange(**data)
         try:
-            within = MooringAreaBookingRange.objects.filter(Q(campground=b.campground),~Q(status=0),Q(range_start__lte=b.range_start), Q(range_end__gte=b.range_start) | Q(range_end__isnull=True) ).latest('updated_on')
+            within = MooringAreaBookingRange.objects.filter(
+                Q(campground=mooring_area_booking_range.campground),
+                ~Q(status=0),
+                Q(range_start__lte=mooring_area_booking_range.range_start),
+                Q(range_end__gte=mooring_area_booking_range.range_start) | Q(range_end__isnull=True)
+            ).latest('updated_on')
             if within:
                 within.updated_on = timezone.now()
                 within.save(skip_validation=True)
-                if within.range_start != b.range_start or within.range_end != b.range_end:
-                    raise ValidationError('{} is already closed.'.format(within.campground.name))
+                if within.range_start != mooring_area_booking_range.range_start or within.range_end != mooring_area_booking_range.range_end:
+                    logger.warning(f'Closing a campground that is already closed: {within.campground.name}. Range start: {within.range_start}, Range end: {within.range_end}')
+                    raise ValidationError(f'{within.campground.name} is already closed.')
             else:
-                b.save()
+                mooring_area_booking_range.save()
         except MooringAreaBookingRange.DoesNotExist:
-            print ("DEBUG-count pre b save: ", MooringAreaBookingRange.objects.filter(campground=self.id).count())
-            b.save()
-            print ("DEBUG-count post b save: ", MooringAreaBookingRange.objects.filter(campground=self.id).count())
+            logger.debug("DEBUG-count pre b save: ", MooringAreaBookingRange.objects.filter(campground=self.id).count())
+            mooring_area_booking_range.save()
+            logger.debug("DEBUG-count post b save: ", MooringAreaBookingRange.objects.filter(campground=self.id).count())
         except:
             raise
-
 
     def createMooringsitePriceHistory(self,data):
         '''Create Multiple campsite rates
