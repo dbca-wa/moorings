@@ -1,6 +1,6 @@
 <template lang="html">
     <div id="bulk-close">
-        <modal okText="Close Moorings" @ok="closeCampgrounds" :force="true">
+        <modal okText="Close Moorings" @ok="closeCampgrounds" :force="true" :large="true">
             <template #header>
                 <div class="modal-header">
                     <h4 class="modal-title">Bulk Close Moorings</h4>
@@ -35,9 +35,8 @@
                                 :max="range_end ? range_end : null"
                             />
                         </div>
-                        <div class="col-md-1"></div>
                         <label for="closure_start_time" class="col-md-2 col-form-label">Start time:</label>
-                        <div class="col-md-3">
+                        <div class="col-md-4">
                             <input id="closure_start_time" name="closure_start_time" v-model="range_start_time" type="time" class="form-control" />
                         </div>
                     </div>
@@ -54,9 +53,8 @@
                                 :min="range_start ? range_start : minStartDate"
                             />
                         </div>
-                        <div class="col-md-1"></div>
                         <label for="closure_end_time" class="col-md-2 col-form-label">Reopen time:</label>
-                        <div class="col-md-3">
+                        <div class="col-md-4">
                             <input id="closure_end_time" name="closure_end_time" v-model="range_end_time" type="time" class="form-control" />
                         </div>
                     </div>
