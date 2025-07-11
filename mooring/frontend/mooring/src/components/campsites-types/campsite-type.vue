@@ -75,7 +75,7 @@
                                                   <div class="pull-right">
                                                       <button type="button" v-show="createCampsiteType" style="margin-right:5px" @click="addCampsiteType()" class="btn btn-primary">Create</button>
                                                       <button type="button" v-show="!createCampsiteType" style="margin-right:5px" @click="updateCampsiteType()" class="btn btn-primary">Update</button>
-                                                      <button type="button" class="btn btn-default pull-right" @click="goBack">Cancel</button>
+                                                      <button type="button" class="btn btn-primary pull-right" @click="goBack">Cancel</button>
                                                   </div>
 
                                               </div>

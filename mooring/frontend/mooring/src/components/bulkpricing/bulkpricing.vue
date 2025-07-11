@@ -148,7 +148,7 @@
                                       </div>
                                       <div class="btn-group btn-group-sm">
                                           <button type="button" class="btn btn-primary" style="margin-right:10px;" @click.prevent="sendData()">Save</button>
-                                          <button type="button" class="btn btn-default" @click="goBack()" >Cancel</button>
+                                          <button type="button" class="btn btn-secondary" @click="goBack()" >Cancel</button>
                                       </div>
                                     </form>
                                 </div>

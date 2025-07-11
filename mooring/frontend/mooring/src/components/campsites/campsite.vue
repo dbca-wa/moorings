@@ -78,7 +78,7 @@
                                       <div class="col-sm-6 pull-right">
                                           <div class="pull-right">
                                               <button type="button" v-show="!createCampsite" style="margin-right:5px" @click="updateCampsite" class="btn btn-primary">Update</button>
-                                              <button type="button" class="btn btn-default pull-right" @click="goBack">Back</button>
+                                              <button type="button" class="btn btn-primary pull-right" @click="goBack">Back</button>
                                           </div>
 
                                       </div>
