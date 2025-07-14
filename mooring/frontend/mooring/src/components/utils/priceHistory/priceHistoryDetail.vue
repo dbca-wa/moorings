@@ -1,11 +1,16 @@
 <template id="PriceHistoryDetail">
-<bootstrapModal title="Add Booking Period" :large=true @ok="addHistory()" @close="close()">
+<modal :large=true @ok="addHistory()" @close="close()">
+    <template #header>
+        <div class="modal-header">
+            <h4 class="modal-title">Add Booking Period</h4>
+        </div>
+    </template>
 
     <div class="modal-body">
         <form name="priceForm" class="form-horizontal">
-			<alert :show.sync="showError" type="danger">{{errorString}}</alert>
+            <alert :show.sync="showError" type="danger">{{errorString}}</alert>
 
-            <div class="row">
+            <!-- <div class="row">
                 <div class="form-group">
                     <div class="col-md-2">
                         <label>Booking Period:</label>
@@ -16,8 +21,27 @@
                         </select>
                     </div>
                 </div>
-            </div>
+            </div> -->
 
+            <div class="row mb-3">
+                <label for="booking-period-select" class="col-md-3 col-form-label">Booking Period:</label>
+                <div class="col-md-4">
+                    <select 
+                        id="booking-period-select" 
+                        name="period" 
+                        v-model="priceHistory.booking_period_id" 
+                        class="form-select"
+                    >
+                        <option 
+                            v-for="per in booking_periods" 
+                            :value="per.id" 
+                            :key="per.id"
+                        >
+                            {{ per.name }}
+                        </option>
+                    </select>
+                </div>
+            </div>
 
             <div class="row" style="display:none;">
                 <div class="form-group">
@@ -42,7 +66,6 @@
                     </div>
                 </div>
             </div>
-
             <div class="row" style='display: none;'>
                 <div class="form-group">
                     <div class="col-md-2">
@@ -83,40 +106,35 @@
                     </div>
                 </div>
             </div>
-            <div class="row">
-                <div class="form-group">
-                    <div class="col-md-2">
-                        <label>Period start: </label>
-                    </div>
-                    <div class="col-md-4">
-                        <div class='input-group date'>
-                            <input  id='period_start' name="period_start"  v-model="priceHistory.period_start" type='text' class="form-control" />
-                            <span class="input-group-addon">
-                                <span class="glyphicon glyphicon-calendar"></span>
-                            </span>
-                        </div>
-                    </div>
-                </div>
-            </div>
-            <div class="row">
-                <div class="form-group">
-                    <div class="col-md-2">
-                        <label>Period end: </label>
-                    </div>
-                    <div class="col-md-4">
-                        <div class='input-group date'>
-                            <input  name="period_end"  v-model="priceHistory.period_end" type='text' class="form-control" />
-                            <span class="input-group-addon">
-                                <span class="glyphicon glyphicon-calendar"></span>
-                            </span>
-                        </div>
-                    </div>
+
+            <div class="row mb-3">
+                <label for="period_start" class="col-md-3 col-form-label">Period start: </label>
+                <div class="col-md-4">
+                    <input
+                        id="period_start"
+                        name="period_start"
+                        type="date"
+                        class="form-control"
+                        v-model="priceHistory.period_start"
+                    />
                 </div>
             </div>
 
+            <div class="row mb-3">
+                <label for="period-end-date" class="col-md-3 col-form-label">Period end: </label>
+                <div class="col-md-4">
+                    <input
+                        id="period-end-date"
+                        name="period_end"
+                        type="date"
+                        class="form-control"
+                        v-model="priceHistory.period_end"
+                    />
+                </div>
+            </div>
 
-            <reason type="price" v-model="priceHistory.reason" ></reason>
-            <div v-show="requireDetails" class="row">
+            <reason type="price" v-model="priceHistory.reason" :threenine="true"></reason>
+            <!-- <div v-show="requireDetails" class="row">
                 <div class="form-group">
                     <div class="col-md-2">
                         <label>Details: </label>
@@ -134,19 +152,41 @@
                     <div class="col-md-5" id='pricehistory_error' style='color: red; font-weight: bold;'>
                     </div>
                 </div>
+            </div> -->
+
+            <!-- Details Textarea -->
+            <div v-show="requireDetails" class="row mb-3">
+                <label for="price-details" class="col-md-3 col-form-label">Details: </label>
+                <div class="col-md-9">
+                    <textarea 
+                        id="price-details" 
+                        name="details" 
+                        class="form-control" 
+                        v-model="priceHistory.details"
+                    ></textarea>
+                </div>
+            </div>
+
+            <!-- Error Message Display Area -->
+            <div class="row" v-if="priceHistoryError">
+                <div class="offset-md-2 col-md-5">
+                    <div class="text-danger fw-bold">
+                        {{ priceHistoryError }}
+                    </div>
+                </div>
             </div>
 
 
         </form>
     </div>
 
-</bootstrapModal>
+</modal>
 </template>
 
 <script>
-import bootstrapModal from '../bootstrap-modal.vue'
+import modal from '../bootstrap-modal.vue'
 import reason from '../reasons.vue'
-import { $, datetimepicker,api_endpoints, validate, helpers, bus } from '../../../hooks'
+import { $, api_endpoints, validate, helpers, bus } from '../../../hooks'
 import alert from '../alert.vue'
 import { mapGetters } from 'vuex'
 import 'bootstrap/dist/js/bootstrap.bundle.min.js';
@@ -232,7 +272,7 @@ export default {
         }
     },
     components: {
-        bootstrapModal,
+        modal,
         alert,
         reason
     },
@@ -312,29 +352,29 @@ export default {
         // $('[data-bs-toggle="tooltip"]').tooltip()
         [...(document.querySelectorAll('[data-bs-toggle="tooltip"]') || [])].map(tooltipTriggerEl => new bootstrap.Tooltip(tooltipTriggerEl))
         vm.form = document.forms.priceForm;
-        var picker = $(vm.form.period_start).closest('.date');
-        var picker2 = $(vm.form.period_end).closest('.date');
+        // var picker = $(vm.form.period_start).closest('.date');
+        // var picker2 = $(vm.form.period_end).closest('.date');
         var today = new Date();
         today.setDate(today.getDate()+1);
-        var tomorrow = new Date(today);
+        // var tomorrow = new Date(today);
 
-        picker.datetimepicker({
-            format: 'DD/MM/YYYY',
-            useCurrent: false,
-            minDate: tomorrow
-        });
-        picker2.datetimepicker({
-            format: 'DD/MM/YYYY',
-            useCurrent: false,
-            minDate: tomorrow
-        });
+        // picker.datetimepicker({
+        //     format: 'DD/MM/YYYY',
+        //     useCurrent: false,
+        //     minDate: tomorrow
+        // });
+        // picker2.datetimepicker({
+        //     format: 'DD/MM/YYYY',
+        //     useCurrent: false,
+        //     minDate: tomorrow
+        // });
 
-        picker.on('dp.change', function(e){
-            vm.priceHistory.period_start = picker.data('DateTimePicker').date().format('DD/MM/YYYY');
-        });
-        picker2.on('dp.change', function(e){
-            vm.priceHistory.period_end = picker2.data('DateTimePicker').date().format('DD/MM/YYYY');
-        });
+        // picker.on('dp.change', function(e){
+        //     vm.priceHistory.period_start = picker.data('DateTimePicker').date().format('DD/MM/YYYY');
+        // });
+        // picker2.on('dp.change', function(e){
+        //     vm.priceHistory.period_end = picker2.data('DateTimePicker').date().format('DD/MM/YYYY');
+        // });
 
         vm.addFormValidations();
         vm.fetchRates();

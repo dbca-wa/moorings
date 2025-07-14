@@ -8,13 +8,12 @@
 
     <div class="modal-body">
         <form id="addMaxStayForm" class="form-horizontal">
-            <div class="">
-                <alert :show.sync="showError" type="danger">{{errorString}}</alert>
-                <div class="row mb-3">
-                    <label for="stay_maximum" class="col-md-3 col-form-label">Maximum Stay: </label>
-                    <div class="col-md-4">
-                        <input placeholder="Default = 28" id='stay_maximum' v-model="stay.max_days" type='text' class="form-control" />
-                    </div>
+            <alert :show.sync="showError" type="danger">{{errorString}}</alert>
+
+            <div class="row mb-3">
+                <label for="stay_maximum" class="col-md-3 col-form-label">Maximum Stay: </label>
+                <div class="col-md-4">
+                    <input placeholder="Default = 28" id='stay_maximum' v-model="stay.max_days" type='text' class="form-control" />
                 </div>
             </div>
             <div class="row mb-3">
