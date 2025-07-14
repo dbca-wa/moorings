@@ -246,7 +246,7 @@ export default {
         let vm = this;
         vm.form = $('#limitsForm');
         // vm.addFormValidations();
-        $('#cg_limits .form-control').blur(function(){
+        $('#cg_limits .form-control').on('blur', function(){
             console.log('campground-limits.vue 2');
             vm.$emit('updated', vm.campground);
         });

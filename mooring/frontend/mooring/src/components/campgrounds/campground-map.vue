@@ -358,7 +358,7 @@ export default {
 
         // End Map Point Selection
 
-        $('#cg_map .form-control').blur(function(){
+        $('#cg_map .form-control').on('blur', function(){
             vm.$emit('updated', vm.campground);
         });
 

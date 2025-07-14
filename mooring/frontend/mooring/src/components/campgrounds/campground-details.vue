@@ -353,7 +353,7 @@ export default {
         vm.form = $('#attForm');
         // vm.addFormValidations();
 
-        $('#cg_attr .form-control').blur(function(){
+        $('#cg_attr .form-control').on('blur', function(){
             console.log('campground-details.vue 1')
             vm.$emit('updated', vm.campground);
         });

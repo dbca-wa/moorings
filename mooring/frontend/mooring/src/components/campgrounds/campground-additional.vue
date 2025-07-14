@@ -224,7 +224,7 @@ export default {
             }
         });
 
-        $('#cg_additional .form-control').blur(function(){
+        $('#cg_additional .form-control').on('blur', function(){
             console.log('campground-additional.vue blur');
             if (vm.validateForm()){
                 console.log('campground-additional.vue blur');

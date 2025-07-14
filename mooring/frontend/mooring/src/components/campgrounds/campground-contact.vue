@@ -1,5 +1,5 @@
 <template lang="html">
-    <div  id="cg_contact" >
+    <div id="cg_contact" >
         <div>
             <form id="contactForm">
                 <div class="col-sm-12">
@@ -226,7 +226,7 @@ export default {
 		// 	console.log(error);
 		// });
         vm.fetchContacts();
-        $('.form-control').blur(function(){
+        $('#cg_contact .form-control').on('blur', function(){
             vm.$emit('updated', vm.campground);
         });
         //Contact
