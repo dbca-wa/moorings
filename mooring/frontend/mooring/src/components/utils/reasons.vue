@@ -7,7 +7,7 @@
             <select v-if="!reasons.length > 0" class="form-select" disabled>
                 <option value="">Loading...</option>
             </select>
-            <select v-else name="open_reason" :value="value" @change="$emit('input', $event.target.value)" class="form-select">
+            <select v-else name="open_reason" :value="modelValue" @change="$emit('update:modelValue', $event.target.value)" class="form-select">
                 <option value=""></option>
                 <option v-for="reason in reasons" :value="reason.id" :key="reason.id">
                     {{reason.text}}
@@ -35,8 +35,9 @@ export default {
         type:{
             required:true
         },
-        value:{
-
+        modelValue:{
+            type: [String, Number],
+            default: ''
         },
         large:{
             default:function () {

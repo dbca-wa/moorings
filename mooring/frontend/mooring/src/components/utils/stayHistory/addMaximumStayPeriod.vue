@@ -8,7 +8,7 @@
 
     <div class="modal-body">
         <form id="addMaxStayForm" class="form-horizontal">
-            <div class="row">
+            <div class="">
                 <alert :show.sync="showError" type="danger">{{errorString}}</alert>
                 <div class="row mb-3">
                     <label for="stay_maximum" class="col-md-3 col-form-label">Maximum Stay: </label>
@@ -17,49 +17,31 @@
                     </div>
                 </div>
             </div>
-            <!-- <div class="row">
-                <div class="row mb-3">
-                    <label for="stay_start_picker" class="col-md-3 col-form-label">Period Start: </label>
-                    <div class="col-md-4">
-                        <div class='input-group date' id="stay_start_picker">
-                            <input name="stay_start" v-model="stay.range_start" type='text' class="form-control" />
-                            <span class="input-group-addon">
-                                <span class="glyphicon glyphicon-calendar"></span>
-                            </span>
-                        </div>
-                    </div>
-                </div>
-            </div> -->
-            <div class="row">
-                <div class="row mb-3">
-                    <label for="stay-start-date" class="col-md-3 col-form-label">Period Start: </label>
-                    <div class="col-md-4">
-                        <input
-                            id="stay-start-date"
-                            name="stay_start"
-                            type="date"
-                            class="form-control"
-                            v-model="stay.range_start"
-                        />
-                    </div>
+            <div class="row mb-3">
+                <label for="stay-start-date" class="col-md-3 col-form-label">Period Start: </label>
+                <div class="col-md-4">
+                    <input
+                        id="stay-start-date"
+                        name="stay_start"
+                        type="date"
+                        class="form-control"
+                        v-model="stay.range_start"
+                    />
                 </div>
             </div>
-            <div class="row">
-                <div class="form-group">
-                    <div class="col-md-2">
-                        <label for="stay_end_picker">Period End: </label>
-                    </div>
-                    <div class="col-md-4">
-                        <div class='input-group date' id='stay_end_picker'>
-                            <input name="stay_end" v-model="stay.range_end" type='text' class="form-control" />
-                            <span class="input-group-addon">
-                                <span class="glyphicon glyphicon-calendar"></span>
-                            </span>
-                        </div>
-                    </div>
+            <div class="row mb-3">
+                <label for="stay-end-date" class="col-md-3 col-form-label">Period End: </label>
+                <div class="col-md-4">
+                    <input
+                        id="stay-end-date"
+                        name="stay_end"
+                        type="date"
+                        class="form-control"
+                        v-model="stay.range_end"
+                    />
                 </div>
             </div>
-            <reason type="stay" v-model="stay.reason" ref="reason"></reason>
+            <reason type="stay" v-model="stay.reason" ref="reason" :threenine="true"></reason>
             <div v-show="requireDetails" class="row">
                 <div class="form-group">
                     <div class="col-md-2">
@@ -96,8 +78,8 @@ export default {
     },
     data: function() {
         return {
-            start_picker: '',
-            end_picker: '',
+            // start_picker: '',
+            // end_picker: '',
             errors: false,
             errorString: '',
             form: '',
@@ -133,6 +115,15 @@ export default {
         reason
     },
     methods: {
+        // you must convert the 'YYYY-MM-DD' values before sending.
+        formatToDdMmYyyy: function(isoDate){
+            console.log('formatToDdMmYyyy called with:', isoDate);
+            if (!isoDate || typeof isoDate !== 'string') return null;
+            const parts = isoDate.split('-');
+            if (parts.length !== 3) return null;
+            const [year, month, day] = parts;
+            return `${day}/${month}/${year}`;
+        },
         close: function() {
             this.stay.max_days= '';
             this.stay.range_start = '';
@@ -146,14 +137,22 @@ export default {
             this.status = '';
         },
         updateReason:function (id) {
+            console.log('updateReason called with id:', id);
             this.stay.reason = id;
         },
         addMaxStay: function() {
+            let vm = this;
             console.log('addMaxStay called');
             if ($(this.form).valid()){
+                vm.stay.range_start = vm.formatToDdMmYyyy(vm.stay.range_start);
+                vm.stay.range_end = vm.formatToDdMmYyyy(vm.stay.range_end);
+                console.log('Formatted Start Date:', vm.stay.range_start);
+                console.log('Formatted End Date:', vm.stay.range_end);
                 if (!this.stay.id){
+                    console.log('Emit addCgStayHistory');
                     this.$emit('addCgStayHistory');
                 }else {
+                    console.log('Emit updateCgStayHistory');
                     this.$emit('updateStayHistory');
                 }
             }
@@ -195,26 +194,27 @@ export default {
         if (!vm.create){
             vm.$refs.modal.title = 'Edit Maximum Stay Period';
         }
-        vm.start_picker = $('#stay_start_picker');
-        vm.end_picker = $('#stay_end_picker');
-        vm.start_picker.datetimepicker({
-            format: 'DD/MM/YYYY'
-        });
-        vm.end_picker.datetimepicker({
-            format: 'DD/MM/YYYY'
-        });
-        vm.start_picker.on('dp.change', function(e){
-            vm.stay.range_start = vm.start_picker.data('DateTimePicker').date().format('DD/MM/YYYY');
-        });
-        vm.end_picker.on('dp.change', function(e){
-            vm.stay.range_end = vm.end_picker.data('DateTimePicker').date().format('DD/MM/YYYY');
-        });
+        // vm.start_picker = $('#stay_start_picker');
+        // vm.end_picker = $('#stay_end_picker');
+        // vm.start_picker.datetimepicker({
+        //     format: 'DD/MM/YYYY'
+        // });
+        // vm.end_picker.datetimepicker({
+        //     format: 'DD/MM/YYYY'
+        // });
+        // vm.start_picker.on('dp.change', function(e){
+        //     vm.stay.range_start = vm.start_picker.data('DateTimePicker').date().format('DD/MM/YYYY');
+        // });
+        // vm.end_picker.on('dp.change', function(e){
+        //     vm.stay.range_end = vm.end_picker.data('DateTimePicker').date().format('DD/MM/YYYY');
+        // });
         vm.form = $('#addMaxStayForm');
         vm.addFormValidations();
         // bus.$once('maxStayReasons',setReasons => {
         //     vm.reasons = setReasons;
         // });
         const onDataLoadedOnce = (setReasons) => {
+            console.log('onDataLoadedOnce called with:', setReasons);
             vm.reasons = setReasons;
             bus.off('maxStayReasons', onDataLoadedOnce);
         };
