@@ -103,45 +103,62 @@ export default {
                     url: api_endpoints.campgroundStayHistory(vm.object_id),
                     dataSrc: ''
                 },
-                columns: [{
-                    mRender: function(data, type, full){
-                        return full.id;
-                    }
-                }, {
-                    "data": "range_start",
-                    sType: 'extract-date',
-                    mRender: function(data, type, full) {
-                        // return new Date(data).toLocaleDateString('en-GB');
-                        return data;
-                    }
-                }, {
-                    "data": "range_end",
-                    sType: 'extract-date',
-                    mRender: function(data, type, full) {
-                        if(data){
+                columns: [
+                    {
+                        "data": "id",
+                        mRender: function(data, type, full){
+                            return full.id;
+                        }
+                    },
+                    {
+                        "data": "range_start",
+                        sType: 'extract-date',
+                        mRender: function(data, type, full) {
                             // return new Date(data).toLocaleDateString('en-GB');
                             return data;
-                        } else {
-                            return '-';
-                        }   
-                    }
-                }, {
-                    "data": "max_days"
-                },{
-                    "data": "reason"
-                }, {
-                    "data": "details"
-                }, {
-                    "mRender": function(data, type, full) {
-                        var id = full.id;
-                        if (full.editable) {
-                            var column = "<td ><a href='#' class='editStay' data-stay_period=\"__ID__\" >Edit</a>";
-                            column += "<br/><a href='#' class='deleteStay' data-stay_period=\"__ID__\" >Delete</a></td>";
-                            return column.replace(/__ID__/g, id);
                         }
-                        return '';
+                    },
+                    {
+                        "data": "range_end",
+                        sType: 'extract-date',
+                        mRender: function(data, type, full) {
+                            if(data){
+                                // return new Date(data).toLocaleDateString('en-GB');
+                                return data;
+                            } else {
+                                return '-';
+                            }   
+                        }
+                    },
+                    {
+                        "data": "max_days"
+                    },
+                    {
+                        "data": "reason"
+                    },
+                    {
+                        "data": "details",
+                        "mRender": function(data, type, full) {
+                            if (data) {
+                                return data;
+                            } else {
+                                return '';
+                            }
+                        }
+                    },
+                    {
+                        "data": "id",
+                        "mRender": function(data, type, full) {
+                            var id = full.id;
+                            if (full.editable) {
+                                var column = "<td ><a href='#' class='editStay' data-stay_period=\"__ID__\" >Edit</a>";
+                                column += "<br/><a href='#' class='deleteStay' data-stay_period=\"__ID__\" >Delete</a></td>";
+                                return column.replace(/__ID__/g, id);
+                            }
+                            return '';
+                        }
                     }
-                }]
+                ]
             },
         }
     },
