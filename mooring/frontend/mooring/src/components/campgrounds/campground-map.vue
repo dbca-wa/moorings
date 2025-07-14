@@ -1,5 +1,5 @@
 <template lang="html">
-<div  id="cg_map" >
+<div id="cg_map">
 	<div>
 		<form id="mapForm">
 		<div class="col-sm-12">
@@ -358,7 +358,7 @@ export default {
 
         // End Map Point Selection
 
-        $('.form-control').blur(function(){
+        $('#cg_map .form-control').blur(function(){
             vm.$emit('updated', vm.campground);
         });
 

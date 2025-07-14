@@ -265,6 +265,7 @@ export default {
             let vm = this;
             vm.isLoading =true;
             vm.reload = reload;
+            console.log('campground-details.vue 2')
             vm.$emit('updated', vm.campground);
             vm.$emit('save', url, method, reload, "details");
         },
@@ -352,7 +353,8 @@ export default {
         vm.form = $('#attForm');
         // vm.addFormValidations();
 
-        $('.form-control').blur(function(){
+        $('#cg_attr .form-control').blur(function(){
+            console.log('campground-details.vue 1')
             vm.$emit('updated', vm.campground);
         });
 

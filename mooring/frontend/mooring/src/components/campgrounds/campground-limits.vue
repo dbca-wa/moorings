@@ -1,5 +1,5 @@
 <template lang="html">
-    <div  id="cg_limits" >
+    <div id="cg_limits" >
         <div>
             <form id="limitsForm">
                 <div class="col-sm-12">
@@ -233,6 +233,7 @@ export default {
             } else {
                 vm.campground.vessel_beam_limit = 0;
             }
+            console.log('campground-limits.vue 1');
             vm.$emit('updated', vm.campground);
             vm.$emit('save', url, method, reload, "limits");
         },
@@ -245,7 +246,8 @@ export default {
         let vm = this;
         vm.form = $('#limitsForm');
         // vm.addFormValidations();
-        $('.form-control').blur(function(){
+        $('#cg_limits .form-control').blur(function(){
+            console.log('campground-limits.vue 2');
             vm.$emit('updated', vm.campground);
         });
     },

@@ -1,24 +1,25 @@
 <template id="addMaxStayCS">
-<bootstrapModal ref="modal" :title="getTitle" :large=true @ok="addMaxStay()" okText="Add">
+<modal ref="modal" :large=true @ok="addMaxStay()" okText="Add">
+    <template #header>
+        <div class="modal-header">
+            <h4 class="modal-title">{{ getTitle }}</h4>
+        </div>
+    </template>
 
     <div class="modal-body">
         <form id="addMaxStayForm" class="form-horizontal">
             <div class="row">
-			    <alert :show.sync="showError" type="danger">{{errorString}}</alert>
-                <div class="form-group">
-                    <div class="col-md-2">
-                        <label for="stay_maximum">Maximum Stay: </label>
-                    </div>
+                <alert :show.sync="showError" type="danger">{{errorString}}</alert>
+                <div class="row mb-3">
+                    <label for="stay_maximum" class="col-md-3 col-form-label">Maximum Stay: </label>
                     <div class="col-md-4">
                         <input placeholder="Default = 28" id='stay_maximum' v-model="stay.max_days" type='text' class="form-control" />
                     </div>
                 </div>
             </div>
-            <div class="row">
-                <div class="form-group">
-                    <div class="col-md-2">
-                        <label for="stay_start_picker">Period Start: </label>
-                    </div>
+            <!-- <div class="row">
+                <div class="row mb-3">
+                    <label for="stay_start_picker" class="col-md-3 col-form-label">Period Start: </label>
                     <div class="col-md-4">
                         <div class='input-group date' id="stay_start_picker">
                             <input name="stay_start" v-model="stay.range_start" type='text' class="form-control" />
@@ -26,6 +27,20 @@
                                 <span class="glyphicon glyphicon-calendar"></span>
                             </span>
                         </div>
+                    </div>
+                </div>
+            </div> -->
+            <div class="row">
+                <div class="row mb-3">
+                    <label for="stay-start-date" class="col-md-3 col-form-label">Period Start: </label>
+                    <div class="col-md-4">
+                        <input
+                            id="stay-start-date"
+                            name="stay_start"
+                            type="date"
+                            class="form-control"
+                            v-model="stay.range_start"
+                        />
                     </div>
                 </div>
             </div>
@@ -58,11 +73,11 @@
         </form>
     </div>
 
-</bootstrapModal>
+</modal>
 </template>
 
 <script>
-import bootstrapModal from '../../utils/bootstrap-modal.vue'
+import modal from '../../utils/bootstrap-modal.vue'
 import reason from '../../utils/reasons.vue'
 import {bus} from '../../utils/eventBus.js'
 import { $, datetimepicker,api_endpoints, validate, helpers } from '../../../hooks'
@@ -113,7 +128,7 @@ export default {
         }
     },
     components: {
-        bootstrapModal,
+        modal,
         alert,
         reason
     },
@@ -134,6 +149,7 @@ export default {
             this.stay.reason = id;
         },
         addMaxStay: function() {
+            console.log('addMaxStay called');
             if ($(this.form).valid()){
                 if (!this.stay.id){
                     this.$emit('addCgStayHistory');
