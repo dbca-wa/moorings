@@ -10,7 +10,7 @@ import datetimepicker from 'eonasdan-bootstrap-datetimepicker';
 import validate from 'jquery-validation';
 import select2 from 'select2';
 import awesomplete from 'awesomplete';
-import slick from 'slick-carousel';
+import slick from 'slick-carousel-browserify';
 import daterangepicker from 'bootstrap-daterangepicker';
 import formValidate from './components/utils/validator.js';
 var Moment = extendMoment(moment);

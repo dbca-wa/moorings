@@ -31,7 +31,7 @@
     "quill-render": "^1.0.5",
     "select2": "4.0.5",
     "select2-bootstrap-theme": "0.1.0-beta.10",
-    "slick-carousel": "^1.8.1",
+    "slick-carousel-browserify": "^1.6.12",
     "sweetalert2": "^6.6.9",
     "util": "^0.12.5",
     "vue": "^3.5.16",
