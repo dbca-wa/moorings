@@ -67,3 +67,4 @@ pillow==10.3.0
 idna==3.7
 cryptography==42.0.8
 pandas==2.0.3
+urllib3>=2.5.0 # not directly required, pinned by Snyk to avoid a vulnerability
