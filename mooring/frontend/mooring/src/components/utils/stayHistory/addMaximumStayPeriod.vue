@@ -40,7 +40,9 @@
                     />
                 </div>
             </div>
+
             <reason type="stay" v-model="stay.reason" ref="reason" :threenine="true"></reason>
+
             <div v-show="requireDetails" class="row">
                 <div class="form-group">
                     <div class="col-md-2">
@@ -61,7 +63,7 @@
 import modal from '../../utils/bootstrap-modal.vue'
 import reason from '../../utils/reasons.vue'
 import {bus} from '../../utils/eventBus.js'
-import { $, datetimepicker,api_endpoints, validate, helpers } from '../../../hooks'
+import { $, datetimepicker,api_endpoints, validate, helpers, Moment } from '../../../hooks'
 import alert from '../../utils/alert.vue'
 
 export default {
@@ -85,6 +87,32 @@ export default {
             reasons: [],
             isOpen: false,
             create: true
+        }
+    },
+    watch: {
+        // Deeply watch the 'stay' prop for changes
+        stay: {
+            handler(newStay) {
+                console.log('New stay object:', newStay);
+                // Do nothing if the newStay object is null
+                if (!newStay) return;
+
+                // --- Handle conversion for range_start ---
+                const startDate = newStay.range_start;
+                if (startDate && /^\d{2}\/\d{2}\/\d{4}$/.test(startDate)) {
+                    let s_date = Moment(startDate, 'DD/MM/YYYY');
+                    this.stay.range_start = Moment(s_date).format('YYYY-MM-DD');
+                }
+
+                // --- Handle conversion for range_end ---
+                const endDate = newStay.range_end;
+                if (endDate && /^\d{2}\/\d{2}\/\d{4}$/.test(endDate)) {
+                    let e_date = Moment(endDate, 'DD/MM/YYYY');
+                    this.stay.range_end = Moment(e_date).format('YYYY-MM-DD');
+                }
+            },
+            immediate: true, // Run the handler immediately when the component is initialized
+            deep: true       // Also detect changes to nested properties of the object
         }
     },
     computed: {
@@ -114,15 +142,6 @@ export default {
         reason
     },
     methods: {
-        // you must convert the 'YYYY-MM-DD' values before sending.
-        formatToDdMmYyyy: function(isoDate){
-            console.log('formatToDdMmYyyy called with:', isoDate);
-            if (!isoDate || typeof isoDate !== 'string') return null;
-            const parts = isoDate.split('-');
-            if (parts.length !== 3) return null;
-            const [year, month, day] = parts;
-            return `${day}/${month}/${year}`;
-        },
         close: function() {
             this.stay.max_days= '';
             this.stay.range_start = '';
@@ -136,23 +155,17 @@ export default {
             this.status = '';
         },
         updateReason:function (id) {
-            console.log('updateReason called with id:', id);
             this.stay.reason = id;
         },
         addMaxStay: function() {
             let vm = this;
-            console.log('addMaxStay called');
-            if ($(this.form).valid()){
-                vm.stay.range_start = vm.formatToDdMmYyyy(vm.stay.range_start);
-                vm.stay.range_end = vm.formatToDdMmYyyy(vm.stay.range_end);
-                console.log('Formatted Start Date:', vm.stay.range_start);
-                console.log('Formatted End Date:', vm.stay.range_end);
-                if (!this.stay.id){
-                    console.log('Emit addCgStayHistory');
-                    this.$emit('addCgStayHistory');
+            if ($(vm.form).valid()){
+                vm.stay.range_start = Moment(vm.stay.range_start).format('DD/MM/YYYY');
+                vm.stay.range_end = Moment(vm.stay.range_end).format('DD/MM/YYYY');
+                if (!vm.stay.id){
+                    vm.$emit('addCgStayHistory');
                 }else {
-                    console.log('Emit updateCgStayHistory');
-                    this.$emit('updateStayHistory');
+                    vm.$emit('updateStayHistory');
                 }
             }
         },

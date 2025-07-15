@@ -81,7 +81,7 @@ import modal from '../bootstrap-modal.vue'
 import reason from '../reasons.vue'
 import alert from '../alert.vue'
 import { mapGetters } from 'vuex'
-import { $, datetimepicker,api_endpoints, validate, helpers, bus } from '../../../hooks'
+import { $, datetimepicker,api_endpoints, validate, helpers, bus, Moment } from '../../../hooks'
 import { range } from 'lodash'
 
 export default {
@@ -192,25 +192,12 @@ export default {
         closeCampgrounds:function () {
             let vm =this;
 
-            // you must convert the 'YYYY-MM-DD' values before sending.
-            const formatToDdMmYyyy = (isoDate) => {
-                if (!isoDate || typeof isoDate !== 'string') return null;
-                const parts = isoDate.split('-');
-                if (parts.length !== 3) return null;
-                const [year, month, day] = parts;
-                return `${day}/${month}/${year}`;
-            };
-
             if (vm.form.valid() && vm.selected_campgrounds.length>0){
                 let vm = this;
                 let data = {
-                    // range_start: vm.range_start,
-                    // range_start_time: vm.range_start_time,
-                    // range_end: vm.range_end,
-                    // range_end_time: vm.range_end_time,
-                    range_start: formatToDdMmYyyy(vm.range_start),
+                    range_start: Moment(vm.range_start).format('DD/MM/YYYY'),
                     range_start_time: vm.range_start_time,
-                    range_end: formatToDdMmYyyy(vm.range_end),
+                    range_end: Moment(vm.range_end).format('DD/MM/YYYY'),
                     range_end_time: vm.range_end_time,
                     campgrounds: vm.selected_campgrounds,
                     reason: vm.reason,

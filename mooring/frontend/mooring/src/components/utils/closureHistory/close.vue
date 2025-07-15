@@ -1,81 +1,106 @@
 <template id="Close">
-<bootstrapModal :title="title" :large=true @ok="addClosure()">
+<modal :large=true @ok="addClosure()">
+    <template #header>
+        <div class="modal-header">
+            <h4 class="modal-title">{{ title }}</h4>
+        </div>
+    </template>
 
     <div class="modal-body">
         <form name="closeForm" class="form-horizontal">
-            <div class="row">
-			    <alert :show.sync="showError" type="danger">{{errorString}}</alert>
-                <div class="form-group">
-                    <div class="col-md-2">
-                        <label for="open_cg_range_start">Closure start: </label>
+            <alert :show.sync="showError" type="danger">{{errorString}}</alert>
+
+            <div class="row mb-3 align-items-center">
+                <!-- Closure Start Date -->
+                <div class="col-md-2">
+                    <label for="closure-start-date" class="col-form-label">Closure start:</label>
+                </div>
+                <div class="col-md-4">
+                    <div class="input-group">
+                        <input 
+                            id="closure-start-date"
+                            name="closure_start"
+                            v-model="statusHistory.range_start" 
+                            type="date" 
+                            class="form-control" 
+                        />
                     </div>
-                    <div class="col-md-4">
-                        <div class='input-group date' :id='close_cg_range_start'>
-                            <input  name="closure_start"  v-model="statusHistory.range_start" type='text' class="form-control" />
-                            <span class="input-group-addon">
-                                <span class="glyphicon glyphicon-calendar"></span>
-                            </span>
-                        </div>
-                    </div>
-                    <div class="col-md-2">
-                        <label for="open_cg_range_start_time"> Start time: </label>
-                    </div>
-                    <div class="col-md-3">
-                        <div class="input-group date" :id='close_cg_range_start_time'>
-                            <input name="closure_start_time" v-model="statusHistory.range_start_time" type='text' class="form-control" />
-                            <span class="input-group-addon">
-                                <span class="glyphicon glyphicon-time"> </span>
-                            </span>
-                        </div>
+                </div>
+                <!-- Start Time -->
+                <div class="col-md-2">
+                    <label for="closure-start-time" class="col-form-label">Start time:</label>
+                </div>
+                <div class="col-md-3">
+                    <div class="input-group">
+                        <input 
+                            id="closure-start-time"
+                            name="closure_start_time" 
+                            v-model="statusHistory.range_start_time" 
+                            type="time" 
+                            class="form-control" 
+                        />
                     </div>
                 </div>
             </div>
-            <div class="row">
-                <div class="form-group">
-                    <div class="col-md-2">
-                        <label for="open_cg_range_start">Reopen: </label>
+
+            <div class="row mb-3 align-items-center">
+                <!-- Reopen Date -->
+                <div class="col-md-2">
+                    <label for="reopen-date" class="col-form-label">Reopen:</label>
+                </div>
+                <div class="col-md-4">
+                    <div class="input-group">
+                        <input 
+                            id="reopen-date"
+                            name="closure_end"
+                            v-model="statusHistory.range_end" 
+                            type="date" 
+                            class="form-control" 
+                        />
                     </div>
-                    <div class="col-md-4">
-                        <div class='input-group date' :id='close_cg_range_end'>
-                            <input name="closure_end" v-model="statusHistory.range_end" type='text' class="form-control" />
-                            <span class="input-group-addon">
-                                <span class="glyphicon glyphicon-calendar"></span>
-                            </span>
-                        </div>
-                    </div>
-                    <div class="col-md-2">
-                        <label for="open_cg_range_end_time"> End time: </label>
-                    </div>
-                    <div class="col-md-3">
-                        <div class="input-group date" :id='close_cg_range_end_time'>
-                            <input name="closure_end_time" v-model="statusHistory.range_end_time" type='text' class="form-control" />
-                            <span class="input-group-addon">
-                                <span class="glyphicon glyphicon-time"> </span>
-                            </span>
-                        </div>
+                </div>
+                <!-- End Time -->
+                <div class="col-md-2">
+                    <label for="reopen-end-time" class="col-form-label">End time:</label>
+                </div>
+                <div class="col-md-3">
+                    <div class="input-group">
+                        <input 
+                            id="reopen-end-time"
+                            name="closure_end_time" 
+                            v-model="statusHistory.range_end_time" 
+                            type="time" 
+                            class="form-control" 
+                        />
                     </div>
                 </div>
             </div>
-            <reason type="close" v-model="statusHistory.closure_reason" ></reason>
-            <div v-show="requireDetails" class="row">
-                <div class="form-group">
-                    <div class="col-md-2">
-                        <label>Details: </label>
-                    </div>
-                    <div class="col-md-4">
-                        <textarea name="closure_details" v-model="statusHistory.details" class="form-control" id="close_cg_details"></textarea>
-                    </div>
+
+            <reason type="close" v-model="statusHistory.closure_reason"></reason>
+
+            <div v-show="requireDetails" class="row align-items-start">
+                <div class="col-md-2">
+                    <label for="closure-details" class="col-form-label">Details:</label>
+                </div>
+                <div class="col-md-10">
+                    <!-- <textarea name="closure_details" v-model="statusHistory.details" class="form-control" id="close_cg_details"></textarea> -->
+                    <textarea 
+                        id="closure-details"
+                        name="closure_details" 
+                        v-model="statusHistory.details" 
+                        class="form-control"
+                    ></textarea>
                 </div>
             </div>
         </form>
     </div>
 
-</bootstrapModal>
+</modal>
 </template>
 
 <script>
-import bootstrapModal from '../bootstrap-modal.vue'
-import { $, datetimepicker,api_endpoints, validate, helpers, bus } from '../../../hooks'
+import modal from '../bootstrap-modal.vue'
+import { $, datetimepicker,api_endpoints, validate, helpers, bus, Moment } from '../../../hooks'
 import alert from '../alert.vue'
 import reason from '../reasons.vue'
     
@@ -96,11 +121,11 @@ export default {
         return {
             id:'',
             current_closure: '',
-            closeStartPicker: '',
-            closeStartTimePicker: '',
+            // closeStartPicker: '',
+            // closeStartTimePicker: '',
             showDetails:false,
-            closeEndPicker: '',
-            closeEndTimePicker: '',
+            // closeEndPicker: '',
+            // closeEndTimePicker: '',
             errors: false,
             errorString: '',
             form: '',
@@ -110,6 +135,30 @@ export default {
             close_cg_range_start_time: 'close_cg_range_start_time'+vm.id,
             close_cg_range_end: 'close_cg_range_end'+vm._uid,
             close_cg_range_end_time: 'close_cg_range_end_time'+vm.id,
+        }
+    },
+    watch: {
+        statusHistory: {
+            handler(newStatusHistory) {
+                // Do nothing if the newStatusHistory object is null
+                if (!newStatusHistory) return;
+
+                // --- Handle conversion for period_start ---
+                const startDate = newStatusHistory.range_start;
+                if (startDate && /^\d{2}\/\d{2}\/\d{4}$/.test(startDate)) {
+                    let s_date = Moment(startDate, 'DD/MM/YYYY');
+                    this.statusHistory.range_start = Moment(s_date).format('YYYY-MM-DD');
+                }
+
+                // --- Handle conversion for period_end ---
+                const endDate = newStatusHistory.range_end;
+                if (endDate && /^\d{2}\/\d{2}\/\d{4}$/.test(endDate)) {
+                    let e_date = Moment(endDate, 'DD/MM/YYYY');
+                    this.statusHistory.range_end = Moment(e_date).format('YYYY-MM-DD');
+                }
+            },
+            immediate: true, // Run the handler immediately when the component is initialized
+            deep: true       // Also detect changes to nested properties of the object
         }
     },
     computed: {
@@ -134,7 +183,7 @@ export default {
         },
     },
     components: {
-        bootstrapModal,
+        modal,
         alert,
         reason
     },
@@ -152,16 +201,19 @@ export default {
             this.statusHistory.details= '';
             this.statusHistory.reason = '';
             this.statusHistory.closure_reason = '';
-            var today = new Date();
-            this.closeEndPicker.data('DateTimePicker').clear();
-            this.closeStartPicker.data('DateTimePicker').clear();
+            // var today = new Date();
+            // this.closeEndPicker.data('DateTimePicker').clear();
+            // this.closeStartPicker.data('DateTimePicker').clear();
         },
         addClosure: function() {
-            if (this.form.valid()){
-                if (!this.closure_id){
-                    this.$emit('closeRange');
+            let vm = this;
+            if (vm.form.valid()){
+                vm.statusHistory.range_start = Moment(vm.statusHistory.range_start).format('DD/MM/YYYY');
+                vm.statusHistory.range_end = Moment(vm.statusHistory.range_end).format('DD/MM/YYYY');
+                if (!vm.closure_id){
+                    vm.$emit('closeRange');
                 }else {
-                    this.$emit('updateRange');
+                    vm.$emit('updateRange');
                 }
             }
         },
@@ -206,34 +258,34 @@ export default {
         var vm = this;
         vm.statusHistory.status=1;
         vm.statusHistory.reason='';
-        vm.closeEndPicker = $('#'+vm.close_cg_range_end);
-        vm.closeStartPicker = $('#'+vm.close_cg_range_start).datetimepicker({
-            format: 'DD/MM/YYYY',
-            minDate: new Date()
-        });
-        vm.closeStartTimePicker = $('#'+vm.close_cg_range_start_time).datetimepicker({
-            format: 'HH:mm',
-        });
-        vm.closeEndPicker.datetimepicker({
-            format: 'DD/MM/YYYY',
-            useCurrent: false
-        });
-        vm.closeEndTimePicker = $('#'+vm.close_cg_range_end_time).datetimepicker({
-            format: 'HH:mm',
-        })
-        vm.closeStartPicker.on('dp.change', function(e){
-            vm.statusHistory.range_start = vm.closeStartPicker.data('DateTimePicker').date() != null ? vm.closeStartPicker.data('DateTimePicker').date().format('DD/MM/YYYY') : '';
-            e.date != null ? vm.closeEndPicker.data("DateTimePicker").minDate(e.date): '';
-        });
-        vm.closeStartTimePicker.on('dp.change', function(e){
-            vm.statusHistory.range_start_time = vm.closeStartTimePicker.data('DateTimePicker').date().format('HH:mm');
-        });
-        vm.closeEndPicker.on('dp.change', function(e){
-            vm.statusHistory.range_end = vm.closeEndPicker.data('DateTimePicker').date() != null  ? vm.closeEndPicker.data('DateTimePicker').date().format('DD/MM/YYYY') : '';
-        });
-        vm.closeEndTimePicker.on('dp.change', function(e){
-            vm.statusHistory.range_end_time = vm.closeEndTimePicker.data('DateTimePicker').date().format('HH:mm');
-        });
+        // vm.closeEndPicker = $('#'+vm.close_cg_range_end);
+        // vm.closeStartPicker = $('#'+vm.close_cg_range_start).datetimepicker({
+        //     format: 'DD/MM/YYYY',
+        //     minDate: new Date()
+        // });
+        // vm.closeStartTimePicker = $('#'+vm.close_cg_range_start_time).datetimepicker({
+        //     format: 'HH:mm',
+        // });
+        // vm.closeEndPicker.datetimepicker({
+        //     format: 'DD/MM/YYYY',
+        //     useCurrent: false
+        // });
+        // vm.closeEndTimePicker = $('#'+vm.close_cg_range_end_time).datetimepicker({
+        //     format: 'HH:mm',
+        // })
+        // vm.closeStartPicker.on('dp.change', function(e){
+        //     vm.statusHistory.range_start = vm.closeStartPicker.data('DateTimePicker').date() != null ? vm.closeStartPicker.data('DateTimePicker').date().format('DD/MM/YYYY') : '';
+        //     e.date != null ? vm.closeEndPicker.data("DateTimePicker").minDate(e.date): '';
+        // });
+        // vm.closeStartTimePicker.on('dp.change', function(e){
+        //     vm.statusHistory.range_start_time = vm.closeStartTimePicker.data('DateTimePicker').date().format('HH:mm');
+        // });
+        // vm.closeEndPicker.on('dp.change', function(e){
+        //     vm.statusHistory.range_end = vm.closeEndPicker.data('DateTimePicker').date() != null  ? vm.closeEndPicker.data('DateTimePicker').date().format('DD/MM/YYYY') : '';
+        // });
+        // vm.closeEndTimePicker.on('dp.change', function(e){
+        //     vm.statusHistory.range_end_time = vm.closeEndTimePicker.data('DateTimePicker').date().format('HH:mm');
+        // });
         vm.form = $(document.forms.closeForm);
         vm.addFormValidations();
         // bus.$once('closeReasons',setReasons => {

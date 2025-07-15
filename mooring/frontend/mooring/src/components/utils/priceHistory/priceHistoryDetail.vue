@@ -10,19 +10,6 @@
         <form name="priceForm" class="form-horizontal">
             <alert :show.sync="showError" type="danger">{{errorString}}</alert>
 
-            <!-- <div class="row">
-                <div class="form-group">
-                    <div class="col-md-2">
-                        <label>Booking Period:</label>
-                    </div>
-                    <div class="col-md-4">
-                        <select name="period" v-model="priceHistory.booking_period_id" class="form-control">
-                            <option v-for="per in booking_periods" :value="per.id"> {{ per.name }}</option>
-                        </select>
-                    </div>
-                </div>
-            </div> -->
-
             <div class="row mb-3">
                 <label for="booking-period-select" class="col-md-3 col-form-label">Booking Period:</label>
                 <div class="col-md-4">
@@ -134,25 +121,6 @@
             </div>
 
             <reason type="price" v-model="priceHistory.reason" :threenine="true"></reason>
-            <!-- <div v-show="requireDetails" class="row">
-                <div class="form-group">
-                    <div class="col-md-2">
-                        <label>Details: </label>
-                    </div>
-                    <div class="col-md-5">
-                        <textarea name="details" v-model="priceHistory.details" class="form-control"></textarea>
-                    </div>
-                </div>
-            </div>
-
-            <div class="row">
-                <div class="form-group">
-                    <div class="col-md-2">
-                    </div>
-                    <div class="col-md-5" id='pricehistory_error' style='color: red; font-weight: bold;'>
-                    </div>
-                </div>
-            </div> -->
 
             <!-- Details Textarea -->
             <div v-show="requireDetails" class="row mb-3">
@@ -175,18 +143,15 @@
                     </div>
                 </div>
             </div>
-
-
         </form>
     </div>
-
 </modal>
 </template>
 
 <script>
 import modal from '../bootstrap-modal.vue'
 import reason from '../reasons.vue'
-import { $, api_endpoints, validate, helpers, bus } from '../../../hooks'
+import { $, api_endpoints, validate, helpers, bus, Moment } from '../../../hooks'
 import alert from '../alert.vue'
 import { mapGetters } from 'vuex'
 import 'bootstrap/dist/js/bootstrap.bundle.min.js';
@@ -269,6 +234,28 @@ export default {
                 vm.priceHistory.infant = '0.00';
                 $('#period_start').prop('disabled', false);
             }
+        },
+        priceHistory: {
+            handler(newPriceHistory) {
+                // Do nothing if the newPriceHistory object is null
+                if (!newPriceHistory) return;
+
+                // --- Handle conversion for period_start ---
+                const startDate = newPriceHistory.period_start;
+                if (startDate && /^\d{2}\/\d{2}\/\d{4}$/.test(startDate)) {
+                    let s_date = Moment(startDate, 'DD/MM/YYYY');
+                    this.priceHistory.period_start = Moment(s_date).format('YYYY-MM-DD');
+                }
+
+                // --- Handle conversion for period_end ---
+                const endDate = newPriceHistory.period_end;
+                if (endDate && /^\d{2}\/\d{2}\/\d{4}$/.test(endDate)) {
+                    let e_date = Moment(endDate, 'DD/MM/YYYY');
+                    this.priceHistory.period_end = Moment(e_date).format('YYYY-MM-DD');
+                }
+            },
+            immediate: true, // Run the handler immediately when the component is initialized
+            deep: true       // Also detect changes to nested properties of the object
         }
     },
     components: {
@@ -289,11 +276,14 @@ export default {
             this.isOpen = false;
         },
         addHistory: function() {
-            if ($(this.form).valid()){
-                if (this.priceHistory.id || this.priceHistory.original){
-                    this.$emit('updatePriceHistory');
+            let vm = this;
+            if ($(vm.form).valid()){
+                vm.priceHistory.period_start = Moment(vm.priceHistory.period_start).format('DD/MM/YYYY');
+                vm.priceHistory.period_end = Moment(vm.priceHistory.period_end).format('DD/MM/YYYY');
+                if (vm.priceHistory.id || vm.priceHistory.original){
+                    vm.$emit('updatePriceHistory');
                 }else {
-                    this.$emit('addPriceHistory');
+                    vm.$emit('addPriceHistory');
                 }
             }
         },
