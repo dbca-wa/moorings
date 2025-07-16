@@ -3287,7 +3287,6 @@ class BookingViewSet(viewsets.ModelViewSet):
                     if v['booking_id'] not in rego_cache:
                        rego_cache[v['booking_id']] = []
                     rego_cache[v['booking_id']].append({'rego':v['rego'], 'type': v['type']})
-
                 
                 for bi in booking_items_object:
                     # if bi['booking__canceled_by__first_name']:
@@ -3519,13 +3518,12 @@ class BookingViewSet(viewsets.ModelViewSet):
                             #    bk_list['campground_site_type'] = '{}{}'.format('{} - '.format(first_campsite.name if first_campsite else ""),'({})'.format(bk_list['campground_site_type'] if bk_list['campground_site_type'] else ""))
                     else:
                         bk_list['campground_site_type'] = ""
-
-
                     #msb_list.sort(key=lambda item: item[2])
                     bk_list['mooringsite_bookings'] = msb_list
 
                     booking_data.append(bk_list)
                 rowcount = rowcount + 1
+                # logger.debug(f"Processed booking {booking.id} - row count: {rowcount}, filtered count: {recordFilteredCount}")
             recordsFiltered = recordFilteredCount 
             #print("MLINE 1.09", datetime.now().strftime("%d/%m/%Y %H:%M:%S"))
             return Response(OrderedDict([
