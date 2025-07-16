@@ -2901,20 +2901,56 @@ class AdmissionsBookingViewSet(viewsets.ModelViewSet):
         try:
             data_temp = AdmissionsBooking.objects.filter(booking_type__in=bt).order_by('-pk')
 
-            ad_details = AdmissionsBooking.objects.filter(booking_type__in=bt).values('id','customer__id','customer__first_name','customer__last_name')
-            for cd in ad_details:
-                 broken_booking_id = cd['id']
-                 if type(cd['customer__first_name']) == str and type(cd['customer__last_name']) == str:
-                     ad_details_obj[cd['id']] = {'first': cd['customer__first_name'].encode('utf-8'),'last': cd['customer__last_name'].encode('utf-8')}
-                 else:
-                     print ("Not a Str :"+str(cd['id']))
-                     ad_details_obj[cd['id']] = {'first': 'Not a String('+str(cd['id'])+')','last': 'Not a String('+str(cd['id'])+')'}
+            from django.contrib.auth import get_user_model
+            User = get_user_model()
+
+            # 1. Fetch booking data, getting only the necessary IDs.
+            bookings = AdmissionsBooking.objects.filter(booking_type__in=bt).values('id', 'customer_id')
+
+            # 2. Collect all unique customer IDs from the bookings.
+            customer_ids = {b['customer_id'] for b in bookings if b['customer_id']}
+
+            # 3. Fetch all relevant user data in a single, efficient query.
+            customers_data = User.objects.filter(id__in=customer_ids).values('id', 'first_name', 'last_name')
+
+            # 4. Create a dictionary mapping customer IDs to their data for fast lookups.
+            # e.g., {123: {'id': 123, 'first_name': 'John', 'last_name': 'Doe'}, ...}
+            customers_map = {c['id']: c for c in customers_data}
+
+            # 5. Initialize the final results dictionary.
+            ad_details_obj = {}
+            broken_booking_id = "0" # Initialize before the loop for safety.
+
+            # 6. Process each booking to build the final dictionary.
+            for booking in bookings:
+                broken_booking_id = booking['id']
+                customer_id = booking['customer_id']
+
+                # Find the corresponding customer details from the map.
+                customer_info = customers_map.get(customer_id)
+
+                # Check if customer exists and has valid first/last name strings.
+                if customer_info and isinstance(customer_info.get('first_name'), str) and isinstance(customer_info.get('last_name'), str):
+                    # If valid, store the UTF-8 encoded names.
+                    ad_details_obj[booking['id']] = {
+                        'first': customer_info['first_name'].encode('utf-8'),
+                        'last': customer_info['last_name'].encode('utf-8')
+                    }
+                else:
+                    # Handle cases where customer is not found or name is not a string.
+                    logger.warning(f"Not a Str or customer not found: {booking['id']}")
+                    ad_details_obj[booking['id']] = {
+                        'first': b'Not a String or customer not found(' + str(booking['id']).encode('utf-8') + b')',
+                        'last': b'Not a String or customer not found(' + str(booking['id']).encode('utf-8') + b')'
+                    }
+
             brokenrow_section = "3"
-            customer_details = AdmissionsBooking.objects.filter(booking_type__in=bt).values('customer__id','customer__first_name','customer__last_name', 'customer__email')
+            customer_details = AdmissionsBooking.objects.filter(booking_type__in=bt).values('customer_id','customer__first_name','customer__last_name', 'customer__email')
             for cd in customer_details:
-                  if cd['customer__id'] not in customer_details_obj:
-                     customer_details_obj[cd['customer__id']] = {'first': cd['customer__first_name'],'last': cd['customer__last_name'], 'email': cd['customer__email'] } 
+                  if cd['customer_id'] not in customer_details_obj:
+                     customer_details_obj[cd['customer_id']] = {'first': cd['customer__first_name'],'last': cd['customer__last_name'], 'email': cd['customer__email'] } 
             #print (customer_details_obj)
+
             brokenrow_section = "4"
 
             admission_line = AdmissionsLine.objects.all().values('admissionsBooking_id','location__mooring_group')
@@ -3179,6 +3215,7 @@ class AdmissionsBookingViewSet(viewsets.ModelViewSet):
 
                 brokenrow_section = "17"
         except Exception as e:
+            logger.error(f"Error in AdmissionsBookingViewSet list method: {str(e)}")
             res ={
                 "Error": str(e),
                 "row_id": str(brokenrow_id),
