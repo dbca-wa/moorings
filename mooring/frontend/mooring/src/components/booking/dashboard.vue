@@ -223,6 +223,8 @@ import changebooking from "./changebooking.vue"
 import bookingHistory from "./history.vue"
 import modal from '../utils/bootstrap-modal.vue'
 import { mapGetters } from 'vuex'
+import { Parser } from '@json2csv/plainjs';
+
 export default {
     name:'booking-dashboard',
     components:{
@@ -595,12 +597,11 @@ export default {
                                 var invoice_link= (full.invoice_ref)?"<a href='"+invoice+"' target='_blank' class='text-primary'>View Payment</a><br/>":"";
                                 column += invoice_link;
                             }
-                            console.log(full.part_booking);
                             if (full.in_future && !full.part_booking) {
                                 if (full.booking_type == 0 || full.booking_type == 1 || full.booking_type == 2) { 
                                     var cancel_booking = "<a href='/cancel-admissions-booking/"+full.id+"' class='text-primary'> Cancel</a><br/>";
                                     column += cancel_booking;
-			        }
+                                }
                             }
                             // invoices += " <a href='/booking-history/{{ full.id }}'>View History</a>";
                             column += invoices;
@@ -913,6 +914,7 @@ export default {
             return str.join("&");
         },
         print: async function(){
+            console.log('print()');
             let vm =this;
             vm.exportingCSV = true;
             
@@ -924,7 +926,8 @@ export default {
                 }
                 const data = await response.json();
 
-                var json2csv = require('json2csv');
+                console.log({data})
+
                 var fields = ['Created']
                 var fields = [...fields,...vm.dtHeaders];
                 fields.splice(vm.dtHeaders.length-1,1);
@@ -1086,16 +1089,41 @@ export default {
                     });
                     bookings.push(bk);
                 });
-                var csv = json2csv({ data:bookings, fields: fields });
-                var a = document.createElement("a"),
-                file = new Blob([csv], {type: 'text/csv'});
+                console.log('after $each')
+                // var csv = json2csv({ data:bookings, fields: fields });
+                // var a = document.createElement("a"),
+                // file = new Blob([csv], {type: 'text/csv'});
+
+                // 1. Create an options object for the parser.
+                const opts = { fields: fields };
+
+                // 2. Instantiate the Parser with the options.
+                const parser = new Parser(opts);
+                console.log({parser})
+
+                // 3. Call the .parse() method on the instance to convert your data.
+                //    This replaces the old json2csv() function call.
+                const csv = parser.parse(bookings);
+                console.log({csv})
+
+                // 4. Create a link element for downloading.
+                var a = document.createElement("a");
+                console.log({a})
+
+                // 5. Create a Blob from the generated CSV string.
+                let file = new Blob([csv], { type: 'text/csv' });
+                console.log({file})
+
                 var filterCampground = (vm.filterCampground == 'All') ? "All Moorings " : $('#filterCampground')[0].selectedOptions[0].text;
                 var filterRegion = (vm.filterCampground == 'All') ? (vm.filterRegion == 'All')? "All Regions" : $('#filterRegion')[0].selectedOptions[0].text : "";
                 var filterDates = (vm.filterDateFrom) ? (vm.filterDateTo) ? "From "+vm.filterDateFrom + " To "+vm.filterDateTo: "From "+vm.filterDateFrom : (vm.filterDateTo) ? " To "+vm.filterDateTo : "" ;
                 var filename =  filterCampground +  "_" + filterRegion + "_" +filterDates+ ".csv";
-                if (window.navigator.msSaveOrOpenBlob) // IE10+
+                if (window.navigator.msSaveOrOpenBlob){
+                    console.log('IE10+ detected');
                     window.navigator.msSaveOrOpenBlob(file, filename);
+                } // IE10+
                 else { // Others
+                    console.log('Non-IE10+ detected');
                     var create_url = URL.createObjectURL(file);
                     a.href = create_url;
                     a.download = filename;
@@ -1117,10 +1145,13 @@ export default {
             }
         },
         print2: async function(){
+            console.log('print2()');
+
             let vm =this;
             vm.exportingCSV2 = true;
             
             let url = api_endpoints.admissionsbookings+'?'+vm.printParams2();
+            console.log(url);
             try {
                 const response = await fetch(url);
                 if (!response.ok) {
@@ -1128,7 +1159,8 @@ export default {
                 }
                 const data = await response.json();
 
-                var json2csv = require('json2csv');
+                console.log({data})
+
                 var fields = ["Confirmation No", "Customer", "Email", "Mobile", "Overnight Stay", "Arrival Date", "Total Attendees", "Adults","Children","Infants", "Vessel Reg No", "Warning Reference", "Invoice Reference",'Cancelled By','Cancellation Reason']
                 
                 var bookings = [];
@@ -1210,9 +1242,26 @@ export default {
                     });
                     bookings.push(bk);
                 });
-                var csv = json2csv({ data:bookings, fields: fields });
-                var a = document.createElement("a"),
-                file = new Blob([csv], {type: 'text/csv'});
+                // var csv = json2csv({ data:bookings, fields: fields });
+                // var a = document.createElement("a"),
+                // file = new Blob([csv], {type: 'text/csv'});
+
+                // 1. Create an options object for the parser.
+                const opts = { fields: fields };
+
+                // 2. Instantiate the Parser with the options.
+                const parser = new Parser(opts);
+
+                // 3. Call the .parse() method on the instance to convert your data.
+                //    This replaces the old json2csv() function call.
+                const csv = parser.parse(bookings);
+
+                // 4. Create a link element for downloading.
+                var a = document.createElement("a");
+
+                // 5. Create a Blob from the generated CSV string.
+                file = new Blob([csv], { type: 'text/csv' });
+
                 var filterDates = (vm.filterDateFrom2) ? (vm.filterDateTo2) ? "From "+vm.filterDateFrom2 + " To "+vm.filterDateTo2: "From "+vm.filterDateFrom2 : (vm.filterDateTo2) ? " To "+vm.filterDateTo2 : "" ;
                 var filename =  filterDates + "_admissions" + ".csv";
                 filename.replace(" ", "_");

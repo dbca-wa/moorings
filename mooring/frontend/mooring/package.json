@@ -21,7 +21,7 @@
     "eonasdan-bootstrap-datetimepicker": "^4.17.43",
     "jquery": "^3.7.1",
     "jquery-validation": "^1.15.1",
-    "json2csv": "^6.0.0-alpha.2",
+     "@json2csv/plainjs": "^7.0.6",
     "lodash": "^4.17.4",
     "mitt": "^3.0.1",
     "moment": "2.30.1",
