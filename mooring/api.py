@@ -3214,7 +3214,7 @@ class AdmissionsBookingViewSet(viewsets.ModelViewSet):
                 brokenrow_id = r['id']
                 r['booking'] = ""
                 r['booking_phone'] = ''
-                admissions_booking = AdmissionsBooking.objects.get(pk=r['id'])
+                admissions_booking = bookings_map.get(r['id'])
                 adLines = AdmissionsLine.objects.filter(admissionsBooking=admissions_booking)
                 lines = []
                 for line in adLines:
@@ -3250,13 +3250,6 @@ class AdmissionsBookingViewSet(viewsets.ModelViewSet):
                 r.update({'invoice_ref': inv, 'in_future': future_or_admin, 'part_booking': admissions_booking.part_booking})
                 brokenrow_section = "15"
                 logger.debug(f'brokenrow_section: {brokenrow_section}')
-                # if(r['customer']):
-                #     brokenrow_section = "16"
-                #     #name = ad.customer.first_name + " " + ad.customer.last_name
-                #     name = customer_details_obj[r['customer']]['first'] + " "+ customer_details_obj[r['customer']]['last']#r.customerFirstName_cache
-                #     email = ad.customer.email
-                #     r.update({'customerName': str(name).encode('utf-8'), 'email': email})
-                # Get the customer ID from the dictionary 'r'.
 
                 # Using the key 'customer_id' is consistent with the model's field name.
                 customer_id = r.get('customer_id')
@@ -3285,22 +3278,6 @@ class AdmissionsBookingViewSet(viewsets.ModelViewSet):
                         })
                 else:
                     r.update({'customerName': 'No customer', 'email': "No customer"})
-
-                # if admissions_booking.created_by is None:
-                #      r['created_by'] = ""
-                # else:
-                #      r['created_by'] = admissions_booking.created_by.first_name + ' '+ admissions_booking.created_by.last_name
-
-                # if admissions_booking.canceled_by is None:
-                #      r['canceled_by'] = ""
-                # else:
-                #      r['canceled_by'] = admissions_booking.canceled_by.first_name + ' '+ admissions_booking.canceled_by.last_name
-
-                # if admissions_booking.cancellation_reason is None:
-                #      r['cancellation_reason'] = ""
-                # else: 
-                #      r['cancellation_reason'] = admissions_booking.cancellation_reason
-                    # Proceed only if the booking object was found.
 
                 if admissions_booking:
                     # Get the creator's full name from the users_map.
