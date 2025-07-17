@@ -94,13 +94,24 @@ class AdmissionsBookingSerializer(serializers.ModelSerializer):
     """Serializer used by the admissions booking process."""
     class Meta:
         model = AdmissionsBooking
-#        excludes = ('totalCost')
-        fields = ('id','customer','booking_type','vesselRegNo','noOfAdults','noOfConcessions','noOfChildren','noOfInfants','warningReferenceNo','created', 'location','mobile')
+        fields = (
+            'id',
+            'customer_id',
+            'booking_type',
+            'vesselRegNo',
+            'noOfAdults',
+            'noOfConcessions',
+            'noOfChildren',
+            'noOfInfants',
+            'warningReferenceNo',
+            'created',
+            'location',
+            'mobile'
+        )
 
 class AdmissionsLineSerializer(serializers.ModelSerializer):
     class Meta:
         model = AdmissionsLine
-#        excludes = ('cost')
         fields = ('arrivalDate','overnightStay','admissionsBooking','location')
 
 class BookingRangeSerializer(serializers.ModelSerializer):

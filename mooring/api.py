@@ -2898,11 +2898,12 @@ class AdmissionsBookingViewSet(viewsets.ModelViewSet):
         brokenrow_id = 0
         brokenrow_section = "START"
         broken_booking_id = 0
+
+        from django.contrib.auth import get_user_model
+        User = get_user_model()
+
         try:
             data_temp = AdmissionsBooking.objects.filter(booking_type__in=bt).order_by('-pk')
-
-            from django.contrib.auth import get_user_model
-            User = get_user_model()
 
             # 1. Fetch booking data, getting only the necessary IDs.
             bookings = AdmissionsBooking.objects.filter(booking_type__in=bt).values('id', 'customer_id')
@@ -2945,13 +2946,38 @@ class AdmissionsBookingViewSet(viewsets.ModelViewSet):
                     }
 
             brokenrow_section = "3"
-            customer_details = AdmissionsBooking.objects.filter(booking_type__in=bt).values('customer_id','customer__first_name','customer__last_name', 'customer__email')
-            for cd in customer_details:
-                  if cd['customer_id'] not in customer_details_obj:
-                     customer_details_obj[cd['customer_id']] = {'first': cd['customer__first_name'],'last': cd['customer__last_name'], 'email': cd['customer__email'] } 
-            #print (customer_details_obj)
+            logger.debug(f'brokenrow_section: {brokenrow_section}')
+            # customer_details = AdmissionsBooking.objects.filter(booking_type__in=bt).values('customer_id','customer__first_name','customer__last_name', 'customer__email')
+            # for cd in customer_details:
+            #       if cd['customer_id'] not in customer_details_obj:
+            #          customer_details_obj[cd['customer_id']] = {'first': cd['customer__first_name'],'last': cd['customer__last_name'], 'email': cd['customer__email'] } 
+
+            # 1. Get a distinct list of non-null customer IDs from the relevant bookings.
+            #    Using .distinct() on the database is more efficient than checking for duplicates in Python.
+            customer_ids = AdmissionsBooking.objects.filter(
+                booking_type__in=bt,
+                customer_id__isnull=False
+            ).values_list('customer_id', flat=True).distinct()
+
+            # 2. Fetch all corresponding user details in a single, efficient database query.
+            users_data = User.objects.filter(id__in=list(customer_ids)).values(
+                'id',
+                'first_name',
+                'last_name',
+                'email'
+            )
+
+            # 3. Build the final dictionary using the unique user data.
+            #    No need to check for duplicates here, as the list is already unique.
+            for user in users_data:
+                customer_details_obj[user['id']] = {
+                    'first': user['first_name'],
+                    'last': user['last_name'],
+                    'email': user['email']
+                }
 
             brokenrow_section = "4"
+            logger.debug(f'brokenrow_section: {brokenrow_section}')
 
             admission_line = AdmissionsLine.objects.all().values('admissionsBooking_id','location__mooring_group')
             for al in admission_line:
@@ -2959,6 +2985,7 @@ class AdmissionsBookingViewSet(viewsets.ModelViewSet):
                        admission_line_obj[al['admissionsBooking_id']] = al
                        
             brokenrow_section = "5"
+            logger.debug(f'brokenrow_section: {brokenrow_section}')
             groups = MooringAreaGroup.objects.filter(members__in=[request.user,])
             for group in groups:
                 if group.id not in mooring_group_access:
@@ -2975,6 +3002,7 @@ class AdmissionsBookingViewSet(viewsets.ModelViewSet):
                    mooring_site_booking[ms['booking__id']] = ms
             #print (mooring_site_booking)
             brokenrow_section = "6"
+            logger.debug(f'brokenrow_section: {brokenrow_section}')
             ap = Booking.objects.all().values('id','admission_payment__id').exclude(admission_payment=None)
             #print (ap)
             for a in ap:
@@ -2983,6 +3011,7 @@ class AdmissionsBookingViewSet(viewsets.ModelViewSet):
             #print (admission_booking_link)
             # If groups then we need to filter data by groups.
             brokenrow_section = "7"
+            logger.debug(f'brokenrow_section: {brokenrow_section}')
             if groups.count() > 0:
                 filtered_ids = []
                 for rec in data_temp:
@@ -3072,6 +3101,7 @@ class AdmissionsBookingViewSet(viewsets.ModelViewSet):
                 return Response("Error no group")
 
             brokenrow_section = "8"
+            logger.debug(f'brokenrow_section: {brokenrow_section}')
 #            recordsTotal = len(data)
 #            recordsTotal = AdmissionsBooking.objects.filter(booking_type__in=[0,1,4],`
             #search = request.GET.get('search[value]') if request.GET.get('search[value]') else None
@@ -3083,6 +3113,7 @@ class AdmissionsBookingViewSet(viewsets.ModelViewSet):
             data2 = []
             data_temp = []
             brokenrow_section = "9"
+            logger.debug(f'brokenrow_section: {brokenrow_section}')
             if search:
                 #if(search.upper().startswith('AD')):
                 #    try:
@@ -3091,6 +3122,7 @@ class AdmissionsBookingViewSet(viewsets.ModelViewSet):
                 #    except:
                 #        pass
                 brokenrow_section = "10"
+                logger.debug(f'brokenrow_section: {brokenrow_section}')
                 for row in data:
                      if row.vesselRegNo_cache.find(search.lower()) >= 0 or row.warningReferenceNo_cache.find(search.lower()) >= 0 or row.refNo_cache == search or str(row.id) == search or self.find_value(row.customerFirstName_cache.lower(),search.encode('utf-8').lower()) is True or self.find_value(row.customerLastName_cache.lower(),search.encode('utf-8').lower()) is True or self.find_value(row.customerFirstName_cache.lower()+str(' ').encode('utf-8')+row.customerLastName_cache.lower(),search.encode('utf-8')) is True:
 
@@ -3105,10 +3137,12 @@ class AdmissionsBookingViewSet(viewsets.ModelViewSet):
                           data_temp.append(row)
                      data = data_temp
                 brokenrow_section = "11"
+                logger.debug(f'brokenrow_section: {brokenrow_section}')
                 #data = data.filter(Q(warningReferenceNo__icontains=search) | Q(vesselRegNo__icontains=search) | Q(customer__first_name__icontains=search) | Q(customer__last_name__icontains=search) | Q(id__icontains=search))
             if date_from and date_to:
                 data_temp = []
                 brokenrow_section = "12.1"
+                logger.debug(f'brokenrow_section: {brokenrow_section}')
                 for row in data:
                       date_match = False
                       for row_line in row.admissions_line:
@@ -3122,6 +3156,7 @@ class AdmissionsBookingViewSet(viewsets.ModelViewSet):
             elif(date_from):
                 data_temp = []
                 brokenrow_section = "12.2"
+                logger.debug(f'brokenrow_section: {brokenrow_section}')
                 for row in data:
                       date_match = False
                       for row_line in row.admissions_line:
@@ -3135,6 +3170,7 @@ class AdmissionsBookingViewSet(viewsets.ModelViewSet):
             elif(date_to):
                 data_temp = []
                 brokenrow_section = "12.3"
+                logger.debug(f'brokenrow_section: {brokenrow_section}')
                 for row in data:
                       date_match = False
                       for row_line in row.admissions_line:
@@ -3147,24 +3183,46 @@ class AdmissionsBookingViewSet(viewsets.ModelViewSet):
             #    data = data.distinct().filter(admissionsline__arrivalDate__lte=date_to)
             #print (data)
             brokenrow_section = "13"
+            logger.debug(f'brokenrow_section: {brokenrow_section}')
             recordsFiltered = int(len(data))
             data = data[int(start):int(length)+int(start)]
-            serializer = AdmissionsBookingSerializer(data,many=True)
+            serializer = AdmissionsBookingSerializer(data, many=True)
             res = serializer.data
-            #print (res)
+
+            # 1. Collect all necessary IDs from the serializer's result.
+            booking_ids = [r['id'] for r in res]
+            creator_ids = {r.get('created_by_id') for r in res if r.get('created_by_id')}
+            canceller_ids = {r.get('canceled_by_id') for r in res if r.get('canceled_by_id')}
+
+            # 2. Fetch all required User objects in a single query.
+            all_user_ids = creator_ids.union(canceller_ids)
+            users_data = User.objects.filter(id__in=all_user_ids).values('id', 'first_name', 'last_name')
+
+            # 3. Create a map for fast lookup of user full names.
+            users_map = {
+                u['id']: f"{u['first_name']} {u['last_name']}".strip() 
+                for u in users_data
+            }
+
+            # 4. Fetch all required AdmissionsBooking objects in a single query.
+            #    This avoids calling .get() inside the loop.
+            bookings_qs = AdmissionsBooking.objects.filter(id__in=booking_ids)
+
+            # 5. Create a map for fast lookup of booking objects.
+            bookings_map = {b.id: b for b in bookings_qs}
             for r in res:
                 brokenrow_id = r['id']
                 r['booking'] = ""
                 r['booking_phone'] = ''
-                ad = AdmissionsBooking.objects.get(pk=r['id'])
-                adLines = AdmissionsLine.objects.filter(admissionsBooking=ad)
+                admissions_booking = AdmissionsBooking.objects.get(pk=r['id'])
+                adLines = AdmissionsLine.objects.filter(admissionsBooking=admissions_booking)
                 lines = []
                 for line in adLines:
                     lines.append({'date' : line.arrivalDate, 'overnight': line.overnightStay})
                 if adLines and lines != []:
                     r.update({'lines' : lines})
-                if Booking.objects.filter(admission_payment=ad).count() > 0:
-                    booking = Booking.objects.filter(admission_payment=ad)[0]
+                if Booking.objects.filter(admission_payment=admissions_booking).count() > 0:
+                    booking = Booking.objects.filter(admission_payment=admissions_booking)[0]
                     if booking.details:
                         if 'phone' in booking.details:
                              r['booking_phone'] = booking.details['phone'].encode('utf-8')
@@ -3175,45 +3233,93 @@ class AdmissionsBookingViewSet(viewsets.ModelViewSet):
                     for b in bi:
                         inv.append(b.invoice_reference)
                 else:
-                    adi = AdmissionsBookingInvoice.objects.filter(admissions_booking=ad)
+                    adi = AdmissionsBookingInvoice.objects.filter(admissions_booking=admissions_booking)
                     inv = []
                     for i in adi:
                        inv.append(i.invoice_reference)
 #                    inv = AdmissionsBookingInvoice.objects.filter(admissions_booking=ad)
 #                    inv = [adi.invoice_reference,]
                 brokenrow_section = "14"
+                logger.debug(f'brokenrow_section: {brokenrow_section}')
 
                 future_or_admin = False
                 if request.user.groups().filter(name=['Mooring Admin']).exists():
                     future_or_admin = True
                 else:
-                    future_or_admin = ad.in_future
-                r.update({'invoice_ref': inv, 'in_future': future_or_admin, 'part_booking': ad.part_booking})
+                    future_or_admin = admissions_booking.in_future
+                r.update({'invoice_ref': inv, 'in_future': future_or_admin, 'part_booking': admissions_booking.part_booking})
                 brokenrow_section = "15"
-                if(r['customer']):
+                logger.debug(f'brokenrow_section: {brokenrow_section}')
+                # if(r['customer']):
+                #     brokenrow_section = "16"
+                #     #name = ad.customer.first_name + " " + ad.customer.last_name
+                #     name = customer_details_obj[r['customer']]['first'] + " "+ customer_details_obj[r['customer']]['last']#r.customerFirstName_cache
+                #     email = ad.customer.email
+                #     r.update({'customerName': str(name).encode('utf-8'), 'email': email})
+                # Get the customer ID from the dictionary 'r'.
+
+                # Using the key 'customer_id' is consistent with the model's field name.
+                customer_id = r.get('customer_id')
+                if customer_id:
                     brokenrow_section = "16"
-                    #name = ad.customer.first_name + " " + ad.customer.last_name
-                    name = customer_details_obj[r['customer']]['first'] + " "+ customer_details_obj[r['customer']]['last']#r.customerFirstName_cache
-                    email = ad.customer.email
-                    r.update({'customerName': str(name).encode('utf-8'), 'email': email})
+                    logger.debug(f'brokenrow_section: {brokenrow_section}')
+                    
+                    # Get the complete details for this customer from our pre-fetched map.
+                    # Using .get() prevents a KeyError if the ID is invalid for some reason.
+                    customer_info = customer_details_obj.get(customer_id)
+
+                    # Proceed only if we successfully found the customer's details.
+                    if customer_info:
+                        # Construct the full name from the fetched details.
+                        first_name = customer_info.get('first', '')
+                        last_name = customer_info.get('last', '')
+                        name = f"{first_name} {last_name}".strip()
+
+                        # Get the email from the same fetched dictionary.
+                        email = customer_info.get('email', '')
+
+                        # Update the original dictionary with the correctly sourced data.
+                        r.update({
+                            'customerName': name.encode('utf-8'),
+                            'email': email
+                        })
                 else:
                     r.update({'customerName': 'No customer', 'email': "No customer"})
-                if ad.created_by is None:
-                     r['created_by'] = ""          
-                else:
-                     r['created_by'] = ad.created_by.first_name + ' '+ ad.created_by.last_name
 
+                # if admissions_booking.created_by is None:
+                #      r['created_by'] = ""
+                # else:
+                #      r['created_by'] = admissions_booking.created_by.first_name + ' '+ admissions_booking.created_by.last_name
 
-                if ad.canceled_by is None:
-                     r['canceled_by'] = ""
+                # if admissions_booking.canceled_by is None:
+                #      r['canceled_by'] = ""
+                # else:
+                #      r['canceled_by'] = admissions_booking.canceled_by.first_name + ' '+ admissions_booking.canceled_by.last_name
+
+                # if admissions_booking.cancellation_reason is None:
+                #      r['cancellation_reason'] = ""
+                # else: 
+                #      r['cancellation_reason'] = admissions_booking.cancellation_reason
+                    # Proceed only if the booking object was found.
+
+                if admissions_booking:
+                    # Get the creator's full name from the users_map.
+                    # .get() provides a default empty string if the ID is None or not found.
+                    r['created_by'] = users_map.get(admissions_booking.created_by_id, "")
+
+                    # Get the canceller's full name from the same map.
+                    r['canceled_by'] = users_map.get(admissions_booking.canceled_by_id, "")
+
+                    # Handle cancellation_reason, which is not a foreign key.
+                    r['cancellation_reason'] = admissions_booking.cancellation_reason or ""
                 else:
-                     r['canceled_by'] = ad.canceled_by.first_name + ' '+ ad.canceled_by.last_name
-                if ad.cancellation_reason is None:
-                     r['cancellation_reason'] = ""           
-                else: 
-                     r['cancellation_reason'] = ad.cancellation_reason
+                    # Handle cases where a booking ID from serializer result was not found in the DB.
+                    r['created_by'] = "Booking not found"
+                    r['canceled_by'] = "Booking not found"
+                    r['cancellation_reason'] = ""
 
                 brokenrow_section = "17"
+                logger.debug(f'brokenrow_section: {brokenrow_section}')
         except Exception as e:
             logger.error(f"Error in AdmissionsBookingViewSet list method: {str(e)}")
             res ={
