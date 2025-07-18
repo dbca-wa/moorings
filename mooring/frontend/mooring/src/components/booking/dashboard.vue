@@ -931,7 +931,40 @@ export default {
                 var fields = ['Created']
                 var fields = [...fields,...vm.dtHeaders];
                 fields.splice(vm.dtHeaders.length-1,1);
-                fields = ['Created', 'Confirmation No', 'Person', 'Email', 'Phone', 'Vessel Rego', 'Amount Due', 'Amount Paid',"Status", "Mooring", "Region", "Arrival", "Departure", "Adults","Concession","Children","Infants",'Booking Type','Invoices','Admission Ref#', 'Admission Amount','Vessel Size','Vessel Draft','Vessel Beam','Vessel Weight','Cancelled By','Cancellation Reason']
+                fields = [
+                    'Created',
+                    'Confirmation No',
+                    'Person',
+                    'Email',
+                    'Phone',
+
+                    'Vessel Rego',
+                    'Amount Due',
+                    'Amount Paid',
+                    "Status",
+                    "Mooring",
+
+                    "Region",
+                    "Arrival",
+                    "Departure",
+                    "Adults",
+                    "Concession",
+
+                    "Children",
+                    "Infants",
+                    'Booking Type',
+                    'Invoices',
+                    'Admission Ref#',
+
+                    'Admission Amount',
+                    'Vessel Size',
+                    'Vessel Draft',
+                    'Vessel Beam',
+                    'Vessel Weight',
+
+                    'Cancelled By',
+                    'Cancellation Reason'
+                ];
                 var booking_types = {
                     0: 'Reception booking',
                     1: 'Internet booking',
@@ -942,9 +975,10 @@ export default {
                 };
 
                 var bookings = [];
-                $.each(data,function (i,booking) {
+                console.log('before $each')
+                $.each(data,function (i, booking) {
                     var bk = {};
-                    $.each(fields,function (j,field) {
+                    $.each(fields, function(j, field){
                         switch (j) {
                             case 0:
                                 bk[field] = Moment(booking.created).format("DD/MM/YYYY HH:mm:ss");
@@ -962,7 +996,7 @@ export default {
                                 bk[field] = booking.phone;
                                 break;
                             case 5:
-                                bk[field] = booking.regos[0].vessel;
+                                bk[field] = booking.regos?.[0]?.vessel ?? '';
                                 break;
                             case 6:
                                 bk[field] = booking.cost_total;
@@ -975,51 +1009,74 @@ export default {
                                 break;
                             case 9:
                                 var name_list = []
-                                console.log(booking.mooringsite_bookings)
-                                for (var i = 0; i < booking.mooringsite_bookings.length; i++){
-                                    console.log(booking.mooringsite_bookings[i]);
-                                    console.log(booking.mooringsite_bookings[i][0]);
-                                    console.log(booking.mooringsite_bookings[i][1]);
-                                    console.log(booking.mooringsite_bookings[i][2]);
-                                    console.log(booking.mooringsite_bookings[i][3]);
-                                    name_list.push(booking.mooringsite_bookings[i][0]);
+                                console.log('9')
+                                // for (var i = 0; i < booking.mooringsite_bookings.length; i++){
+                                //     name_list.push(booking.mooringsite_bookings[i][0]);
+                                // }
+                                if (Array.isArray(booking.mooringsite_bookings)) {
+                                    for (let i = 0; i < booking.mooringsite_bookings.length; i++) {
+                                        if (Array.isArray(booking.mooringsite_bookings[i])) {
+                                            name_list.push(booking.mooringsite_bookings[i][0]);
+                                        }
+                                    }
                                 }
                                 bk[field] = name_list;
                                 break;
                             case 10:
-                                var name_list = []
-                                for (var i = 0; i < booking.mooringsite_bookings.length; i++){
-                                    name_list.push(booking.mooringsite_bookings[i][1]);
-                                }
+                                console.log('10')
+                                // var name_list = []
+                                // for (var i = 0; i < booking.mooringsite_bookings.length; i++){
+                                //     name_list.push(booking.mooringsite_bookings[i][1]);
+                                // }
+                                var name_list = booking.mooringsite_bookings?.map(item => item[1]) ?? [];
                                 bk[field] = name_list;
                                 break;
                             case 11:
-                                var name_list = []
-                                for (var i = 0; i < booking.mooringsite_bookings.length; i++){
-                                    name_list.push(Moment(booking.mooringsite_bookings[i][2]).format('DD/MM/YYYY HH:mm'));
-                                }
+                                // var name_list = []
+                                console.log('11')
+                                // for (var i = 0; i < booking.mooringsite_bookings.length; i++){
+                                //     name_list.push(Moment(booking.mooringsite_bookings[i][2]).format('DD/MM/YYYY HH:mm'));
+                                // }
+                                var name_list = booking.mooringsite_bookings?.map(item => {
+                                    return item && item[2] ? Moment(item[2]).format('DD/MM/YYYY HH:mm') : '';
+                                }) ?? [];
                                 bk[field] = name_list;
                                 break;
                             case 12:
-                                var name_list = []
-                                for (var i = 0; i < booking.mooringsite_bookings.length; i++){
-                                    name_list.push(Moment(booking.mooringsite_bookings[i][3]).format('DD/MM/YYYY HH:mm'));
-                                }
+                                // var name_list = []
+                                console.log('12')
+                                // for (var i = 0; i < booking.mooringsite_bookings.length; i++){
+                                //     for (var i = 0; i < booking.mooringsite_bookings.length; i++){
+                                //         name_list.push(Moment(booking.mooringsite_bookings[i][3]).format('DD/MM/YYYY HH:mm'));
+                                //     }
+                                // }
+                                var name_list = booking.mooringsite_bookings?.map(item => {
+                                    return item && item[3] ? Moment(item[3]).format('DD/MM/YYYY HH:mm') : '';
+                                }) ?? [];
                                 bk[field] = name_list;
                                 break;
                             case 13:
-                                bk[field] = booking.guests.adults;
+                                // bk[field] = booking.guests.adults;
+                                console.log('13')
+                                bk[field] = booking.guests?.adults ?? 0;
                                 break;
                             case 14:
-                                bk[field] =  booking.guests.concession;
+                                // bk[field] =  booking.guests.concession;
+                                console.log('14')
+                                bk[field] =  booking.guests?.concession ?? 0;
                                 break;
                             case 15:
-                                bk[field] =  booking.guests.children;
+                                // bk[field] =  booking.guests.children;
+                                console.log('15')
+                                bk[field] =  booking.guests?.children ?? 0;
                                 break;
                             case 16:
-                                bk[field] =  booking.guests.infants;
+                                // bk[field] =  booking.guests.infants;
+                                console.log('16')
+                                bk[field] =  booking.guests?.infants ?? 0;
                                 break;
                             case 17:
+                                console.log('17')
                                 if (typeof booking_types[booking.booking_type] !== 'undefined') {
                                     bk[field] = booking_types[booking.booking_type];
                                 } else {
@@ -1027,23 +1084,27 @@ export default {
                                 }
                                 break;
                             case 18:
+                                console.log('18')
                                 bk[field] = booking.invoices;
                                 break;
                             case 19:
+                                console.log('19')
                                 if (booking.admissions) { 
-                                	bk[field] = 'AD'+booking.admissions.id;
+                                	bk[field] = 'AD' + booking.admissions.id;
                                 } else {
                                     bk[field] = '';
                                 }
                                 break;
                             case 20:
+                                console.log('20')
                                 if (booking.admissions) {
-                                    	bk[field] = booking.admissions.amount;
+                                    bk[field] = booking.admissions.amount;
                                 } else {
                                     bk[field] = '';
                                 }
                                 break;
                             case 21:
+                                console.log('21')
                                 if (booking.vessel_details) {
                                         bk[field] = booking.vessel_details.vessel_size;
                                 } else {
@@ -1051,6 +1112,7 @@ export default {
                                 }
                                 break;
                             case 22:
+                                console.log('22')
                                 if (booking.vessel_details) {
                                         bk[field] = booking.vessel_details.vessel_draft;
                                 } else {
@@ -1058,31 +1120,35 @@ export default {
                                 }
                                 break;
                             case 23:
+                                console.log('23')
                                 if (booking.vessel_details) {
-                                        bk[field] = booking.vessel_details.vessel_beam;
+                                    bk[field] = booking.vessel_details.vessel_beam;
                                 } else {
-                                        bk[field] = '';
+                                    bk[field] = '';
                                 }
                                 break;
                             case 24:
+                                console.log('24')
                                 if (booking.vessel_details) {
-                                        bk[field] = booking.vessel_details.vessel_weight;
+                                    bk[field] = booking.vessel_details.vessel_weight;
                                 } else {
-                                        bk[field] = '';
+                                    bk[field] = '';
                                 }
                                 break;
                             case 25:
+                                ronsole.log('25')
                                 if (booking.vessel_details) {
-                                        bk[field] = booking.canceled_by;
+                                    bk[field] = booking.canceled_by;
                                 } else {
-                                        bk[field] = '';
+                                    bk[field] = '';
                                 }
                                 break;
                             case 26:
+                                ronsole.log('26')
                                 if (booking.vessel_details) {
-                                        bk[field] = booking.cancelation_reason;
+                                    bk[field] = booking.cancelation_reason;
                                 } else {
-                                        bk[field] = '';
+                                    bk[field] = '';
                                 }
                                 break;
                         }
