@@ -1,5 +1,5 @@
 <template lang="html">
-    <div  id="cg_contact" >
+    <div id="cg_contact" >
         <div>
             <form id="contactForm">
                 <div class="col-sm-12">
@@ -7,7 +7,7 @@
                         <p>Mooring successfully updated</p>
                     </alert>
                     <alert :show.sync="showError" type="danger">
-                        <p>{{errorString}}<p/>
+                        <p>{{errorString}}</p>
                     </alert>
                     <div class="row">
                         <div class="col-lg-12">
@@ -43,7 +43,7 @@
                                     <div class="form-group pull-right">
                                         <a href="#" v-if="createCampground" class="btn btn-primary" @click.prevent="create">Create</a>
                                         <a href="#" v-else class="btn btn-primary" @click.prevent="update">Update</a>
-                                        <a href="#" class="btn btn-default" @click.prevent="goBack">Cancel</a>
+                                        <a href="#" class="btn btn-primary" @click.prevent="goBack">Cancel</a>
                                     </div>
                                 </div>
                             </div>
@@ -197,49 +197,22 @@ export default {
             vm.$emit('save', url, method, reload, "contact");
         },
         showAlert: function() {
-            bus.$emit('showAlert', 'alert1');
+            // bus.$emit('showAlert', 'alert1');
+            bus.emit('showAlert', 'alert1');
         },
-        // addFormValidations: function() {
-        //     this.form.validate({
-		// 		ignore:'div.ql-editor',
-        //         rules: {
-        //             contact: "required",
-        //             email: {
-        //                 required: true,
-        //                 email: true
-        //             },
-        //             telephone: "required",
-
-        //         },
-        //         messages: {
-        //             contact: "Please select a contact",
-        //             email: "Please select a contact",
-        //             telephone: "Please select a contact",
-        //         },
-        //         showErrors: function(errorMap, errorList) {
-        //             $.each(this.validElements(), function(index, element) {
-        //                 var $element = $(element);
-
-        //                 $element.attr("data-original-title", "").parents('.form-group').removeClass('has-error');
-        //             });
-
-        //             // destroy tooltips on valid elements
-        //             $("." + this.settings.validClass).tooltip("destroy");
-
-        //             // add or update tooltips
-        //             for (var i = 0; i < errorList.length; i++) {
-        //                 var error = errorList[i];
-        //                 $('#contact').focus();
-        //                 $(error.element)
-        //                     .tooltip({
-        //                         trigger: "focus"
-        //                     })
-        //                     .attr("data-original-title", error.message)
-        //                     .parents('.form-group').addClass('has-error');
-        //             }
-        //         }
-        //     });
-        // },
+        async fetchContacts() {
+            const url = api_endpoints.contacts;
+            try {
+                const response = await fetch(url);
+                if (!response.ok) {
+                    throw new Error(`HTTP error! Status: ${response.status}`);
+                }
+                const data = await response.json();
+                this.contacts = data;
+            } catch (error) {
+                console.error('Failed to fetch contacts:', error);
+            }
+        }
     },
     mounted: function() {
         let vm = this;
@@ -247,12 +220,13 @@ export default {
   
         vm.form = $('#contactForm');
         // vm.addFormValidations();
-		vm.$http.get(api_endpoints.contacts).then((response) => {
-			vm.contacts = response.body
-		}, (error) => {
-			console.log(error);
-		});
-        $('.form-control').blur(function(){
+		// vm.$http.get(api_endpoints.contacts).then((response) => {
+		// 	vm.contacts = response.body
+		// }, (error) => {
+		// 	console.log(error);
+		// });
+        vm.fetchContacts();
+        $('#cg_contact .form-control').on('blur', function(){
             vm.$emit('updated', vm.campground);
         });
         //Contact

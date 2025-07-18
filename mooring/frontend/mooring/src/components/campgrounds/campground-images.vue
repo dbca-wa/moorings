@@ -7,7 +7,7 @@
 				<p>Mooring successfully updated</p>
 			</alert>
 			<alert :show.sync="showError" type="danger">
-				<p>{{errorString}}<p/>
+				<p>{{errorString}}</p>
 			</alert>
 					<div class="row">
 						<div class="col-lg-12">
@@ -17,7 +17,7 @@
                                     <div class="form-group pull-right">
                                         <a href="#" v-if="createCampground" class="btn btn-primary" @click.prevent="create">Create</a>
                                         <a href="#" v-else class="btn btn-primary" @click.prevent="update">Update</a>
-                                        <a href="#" class="btn btn-default" @click.prevent="goBack">Cancel</a>
+                                        <a href="#" class="btn btn-primary" @click.prevent="goBack">Cancel</a>
                                     </div>
                                 </div>
                             </div>
@@ -136,7 +136,8 @@ export default {
             vm.$emit('save', url, method, reload, "images");
         },
         showAlert: function() {
-            bus.$emit('showAlert', 'alert1');
+            // bus.$emit('showAlert', 'alert1');
+            bus.emit('showAlert', 'alert1');
         },
     },
     mounted: function() {

@@ -47,7 +47,7 @@
                                             <label class="col-md-2 control-label pull-left required"  for="Campground">Guests: </label>
                                             <div class="col-md-8">
                                                   <div class="dropdown guests">
-                                                      <input type="text" class="form-control dropdown-toggle" name="guests" placeholder="Guests" data-toggle="dropdown" aria-haspopup="true" aria-expanded="true" v-model="guestsText">
+                                                      <input type="text" class="form-control dropdown-toggle" name="guests" placeholder="Guests" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="true" v-model="guestsText">
                                                       <ul class="dropdown-menu" aria-labelledby="dropdownMenu1">
                                                           <li v-for="guest in guestsPicker">
                                                               <div class="row">
@@ -87,8 +87,8 @@
                                     Click <a target="_blank" :href="campground.campground_map">here</a> to open the map of the campground to help you select the preferred campsite
                                 </p>
                                 <ul class="nav nav-tabs">
-                                    <li :class="{active:campground.site_type == 0}" v-show="campground.site_type == 0" ><a data-toggle="tab" href="#campsite-booking" @click.prevent="booking_type=booking_types.CAMPSITE">Campsite</a></li>
-                                    <li :class="{active:(campground.site_type == 1) || (campground.site_type == 2)}" v-show="campground.site_type == 1" ><a data-toggle="tab" href="#campsite-class-booking" @click.prevent="booking_type=booking_types.CLASS">Campsite Type </a></li>
+                                    <li :class="{active:campground.site_type == 0}" v-show="campground.site_type == 0" ><a data-bs-toggle="tab" href="#campsite-booking" @click.prevent="booking_type=booking_types.CAMPSITE">Campsite</a></li>
+                                    <li :class="{active:(campground.site_type == 1) || (campground.site_type == 2)}" v-show="campground.site_type == 1" ><a data-bs-toggle="tab" href="#campsite-class-booking" @click.prevent="booking_type=booking_types.CLASS">Campsite Type </a></li>
                                 </ul>
                                 <div class="tab-content">
                                     <div id="campsite-booking" class="tab-pane fade in active" v-if="campground.site_type == 0">
@@ -210,7 +210,7 @@
                                       <div class="form-group">
                                           <label for="vehicles" class="required">Number of Vehicles</label>
                                           <div class="dropdown guests">
-                                              <input type="number" min="0" max="10" name="vehicles" class="form-control dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="true" readonly="true" v-model="booking.parkEntry.vehicles" @change="updatePrices()">
+                                              <input type="number" min="0" max="10" name="vehicles" class="form-control dropdown-toggle" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="true" readonly="true" v-model="booking.parkEntry.vehicles" @change="updatePrices()">
                                               <ul class="dropdown-menu" aria-labelledby="dropdownMenu1">
                                                   <li v-for="park_entry in parkEntryPicker">
                                                       <div class="row">
@@ -292,7 +292,7 @@
                 </div>
             </div>
             <div slot="footer">
-                <button id="okBtn" type="button" class="btn btn-default" @click="finishBooking()">Finalize Booking</button>
+                <button id="okBtn" type="button" class="btn btn-primary" @click="finishBooking()">Finalize Booking</button>
             </div>
         </modal>
     </div>
@@ -991,25 +991,8 @@ export default {
                     firstname: "fill in all details",
                 },
                 showErrors: function(errorMap, errorList) {
-                    $.each(this.validElements(), function(index, element) {
-                        var $element = $(element);
-
-                        $element.attr("data-original-title", "").parents('.form-group').removeClass('has-error');
-                    });
-
-                    // destroy tooltips on valid elements
-                    $("." + this.settings.validClass).tooltip("destroy");
-
-                    // add or update tooltips
-                    for (var i = 0; i < errorList.length; i++) {
-                        var error = errorList[i];
-                        $(error.element)
-                            .tooltip({
-                                trigger: "focus"
-                            })
-                            .attr("data-original-title", error.message)
-                            .parents('.form-group').addClass('has-error');
-                    }
+                    const { showErrors } = helpers.useFormErrors();
+                    showErrors(errorMap, errorList, this.validElements());
                 }
             });
         },
@@ -1075,7 +1058,7 @@ export default {
     .awesomplete{
         width:100%;
     }
-    .dropdown-menu:before {
+    /* .dropdown-menu:before {
       position: absolute;
       top: -12px;
       left: 12px;
@@ -1085,11 +1068,11 @@ export default {
       border-left: 12px solid transparent;
       border-bottom-color: rgba(46, 109, 164, 1);
       content: '';
-    }
-    .dropdown-menu{
+    } */
+    /* .dropdown-menu{
         top:120%;
         width: 300px;
-    }
+    } */
     .guests li{
         padding: 10px;
         margin-right: 10px;

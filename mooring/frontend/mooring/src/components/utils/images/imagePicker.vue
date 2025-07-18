@@ -52,7 +52,8 @@ import {
 }
 from '../eventBus.js'
 import loader from '../loader.vue'
-module.exports = {
+
+export default {
     name: '',
     props:{
         showCaption:{
@@ -173,7 +174,7 @@ module.exports = {
     mounted: function() {
         let vm = this;
         vm.slick_init();
-        bus.$on('campgroundFetched',function(){
+        bus.on('campgroundFetched',function(){
             if (vm.images){
                 $('.upload').slick('unslick');
                 vm.imageLoaderText='Loading Images...'
@@ -252,7 +253,7 @@ module.exports = {
 /* Slider */
 .slick-loading .slick-list
 {
-    background: #fff url('/slick-carousel-browserify/slick/ajax-loader.gif') center center no-repeat;
+    /* background: #fff url('/slick-carousel-browserify/slick/ajax-loader.gif') center center no-repeat; */
 }
 
 /* Arrows */

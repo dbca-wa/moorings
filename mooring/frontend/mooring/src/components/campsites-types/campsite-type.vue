@@ -3,7 +3,7 @@
        <div class="panel panel-default" id="applications">
          <div class="panel-heading" role="tab" id="applications-heading">
              <h4 class="panel-title">
-                 <a role="button" data-toggle="collapse" href="#applications-collapse"
+                 <a role="button" data-bs-toggle="collapse" href="#applications-collapse"
                     aria-expanded="false" aria-controls="applications-collapse">
                      <h3>Camp Site Type</h3>
                  </a>
@@ -75,7 +75,7 @@
                                                   <div class="pull-right">
                                                       <button type="button" v-show="createCampsiteType" style="margin-right:5px" @click="addCampsiteType()" class="btn btn-primary">Create</button>
                                                       <button type="button" v-show="!createCampsiteType" style="margin-right:5px" @click="updateCampsiteType()" class="btn btn-primary">Update</button>
-                                                      <button type="button" class="btn btn-default pull-right" @click="goBack">Cancel</button>
+                                                      <button type="button" class="btn btn-primary pull-right" @click="goBack">Cancel</button>
                                                   </div>
 
                                               </div>

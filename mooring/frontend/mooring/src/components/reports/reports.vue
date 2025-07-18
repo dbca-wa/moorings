@@ -634,25 +634,8 @@ export default {
                     banked_start: "Field is required",
                 },
                 showErrors:function(errorMap, errorList) {
-                    $.each(this.validElements(), function(index, element) {
-                        var $element = $(element);
-
-                        $element.attr("data-original-title", "").parents('.form-group').removeClass('has-error');
-                    });
-
-                    // destroy tooltips on valid elements
-                    $("." + this.settings.validClass).tooltip("destroy");
-
-                    // add or update tooltips
-                    for (var i = 0; i < errorList.length; i++) {
-                        var error = errorList[i];
-                        $(error.element)
-                            .tooltip({
-                                trigger: "focus"
-                            })
-                            .attr("data-original-title", error.message)
-                            .parents('.form-group').addClass('has-error');
-                    }
+                    const { showErrors } = helpers.useFormErrors();
+                    showErrors(errorMap, errorList, this.validElements());
                 }
             });
             vm.refund_form.validate({
@@ -673,25 +656,8 @@ export default {
                     refund_end_date: "Field is required",
                 },
                 showErrors:function(errorMap, errorList) {
-                    $.each(this.validElements(), function(index, element) {
-                        var $element = $(element);
-
-                        $element.attr("data-original-title", "").parents('.form-group').removeClass('has-error');
-                    });
-
-                    // destroy tooltips on valid elements
-                    $("." + this.settings.validClass).tooltip("destroy");
-
-                    // add or update tooltips
-                    for (var i = 0; i < errorList.length; i++) {
-                        var error = errorList[i];
-                        $(error.element)
-                            .tooltip({
-                                trigger: "focus"
-                            })
-                            .attr("data-original-title", error.message)
-                            .parents('.form-group').addClass('has-error');
-                    }
+                    const { showErrors } = helpers.useFormErrors();
+                    showErrors(errorMap, errorList, this.validElements());
                 }
             });
             vm.oracle_form.validate({
@@ -702,25 +668,8 @@ export default {
                     oracle_date: "Field is required",
                 },
                 showErrors:function(errorMap, errorList) {
-                    $.each(this.validElements(), function(index, element) {
-                        var $element = $(element);
-
-                        $element.attr("data-original-title", "").parents('.form-group').removeClass('has-error');
-                    });
-
-                    // destroy tooltips on valid elements
-                    $("." + this.settings.validClass).tooltip("destroy");
-
-                    // add or update tooltips
-                    for (var i = 0; i < errorList.length; i++) {
-                        var error = errorList[i];
-                        $(error.element)
-                            .tooltip({
-                                trigger: "focus"
-                            })
-                            .attr("data-original-title", error.message)
-                            .parents('.form-group').addClass('has-error');
-                    }
+                    const { showErrors } = helpers.useFormErrors();
+                    showErrors(errorMap, errorList, this.validElements());
                 }
             });
             vm.booking_settlements_form.validate({
@@ -731,25 +680,8 @@ export default {
                     booking_settlement_date: "Field is required",
                 },
                 showErrors:function(errorMap, errorList) {
-                    $.each(this.validElements(), function(index, element) {
-                        var $element = $(element);
-
-                        $element.attr("data-original-title", "").parents('.form-group').removeClass('has-error');
-                    });
-
-                    // destroy tooltips on valid elements
-                    $("." + this.settings.validClass).tooltip("destroy");
-
-                    // add or update tooltips
-                    for (var i = 0; i < errorList.length; i++) {
-                        var error = errorList[i];
-                        $(error.element)
-                            .tooltip({
-                                trigger: "focus"
-                            })
-                            .attr("data-original-title", error.message)
-                            .parents('.form-group').addClass('has-error');
-                    }
+                    const { showErrors } = helpers.useFormErrors();
+                    showErrors(errorMap, errorList, this.validElements());
                 }
             });
             vm.bookings_form.validate({
@@ -760,25 +692,8 @@ export default {
                     bookings_date: "Field is required",
                 },
                 showErrors:function(errorMap, errorList) {
-                    $.each(this.validElements(), function(index, element) {
-                        var $element = $(element);
-
-                        $element.attr("data-original-title", "").parents('.form-group').removeClass('has-error');
-                    });
-
-                    // destroy tooltips on valid elements
-                    $("." + this.settings.validClass).tooltip("destroy");
-
-                    // add or update tooltips
-                    for (var i = 0; i < errorList.length; i++) {
-                        var error = errorList[i];
-                        $(error.element)
-                            .tooltip({
-                                trigger: "focus"
-                            })
-                            .attr("data-original-title", error.message)
-                            .parents('.form-group').addClass('has-error');
-                    }
+                    const { showErrors } = helpers.useFormErrors();
+                    showErrors(errorMap, errorList, this.validElements());
                 }
             });
         },

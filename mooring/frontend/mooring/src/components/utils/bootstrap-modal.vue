@@ -3,6 +3,7 @@
         <div class="modal" @click.self="clickMask">
             <div class="modal-dialog" :class="modalClass">
                 <div class="modal-content">
+
                     <!--Header-->
                     <slot name="header">
                         <div class="modal-header">
@@ -14,10 +15,12 @@
                             </h4>
                         </div>
                     </slot>
+
                     <!--Container-->
                     <div class="modal-body">
                         <slot></slot>
                     </div>
+
                     <!--Footer-->
                     <div class="modal-footer">
                         <slot name="footer">
@@ -25,6 +28,7 @@
                             <button v-if="showCancel" type="button" :class="cancelClass" @click="cancel">{{cancelText}}</button>
                         </slot>
                     </div>
+
                 </div>
             </div>
         </div>
@@ -82,11 +86,11 @@
             },
             okClass: {
                 type: String,
-                default: 'btn btn-default'
+                default: 'btn btn-primary'
             },
             cancelClass: {
                 type: String,
-                default: 'btn btn-default'
+                default: 'btn btn-secondary'
             },
             closeWhenOK: {
                 type: Boolean,

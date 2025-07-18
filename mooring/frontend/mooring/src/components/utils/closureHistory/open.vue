@@ -52,7 +52,8 @@ import {bus} from '../../utils/eventBus.js'
 import { $, datetimepicker,api_endpoints, validate, helpers } from '../../../hooks'
 import alert from '../../utils/alert.vue'
 import reason from '../../utils/reasons.vue'
-module.exports = {
+
+export default {
     name: 'pkCsOpen',
     data: function() {
         return {
@@ -124,7 +125,8 @@ module.exports = {
                 dataType: 'json',
                 success: function(data, stat, xhr) {
                     vm.close();
-                    bus.$emit('refreshCSTable');
+                    // bus.$emit('refreshCSTable');
+                    bus.emit('refreshCSTable');
                 },
                 error:function (data){
                     vm.errors = true;
@@ -158,32 +160,15 @@ module.exports = {
                     open_details: "Details required if Other reason is selected"
                 },
                 showErrors: function(errorMap, errorList) {
-
-                    $.each(this.validElements(), function(index, element) {
-                        var $element = $(element);
-                        $element.attr("data-original-title", "").parents('.form-group').removeClass('has-error');
-                    });
-
-                    // destroy tooltips on valid elements
-                    $("." + this.settings.validClass).tooltip("destroy");
-
-                    // add or update tooltips
-                    for (var i = 0; i < errorList.length; i++) {
-                        var error = errorList[i];
-                        $(error.element)
-                            .tooltip({
-                                trigger: "focus"
-                            })
-                            .attr("data-original-title", error.message)
-                            .parents('.form-group').addClass('has-error');
-                    }
+                    const { showErrors } = helpers.useFormErrors();
+                    showErrors(errorMap, errorList, this.validElements());
                 }
             });
        }
     },
     mounted: function() {
         var vm = this;
-        bus.$on('opencloseCS', function(data){
+        bus.on('opencloseCS', function(data){
             vm.status = data.status;
             vm.id = data.id;
             vm.current_closure = data.closure;
@@ -197,9 +182,14 @@ module.exports = {
         });
         vm.form = $('#openCGForm');
         vm.addFormValidations();
-        bus.$once('openReasons',setReasons => {
+        // bus.$once('openReasons',setReasons => {
+        //     vm.reasons = setReasons;
+        // });
+        const onDataLoadedOnce = (setReasons) => {
             vm.reasons = setReasons;
-        });
+            bus.off('openReasons', onDataLoadedOnce);
+        };
+        bus.on('openReasons', onDataLoadedOnce);
     }
 };
 </script>

@@ -1,620 +1,1012 @@
 {% extends 'mooring/base.html' %}
 {% load static %}
 {% load users %}
-{% block extra_css %}
-    <link href="/static/ledger/css/bootstrap.min.css" rel="stylesheet">
-    <link href="/static/common/css/dataTables.bootstrap.min.css?ver={{ GIT_COMMIT_HASH }}" rel="stylesheet"/>
-    <link href="/static/common/css/select2.min.css?ver={{ GIT_COMMIT_HASH }}" rel="stylesheet"/>
-    <link href="/static/common/css/select2-bootstrap.css?ver={{ GIT_COMMIT_HASH }}" rel="stylesheet"/>
-    <link href="/static/common/css/font-awesome.css?ver={{ GIT_COMMIT_HASH }}" rel="stylesheet"/>
-    <link rel="stylesheet" href="{% static 'mooring/css/dashboard.css' %}?ver={{ GIT_COMMIT_HASH }}">
-<style>
-#table-abb>tbody>tr>td.details-control:before {
-    top: 9px;
-    left: 4px;
-    height: 14px;
-    width: 14px;
-    display: inline-block;
-    color: white;
-    border: 2px solid white;
-    border-radius: 14px;
-    box-shadow: 0 0 3px #444;
-    box-sizing: content-box;
-    text-align: center;
-    text-indent: 0 !important;
-    font-family: 'Courier New', Courier, monospace;
-    line-height: 14px;
-    content: '+';
-    margin-right: 10px;
-    background-color: #31b131;
-}
-#table-abb>tbody>tr.shown>td.details-control:before {
-    content: '-';
-    background-color: #d33333 !important;
-}
-</style>
 
+{% block extra_css %}
+  <link href="{% static 'common/css/bootstrap.min.css' %}" rel="stylesheet" />
+  <link href="{% static 'common/css/dataTables.bootstrap5.min.css' %}?ver={{ GIT_COMMIT_HASH }}" rel="stylesheet" />
+  <link href="{% static 'common/css/select2.min.css' %}?ver={{ GIT_COMMIT_HASH }}" rel="stylesheet" />
+  <link href="{% static 'common/css/select2-bootstrap.css' %}?ver={{ GIT_COMMIT_HASH }}" rel="stylesheet" />
+  <link href="{% static 'common/css/font-awesome.css' %}?ver={{ GIT_COMMIT_HASH }}" rel="stylesheet" />
+  <link href="{% static 'mooring/css/dashboard.css' %}?ver={{ GIT_COMMIT_HASH }}" rel="stylesheet"/>
+  <style>
+      #table-abb > tbody > tr > td.details-control:before {
+          top: 9px;
+          left: 4px;
+          height: 14px;
+          width: 14px;
+          display: inline-block;
+          color: white;
+          border: 2px solid white;
+          border-radius: 14px;
+          box-shadow: 0 0 3px #444;
+          box-sizing: content-box;
+          text-align: center;
+          text-indent: 0 !important;
+          font-family: "Courier New", Courier, monospace;
+          line-height: 14px;
+          content: "+";
+          margin-right: 10px;
+          background-color: #31b131;
+      }
+      #table-abb > tbody > tr.shown > td.details-control:before {
+          content: "-";
+          background-color: #d33333 !important;
+      }
+  </style>
 {% endblock %}
+
 {% block extra_js %}
 {% endblock %}
+
 {% block requirements %}
 {% endblock %}
 
 {% block content %}
+<div id="letter-pdf-iframe" style="display: none"></div>
 
-<div id='letter-pdf-iframe' style='display:none'>
-
-</div>
-
-<div class="modal" tabindex="-1" role="dialog" id='cancelBookingModal' >
-  <div class="modal-dialog" role="document">
-    <div class="modal-content">
-      <div class="modal-header">
-        <h5 class="modal-title">Are you sure you wish to cancel booking?</h5>
-        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-           <span aria-hidden="true">&times;</span>
-        </button>
-      </div>
-      <div class="modal-body">
-	<center>
-	   <div class='col-lg-12'>
-   	       <textarea class='form-control textarea' id='cancellation_reason' rows='10'></textarea>
-	       &nbsp;
-	   </div>
-	   <div class='col-lg-12'>
-   	      <button type="button" class="btn btn-lg btn-danger" onclick="annual_bookings.cancel_booking_confirm_no();">Cancel</button>
-              <button type="button" class="btn btn-lg btn-success" onclick="annual_bookings.cancel_booking_confirm_yes();">Submit Cancellation</button> 
-	      &nbsp;
-	    </div>
-	    &nbsp;
-	</center>
-      </div>
-      <div class="modal-footer">
-	      &nbsp;
-      </div>
-    </div>
-  </div>
-</div>
-
-
-<div class="modal" tabindex="-1" role="dialog" id='stickerUpdateModal' >
-  <div class="modal-dialog" role="document">
-    <div class="modal-content">
-      <div class="modal-header">
-        <h5 class="modal-title">Please enter sticker:</h5>
-        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-           <span aria-hidden="true">&times;</span>
-        </button>
-      </div>
-      <div class="modal-body">
-	<div class="col-lg-12">
-                <div id='sticker-error'>
-
-	            </div>
-
-        </div>
-	<div class="col-lg-12">
-		<label for="">Sticker No for Vessel <span id='sticker_rego_no'></span></label>
-               <input value="" id="sticker_no" class="form-control" type="text" placeholder="Sticker No" minlength='7' maxlength='7'>
-	       &nbsp;
-	</div>
-        <div class="col-lg-12">
-               <label for="">Comment</label>
-               <textarea class='form-control textarea' id='sticker_comment' rows='10'></textarea>
-               &nbsp;
-        </div>
-	<div class="col-lg-12 text-right">
-		<button type="button" class="btn btn-lg btn-primary" onclick="annual_bookings.save_sticker(false);">Update</button> <button type="button" class="btn btn-lg btn-primary" onclick="annual_bookings.save_sticker(true);">Update & PDF</button>
-	</div>
-	&nbsp;
-      </div>
-      <div class="modal-footer">
-              &nbsp;
-      </div>
-    </div>
-  </div>
-</div>
-
-
-
-
-    <div class="container" id="dashboard-table-container">
-	    <div id='errors'>
+<div class="modal" tabindex="-1" role="dialog" id="cancelBookingModal">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">
+                    Are you sure you wish to cancel booking?
+                </h5>
+                <button
+                    type="button"
+                    class="close"
+                    data-dismiss="modal"
+                    aria-label="Close"
+                >
+                    <span aria-hidden="true">&times;</span>
+                </button>
             </div>
-<div class="panel panel-default">
-    <div class="panel-heading" role="tab" id="title_heading">
-        <h3 class="panel-title">
-            <a role="button" data-toggle="collapse" href="#search_person_company_collapse" aria-expanded="false" aria-controls="search_person_company_collapse">
-                Annual Admission Bookings 
-            </a>
-        </h3>
-    </div>
-
-    <div class="panel-collapse collapse in" id="search_person_company_collapse" role="tabpanel" aria-labelledby="search_person_company_heading">
-        <div class="panel-body">
-
-        <div class="col-lg-12">
-           <form onsubmit="annual_bookings.get();return false;" ionkeydown="return event.key != 'Enter';">
-          <div class="row">
-          <div class="col-lg-9">
-                &nbsp; 
-
-          </div>
-          <div class="col-lg-3">
-                  <button type="button" id='export-csv-button-loader' class="btn btn-default pull-right" disabled="disabled" style='display:none'><i aria-hidden="true" class="fa fa-circle-o-notch fa-spin"></i> Exporting to CSV</button>
-		  <button type="button" id="export-csv-button" class="btn btn-default pull-right" onclick="annual_bookings.get('csv');"><i aria-hidden="true" class="fa fa-file-excel-o"></i> Export to CSV </button>
-	  </div>
-
-          <div class="col-lg-3">
-            <span style='display: none' class="pull-left"><a href="{% url "dash-failed_refunds_completed" %}" type="button" class="btn btn-primary" style="">Completed Refunds</a></span>
-                <div class="form-group">
-                        <label for="">Booking Period</label>
-                        <select id="booking-period" class="form-control">
-                                <option value="ALL">All</option>
-				{% for i in annual_booking_period_group %}
-				   <option value="{{ i.id }}">{{ i.name }}</option>
-				{% endfor %}
-                        </select>
-                </div>
-           </div>
- 
-	
-          <div class="col-lg-3">
-            <span style='display: none' class="pull-left"><a href="{% url "dash-failed_refunds_completed" %}" type="button" class="btn btn-primary" style="">Completed Refunds</a></span>
-		<div class="form-group">
-			<label for="">Status</label> 
-			<select id="status" class="form-control">
-                                <option value="ALL">All</option>
-				<option value="current">Current</option> 
-				<option value="cancelled">Cancelled</option>
-				<option value="awaiting sticker">Awaiting Sticker</option>
-				<option value="expired">Expired</option>
-				<option value="future">Future</option>
-			</select>
-		</div>
-	   </div>
-
-
-          <div class="col-lg-3">
-            <label for="">Keyword</label>
-            <input value='{{ keyword }}'  id='keyword' class="form-control" type='text' placeholder='Enter Keyword'>
-          </div>
-
-	   <div class="col-lg-3">
-
-                <label for="">&nbsp;</label>
-                <div class="col-lg-12">
-                <span class=""><button onclick="annual_bookings.get();" type="button" class="btn btn-primary" style="">Filter</a></button>
-	        </div>
-	   </div>
-	  
-          </div>
+            <div class="modal-body">
+                <center>
+                    <div class="col-lg-12">
+                        <textarea
+                            class="form-control textarea"
+                            id="cancellation_reason"
+                            rows="10"
+                        ></textarea>
+                        &nbsp;
+                    </div>
+                    <div class="col-lg-12">
+                        <button
+                            type="button"
+                            class="btn btn-lg btn-danger"
+                            onclick="annual_bookings.cancel_booking_confirm_no();"
+                        >
+                            Cancel
+                        </button>
+                        <button
+                            type="button"
+                            class="btn btn-lg btn-success"
+                            onclick="annual_bookings.cancel_booking_confirm_yes();"
+                        >
+                            Submit Cancellation
+                        </button>
+                        &nbsp;
+                    </div>
+                    &nbsp;
+                </center>
+            </div>
+            <div class="modal-footer">&nbsp;</div>
         </div>
-        </form>
-        <div class="col-lg-12">
-		&nbsp;
-	</div>	
-        <table width="100%" id='table-abb'  class='display responsive hover table table-striped table-bordered dt-responsive nowrap dataTable no-footer dtr-inline'>
-        <thead>
-        <tr>
-		<th>ID</th><th>Created</th><th>Person</th><th>Mobile</th><th>Vessel Reg # / length</th><th>Sticker#</th><th>Year</th><th class='none'>Status</th><th class='none'>Actions</th>
-	
-	</tr>
-        </thead>
-        <tbody>
-        </tbody>
-        </table>
     </div>
 </div>
+
+<div class="modal" tabindex="-1" role="dialog" id="stickerUpdateModal">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Please enter sticker:</h5>
+                <button
+                    type="button"
+                    class="close"
+                    data-dismiss="modal"
+                    aria-label="Close"
+                >
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <div class="col-lg-12">
+                    <div id="sticker-error"></div>
+                </div>
+                <div class="col-lg-12">
+                    <label for=""
+                        >Sticker No for Vessel <span id="sticker_rego_no"></span
+                    ></label>
+                    <input
+                        value=""
+                        id="sticker_no"
+                        class="form-control"
+                        type="text"
+                        placeholder="Sticker No"
+                        minlength="7"
+                        maxlength="7"
+                    />
+                    &nbsp;
+                </div>
+                <div class="col-lg-12">
+                    <label for="">Comment</label>
+                    <textarea
+                        class="form-control textarea"
+                        id="sticker_comment"
+                        rows="10"
+                    ></textarea>
+                    &nbsp;
+                </div>
+                <div class="col-lg-12 text-right">
+                    <button
+                        type="button"
+                        class="btn btn-lg btn-primary"
+                        onclick="annual_bookings.save_sticker(false);"
+                    >
+                        Update
+                    </button>
+                    <button
+                        type="button"
+                        class="btn btn-lg btn-primary"
+                        onclick="annual_bookings.save_sticker(true);"
+                    >
+                        Update & PDF
+                    </button>
+                </div>
+                &nbsp;
+            </div>
+            <div class="modal-footer">&nbsp;</div>
+        </div>
+    </div>
+</div>
+
+<div class="container" id="dashboard-table-container">
+    <div id="errors"></div>
+
+    <div class="card">
+        <div class="card-header" id="title_heading" role="tab">
+            <h2 class="mb-0">
+                <button
+                    class="btn d-flex justify-content-between align-items-center w-100 text-start"
+                    type="button"
+                    data-bs-toggle="collapse"
+                    data-bs-target="#search_person_company_collapse"
+                    :aria-expanded="true"
+                    aria-controls="search_person_company_collapse"
+                >
+                    <h3 class="mb-0">Annual Admission Bookings</h3>
+                    <span><i class="bi bi-chevron-down fs-4 fw-bold"></i></span>
+                </button>
+            </h2>
+        </div>
+
+        <div
+            id="search_person_company_collapse"
+            class="collapse show"
+            role="tabpanel"
+            aria-labelledby="title_heading"
+        >
+            <div class="card-body">
+                <div class="col-lg-12">
+                    <form onsubmit="annual_bookings.get();return false;" ionkeydown="return event.key != 'Enter';">
+                        <div class="row">
+                            <div class="col-lg-9">&nbsp;</div>
+                            <div class="col-lg-3">
+                                <button
+                                    type="button"
+                                    id="export-csv-button-loader"
+                                    class="btn btn-primary pull-right"
+                                    disabled="disabled"
+                                    style="display: none"
+                                >
+                                    <i aria-hidden="true" class="fa fa-circle-o-notch fa-spin"></i>
+                                    Exporting to CSV
+                                </button>
+                                <button
+                                    type="button"
+                                    id="export-csv-button"
+                                    class="btn btn-primary pull-right"
+                                    onclick="annual_bookings.get('csv');"
+                                >
+                                    <i aria-hidden="true" class="fa fa-file-excel-o"></i>
+                                    Export to CSV
+                                </button>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-lg-3">
+                                <span style="display: none" class="pull-left">
+                                    <a href='{% url "dash-failed_refunds_completed" %}' role="button" class="btn btn-primary" style="">
+                                        Completed Refunds
+                                    </a>
+                                </span>
+                                <label for="booking-period" class="form-label">Booking Period</label>
+                                <select id="booking-period" name="booking_period" class="form-select">
+                                    <option value="ALL">All</option>
+                                    {% for i in annual_booking_period_group %}
+                                    <option value="{{ i.id }}">
+                                        {{ i.name }}
+                                    </option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+
+                            <div class="col-lg-3">
+                                <span style="display: none" class="pull-left"
+                                    ><a
+                                        href='{% url "dash-failed_refunds_completed" %}'
+                                        role="button"
+                                        class="btn btn-primary"
+                                        style=""
+                                        >Completed Refunds</a
+                                    ></span
+                                >
+                                <label for="status" class="form-label">Status</label>
+                                <select id="status" class="form-select">
+                                    <option value="ALL">All</option>
+                                    <option value="current">Current</option>
+                                    <option value="cancelled">
+                                        Cancelled
+                                    </option>
+                                    <option value="awaiting sticker">
+                                        Awaiting Sticker
+                                    </option>
+                                    <option value="expired">Expired</option>
+                                    <option value="future">Future</option>
+                                </select>
+                            </div>
+
+                            <div class="col-lg-3">
+                                <label for="keyword" class="form-label">Keyword</label>
+                                <input
+                                    value="{{ keyword }}"
+                                    id="keyword"
+                                    class="form-control"
+                                    type="text"
+                                    placeholder="Enter Keyword"
+                                />
+                            </div>
+
+                            <div class="col-lg-3">
+                                <label for="" class="form-label">&nbsp;</label>
+                                <div class="col-lg-12">
+                                    <span class="">
+                                        <button
+                                            onclick="annual_bookings.get();"
+                                            type="button"
+                                            class="btn btn-primary"
+                                            style=""
+                                        >
+                                            Filter
+                                        </button>
+                                    </span>
+                                </div>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+
+                <table
+                    width="100%"
+                    id="table-abb"
+                    class="display responsive hover table table-striped table-bordered dt-responsive nowrap dataTable no-footer dtr-inline"
+                >
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Created</th>
+                            <th>Person</th>
+                            <th>Mobile</th>
+                            <th>Vessel Reg # / length</th>
+                            <th>Sticker#</th>
+                            <th>Year</th>
+                            <th class="none">Status</th>
+                            <th class="none">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody></tbody>
+                </table>
+            </div>
+        </div>
+
+    </div>
+</div>
+
 <script>
-	var annual_bookings = {
-                var: {
-                      datatables: null,
-                      selected_booking_id: null,
+    var annual_bookings = {
+        var: {
+            datatables: null,
+            selected_booking_id: null,
+        },
+        cancel_booking_confirm: function (booking_id) {
+            annual_bookings.var.selected_booking_id = booking_id;
+            $("#cancellation_reason").val("");
+            $("#cancelBookingModal").modal("show");
+        },
+        cancel_booking_confirm_no: function () {
+            annual_bookings.var.selected_booking_id = null;
+            $("#cancelBookingModal").modal("hide");
+        },
+        cancel_booking_confirm_yes: function () {
+            var booking_id = annual_bookings.var.selected_booking_id;
+            var cancellation_reason = $("#cancellation_reason").val();
+            if (cancellation_reason.length > 6) {
+            } else {
+                alert("Cancellation reason to short");
+                return false;
+            }
+            $.ajax({
+                type: "GET",
+                url: "/api/booking/cancel-annual-admissions/",
+                data: {
+                    booking_id: booking_id,
+                    cancellation_reason: cancellation_reason,
                 },
-                cancel_booking_confirm: function(booking_id) {
-		      annual_bookings.var.selected_booking_id = booking_id;
-		      $('#cancellation_reason').val('');
-                      $('#cancelBookingModal').modal('show');
+                cache: false,
+                success: function (data) {
+                    annual_bookings.get();
+                    $("#errors").html(
+                        "<div class='alert alert-success'>Successfully Cancelled</div>"
+                    );
                 },
-		cancel_booking_confirm_no: function() {
-                      annual_bookings.var.selected_booking_id = null;
-                      $('#cancelBookingModal').modal('hide');
-		},
-                cancel_booking_confirm_yes: function() {
-                        var booking_id = annual_bookings.var.selected_booking_id;
-			var cancellation_reason = $('#cancellation_reason').val();
-			if (cancellation_reason.length > 6) { 
-
-			} else {
-                                alert('Cancellation reason to short');
-				return false;
-			}
-                        $.ajax({
-                                  type: "GET",
-                                  url: "/api/booking/cancel-annual-admissions/",
-                                  data: {"booking_id": booking_id, 'cancellation_reason': cancellation_reason},
-                                  cache: false,
-                                  success: function(data) {
-					  annual_bookings.get(); 
-					  $('#errors').html("<div class='alert alert-success'>Successfully Cancelled</div>");
-                                  },
-                                  error: function(data) {
-                                          if (data.hasOwnProperty("responseJSON")) {
-                                             $('#errors').html("<div class='alert alert-error'>ERROR: "+data['responseJSON']['response']+"</div>");
-                                          } else {
-                                             $('#errors').html("<div class='alert alert-error'>ERROR: unknown error cancelling booking</div>");
-                                          }
-                                          annual_bookings.get();
-                                          setTimeout(function() { $('#errors').html(''); }, 8000);
-                                  }
-                        });
-                        $('#cancelBookingModal').modal('hide');
-
-                },
-                update_sticker: function(booking_id, sticker_no, vessel_rego) { 
-			annual_bookings.var.selected_booking_id = booking_id;
-			$('#sticker_no').val(sticker_no);
-			$('#sticker_comment').val('');
-			$('#sticker_rego_no').html(vessel_rego);
-                        $('#stickerUpdateModal').modal('show');
-			$('#sticker-error').html('');
-                },
-		save_sticker: function(download_pdf) { 
-	                var booking_id = annual_bookings.var.selected_booking_id;
-                        var sticker_no = $('#sticker_no').val();
-			var sticker_comment = $('#sticker_comment').val();
-			if (sticker_no.length != 7) {
-			      $('#sticker-error').html("<div class='alert alert-error'>ERROR: Sticker number must be 7 digits</div>");
-			      return false;
-			}
-			if (/\D/g.test(sticker_no)) {
-                              $('#sticker-error').html("<div class='alert alert-error'>ERROR: Sticker number can only contain numbers and be 7 digits in length.</div>");
-			      return false;
-			}
-                        $.ajax({
-                                  type: "GET",
-                                  url: "/api/booking/update_sticker_admission_booking/",
-                                  data: {"booking_id": booking_id, 'sticker_no':  sticker_no, 'sticker_comment': sticker_comment },
-                                  cache: false,
-                                  success: function(data) {
-					  annual_bookings.get();
-					  $('#errors').html("<div class='alert alert-success'>Successfully Updated</div>");
-					  if (download_pdf == true) {
-					      $('#letter-pdf-iframe').html('<iframe width="560" height="315" src="/api/get_aa_letter/'+annual_bookings.var.selected_booking_id+'" frameborder="0" allowfullscreen></iframe>');
-				          }
-                                  },
-                                  error: function(data) {
-					  if (data.hasOwnProperty("responseJSON")) { 
-                                             $('#errors').html("<div class='alert alert-error'>ERROR: "+data['responseJSON']['response']+"</div>");
-					  } else {
-                                             $('#errors').html("<div class='alert alert-error'>ERROR: unknown error updating sticker</div>"); 
-				          }
-                                          annual_bookings.get();
-                                          setTimeout(function() { $('#errors').html(''); }, 8000);
-                                  }
-                            
-				
-                        });
-			$('#stickerUpdateModal').modal('hide');
-		},
-                dtformat: function(d) {
-                    // `d` is the original data object for the row
-                    console.log('dtformat');
-                    console.log(d);
-                    var created_by_name = '';
-			console.log("FFF");
-                    if (d[10] != null ) {
-                         created_by_name = d[10]['fullname'];
-		    }
-		    var canceled_by_name = '';
-	            if (d[17] != null) {
-                       canceled_by_name = d[17]['fullname'];
-	            }
-		    var sticker_table_history = '';
-		    if (d[20].length > 0) {
-		       sticker_table_history = '<h5  style="font-weight: bold;">Sticker Change History</h5>';
-	               sticker_table_history += '<table cellpadding="5" cellspacing="0" border="0" width="100%" style="padding-left:50px;">';
-	               sticker_table_history += '<tr style="background-color: #ececec;"><th>Value</th><th>Changed By</th><th>Change Date</th><th>Comment</th></tr>';
-	               for ( var s = 0, l = d[20].length; s < l; s++ ) {
-                                console.log(d[20][s]);
-			        var sticker_comment = '';
-			        if (d[20][s]['sticker_comment'] != null) { 
-                                   sticker_comment = d[20][s]['sticker_comment'];
-				}
-			       sticker_table_history += "<tr style='background-color: #fffafa'><td style='padding: 5px;'>"+d[20][s]['value']+"</td><td>"+d[20][s]['first_name']+" "+d[20][s]['last_name']+"</td><td>"+d[20][s]['updated_friendly']+"</td><td>"+sticker_comment+"</td></tr>";
-	               }
-		       sticker_table_history += "</table>";
+                error: function (data) {
+                    if (data.hasOwnProperty("responseJSON")) {
+                        $("#errors").html(
+                            "<div class='alert alert-error'>ERROR: " +
+                                data["responseJSON"]["response"] +
+                                "</div>"
+                        );
+                    } else {
+                        $("#errors").html(
+                            "<div class='alert alert-error'>ERROR: unknown error cancelling booking</div>"
+                        );
                     }
-
-                    return '<h5 style="font-weight: bold;">Details</h5><table cellpadding="8" cellspacing="0" border="0" width="100%" style="padding-left:50px;">'+
-                        '<tr style="background-color: #ececec; font-weight: bold; ">'+
-                            '<td style="padding: 5px;">Phone:</td>'+
-                            '<td>Created By</td>'+
-                            '<td>Created:</td>'+
-                        '</tr>'+
-                        '<tr style="background-color: #fffafa" >'+
-			    '<td style="padding: 5px;" >'+d[16]+'</td>'+
-                            '<td style="padding: 5px;">'+created_by_name+'</td>'+
-			    '<td style="padding: 5px;">'+d[9]+'</td>'+
-                        '</tr>'+
-                    '</table>'+
-                    '<h5  style="font-weight: bold;">Override</h5><table cellpadding="5" cellspacing="0" border="0" width="100%" style="padding-left:50px;">'+
-                        '<tr style="background-color: #ececec; font-weight: bold;">'+
-			    '<td style="padding: 5px; width: 200px;">Overridden By:</td>'+
-                            '<td style="width: 200px;">Price:</td>'+
-                            '<td style="width: 400px;">Reason:</td>'+
-                            '<td>&nbsp;</td>'+
-                        '</tr>'+
-                        '<tr style="background-color: #fffafa">'+
-				'<td style="padding: 5px;">'+d[12]['fullname']+'</td>'+
-                                '<td>$'+d[13]+'</td>'+
-                                '<td>'+d[14]+'</td>'+
-                                '<td>&nbsp;</td>'+
-                        '</tr>'+
-                        '<tr style="background-color: #ececec; font-weight: bold;">'+
-                            '<td style="padding: 5px; text-align: left" align="left" colspan=4>Information:</td>'+
-                        '</tr>'+
-                        '<tr style="background-color: #fffafa;">'+
-                            '<td style="padding: 5px; text-align: left" colspan=4>'+d[15]+'</td>'+
-                        '</tr>'+
-                    '</table>'+
-                    '<h5  style="font-weight: bold;">Cancellation</h5><table cellpadding="5" cellspacing="0" border="0" width="100%" style="padding-left:50px;">'+
-                        '<tr style="background-color: #ececec; font-weight: bold;" >'+
-                            '<td style="padding: 5px; width: 200px;">Cancelled By:</td>'+
-                            '<td style="padding: 5px; width: 400px;">Datetime:</td>'+
-                            '<td style="padding: 5px; width: 400px;" >&nbsp;</td>'+
-                            '<td style="padding: 5px; width: 400px;">&nbsp;</td>'+
-                        '</tr>'+
-
-                        '<tr style="background-color: #fffafa">'+
-                            '<td style="padding: 5px;">'+canceled_by_name+'</td>'+
-                            '<td style="padding: 5px;">'+d[19]+'</td>'+
-                            '<td>&nbsp;</td>'+
-                            '<td>&nbsp;</td>'+
-
-                        '</tr>'+
-                        '<tr style="background-color: #ececec;" >'+
-                            '<td colspan="4" style="padding: 5px; font-weight: bold;">Reason:</td>'+
-                        '</tr>'+
-                        '<tr style="background-color: #fffafa">'+
-                            '<td colspan="4" style="padding: 5px;">'+d[18]+'&nbsp;</td>'+
-                        '</tr>'+
-                    '</table>'+sticker_table_history;
+                    annual_bookings.get();
+                    setTimeout(function () {
+                        $("#errors").html("");
+                    }, 8000);
                 },
-                init_dt: function() {
-                                annual_bookings.var.datatables = $('#table-abb').DataTable(
-                                            {'responsive': true,
-                                            "columns": [
-                                                         {
-                                                            "className":      'details-control',
-                                                            "orderable":      true,
-                                                         },
-                                                         {
-                                                           "orderable":      true,
-                                                         },
-                                                         {
-                                                           "orderable":      true,
-                                                         },
-                                                         {
-                                                           "orderable":      true,
-                                                         },
-                                                         {
-                                                           "orderable":      true,
-                                                         },
-                                                         {
-                                                           "orderable":      true,
-                                                         },
-                                                         {
-                                                           "orderable":      true,
-                                                         },
-                                                         {
-                                                            "orderable":      true,
-                                                         }
-                                                       ],
-                                             columnDefs: [
-                                                     { type: 'natural-nohtml', targets: 0 }, { 'aTargets':  1,  },  { 'aTargets':  2 }, { type: 'natural-nohtml', targets: 3 }, { 'aTargets':  4 }, { 'aTargets':  5 }, { 'aTargets':  6 }, { 'aTargets':  7 }, { 'aTargets':  8 }
-                                             ],
-                                             searching: false,
-                                             paging: true,
-                                             "pageLength": 25,
-                                             "order": [[ 0, "desc" ]]
-                                            });
-
-                                //annual_bookings.var.datatables = $('#table-abb').DataTable({'responsive': true, searching: false, paging: true, "pageLength": 25, "order": [[ 0, "desc" ]],
-                                //     columnDefs: [
-                                //       { type: 'natural-nohtml', targets: 0 }, { 'aTargets':  1 },  { 'aTargets':  2 }, { type: 'natural-nohtml', targets: 3 }, { 'aTargets':  2 }
-                                //     ]
-                                //});
-
-                                $('#table-abb tbody').on('click', 'td.details-control', function () {
-                                    var tr = $(this).closest('tr');
-                                    var row = annual_bookings.var.datatables.row( tr );
-
-                                    if ( row.child.isShown() ) {
-                                        // This row is already open - close it
-                                        row.child.hide();
-                                        tr.removeClass('shown');
-                                    } else {
-                                        // Open this row
-                                        row.child( annual_bookings.dtformat(row.data()) ).show();
-                                        tr.addClass('shown');
-                                    }
-                                });
+            });
+            $("#cancelBookingModal").modal("hide");
+        },
+        update_sticker: function (booking_id, sticker_no, vessel_rego) {
+            annual_bookings.var.selected_booking_id = booking_id;
+            $("#sticker_no").val(sticker_no);
+            $("#sticker_comment").val("");
+            $("#sticker_rego_no").html(vessel_rego);
+            $("#stickerUpdateModal").modal("show");
+            $("#sticker-error").html("");
+        },
+        save_sticker: function (download_pdf) {
+            var booking_id = annual_bookings.var.selected_booking_id;
+            var sticker_no = $("#sticker_no").val();
+            var sticker_comment = $("#sticker_comment").val();
+            if (sticker_no.length != 7) {
+                $("#sticker-error").html(
+                    "<div class='alert alert-error'>ERROR: Sticker number must be 7 digits</div>"
+                );
+                return false;
+            }
+            if (/\D/g.test(sticker_no)) {
+                $("#sticker-error").html(
+                    "<div class='alert alert-error'>ERROR: Sticker number can only contain numbers and be 7 digits in length.</div>"
+                );
+                return false;
+            }
+            $.ajax({
+                type: "GET",
+                url: "/api/booking/update_sticker_admission_booking/",
+                data: {
+                    booking_id: booking_id,
+                    sticker_no: sticker_no,
+                    sticker_comment: sticker_comment,
                 },
-                get: function(data_type) { 
+                cache: false,
+                success: function (data) {
+                    annual_bookings.get();
+                    $("#errors").html(
+                        "<div class='alert alert-success'>Successfully Updated</div>"
+                    );
+                    if (download_pdf == true) {
+                        $("#letter-pdf-iframe").html(
+                            '<iframe width="560" height="315" src="/api/get_aa_letter/' +
+                                annual_bookings.var
+                                    .selected_booking_id +
+                                '" frameborder="0" allowfullscreen></iframe>'
+                        );
+                    }
+                },
+                error: function (data) {
+                    if (data.hasOwnProperty("responseJSON")) {
+                        $("#errors").html(
+                            "<div class='alert alert-error'>ERROR: " +
+                                data["responseJSON"]["response"] +
+                                "</div>"
+                        );
+                    } else {
+                        $("#errors").html(
+                            "<div class='alert alert-error'>ERROR: unknown error updating sticker</div>"
+                        );
+                    }
+                    annual_bookings.get();
+                    setTimeout(function () {
+                        $("#errors").html("");
+                    }, 8000);
+                },
+            });
+            $("#stickerUpdateModal").modal("hide");
+        },
+        dtformat: function (d) {
+            // `d` is the original data object for the row
+            console.log("dtformat");
+            console.log(d);
+            var created_by_name = "";
+            console.log("FFF");
+            if (d[10] != null) {
+                created_by_name = d[10]["fullname"];
+            }
+            var canceled_by_name = "";
+            if (d[17] != null) {
+                canceled_by_name = d[17]["fullname"];
+            }
+            var sticker_table_history = "";
+            if (d[20].length > 0) {
+                sticker_table_history =
+                    '<h5  style="font-weight: bold;">Sticker Change History</h5>';
+                sticker_table_history +=
+                    '<table cellpadding="5" cellspacing="0" border="0" width="100%" style="padding-left:50px;">';
+                sticker_table_history +=
+                    '<tr style="background-color: #ececec;"><th>Value</th><th>Changed By</th><th>Change Date</th><th>Comment</th></tr>';
+                for (var s = 0, l = d[20].length; s < l; s++) {
+                    console.log(d[20][s]);
+                    var sticker_comment = "";
+                    if (d[20][s]["sticker_comment"] != null) {
+                        sticker_comment = d[20][s]["sticker_comment"];
+                    }
+                    sticker_table_history +=
+                        "<tr style='background-color: #fffafa'><td style='padding: 5px;'>" +
+                        d[20][s]["value"] +
+                        "</td><td>" +
+                        d[20][s]["first_name"] +
+                        " " +
+                        d[20][s]["last_name"] +
+                        "</td><td>" +
+                        d[20][s]["updated_friendly"] +
+                        "</td><td>" +
+                        sticker_comment +
+                        "</td></tr>";
+                }
+                sticker_table_history += "</table>";
+            }
 
-                        var booking_period = $('#booking-period').val();
-                        var booking_status = $('#status').val();
-                        var keyword = $('#keyword').val();
+            return (
+                '<h5 style="font-weight: bold;">Details</h5><table cellpadding="8" cellspacing="0" border="0" width="100%" style="padding-left:50px;">' +
+                '<tr style="background-color: #ececec; font-weight: bold; ">' +
+                '<td style="padding: 5px;">Phone:</td>' +
+                "<td>Created By</td>" +
+                "<td>Created:</td>" +
+                "</tr>" +
+                '<tr style="background-color: #fffafa" >' +
+                '<td style="padding: 5px;" >' +
+                d[16] +
+                "</td>" +
+                '<td style="padding: 5px;">' +
+                created_by_name +
+                "</td>" +
+                '<td style="padding: 5px;">' +
+                d[9] +
+                "</td>" +
+                "</tr>" +
+                "</table>" +
+                '<h5  style="font-weight: bold;">Override</h5><table cellpadding="5" cellspacing="0" border="0" width="100%" style="padding-left:50px;">' +
+                '<tr style="background-color: #ececec; font-weight: bold;">' +
+                '<td style="padding: 5px; width: 200px;">Overridden By:</td>' +
+                '<td style="width: 200px;">Price:</td>' +
+                '<td style="width: 400px;">Reason:</td>' +
+                "<td>&nbsp;</td>" +
+                "</tr>" +
+                '<tr style="background-color: #fffafa">' +
+                '<td style="padding: 5px;">' +
+                d[12]["fullname"] +
+                "</td>" +
+                "<td>$" +
+                d[13] +
+                "</td>" +
+                "<td>" +
+                d[14] +
+                "</td>" +
+                "<td>&nbsp;</td>" +
+                "</tr>" +
+                '<tr style="background-color: #ececec; font-weight: bold;">' +
+                '<td style="padding: 5px; text-align: left" align="left" colspan=4>Information:</td>' +
+                "</tr>" +
+                '<tr style="background-color: #fffafa;">' +
+                '<td style="padding: 5px; text-align: left" colspan=4>' +
+                d[15] +
+                "</td>" +
+                "</tr>" +
+                "</table>" +
+                '<h5  style="font-weight: bold;">Cancellation</h5><table cellpadding="5" cellspacing="0" border="0" width="100%" style="padding-left:50px;">' +
+                '<tr style="background-color: #ececec; font-weight: bold;" >' +
+                '<td style="padding: 5px; width: 200px;">Cancelled By:</td>' +
+                '<td style="padding: 5px; width: 400px;">Datetime:</td>' +
+                '<td style="padding: 5px; width: 400px;" >&nbsp;</td>' +
+                '<td style="padding: 5px; width: 400px;">&nbsp;</td>' +
+                "</tr>" +
+                '<tr style="background-color: #fffafa">' +
+                '<td style="padding: 5px;">' +
+                canceled_by_name +
+                "</td>" +
+                '<td style="padding: 5px;">' +
+                d[19] +
+                "</td>" +
+                "<td>&nbsp;</td>" +
+                "<td>&nbsp;</td>" +
+                "</tr>" +
+                '<tr style="background-color: #ececec;" >' +
+                '<td colspan="4" style="padding: 5px; font-weight: bold;">Reason:</td>' +
+                "</tr>" +
+                '<tr style="background-color: #fffafa">' +
+                '<td colspan="4" style="padding: 5px;">' +
+                d[18] +
+                "&nbsp;</td>" +
+                "</tr>" +
+                "</table>" +
+                sticker_table_history
+            );
+        },
+        init_dt: function () {
+            annual_bookings.var.datatables = $("#table-abb").DataTable({
+                responsive: true,
+                columns: [
+                    {
+                        className: "details-control",
+                        orderable: true,
+                    },
+                    {
+                        orderable: true,
+                    },
+                    {
+                        orderable: true,
+                    },
+                    {
+                        orderable: true,
+                    },
+                    {
+                        orderable: true,
+                    },
+                    {
+                        orderable: true,
+                    },
+                    {
+                        orderable: true,
+                    },
+                    {
+                        orderable: true,
+                    },
+                ],
+                columnDefs: [
+                    { type: "natural-nohtml", targets: 0 },
+                    { aTargets: 1 },
+                    { aTargets: 2 },
+                    { type: "natural-nohtml", targets: 3 },
+                    { aTargets: 4 },
+                    { aTargets: 5 },
+                    { aTargets: 6 },
+                    { aTargets: 7 },
+                    { aTargets: 8 },
+                ],
+                searching: false,
+                paging: true,
+                pageLength: 25,
+                order: [[0, "desc"]],
+            });
 
-                        if (booking_period == 'ALL' && keyword.length == 0) {
-                              alert('Please select enter a keyword or select a booking period');
-                              return;
+            //annual_bookings.var.datatables = $('#table-abb').DataTable({'responsive': true, searching: false, paging: true, "pageLength": 25, "order": [[ 0, "desc" ]],
+            //     columnDefs: [
+            //       { type: 'natural-nohtml', targets: 0 }, { 'aTargets':  1 },  { 'aTargets':  2 }, { type: 'natural-nohtml', targets: 3 }, { 'aTargets':  2 }
+            //     ]
+            //});
+
+            $("#table-abb tbody").on(
+                "click",
+                "td.details-control",
+                function () {
+                    var tr = $(this).closest("tr");
+                    var row = annual_bookings.var.datatables.row(tr);
+
+                    if (row.child.isShown()) {
+                        // This row is already open - close it
+                        row.child.hide();
+                        tr.removeClass("shown");
+                    } else {
+                        // Open this row
+                        row.child(
+                            annual_bookings.dtformat(row.data())
+                        ).show();
+                        tr.addClass("shown");
+                    }
+                }
+            );
+        },
+        get: function (data_type) {
+            var booking_period = $("#booking-period").val();
+            var booking_status = $("#status").val();
+            var keyword = $("#keyword").val();
+
+            if (booking_period == "ALL" && keyword.length == 0) {
+                alert(
+                    "Please select enter a keyword or select a booking period"
+                );
+                return;
+            }
+
+            if (data_type == "csv") {
+                $("#export-csv-button").hide();
+                $("#export-csv-button-loader").show();
+                $.ajax({
+                    url: "/api/booking/annual-admissions/",
+                    type: "GET",
+                    data: {
+                        booking_period: booking_period,
+                        booking_status: booking_status,
+                        keyword: keyword,
+                        data_type: "csv",
+                    },
+                })
+                    .done(function (data, textStatus, request) {
+                        // csv => Blob
+                        var blob = new Blob([data], {
+                            type: "text/csv",
+                        });
+
+                        // the file name from server.
+                        var filename = "";
+                        var disposition = request.getResponseHeader(
+                            "Content-Disposition"
+                        );
+                        if (
+                            disposition &&
+                            disposition.indexOf("attachment") !== -1
+                        ) {
+                            var filenameRegex =
+                                /filename[^;=\n]*=((['"]).*?\2|[^;\n]*)/;
+                            var matches =
+                                filenameRegex.exec(disposition);
+                            if (matches != null && matches[1])
+                                filename = matches[1].replace(
+                                    /['"]/g,
+                                    ""
+                                );
                         }
 
-                        // console.log("datatables init - completed");
-
-                        if (data_type == 'csv' ) {
-                             $('#export-csv-button').hide();
-                             $('#export-csv-button-loader').show();
-                             $.ajax({
-                                 url: "/api/booking/annual-admissions/",
-                                 type: 'GET',
-                                 data: {'booking_period': booking_period,
-                                        'booking_status': booking_status,
-                                        'keyword': keyword,
-                                        'data_type': 'csv'
-                                       },
-                             }).done(function (data, textStatus, request) {
-                                 // csv => Blob
-			         var blob = new Blob([data], {type: 'text/csv'});
-
-                                 // the file name from server.
-                                 var filename = "";
-                                 var disposition = request.getResponseHeader('Content-Disposition');
-                                 if (disposition && disposition.indexOf('attachment') !== -1) {
-                                     var filenameRegex = /filename[^;=\n]*=((['"]).*?\2|[^;\n]*)/;
-                                     var matches = filenameRegex.exec(disposition);
-                                     if (matches != null && matches[1]) filename = matches[1].replace(/['"]/g, '');
-                                 }
-                                 
-                                 if (window.navigator && window.navigator.msSaveOrOpenBlob) { // for IE
-                                      window.navigator.msSaveOrOpenBlob(blob, filename);
-                                 } else { // for others
-                                     var url = window.URL.createObjectURL(blob);
-                                     const a = document.createElement('a');
-                                     a.style.display = 'none';
-                                     a.href = url;
-                                     a.download = filename;
-                                     document.body.appendChild(a);
-                                     a.click();
-                                     window.URL.revokeObjectURL(url);
-                                 }
-                             }).then(function() {
-                                 $('#export-csv-button').show();
-                                 $('#export-csv-button-loader').hide();
-
-                                 console.log('completed');
-                             })
-
-
-
+                        if (
+                            window.navigator &&
+                            window.navigator.msSaveOrOpenBlob
+                        ) {
+                            // for IE
+                            window.navigator.msSaveOrOpenBlob(
+                                blob,
+                                filename
+                            );
                         } else {
+                            // for others
+                            var url = window.URL.createObjectURL(blob);
+                            const a = document.createElement("a");
+                            a.style.display = "none";
+                            a.href = url;
+                            a.download = filename;
+                            document.body.appendChild(a);
+                            a.click();
+                            window.URL.revokeObjectURL(url);
+                        }
+                    })
+                    .then(function () {
+                        $("#export-csv-button").show();
+                        $("#export-csv-button-loader").hide();
 
+                        console.log("completed");
+                    });
+            } else {
+                annual_bookings.var.datatables.clear().draw();
+                annual_bookings.var.datatables.row
+                    .add([
+                        "<center><img src='/static/common/img/ajax-loader-spinner.gif'><br><strong>Please Wait Loading</strong></center>",
+                        "",
+                        "",
+                        "",
+                        "",
+                        "",
+                        "",
+                        "",
+                        "",
+                    ])
+                    .draw();
+                $("td:eq(0)", annual_bookings.var.datatables.row).attr(
+                    "colspan",
+                    10
+                );
 
+                $("td:eq(1)", annual_bookings.var.datatables.row).css(
+                    "display",
+                    "none"
+                );
+                $("td:eq(2)", annual_bookings.var.datatables.row).css(
+                    "display",
+                    "none"
+                );
+                $("td:eq(3)", annual_bookings.var.datatables.row).css(
+                    "display",
+                    "none"
+                );
+                $("td:eq(4)", annual_bookings.var.datatables.row).css(
+                    "display",
+                    "none"
+                );
+                $("td:eq(5)", annual_bookings.var.datatables.row).css(
+                    "display",
+                    "none"
+                );
+                $("td:eq(6)", annual_bookings.var.datatables.row).css(
+                    "display",
+                    "none"
+                );
+                $("td:eq(7)", annual_bookings.var.datatables.row).css(
+                    "display",
+                    "none"
+                );
+                $("td:eq(8)", annual_bookings.var.datatables.row).css(
+                    "display",
+                    "none"
+                );
+                $("td:eq(9)", annual_bookings.var.datatables.row).css(
+                    "display",
+                    "none"
+                );
 
-			annual_bookings.var.datatables.clear().draw();
-			annual_bookings.var.datatables.row.add(["<center><img src='/static/common/img/ajax-loader-spinner.gif'><br><strong>Please Wait Loading</strong></center>","","","","","","","",""]).draw();
-			$('td:eq(0)', annual_bookings.var.datatables.row).attr('colspan', 10);
+                $.ajax({
+                    type: "GET",
+                    url: "/api/booking/annual-admissions/",
+                    data: {
+                        booking_period: booking_period,
+                        booking_status: booking_status,
+                        keyword: keyword,
+                    },
+                    cache: false,
+                    success: function (data) {
+                        annual_bookings.var.datatables.clear().draw();
+                        for (
+                            var i = 0, l = data["data"].length;
+                            i < l;
+                            i++
+                        ) {
+                            //+data['data'][i]['short']+"'>"+data['data'][i]['name']+"</option>";
+                            console.log(data["data"][i]);
+                            var bookingid =
+                                "AA" + data["data"][i]["id"];
+                            var fullname =
+                                data["data"][i]["customer"]["fullname"];
+                            var phones = "";
+                            var phone = "";
+                            var vessel_info = "";
+                            var vessel_rego = "";
+                            if (data["data"][i]["details"]) {
+                                fullname =
+                                    data["data"][i]["details"][
+                                        "first_name"
+                                    ] +
+                                    " " +
+                                    data["data"][i]["details"][
+                                        "last_name"
+                                    ];
+                                if (
+                                    data["data"][i]["details"]["phone"]
+                                        .length > 0
+                                ) {
+                                    // phones = phones + data['data'][i]['details']['phone']+'<br>';
+                                    phone =
+                                        data["data"][i]["details"][
+                                            "phone"
+                                        ];
+                                }
+                                if (
+                                    data["data"][i]["details"]["mobile"]
+                                        .length > 0
+                                ) {
+                                    phones =
+                                        phones +
+                                        data["data"][i]["details"][
+                                            "mobile"
+                                        ];
+                                }
 
-                        $('td:eq(1)', annual_bookings.var.datatables.row).css('display', 'none');
-                        $('td:eq(2)', annual_bookings.var.datatables.row).css('display', 'none');
-                        $('td:eq(3)', annual_bookings.var.datatables.row).css('display', 'none');
-                        $('td:eq(4)', annual_bookings.var.datatables.row).css('display', 'none');
-                        $('td:eq(5)', annual_bookings.var.datatables.row).css('display', 'none');
-                        $('td:eq(6)', annual_bookings.var.datatables.row).css('display', 'none');
-                        $('td:eq(7)', annual_bookings.var.datatables.row).css('display', 'none');
-                        $('td:eq(8)', annual_bookings.var.datatables.row).css('display', 'none');
-		        $('td:eq(9)', annual_bookings.var.datatables.row).css('display', 'none');
+                                if (
+                                    data["data"][i]["details"][
+                                        "vessel_rego"
+                                    ].length > 0
+                                ) {
+                                    vessel_info =
+                                        vessel_info +
+                                        data["data"][i]["details"][
+                                            "vessel_rego"
+                                        ];
+                                    vessel_rego =
+                                        data["data"][i]["details"][
+                                            "vessel_rego"
+                                        ];
+                                }
 
-                        $.ajax({  
-                                  type: "GET",
-                                  url: "/api/booking/annual-admissions/",
-  				  data: {'booking_period': booking_period, 'booking_status': booking_status, 'keyword': keyword },
-                                  cache: false,
-                                  success: function(data) {
-					  annual_bookings.var.datatables.clear().draw();
-                                          for ( var i = 0, l = data['data'].length; i < l; i++ ) {
-                                                  //+data['data'][i]['short']+"'>"+data['data'][i]['name']+"</option>";
-                                                  console.log(data['data'][i]);
-                                                  var bookingid = 'AA'+data['data'][i]['id'];
-						  var fullname = data['data'][i]['customer']['fullname'];
-                                                  var phones = '';
-                                                  var phone = '';
-						  var vessel_info = '';
-						  var vessel_rego = '';
-						  if (data['data'][i]['details']) {
-					              fullname = data['data'][i]['details']['first_name']+' '+data['data'][i]['details']['last_name'];
-						      if (data['data'][i]['details']['phone'].length > 0) {
-							      // phones = phones + data['data'][i]['details']['phone']+'<br>';
-                                                              phone = data['data'][i]['details']['phone'];
-                                                      }
-                                                      if (data['data'][i]['details']['mobile'].length > 0) {
-							   phones = phones + data['data'][i]['details']['mobile'];
-					              }
+                                if (
+                                    data["data"][i]["details"][
+                                        "vessel_length"
+                                    ].length > 0
+                                ) {
+                                    vessel_info =
+                                        vessel_info +
+                                        " / " +
+                                        data["data"][i]["details"][
+                                            "vessel_length"
+                                        ];
+                                }
+                            }
+                            var sticker_no =
+                                data["data"][i]["sticker_no"];
+                            var booking_year = data["data"][i]["year"];
+                            var status = data["data"][i]["status"];
 
-                                                      if (data['data'][i]['details']['vessel_rego'].length > 0) {
-							   vessel_info = vessel_info + data['data'][i]['details']['vessel_rego'];
-							   vessel_rego =  data['data'][i]['details']['vessel_rego'];
-                                                      }
-						      
-                                                      if (data['data'][i]['details']['vessel_length'].length > 0) {
-                                                           vessel_info = vessel_info + " / "+data['data'][i]['details']['vessel_length'];
-                                                      }
+                            // actions
+                            var view_payment_link =
+                                "/ledger/payments/invoice/payment?";
+                            var pdf_invoices = "";
+                            if (
+                                data["data"][i]["invoices"].length > 0
+                            ) {
+                                for (
+                                    f = 0;
+                                    f <
+                                    data["data"][i]["invoices"].length;
+                                    f++
+                                ) {
+                                    view_payment_link =
+                                        view_payment_link +
+                                        "&invoice=" +
+                                        data["data"][i]["invoices"][f];
+                                    pdf_invoices =
+                                        pdf_invoices +
+                                        '<i style="color:red;" class="fa fa-file-pdf-o"></i> <a href="/mooring/payments/invoice-pdf/' +
+                                        data["data"][i]["invoices"][f] +
+                                        '" target="invoice_' +
+                                        data["data"][i]["invoices"][f] +
+                                        '" >#' +
+                                        data["data"][i]["invoices"][f] +
+                                        "</a><br>";
+                                }
+                            }
+                            if (data["data"][i]["sticker_no"] == null) {
+                                data["data"][i]["sticker_no"] = "";
+                            }
+                            var action_buttons = "";
+                            action_buttons =
+                                action_buttons +
+                                "<a href='" +
+                                view_payment_link +
+                                "' target='view_ledger_payment_" +
+                                data["data"][i]["id"] +
+                                "'>View Payment</a><br>";
+                            action_buttons =
+                                action_buttons +
+                                "<a href='/annual-admissions-booking-history-refund/" +
+                                data["data"][i]["id"] +
+                                "/'>Oracle Refund</a><br>";
+                            if (
+                                data["data"][i]["status"] != "cancelled"
+                            ) {
+                                action_buttons =
+                                    action_buttons +
+                                    "<a href=" +
+                                    '"' +
+                                    "javascript:annual_bookings.cancel_booking_confirm('" +
+                                    data["data"][i]["id"] +
+                                    "');" +
+                                    '"' +
+                                    ";>Cancel</a><br>";
+                            }
 
+                            action_buttons =
+                                action_buttons +
+                                "<a href=" +
+                                '"' +
+                                "javascript:annual_bookings.update_sticker('" +
+                                data["data"][i]["id"] +
+                                "','" +
+                                data["data"][i]["sticker_no"] +
+                                "','" +
+                                vessel_rego +
+                                "');" +
+                                '"' +
+                                " >Update Sticker No</a><br>";
 
-					          }
-                                                  var sticker_no = data['data'][i]['sticker_no'];
-						  var booking_year = data['data'][i]['year']; 
-                                                  var status = data['data'][i]['status'];
+                            action_buttons =
+                                action_buttons + pdf_invoices;
+                            action_buttons =
+                                action_buttons +
+                                '<i style="color:red;" class="fa fa-file-pdf-o"></i> <a href="/api/get_aa_letter/' +
+                                data["data"][i]["id"] +
+                                '">Letter</a><br>';
 
-						  // actions
-						  var view_payment_link = '/ledger/payments/invoice/payment?';
-						  var pdf_invoices = '';
-						  if (data['data'][i]['invoices'].length > 0) { 
-						     for (f = 0; f < data['data'][i]['invoices'].length; f++) {
-                                                           view_payment_link = view_payment_link + "&invoice="+data['data'][i]['invoices'][f];
-						           pdf_invoices = pdf_invoices + '<i style="color:red;" class="fa fa-file-pdf-o"></i> <a href="/mooring/payments/invoice-pdf/'+data['data'][i]['invoices'][f]+'" target="invoice_'+data['data'][i]['invoices'][f]+'" >#'+data['data'][i]['invoices'][f]+'</a><br>';
-					             }
-					          }
-						  if (data['data'][i]['sticker_no'] == null) {
-                                                        data['data'][i]['sticker_no'] = '';
+                            //var CreatedDateObj = new Date(data['data'][i]['created']);
+                            var CreatedMomentObj = moment(
+                                data["data"][i]["created"],
+                                "DD/MM/YYYY LT"
+                            );
+                            var rowc =
+                                annual_bookings.var.datatables.row
+                                    .add([
+                                        bookingid,
+                                        CreatedMomentObj.format(
+                                            "DD/MM/YYYY LT"
+                                        ),
+                                        fullname,
+                                        phones,
+                                        vessel_info,
+                                        sticker_no,
+                                        booking_year,
+                                        status,
+                                        action_buttons,
+                                        data["data"][i]["created"],
+                                        data["data"][i]["created_by"],
+                                        data["data"][i]["email"],
+                                        data["data"][i][
+                                            "overridden_by"
+                                        ],
+                                        data["data"][i][
+                                            "override_price"
+                                        ],
+                                        data["data"][i][
+                                            "override_reason"
+                                        ],
+                                        data["data"][i][
+                                            "override_reason_info"
+                                        ],
+                                        phone,
+                                        data["data"][i]["canceled_by"],
+                                        data["data"][i][
+                                            "cancellation_reason"
+                                        ],
+                                        data["data"][i][
+                                            "cancelation_time"
+                                        ],
+                                        data["data"][i][
+                                            "sticker_no_history"
+                                        ],
+                                    ])
+                                    .draw();
+                        }
 
-	                                          }
-						  var action_buttons = '';
-						  action_buttons = action_buttons + "<a href='"+view_payment_link+"' target='view_ledger_payment_"+data['data'][i]['id']+"'>View Payment</a><br>";
-																					                                                      action_buttons = action_buttons + "<a href='/annual-admissions-booking-history-refund/"+data['data'][i]['id']+"/'>Oracle Refund</a><br>";
-						  if (data['data'][i]['status'] != 'cancelled') {
-                                                     action_buttons = action_buttons + "<a href="+'"'+"javascript:annual_bookings.cancel_booking_confirm('"+data['data'][i]['id']+"');"+'"'+";>Cancel</a><br>";
-			                          }
-					          
-						  action_buttons = action_buttons + "<a href="+'"'+"javascript:annual_bookings.update_sticker('"+data['data'][i]['id']+"','"+data['data'][i]['sticker_no']+"','"+vessel_rego+"');"+'"'+" >Update Sticker No</a><br>";
+                        console.log(data);
+                    },
+                });
+            }
+        },
+    };
+    //annual_bookings.var.datatables = $('#table-abb').DataTable();
 
-                                                  action_buttons = action_buttons + pdf_invoices;
-						  action_buttons = action_buttons + '<i style="color:red;" class="fa fa-file-pdf-o"></i> <a href="/api/get_aa_letter/'+data['data'][i]['id']+'">Letter</a><br>';
+    //function searchRefunds() {
+    //var status = $('#status').val();
+    //var keyword= $('#keyword').val();
+    //
+    //window.location="{% url 'dash-failedrefunds' %}/?status="+status+'&keyword='+keyword;
+    //}
+    window.onload = function () {
+        //$('#status').val('{{ status }}');
+        annual_bookings.init_dt();
+    };
 
-						  //var CreatedDateObj = new Date(data['data'][i]['created']);
-						  var CreatedMomentObj = moment(data['data'][i]['created'], 'DD/MM/YYYY LT');
-						  var rowc = annual_bookings.var.datatables.row.add([bookingid,CreatedMomentObj.format("DD/MM/YYYY LT"),fullname,phones,vessel_info,sticker_no,booking_year,status,action_buttons,data['data'][i]['created'], data['data'][i]['created_by'],data['data'][i]['email'], data['data'][i]['overridden_by'],  data['data'][i]['override_price'], data['data'][i]['override_reason'], data['data'][i]['override_reason_info'], phone, data['data'][i]['canceled_by'], data['data'][i]['cancellation_reason'],  data['data'][i]['cancelation_time'],data['data'][i]['sticker_no_history']]).draw();
-
-                                                  
-                                          }
-
-                                       console.log(data);
-                                  }
-                        });
-                      }
-
-
-                },
-
-	}
-        //annual_bookings.var.datatables = $('#table-abb').DataTable();
-
-//function searchRefunds() { 
-//var status = $('#status').val();
-//var keyword= $('#keyword').val();
-//
-//window.location="{% url 'dash-failedrefunds' %}/?status="+status+'&keyword='+keyword;
-//}
-window.onload= function() {
-//$('#status').val('{{ status }}');
-      annual_bookings.init_dt();
-}
-
-// var tableabb = $('#table-abb').DataTable();
-// tableabb.row.add([1,'dfsa','asdf','dsfads','dsafasfad','2324sfas','sdafsaf','66sgfsdg']).draw();
-// tableabb.clear().draw();
+    // var tableabb = $('#table-abb').DataTable();
+    // tableabb.row.add([1,'dfsa','asdf','dsfads','dsafasfad','2324sfas','sdafsaf','66sgfsdg']).draw();
+    // tableabb.clear().draw();
 </script>
+<script src="{% static '/common/js/dataTables.min.js' %}?ver={{ GIT_COMMIT_HASH }}" />
+<script src="{% static '/common/js/dataTables.bootstrap5.min.js' %}?ver={{ GIT_COMMIT_HASH }}" />
 {% endblock %}

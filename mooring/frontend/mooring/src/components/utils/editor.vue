@@ -16,7 +16,7 @@ import {
     $,
 }
 from '../../hooks.js'
-import Editor from 'quill';
+import Quill from 'quill';
 import Render from 'quill-render';
 
 export default {
@@ -42,7 +42,7 @@ export default {
     },
     mounted: function(){
         let vm = this;
-        vm.editor = new Editor('#'+vm.editor_id, {
+        vm.editor = new Quill('#'+vm.editor_id, {
             modules: {
                 toolbar: true
             },

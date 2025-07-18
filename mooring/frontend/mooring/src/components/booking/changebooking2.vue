@@ -61,7 +61,7 @@
                                             </div>
                                             <div class="col-md-8">
                                                   <div class="dropdown guests">
-                                                      <input type="text" readonly class="form-control dropdown-toggle" name="guests" placeholder="Guests" data-toggle="dropdown" aria-haspopup="true" aria-expanded="true" v-model="guestsText">
+                                                      <input type="text" readonly class="form-control dropdown-toggle" name="guests" placeholder="Guests" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="true" v-model="guestsText">
                                                       <ul class="dropdown-menu" aria-labelledby="dropdownMenu1">
                                                           <li v-for="guest in guestsPicker">
                                                               <div class="row">
@@ -92,7 +92,7 @@
                                       <div class="form-group">
                                           <label style='display:none' for="vehicles" class="required col-md-4">Number of Vessels</label>
                                           <div class="dropdown guests col-md-8">
-                                              <input type="number" min="1" max="1" name="vehicles" class="form-control dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="true" readonly="true" v-model="booking.parkEntry.vehicles" style='display:none'>
+                                              <input type="number" min="1" max="1" name="vehicles" class="form-control dropdown-toggle" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="true" readonly="true" v-model="booking.parkEntry.vehicles" style='display:none'>
                                               <ul class="dropdown-menu" aria-labelledby="dropdownMenu1">
                                                   <li v-for="park_entry in parkEntryPicker">
                                                       <div class="row">
@@ -820,24 +820,8 @@ export default {
                 },
                 messages: {},
                 showErrors: function(errorMap, errorList) {
-                    $.each(this.validElements(), function(index, element) {
-                        var $element = $(element);
-                        $element.attr("data-original-title", "").parents('.form-group').removeClass('has-error');
-                    });
-
-                    // destroy tooltips on valid elements
-                    $("." + this.settings.validClass).tooltip("destroy");
-
-                    // add or update tooltips
-                    for (var i = 0; i < errorList.length; i++) {
-                        var error = errorList[i];
-                        $(error.element)
-                            .tooltip({
-                                trigger: "focus"
-                            })
-                            .attr("data-original-title", error.message)
-                            .parents('.form-group').addClass('has-error');
-                    }
+                    const { showErrors } = helpers.useFormErrors();
+                    showErrors(errorMap, errorList, this.validElements());
                 }
             });
         },
@@ -989,7 +973,7 @@ export default {
     .awesomplete{
         width:100%;
     }
-    .dropdown-menu:before {
+    /* .dropdown-menu:before {
       position: absolute;
       top: -12px;
       left: 12px;
@@ -1003,7 +987,7 @@ export default {
     .dropdown-menu{
         top:120%;
         width: 300px;
-    }
+    } */
     .guests li{
         padding: 10px;
         margin-right: 10px;

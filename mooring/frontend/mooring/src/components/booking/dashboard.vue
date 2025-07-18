@@ -1,26 +1,33 @@
 <template lang="html" id="booking-dashboard">
-<div class="panel-group" id="bookings-accordion" role="tablist" aria-multiselectable="true">
-    <div class="row" v-show="!isLoading">
-        <div class="panel panel-default" style="overflow:visible;">
-            <div class="panel-heading" role="tab" id="bookings-heading">
-                <h4 class="panel-title">
-                    <a role="button" data-toggle="collapse" href="#bookings-collapse"
-                    aria-expanded="false" aria-controls="bookings-collapse" style="outline:none;">
-                        <div>
-                            <h3 style="display:inline;">Bookings</h3>
-                            <span id="collapse_bookings_span" class="glyphicon glyphicon-menu-up" style="float:right;"></span>
-                        </div>
-                    </a>
-                </h4>
+    <div v-if="!isLoading">
+        <div class="card">
+            <div class="card-header" id="bookings-heading">
+                <h2 class="mb-0">
+                    <button 
+                        class="btn d-flex justify-content-between align-items-center w-100 text-start text-decoration-none"
+                        type="button"
+                        :aria-expanded="isExpanded"
+                        aria-controls="bookings-collapse"
+                        @click="toggleCollapse"
+                    >
+                        <h3 class="mb-0">Bookings</h3>
+                        <i :class="['bi', isExpanded ? 'bi-chevron-up' : 'bi-chevron-down', 'fs-4', 'fw-bold']"></i>
+                    </button>
+                </h2>
             </div>
-            <div id="bookings-collapse" class="panel-collapse collapse in" role="tabpanel" aria-labelledby="bookings-heading">
-                <div class="panel-body">
+            <div 
+                id="bookings-collapse"
+                class="collapse show"  
+                aria-labelledby="bookings-heading"
+                ref="collapseElement"
+            >
+                <div class="card-body">
                     <div class="row">
                         <div class="col-md-12">
-                            <button v-if="!exportingCSV" type="button" class="btn btn-default pull-right" id="print-btn" @click="print()">
+                            <button v-if="!exportingCSV" type="button" class="btn btn-primary pull-right" id="print-btn" @click="print()">
                                 <i class="fa fa-file-excel-o" aria-hidden="true"></i> Export to CSV
                             </button>
-                            <button v-else type="button" class="btn btn-default pull-right" disabled>
+                            <button v-else type="button" class="btn btn-primary pull-right" disabled>
                                 <i class="fa fa-circle-o-notch fa-spin" aria-hidden="true"></i> Exporting to CSV
                             </button>
                         </div>
@@ -87,7 +94,7 @@
                         </div>
 
 
-                        <div style='display: none' class="col-md-4" iv-if="filterCanceled == 'True'">
+                        <div style='display: none;' class="col-md-4" iv-if="filterCanceled == 'True'">
                             <div class="form-group">
                             <label for="">Refund Status</label>
                             <select class="form-control" v-model="filterRefundStatus" id="filterRefundStatus">
@@ -108,31 +115,41 @@
                     <bookingHistory ref="bookingHistory" :booking_id="selected_booking" />
                 </div>
             </div>
-        <loader :isLoading="isLoading" >{{loading.join(' , ')}}</loader>
         </div>
     </div>
+    <div v-else>
+        <loader :isLoading="isLoading">{{ loading.join(', ') }}</loader>
+    </div>
 
-    <div class="row" v-show="!isLoading2">
-        <div class="panel panel-default" style="overflow:visible;margin-top:20px;">
-            <div class="panel-heading" role="tab" id="admissions-heading">
-                <h4 class="panel-title">
-                    <a role="button" data-toggle="collapse" href="#admissions-collapse"
-                    aria-expanded="false" aria-controls="admissions-collapse" style="outline:none;">
-                        <div>
-                            <h3 style="display:inline;">Admission Fee Payments</h3>
-                            <span id="collapse_admissions_span" class="glyphicon glyphicon-menu-up" style="float:right;"></span>
-                        </div>
-                    </a>
-                </h4>
+    <div v-if="!isLoading2" class="mt-3">
+        <div class="card">
+            <div class="card-header" id="admissions-heading">
+                <h2 class="mb-0">
+                    <button 
+                        class="btn d-flex justify-content-between align-items-center w-100 text-start text-decoration-none"
+                        type="button"
+                        :aria-expanded="isExpanded2"
+                        aria-controls="admissions-collapse"
+                        @click="toggleCollapse2"
+                    >
+                        <h3 class="mb-0">Admission Fee Payments</h3>
+                        <i :class="['bi', isExpanded2 ? 'bi-chevron-up' : 'bi-chevron-down', 'fs-4', 'fw-bold']"></i>
+                    </button>
+                </h2>
             </div>
-            <div id="admissions-collapse" class="panel-collapse collapse in" role="tabpanel" aria-labelledby="admissions-heading">
-                <div class="panel-body">
+            <div 
+                id="admissions-collapse"
+                class="collapse show"  
+                aria-labelledby="admissions-heading"
+                ref="collapseElement2"
+            >
+                <div class="card-body">
                     <div class="row">
                         <div class="col-md-12">
-                            <button v-if="!exportingCSV2" type="button" class="btn btn-default pull-right" id="print-btn" @click="print2()">
+                            <button v-if="!exportingCSV2" type="button" class="btn btn-primary pull-right" id="print-btn" @click="print2()">
                                 <i class="fa fa-file-excel-o" aria-hidden="true"></i> Export to CSV
                             </button>
-                            <button v-else type="button" class="btn btn-default pull-right" disabled>
+                            <button v-else type="button" class="btn btn-primary pull-right" disabled>
                                 <i class="fa fa-circle-o-notch fa-spin" aria-hidden="true"></i> Exporting to CSV
                             </button>
                         </div>
@@ -181,10 +198,11 @@
                     </div>
                 </div>
             </div>
-            <loader :isLoading2="isLoading2" >{{loading2.join(' , ')}}</loader>
         </div>
     </div>
-</div>
+    <div v-else>
+        <loader :isLoading2="isLoading2">{{ loading2.join(', ') }}</loader>
+    </div>
 </template>
 
 
@@ -205,6 +223,8 @@ import changebooking from "./changebooking.vue"
 import bookingHistory from "./history.vue"
 import modal from '../utils/bootstrap-modal.vue'
 import { mapGetters } from 'vuex'
+import { Parser } from '@json2csv/plainjs';
+
 export default {
     name:'booking-dashboard',
     components:{
@@ -297,7 +317,7 @@ export default {
                              var max_length = 25;
                              var short_name = (name.length > max_length) ? name.substring(0,max_length-1)+'...' : name;
                              var popover =  (name.length > max_length) ? "class=\"name_popover\"":"";
-                             var column = '<td ><div '+popover+' tabindex="0" data-toggle="popover" data-placement="top" data-content="__NAME__">'+short_name+'</div>';
+                             var column = '<td ><div '+popover+' tabindex="0" data-bs-toggle="popover" data-placement="top" data-bs-content="__NAME__">'+short_name+'</div>';
 
                              column += '<BR>'+ full.booking_phone_number;
                              column += '</td>';
@@ -346,20 +366,6 @@ export default {
                         orderable:false,
                         searchable:false
                     },
-//                    {
-//                        data:"campground_site_type",
-//                        mRender:function (data,type,full) {
-//                            if (data){
-//                                var max_length = 15;
-//                                var name = (data.length > max_length) ? data.substring(0,max_length-1)+'...' : data;
-//                                var column = '<td> <div class="name_popover" tabindex="0" data-toggle="popover" data-placement="top" data-content="__NAME__" >'+ name +'</div></td>';
-//                                return column.replace('__NAME__', data);
-//                            }
-//                            return '';
-//                        },
-//                        orderable:false,
-//                        searchable:false
-//                   },
                     {
                         orderable:false,
                         searchable:false,
@@ -591,12 +597,11 @@ export default {
                                 var invoice_link= (full.invoice_ref)?"<a href='"+invoice+"' target='_blank' class='text-primary'>View Payment</a><br/>":"";
                                 column += invoice_link;
                             }
-                            console.log(full.part_booking);
                             if (full.in_future && !full.part_booking) {
                                 if (full.booking_type == 0 || full.booking_type == 1 || full.booking_type == 2) { 
                                     var cancel_booking = "<a href='/cancel-admissions-booking/"+full.id+"' class='text-primary'> Cancel</a><br/>";
                                     column += cancel_booking;
-			        }
+                                }
                             }
                             // invoices += " <a href='/booking-history/{{ full.id }}'>View History</a>";
                             column += invoices;
@@ -633,7 +638,13 @@ export default {
             filterDateTo2:"",
             filterCanceled2: 'False',
             filterBookingKeyword: '',
-            filterAdmissionKeyword: ''
+            filterAdmissionKeyword: '',
+
+            isExpanded: true,
+            isExpanded2: true,
+            collapseInstance: null,
+            collapseInstance2: null,
+
         }
     },
     watch:{
@@ -805,6 +816,7 @@ export default {
                     })
                 })
                 //bus.$emit('showAlert', 'cancelBooking');
+                bus.emit('showAlert', 'cancelBooking');
             });
             vm.dateToPicker.on('dp.change', function(e){
                 if (vm.dateToPicker.data('DateTimePicker').date()) {
@@ -901,25 +913,58 @@ export default {
                 }
             return str.join("&");
         },
-        print:function () {
+        print: async function(){
+            console.log('print()');
             let vm =this;
             vm.exportingCSV = true;
-            vm.$http.get(api_endpoints.bookings+'?'+vm.printParams()).then(res => {
-                var data = res.body.results;
+            
+            let url = api_endpoints.bookings+'?'+vm.printParams();
+            try {
+                const response = await fetch(url);
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+                const data = await response.json();
 
-                var json2csv = require('json2csv');
+                console.log({data})
+
                 var fields = ['Created']
-                //var fields = [...vm.dtHeaders];
                 var fields = [...fields,...vm.dtHeaders];
                 fields.splice(vm.dtHeaders.length-1,1);
-                fields = ['Created', 'Confirmation No', 'Person', 'Email', 'Phone', 'Vessel Rego', 'Amount Due', 'Amount Paid',"Status", "Mooring", "Region", "Arrival", "Departure", "Adults","Concession","Children","Infants",'Booking Type','Invoices','Admission Ref#', 'Admission Amount','Vessel Size','Vessel Draft','Vessel Beam','Vessel Weight','Cancelled By','Cancellation Reason']
-                //fields = ['Created', 'Confirmation No', 'Person', 'Email', 'Phone', 'Vessel Rego', 'Amount Due', 'Amount Paid',"Status", "Mooring", "Region", "Arrival", "Departure", "Adults","Concession","Children","Infants","Cancelled","Cancellation Reason","Cancelation Date","Cancelled By", 'Booking Type','Invoices']
-                // fields = [...fields,"Adults","Concession","Children","Infants","Regos","Cancelled","Cancellation Reason","Cancelation Date","Cancelled By"]
-                // fields.splice(4,0,"Email");
-                // fields.splice(5,0,"Phone");
-                // fields.splice(9,0,'Amount Due')
-                // fields.splice(10,0,'Amount Paid')
-                // fields.splice(22,0,'Booking Type')
+                fields = [
+                    'Created',
+                    'Confirmation No',
+                    'Person',
+                    'Email',
+                    'Phone',
+
+                    'Vessel Rego',
+                    'Amount Due',
+                    'Amount Paid',
+                    "Status",
+                    "Mooring",
+
+                    "Region",
+                    "Arrival",
+                    "Departure",
+                    "Adults",
+                    "Concession",
+
+                    "Children",
+                    "Infants",
+                    'Booking Type',
+                    'Invoices',
+                    'Admission Ref#',
+
+                    'Admission Amount',
+                    'Vessel Size',
+                    'Vessel Draft',
+                    'Vessel Beam',
+                    'Vessel Weight',
+
+                    'Cancelled By',
+                    'Cancellation Reason'
+                ];
                 var booking_types = {
                     0: 'Reception booking',
                     1: 'Internet booking',
@@ -929,188 +974,224 @@ export default {
                     5: 'Changed Booking',
                 };
 
-                //var data = vm.$refs.bookings_table.vmDataTable.ajax.json().results;
                 var bookings = [];
-                $.each(data,function (i,booking) {
+                console.log('before $each')
+                $.each(data,function (i, booking) {
                     var bk = {};
-                    $.each(fields,function (j,field) {
+                    $.each(fields, function(j, field){
                         switch (j) {
                             case 0:
                                 bk[field] = Moment(booking.created).format("DD/MM/YYYY HH:mm:ss");
-                            break;
+                                break;
                             case 1:
-                                // bk[field] = booking.campground_name;
                                 bk[field] = "PS" + booking.id;
-                            break;
+                                break;
                             case 2:
-                                // bk[field] = booking.campground_region;
                                 bk[field] = booking.firstname +" "+ booking.lastname;
-                            break;
+                                break;
                             case 3:
-                                // bk[field] = booking.firstname +" "+ booking.lastname;
                                 bk[field] = booking.email;
-                            break;
+                                break;
                             case 4:
-                                // bk[field] = booking.email;
                                 bk[field] = booking.phone;
-                            break;
+                                break;
                             case 5:
-                                // bk[field] = booking.phone;
-                                bk[field] = booking.regos[0].vessel;
-                            break;
+                                bk[field] = booking.regos?.[0]?.vessel ?? '';
+                                break;
                             case 6:
                                 bk[field] = booking.cost_total;
-                            break;
+                                break;
                             case 7:
-                                // bk[field] = booking.campground_site_type;
                                 bk[field] = booking.amount_paid;
-                            break;
+                                break;
                             case 8:
                                 bk[field] = booking.invoice_status;
-                            break;
+                                break;
                             case 9:
                                 var name_list = []
-                                console.log(booking.mooringsite_bookings)
-                                for (var i = 0; i < booking.mooringsite_bookings.length; i++){
-                                    console.log(booking.mooringsite_bookings[i]);
-                                    console.log(booking.mooringsite_bookings[i][0]);
-                                    console.log(booking.mooringsite_bookings[i][1]);
-                                    console.log(booking.mooringsite_bookings[i][2]);
-                                    console.log(booking.mooringsite_bookings[i][3]);
-                                    name_list.push(booking.mooringsite_bookings[i][0]);
+                                console.log('9')
+                                // for (var i = 0; i < booking.mooringsite_bookings.length; i++){
+                                //     name_list.push(booking.mooringsite_bookings[i][0]);
+                                // }
+                                if (Array.isArray(booking.mooringsite_bookings)) {
+                                    for (let i = 0; i < booking.mooringsite_bookings.length; i++) {
+                                        if (Array.isArray(booking.mooringsite_bookings[i])) {
+                                            name_list.push(booking.mooringsite_bookings[i][0]);
+                                        }
+                                    }
                                 }
                                 bk[field] = name_list;
-                            break;
+                                break;
                             case 10:
-                                var name_list = []
-                                for (var i = 0; i < booking.mooringsite_bookings.length; i++){
-                                    name_list.push(booking.mooringsite_bookings[i][1]);
-                                }
+                                console.log('10')
+                                // var name_list = []
+                                // for (var i = 0; i < booking.mooringsite_bookings.length; i++){
+                                //     name_list.push(booking.mooringsite_bookings[i][1]);
+                                // }
+                                var name_list = booking.mooringsite_bookings?.map(item => item[1]) ?? [];
                                 bk[field] = name_list;
-                            break;
+                                break;
                             case 11:
-                                var name_list = []
-                                for (var i = 0; i < booking.mooringsite_bookings.length; i++){
-                                    name_list.push(Moment(booking.mooringsite_bookings[i][2]).format('DD/MM/YYYY HH:mm'));
-                                }
+                                // var name_list = []
+                                console.log('11')
+                                // for (var i = 0; i < booking.mooringsite_bookings.length; i++){
+                                //     name_list.push(Moment(booking.mooringsite_bookings[i][2]).format('DD/MM/YYYY HH:mm'));
+                                // }
+                                var name_list = booking.mooringsite_bookings?.map(item => {
+                                    return item && item[2] ? Moment(item[2]).format('DD/MM/YYYY HH:mm') : '';
+                                }) ?? [];
                                 bk[field] = name_list;
-                            break;
+                                break;
                             case 12:
-                                var name_list = []
-                                for (var i = 0; i < booking.mooringsite_bookings.length; i++){
-                                    name_list.push(Moment(booking.mooringsite_bookings[i][3]).format('DD/MM/YYYY HH:mm'));
-                                }
+                                // var name_list = []
+                                console.log('12')
+                                // for (var i = 0; i < booking.mooringsite_bookings.length; i++){
+                                //     for (var i = 0; i < booking.mooringsite_bookings.length; i++){
+                                //         name_list.push(Moment(booking.mooringsite_bookings[i][3]).format('DD/MM/YYYY HH:mm'));
+                                //     }
+                                // }
+                                var name_list = booking.mooringsite_bookings?.map(item => {
+                                    return item && item[3] ? Moment(item[3]).format('DD/MM/YYYY HH:mm') : '';
+                                }) ?? [];
                                 bk[field] = name_list;
-                            break;
+                                break;
                             case 13:
-                                bk[field] = booking.guests.adults;
-                            break;
+                                // bk[field] = booking.guests.adults;
+                                console.log('13')
+                                bk[field] = booking.guests?.adults ?? 0;
+                                break;
                             case 14:
-                                bk[field] =  booking.guests.concession;
-                            break;
+                                // bk[field] =  booking.guests.concession;
+                                console.log('14')
+                                bk[field] =  booking.guests?.concession ?? 0;
+                                break;
                             case 15:
-                                bk[field] =  booking.guests.children;
-                            break;
+                                // bk[field] =  booking.guests.children;
+                                console.log('15')
+                                bk[field] =  booking.guests?.children ?? 0;
+                                break;
                             case 16:
-                                bk[field] =  booking.guests.infants;
-                            break;
-//                            case 17:
-//                                bk[field] = booking.is_canceled;
-//                            break;
-//                            case 18:
-//                                bk[field] = booking.cancelation_reason;
-//                            break;
-//                            case 19:
-//                                bk[field] = booking.cancelation_time ? Moment(booking.cancelation_time).format("DD/MM/YYYY HH:mm:ss") : '';
-//                            break;
-//                            case 20:
-//                                bk[field] = booking.canceled_by;
-//                            break;
+                                // bk[field] =  booking.guests.infants;
+                                console.log('16')
+                                bk[field] =  booking.guests?.infants ?? 0;
+                                break;
                             case 17:
+                                console.log('17')
                                 if (typeof booking_types[booking.booking_type] !== 'undefined') {
                                     bk[field] = booking_types[booking.booking_type];
                                 } else {
                                     bk[field] = booking.booking_type;
                                 }
-                            break;                   
+                                break;
                             case 18:
+                                console.log('18')
                                 bk[field] = booking.invoices;
-                            break;
+                                break;
                             case 19:
+                                console.log('19')
                                 if (booking.admissions) { 
-                                	bk[field] = 'AD'+booking.admissions.id;
+                                	bk[field] = 'AD' + booking.admissions.id;
                                 } else {
-					bk[field] = '';
-				}
-                            break;
+                                    bk[field] = '';
+                                }
+                                break;
                             case 20:
+                                console.log('20')
                                 if (booking.admissions) {
-                                    	bk[field] = booking.admissions.amount;
+                                    bk[field] = booking.admissions.amount;
                                 } else {
-					bk[field] = '';
-				}
-                            break;
+                                    bk[field] = '';
+                                }
+                                break;
                             case 21:
+                                console.log('21')
                                 if (booking.vessel_details) {
                                         bk[field] = booking.vessel_details.vessel_size;
                                 } else {
                                         bk[field] = '';
                                 }
-                            break;
+                                break;
                             case 22:
+                                console.log('22')
                                 if (booking.vessel_details) {
                                         bk[field] = booking.vessel_details.vessel_draft;
                                 } else {
                                         bk[field] = '';
                                 }
-                            break;
+                                break;
                             case 23:
+                                console.log('23')
                                 if (booking.vessel_details) {
-                                        bk[field] = booking.vessel_details.vessel_beam;
+                                    bk[field] = booking.vessel_details.vessel_beam;
                                 } else {
-                                        bk[field] = '';
+                                    bk[field] = '';
                                 }
-                            break;
+                                break;
                             case 24:
+                                console.log('24')
                                 if (booking.vessel_details) {
-                                        bk[field] = booking.vessel_details.vessel_weight;
+                                    bk[field] = booking.vessel_details.vessel_weight;
                                 } else {
-                                        bk[field] = '';
+                                    bk[field] = '';
                                 }
-                            break;
+                                break;
                             case 25:
+                                ronsole.log('25')
                                 if (booking.vessel_details) {
-                                        bk[field] = booking.canceled_by;
+                                    bk[field] = booking.canceled_by;
                                 } else {
-                                        bk[field] = '';
+                                    bk[field] = '';
                                 }
-                            break;
+                                break;
                             case 26:
+                                ronsole.log('26')
                                 if (booking.vessel_details) {
-                                        bk[field] = booking.cancelation_reason;
+                                    bk[field] = booking.cancelation_reason;
                                 } else {
-                                        bk[field] = '';
+                                    bk[field] = '';
                                 }
-                            break;
-
-
-
+                                break;
                         }
                     });
                     bookings.push(bk);
                 });
-                var csv = json2csv({ data:bookings, fields: fields });
-                var a = document.createElement("a"),
-                file = new Blob([csv], {type: 'text/csv'});
+                console.log('after $each')
+                // var csv = json2csv({ data:bookings, fields: fields });
+                // var a = document.createElement("a"),
+                // file = new Blob([csv], {type: 'text/csv'});
+
+                // 1. Create an options object for the parser.
+                const opts = { fields: fields };
+
+                // 2. Instantiate the Parser with the options.
+                const parser = new Parser(opts);
+                console.log({parser})
+
+                // 3. Call the .parse() method on the instance to convert your data.
+                //    This replaces the old json2csv() function call.
+                const csv = parser.parse(bookings);
+                console.log({csv})
+
+                // 4. Create a link element for downloading.
+                var a = document.createElement("a");
+                console.log({a})
+
+                // 5. Create a Blob from the generated CSV string.
+                let file = new Blob([csv], { type: 'text/csv' });
+                console.log({file})
+
                 var filterCampground = (vm.filterCampground == 'All') ? "All Moorings " : $('#filterCampground')[0].selectedOptions[0].text;
                 var filterRegion = (vm.filterCampground == 'All') ? (vm.filterRegion == 'All')? "All Regions" : $('#filterRegion')[0].selectedOptions[0].text : "";
                 var filterDates = (vm.filterDateFrom) ? (vm.filterDateTo) ? "From "+vm.filterDateFrom + " To "+vm.filterDateTo: "From "+vm.filterDateFrom : (vm.filterDateTo) ? " To "+vm.filterDateTo : "" ;
                 var filename =  filterCampground +  "_" + filterRegion + "_" +filterDates+ ".csv";
-                if (window.navigator.msSaveOrOpenBlob) // IE10+
+                if (window.navigator.msSaveOrOpenBlob){
+                    console.log('IE10+ detected');
                     window.navigator.msSaveOrOpenBlob(file, filename);
+                } // IE10+
                 else { // Others
-                    var url = URL.createObjectURL(file);
-                    a.href = url;
+                    console.log('Non-IE10+ detected');
+                    var create_url = URL.createObjectURL(file);
+                    a.href = create_url;
                     a.download = filename;
                     document.body.appendChild(a);
                     a.click();
@@ -1120,24 +1201,32 @@ export default {
                     }, 0);
                 }
                 vm.exportingCSV = false;
-            },
-            (error) => {
+            } catch (error) {
                 vm.exportingCSV = false;
                 swal({
                     type: 'error',
                     title: 'Export Error', 
                     text: helpers.apiVueResourceError(error), 
                 })
-            });
+            }
         },
-        print2:function () {
+        print2: async function(){
+            console.log('print2()');
+
             let vm =this;
             vm.exportingCSV2 = true;
             
-            vm.$http.get(api_endpoints.admissionsbookings+'?'+vm.printParams2()).then(res => {
-                var data = res.body.results;
+            let url = api_endpoints.admissionsbookings+'?'+vm.printParams2();
+            console.log(url);
+            try {
+                const response = await fetch(url);
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+                const data = await response.json();
 
-                var json2csv = require('json2csv');
+                console.log({data})
+
                 var fields = ["Confirmation No", "Customer", "Email", "Mobile", "Overnight Stay", "Arrival Date", "Total Attendees", "Adults","Children","Infants", "Vessel Reg No", "Warning Reference", "Invoice Reference",'Cancelled By','Cancellation Reason']
                 
                 var bookings = [];
@@ -1219,17 +1308,34 @@ export default {
                     });
                     bookings.push(bk);
                 });
-                var csv = json2csv({ data:bookings, fields: fields });
-                var a = document.createElement("a"),
-                file = new Blob([csv], {type: 'text/csv'});
+                // var csv = json2csv({ data:bookings, fields: fields });
+                // var a = document.createElement("a"),
+                // file = new Blob([csv], {type: 'text/csv'});
+
+                // 1. Create an options object for the parser.
+                const opts = { fields: fields };
+
+                // 2. Instantiate the Parser with the options.
+                const parser = new Parser(opts);
+
+                // 3. Call the .parse() method on the instance to convert your data.
+                //    This replaces the old json2csv() function call.
+                const csv = parser.parse(bookings);
+
+                // 4. Create a link element for downloading.
+                var a = document.createElement("a");
+
+                // 5. Create a Blob from the generated CSV string.
+                file = new Blob([csv], { type: 'text/csv' });
+
                 var filterDates = (vm.filterDateFrom2) ? (vm.filterDateTo2) ? "From "+vm.filterDateFrom2 + " To "+vm.filterDateTo2: "From "+vm.filterDateFrom2 : (vm.filterDateTo2) ? " To "+vm.filterDateTo2 : "" ;
                 var filename =  filterDates + "_admissions" + ".csv";
                 filename.replace(" ", "_");
                 if (window.navigator.msSaveOrOpenBlob) // IE10+
                     window.navigator.msSaveOrOpenBlob(file, filename);
                 else { // Others
-                    var url = URL.createObjectURL(file);
-                    a.href = url;
+                    var create_url = URL.createObjectURL(file);
+                    a.href = create_url;
                     a.download = filename;
                     document.body.appendChild(a);
                     a.click();
@@ -1239,16 +1345,29 @@ export default {
                     }, 0);
                 }
                 vm.exportingCSV2 = false;
-            },
-            (error) => {
+            } catch (error) {
                 vm.exportingCSV2 = false;
                 swal({
                     type: 'error',
                     title: 'Export Error', 
                     text: helpers.apiVueResourceError(error), 
                 })
-            });
+            }
         },
+        toggleCollapse: function() {
+            console.log('toggleCollapse()')
+            if (this.collapseInstance) {
+                console.log('Toggling collapse instance');
+                this.collapseInstance.toggle();
+            }
+        },
+        toggleCollapse2: function() {
+            console.log('toggleCollapse2()')
+            if (this.collapseInstance2) {
+                console.log('Toggling collapse instance2');
+                this.collapseInstance2.toggle();
+            }
+        }
     },
     created: function(){
         let vm = this;
@@ -1265,6 +1384,33 @@ export default {
     },
     mounted:function () {
         let vm = this;
+
+        const collapseEl = vm.$refs.collapseElement;
+        if (collapseEl) {
+            vm.collapseInstance = new bootstrap.Collapse(collapseEl, {
+                toggle: false
+            });
+        }
+        collapseEl.addEventListener('show.bs.collapse', () => {
+            vm.isExpanded = true;
+        });
+        collapseEl.addEventListener('hide.bs.collapse', () => {
+            vm.isExpanded = false;
+        });
+        
+        const collapseEl2 = vm.$refs.collapseElement2;
+        if (collapseEl2) {
+            vm.collapseInstance2 = new bootstrap.Collapse(collapseEl2, {
+                toggle: false
+            });
+        }
+        collapseEl2.addEventListener('show.bs.collapse', () => {
+            vm.isExpanded2 = true;
+        });
+        collapseEl2.addEventListener('hide.bs.collapse', () => {
+            vm.isExpanded2 = false;
+        });
+
         vm.dateFromPicker = $('#booking-date-from').datetimepicker(vm.datepickerOptions);
         vm.dateToPicker = $('#booking-date-to').datetimepicker(vm.datepickerOptions);
         vm.dateFromPicker2 = $('#admission-date-from').datetimepicker(vm.datepickerOptions);
@@ -1297,13 +1443,10 @@ export default {
                vm.$refs.bookings_table.vmDataTable.ajax.reload();
         });
 
-
         $('#AdmissionKeyword').on('change', function() { 
                vm.$refs.admissions_bookings_table.vmDataTable.ajax.reload(); 
         }); 
-
     }
-
 }
 </script>
 
