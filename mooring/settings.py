@@ -23,7 +23,7 @@ BOOKING_TIMEOUT = 1200
 
 INSTALLED_APPS += [
     'webtemplate_dbca',
-    'bootstrap3',
+    'django_bootstrap5',
     'mooring',
     'taggit',
     'rest_framework',

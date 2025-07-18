@@ -71,7 +71,8 @@ import bootstrapModal from '../bootstrap-modal.vue'
 import reason from '../reasons.vue'
 import { $, datetimepicker,api_endpoints, validate, helpers, bus } from '../../../hooks'
 import alert from '../alert.vue'
-module.exports = {
+
+export default {
     name: 'ParkPriceHistoryDetail',
     props: {
         priceHistory: {
@@ -174,32 +175,15 @@ module.exports = {
                     details: "Details required if other reason is selected",
                 },
                 showErrors: function(errorMap, errorList) {
-
-                    $.each(this.validElements(), function(index, element) {
-                        var $element = $(element);
-                        $element.attr("data-original-title", "").parents('.form-group').removeClass('has-error');
-                    });
-
-                    // destroy tooltips on valid elements
-                    $("." + this.settings.validClass).tooltip("destroy");
-
-                    // add or update tooltips
-                    for (var i = 0; i < errorList.length; i++) {
-                        var error = errorList[i];
-                        $(error.element)
-                            .tooltip({
-                                trigger: "focus"
-                            })
-                            .attr("data-original-title", error.message)
-                            .parents('.form-group').addClass('has-error');
-                    }
+                    const { showErrors } = helpers.useFormErrors();
+                    showErrors(errorMap, errorList, this.validElements());
                 }
             });
        }
     },
     mounted: function() {
         var vm = this;
-        $('[data-toggle="tooltip"]').tooltip()
+        $('[data-bs-toggle="tooltip"]').tooltip()
         vm.form = document.forms.priceForm;
         var picker = $(vm.form.period_start).closest('.date');
         var today = new Date();
@@ -214,9 +198,14 @@ module.exports = {
             vm.priceHistory.period_start = picker.data('DateTimePicker').date().format('YYYY-MM-DD');
         });
         vm.addFormValidations();
-        bus.$once('priceReasons',setReasons => {
+        // bus.$once('priceReasons',setReasons => {
+        //     vm.reasons = setReasons;
+        // });
+        const onDataLoadedOnce = (setReasons) => {
             vm.reasons = setReasons;
-        });
+            bus.off('priceReasons', onDataLoadedOnce);
+        };
+        bus.on('priceReasons', onDataLoadedOnce);
     }
 };
 </script>

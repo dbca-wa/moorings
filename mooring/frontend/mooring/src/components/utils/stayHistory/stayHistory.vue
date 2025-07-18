@@ -1,16 +1,15 @@
 <template id="stayHistory">
-<div class="row">
     <StayHistoryDetail :stay="stay" :mooringarea="mooringarea" ref="addMaxStayModal" @addCgStayHistory="addStayHistory()" @updateStayHistory="updateStayHistory()"></StayHistoryDetail>
-    <div class="col-sm-12">
+    <div class="row">
         <alert ref="retrieveStayAlert" :show.sync="retrieve_stay.error" type="danger" :duration="retrieve_stay.timeout">{{retrieve_stay.errorString}}</alert>
-        <div class="col-sm-8" v-if="invent"/>
-        <div class="col-sm-4" v-if="invent">
-            <button @click="showAddStay()" class="btn btn-primary pull-right table_btn">Add Max Stay Period</button>
+        <div class="row" v-if="invent">
+            <div class="col-12 text-end">
+                <button @click="showAddStay()" class="btn btn-primary pull-right table_btn">Add Max Stay Period</button>
+            </div>
         </div>
         <datatable ref="addMaxStayDT" :dtHeaders ="msh_headers" :dtOptions="msh_options" id="stay_history"></datatable>
-     </div>
+    </div>
     <confirmbox id="deleteStay" :options="deleteStayPrompt"></confirmbox>
-</div>
 </template>
 
 <script>
@@ -104,45 +103,62 @@ export default {
                     url: api_endpoints.campgroundStayHistory(vm.object_id),
                     dataSrc: ''
                 },
-                columns: [{
-                    mRender: function(data, type, full){
-                        return full.id;
-                    }
-                }, {
-                    "data": "range_start",
-                    sType: 'extract-date',
-                    mRender: function(data, type, full) {
-                        // return new Date(data).toLocaleDateString('en-GB');
-                        return data;
-                    }
-                }, {
-                    "data": "range_end",
-                    sType: 'extract-date',
-                    mRender: function(data, type, full) {
-                        if(data){
+                columns: [
+                    {
+                        "data": "id",
+                        mRender: function(data, type, full){
+                            return full.id;
+                        }
+                    },
+                    {
+                        "data": "range_start",
+                        sType: 'extract-date',
+                        mRender: function(data, type, full) {
                             // return new Date(data).toLocaleDateString('en-GB');
                             return data;
-                        } else {
-                            return '-';
-                        }   
-                    }
-                }, {
-                    "data": "max_days"
-                },{
-                    "data": "reason"
-                }, {
-                    "data": "details"
-                }, {
-                    "mRender": function(data, type, full) {
-                        var id = full.id;
-                        if (full.editable) {
-                            var column = "<td ><a href='#' class='editStay' data-stay_period=\"__ID__\" >Edit</a>";
-                            column += "<br/><a href='#' class='deleteStay' data-stay_period=\"__ID__\" >Delete</a></td>";
-                            return column.replace(/__ID__/g, id);
                         }
-                        return '';
+                    },
+                    {
+                        "data": "range_end",
+                        sType: 'extract-date',
+                        mRender: function(data, type, full) {
+                            if(data){
+                                // return new Date(data).toLocaleDateString('en-GB');
+                                return data;
+                            } else {
+                                return '-';
+                            }   
+                        }
+                    },
+                    {
+                        "data": "max_days"
+                    },
+                    {
+                        "data": "reason"
+                    },
+                    {
+                        "data": "details",
+                        "mRender": function(data, type, full) {
+                            if (data) {
+                                return data;
+                            } else {
+                                return '';
+                            }
+                        }
+                    },
+                    {
+                        "data": "id",
+                        "mRender": function(data, type, full) {
+                            var id = full.id;
+                            if (full.editable) {
+                                var column = "<td ><a href='#' class='editStay' data-stay_period=\"__ID__\" >Edit</a>";
+                                column += "<br/><a href='#' class='deleteStay' data-stay_period=\"__ID__\" >Delete</a></td>";
+                                return column.replace(/__ID__/g, id);
+                            }
+                            return '';
+                        }
                     }
-                }]
+                ]
             },
         }
     },
@@ -230,7 +246,8 @@ export default {
                 e.preventDefault();
                 var id = $(this).attr('data-stay_period');
                 vm.deleteStay = id;
-                bus.$emit('showAlert', 'deleteStay');
+                // bus.$emit('showAlert', 'deleteStay');
+                bus.emit('showAlert', 'deleteStay');
             });
         },
     },

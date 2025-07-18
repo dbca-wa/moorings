@@ -67,7 +67,8 @@ import reason from '../../utils/reasons.vue'
 import {bus} from '../../utils/eventBus.js'
 import { $, datetimepicker,api_endpoints, validate, helpers } from '../../../hooks'
 import alert from '../../utils/alert.vue'
-module.exports = {
+
+export default {
     name: 'addMaxStayCS',
     props: {
         campsite: {
@@ -156,25 +157,8 @@ module.exports = {
                     open_details: "Details required if Other reason is selected"
                 },
                 showErrors: function(errorMap, errorList) {
-
-                    $.each(this.validElements(), function(index, element) {
-                        var $element = $(element);
-                        $element.attr("data-original-title", "").parents('.form-group').removeClass('has-error');
-                    });
-
-                    // destroy tooltips on valid elements
-                    $("." + this.settings.validClass).tooltip("destroy");
-
-                    // add or update tooltips
-                    for (var i = 0; i < errorList.length; i++) {
-                        var error = errorList[i];
-                        $(error.element)
-                            .tooltip({
-                                trigger: "focus"
-                            })
-                            .attr("data-original-title", error.message)
-                            .parents('.form-group').addClass('has-error');
-                    }
+                    const { showErrors } = helpers.useFormErrors();
+                    showErrors(errorMap, errorList, this.validElements());
                 }
             });
        }

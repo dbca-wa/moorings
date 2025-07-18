@@ -1,50 +1,48 @@
 <template id="addMaxStayCS">
-<bootstrapModal ref="modal" :title="getTitle" :large=true @ok="addMaxStay()" okText="Add">
+<modal ref="modal" :large=true @ok="addMaxStay()" okText="Add">
+    <template #header>
+        <div class="modal-header">
+            <h4 class="modal-title">{{ getTitle }}</h4>
+        </div>
+    </template>
 
     <div class="modal-body">
         <form id="addMaxStayForm" class="form-horizontal">
-            <div class="row">
-			    <alert :show.sync="showError" type="danger">{{errorString}}</alert>
-                <div class="form-group">
-                    <div class="col-md-2">
-                        <label for="stay_maximum">Maximum Stay: </label>
-                    </div>
-                    <div class="col-md-4">
-                        <input placeholder="Default = 28" id='stay_maximum' v-model="stay.max_days" type='text' class="form-control" />
-                    </div>
+            <alert :show.sync="showError" type="danger">{{errorString}}</alert>
+
+            <div class="row mb-3">
+                <label for="stay_maximum" class="col-md-3 col-form-label">Maximum Stay: </label>
+                <div class="col-md-4">
+                    <input placeholder="Default = 28" id='stay_maximum' v-model="stay.max_days" type='text' class="form-control" />
                 </div>
             </div>
-            <div class="row">
-                <div class="form-group">
-                    <div class="col-md-2">
-                        <label for="stay_start_picker">Period Start: </label>
-                    </div>
-                    <div class="col-md-4">
-                        <div class='input-group date' id="stay_start_picker">
-                            <input name="stay_start" v-model="stay.range_start" type='text' class="form-control" />
-                            <span class="input-group-addon">
-                                <span class="glyphicon glyphicon-calendar"></span>
-                            </span>
-                        </div>
-                    </div>
+            <div class="row mb-3">
+                <label for="stay-start-date" class="col-md-3 col-form-label">Period Start: </label>
+                <div class="col-md-4">
+                    <input
+                        id="stay-start-date"
+                        name="stay_start"
+                        type="date"
+                        class="form-control"
+                        v-model="stay.range_start"
+                    />
                 </div>
             </div>
-            <div class="row">
-                <div class="form-group">
-                    <div class="col-md-2">
-                        <label for="stay_end_picker">Period End: </label>
-                    </div>
-                    <div class="col-md-4">
-                        <div class='input-group date' id='stay_end_picker'>
-                            <input name="stay_end" v-model="stay.range_end" type='text' class="form-control" />
-                            <span class="input-group-addon">
-                                <span class="glyphicon glyphicon-calendar"></span>
-                            </span>
-                        </div>
-                    </div>
+            <div class="row mb-3">
+                <label for="stay-end-date" class="col-md-3 col-form-label">Period End: </label>
+                <div class="col-md-4">
+                    <input
+                        id="stay-end-date"
+                        name="stay_end"
+                        type="date"
+                        class="form-control"
+                        v-model="stay.range_end"
+                    />
                 </div>
             </div>
-            <reason type="stay" v-model="stay.reason" ref="reason"></reason>
+
+            <reason type="stay" v-model="stay.reason" ref="reason" :threenine="true"></reason>
+
             <div v-show="requireDetails" class="row">
                 <div class="form-group">
                     <div class="col-md-2">
@@ -58,16 +56,17 @@
         </form>
     </div>
 
-</bootstrapModal>
+</modal>
 </template>
 
 <script>
-import bootstrapModal from '../../utils/bootstrap-modal.vue'
+import modal from '../../utils/bootstrap-modal.vue'
 import reason from '../../utils/reasons.vue'
 import {bus} from '../../utils/eventBus.js'
-import { $, datetimepicker,api_endpoints, validate, helpers } from '../../../hooks'
+import { $, datetimepicker,api_endpoints, validate, helpers, Moment } from '../../../hooks'
 import alert from '../../utils/alert.vue'
-module.exports = {
+
+export default {
     name: 'addMaxStayCS',
     props: {
         mooringarea: {
@@ -80,14 +79,40 @@ module.exports = {
     },
     data: function() {
         return {
-            start_picker: '',
-            end_picker: '',
+            // start_picker: '',
+            // end_picker: '',
             errors: false,
             errorString: '',
             form: '',
             reasons: [],
             isOpen: false,
             create: true
+        }
+    },
+    watch: {
+        // Deeply watch the 'stay' prop for changes
+        stay: {
+            handler(newStay) {
+                console.log('New stay object:', newStay);
+                // Do nothing if the newStay object is null
+                if (!newStay) return;
+
+                // --- Handle conversion for range_start ---
+                const startDate = newStay.range_start;
+                if (startDate && /^\d{2}\/\d{2}\/\d{4}$/.test(startDate)) {
+                    let s_date = Moment(startDate, 'DD/MM/YYYY');
+                    this.stay.range_start = Moment(s_date).format('YYYY-MM-DD');
+                }
+
+                // --- Handle conversion for range_end ---
+                const endDate = newStay.range_end;
+                if (endDate && /^\d{2}\/\d{2}\/\d{4}$/.test(endDate)) {
+                    let e_date = Moment(endDate, 'DD/MM/YYYY');
+                    this.stay.range_end = Moment(e_date).format('YYYY-MM-DD');
+                }
+            },
+            immediate: true, // Run the handler immediately when the component is initialized
+            deep: true       // Also detect changes to nested properties of the object
         }
     },
     computed: {
@@ -112,7 +137,7 @@ module.exports = {
         }
     },
     components: {
-        bootstrapModal,
+        modal,
         alert,
         reason
     },
@@ -133,11 +158,14 @@ module.exports = {
             this.stay.reason = id;
         },
         addMaxStay: function() {
-            if ($(this.form).valid()){
-                if (!this.stay.id){
-                    this.$emit('addCgStayHistory');
+            let vm = this;
+            if ($(vm.form).valid()){
+                vm.stay.range_start = Moment(vm.stay.range_start).format('DD/MM/YYYY');
+                vm.stay.range_end = Moment(vm.stay.range_end).format('DD/MM/YYYY');
+                if (!vm.stay.id){
+                    vm.$emit('addCgStayHistory');
                 }else {
-                    this.$emit('updateStayHistory');
+                    vm.$emit('updateStayHistory');
                 }
             }
         },
@@ -167,25 +195,8 @@ module.exports = {
                     open_details: "Details required if Other reason is selected"
                 },
                 showErrors: function(errorMap, errorList) {
-
-                    $.each(this.validElements(), function(index, element) {
-                        var $element = $(element);
-                        $element.attr("data-original-title", "").parents('.form-group').removeClass('has-error');
-                    });
-
-                    // destroy tooltips on valid elements
-                    $("." + this.settings.validClass).tooltip("destroy");
-
-                    // add or update tooltips
-                    for (var i = 0; i < errorList.length; i++) {
-                        var error = errorList[i];
-                        $(error.element)
-                            .tooltip({
-                                trigger: "focus"
-                            })
-                            .attr("data-original-title", error.message)
-                            .parents('.form-group').addClass('has-error');
-                    }
+                    const { showErrors } = helpers.useFormErrors();
+                    showErrors(errorMap, errorList, this.validElements());
                 }
             });
        }
@@ -195,25 +206,31 @@ module.exports = {
         if (!vm.create){
             vm.$refs.modal.title = 'Edit Maximum Stay Period';
         }
-        vm.start_picker = $('#stay_start_picker');
-        vm.end_picker = $('#stay_end_picker');
-        vm.start_picker.datetimepicker({
-            format: 'DD/MM/YYYY'
-        });
-        vm.end_picker.datetimepicker({
-            format: 'DD/MM/YYYY'
-        });
-        vm.start_picker.on('dp.change', function(e){
-            vm.stay.range_start = vm.start_picker.data('DateTimePicker').date().format('DD/MM/YYYY');
-        });
-        vm.end_picker.on('dp.change', function(e){
-            vm.stay.range_end = vm.end_picker.data('DateTimePicker').date().format('DD/MM/YYYY');
-        });
+        // vm.start_picker = $('#stay_start_picker');
+        // vm.end_picker = $('#stay_end_picker');
+        // vm.start_picker.datetimepicker({
+        //     format: 'DD/MM/YYYY'
+        // });
+        // vm.end_picker.datetimepicker({
+        //     format: 'DD/MM/YYYY'
+        // });
+        // vm.start_picker.on('dp.change', function(e){
+        //     vm.stay.range_start = vm.start_picker.data('DateTimePicker').date().format('DD/MM/YYYY');
+        // });
+        // vm.end_picker.on('dp.change', function(e){
+        //     vm.stay.range_end = vm.end_picker.data('DateTimePicker').date().format('DD/MM/YYYY');
+        // });
         vm.form = $('#addMaxStayForm');
         vm.addFormValidations();
-        bus.$once('maxStayReasons',setReasons => {
+        // bus.$once('maxStayReasons',setReasons => {
+        //     vm.reasons = setReasons;
+        // });
+        const onDataLoadedOnce = (setReasons) => {
+            console.log('onDataLoadedOnce called with:', setReasons);
             vm.reasons = setReasons;
-        });
+            bus.off('maxStayReasons', onDataLoadedOnce);
+        };
+        bus.on('maxStayReasons', onDataLoadedOnce);
     }
 };
 </script>

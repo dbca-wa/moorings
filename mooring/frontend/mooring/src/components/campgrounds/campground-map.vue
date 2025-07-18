@@ -1,5 +1,5 @@
 <template lang="html">
-<div  id="cg_map" >
+<div id="cg_map">
 	<div>
 		<form id="mapForm">
 		<div class="col-sm-12">
@@ -7,7 +7,7 @@
 				<p>Mooring successfully updated</p>
 			</alert>
 			<alert :show.sync="showError" type="danger">
-				<p>{{errorString}}<p/>
+				<p>{{errorString}}</p>
 			</alert>
 					<div class="row">
 						<div class="col-lg-12">
@@ -51,7 +51,7 @@
                                         <div class="form-group pull-right">
                                             <a href="#" v-if="createCampground" class="btn btn-primary" @click.prevent="create">Create</a>
                                             <a href="#" v-else class="btn btn-primary" @click.prevent="update">Update</a>
-                                            <a href="#" class="btn btn-default" @click.prevent="goBack">Cancel</a>
+                                            <a href="#" class="btn btn-primary" @click.prevent="goBack">Cancel</a>
                                         </div>
                                     </div>
                                 </div>
@@ -88,13 +88,23 @@ import {
     select2
 }
 from '../utils/eventBus.js';
-import OpenLayers from 'openlayers';
-import ol from 'openlayers';
-import Editor from 'quill';
-import Render from 'quill-render';
+// import OpenLayers from 'openlayers';
+// import ol from 'openlayers';
+import TileLayer from 'ol/layer/Tile.js'
+import OSM from 'ol/source/OSM.js'
+import { transform } from 'ol/proj'
+import Feature from 'ol/Feature'
+import Point from 'ol/geom/Point.js'
+import VectorSource from 'ol/source/Vector.js'
+import VectorLayer from 'ol/layer/Vector.js'
+import Map from 'ol/Map.js'
+import View from 'ol/View.js'
+import Draw from 'ol/interaction/Draw.js'
+// import GeometryType from 'ol/geom/geometrytype.js'
+
+import Quill from 'quill';
 import loader from '../utils/loader.vue'
 import alert from '../utils/alert.vue'
-import {mapGetters} from 'vuex'
 export default {
     name: 'cg_map',
     components: {
@@ -164,7 +174,6 @@ export default {
             helpers.goBack(this);
         },
         create: function() {
-            console.log("CREATE");
             this.sendData(api_endpoints.campgrounds, 'POST');
         },
         update: function() {
@@ -195,28 +204,24 @@ export default {
             vm.$emit('save', url, method, reload, "map");
         },
         showAlert: function() {
-            bus.$emit('showAlert', 'alert1');
+            // bus.$emit('showAlert', 'alert1');
+            bus.emit('showAlert', 'alert1');
         },
         setCoordinates: function() { 
-		    console.log('gps changes');
             var longitude = $('#longitude').val();
 		    var latitude = $('#latitude').val();
             $('#location_coordinates').val("POINT ("+longitude+" "+latitude+")");
-            console.log("setCoordinates");
-            console.log(this.campground.wkb_geometry);
             var coord = new Object();
             coord.coordinates = [parseFloat(longitude),parseFloat(latitude)];
             coord.type = "Point";
             this.campground.wkb_geometry = coord;
-            console.log("NBEXT");
-            console.log(this.campground.wkb_geometry);
 	    }
     },
     mounted: function() {
         let vm = this;
         vm.isLoading = true;
 
-        vm.editor = new Editor('#editorhidden', {
+        vm.editor = new Quill('#editorhidden', {
             modules: {
                 toolbar: true
             },
@@ -231,29 +236,16 @@ export default {
         
         vm.form = $('#mapForm');
         // Load Map Point Selection
-        var raster = new ol.layer.Tile({
-            source: new ol.source.OSM({noWrap: true, wrapX: false,})
+        var raster = new TileLayer({
+            source: new OSM({noWrap: true, wrapX: false,})
         });
 
-
-//       var raster = new ol.layer.Tile({
-//             source: new ol.source.WMTS({
-//                url: 'https://kmi.dpaw.wa.gov.au/geoserver/gwc/service/wmts',
-//                format: 'image/png',
-//                layer: 'public:mapbox-streets',
-//		})
-//       });
-
-        console.log("Beginning map load");
         var iconFeature = null;
         var lat = 0;
         var lon = 0;
         setTimeout(function(){
 
-
         if (vm.campground.wkb_geometry) {
-            console.log("GSPPP");
-            console.log(vm.campground.wkb_geometry);
             if (vm.campground.wkb_geometry.coordinates) {
             lat = vm.campground.wkb_geometry.coordinates[0];
             lon = vm.campground.wkb_geometry.coordinates[1];
@@ -262,32 +254,30 @@ export default {
 
             }
         }
-        var coords = ol.proj.transform([lat,lon], 'EPSG:4326', 'EPSG:3857');
-        // var coords = ol.proj.transform([-106.63694687814734,42.46614905892275], 'EPSG:4326', 'EPSG:3857');
+        var coords = transform([lat,lon], 'EPSG:4326', 'EPSG:3857');
 
         var iconFeature;
         if (lat == 0 && lon == 0) { 
-        iconFeature = new ol.Feature({
+        iconFeature = new Feature({
             saved_coordinates: 'yes',
         });
 
         } else {
-        iconFeature = new ol.Feature({
-            geometry: new ol.geom.Point(coords),
+        iconFeature = new Feature({
+            geometry: new Point(coords),
             saved_coordinates: 'yes',
         });
         }
-        console.log(iconFeature);
-        var source = new ol.source.Vector({wrapX: false, features: [iconFeature]});
+        var source = new VectorSource({wrapX: false, features: [iconFeature]});
 
-        var vector = new ol.layer.Vector({
+        var vector = new VectorLayer({
             source: source
         });
 
-        var map = new ol.Map({
+        var map = new Map({
                 layers: [raster, vector],
                 target: 'map',
-                view: new ol.View({
+                view: new View({
                     center: [-11000000, 4600000],
                     zoom: 5
                 })
@@ -303,10 +293,9 @@ export default {
             //if (value === 'None') {
             //} else {
                 var geometryFunction;
-                    console.log(value);
-                    draw = new ol.interaction.Draw({
+                    draw = new Draw({
                         source: source,
-                        type: /** @type {ol.geom.GeometryType} */(typeSelect.value),
+                        type: typeSelect.value,
                     });
 
                     draw.on('drawend', function (e) {
@@ -324,22 +313,18 @@ export default {
         };
 
         if (lat == 0 && lon == 0 ) {
-                console.log('no coor'); 
-		map.getView().setCenter(ol.proj.transform([114.85900618716143, -29.714142674457065], 'EPSG:4326', 'EPSG:3857'));
+		map.getView().setCenter(transform([114.85900618716143, -29.714142674457065], 'EPSG:4326', 'EPSG:3857'));
         } else {
-	        map.getView().setCenter(ol.proj.transform([lat, lon], 'EPSG:4326', 'EPSG:3857'));
+	        map.getView().setCenter(transform([lat, lon], 'EPSG:4326', 'EPSG:3857'));
         }
 
         map.on('singleclick', function(ev) {
-          console.log('clicked');
 
          // Remove Prepopulated Point From Map
          var features = source.getFeatures();
          features.forEach((feature) => {
-		console.log(feature);
                 var properties = feature.getProperties();
                 if ('saved_coordinates' in properties) { 
-                  console.log(properties.saved_coordinates);
                   if (properties.saved_coordinates == 'yes') {
                     source.removeFeature(feature);
                   }
@@ -349,14 +334,10 @@ export default {
 
          // Save Long and Lat to hidden input field.
           var mouseCoords = [ev.originalEvent.offsetX, ev.originalEvent.offsetY];
-          console.log(ev.coordinate);
-          var latLon = ol.proj.transform(ev.coordinate, 'EPSG:3857', 'EPSG:4326');
-          console.log("GPS SELECT");
-          console.log(latLon);
+          var latLon = transform(ev.coordinate, 'EPSG:3857', 'EPSG:4326');
           $('#longitude').val(latLon[0]);
           $('#latitude').val(latLon[1]);
           $('#location_coordinates').val("POINT ("+latLon[0]+" "+latLon[1]+")");
-          // console.log("vm.campground.wkb_geometry.coordinates -START");
           var coord = new Object();
           coord.coordinates = latLon;
           coord.type = "Point";
@@ -370,7 +351,6 @@ export default {
         // map.once('postrender', function(event){
         //     $('#collapse_map').click();
         // });
-        console.log("ENDED");
 
 
         }, 200);
@@ -378,7 +358,7 @@ export default {
 
         // End Map Point Selection
 
-        $('.form-control').blur(function(){
+        $('#cg_map .form-control').on('blur', function(){
             vm.$emit('updated', vm.campground);
         });
 

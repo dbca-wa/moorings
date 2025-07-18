@@ -51,7 +51,7 @@
 import {$} from '../../hooks.js'
 import {bus} from './eventBus.js'
 
-var confirmModal = module.exports = {
+export default {
     data:function () {
         return {
             confirmModal: 'confirmModal'+this._uid,
@@ -109,13 +109,13 @@ var confirmModal = module.exports = {
                    })
                });
             }
-            $(buttons).append("<button type=\"button\" data-dismiss=\"modal\" class=\"btn btn-default\" style='margin-bottom:10px;'>"+vm.cancelText+"</button>");
+            $(buttons).append("<button type=\"button\" data-dismiss=\"modal\" class=\"btn btn-primary\" style='margin-bottom:10px;'>"+vm.cancelText+"</button>");
         }
    },
    mounted:function () {
        var vm = this;
        vm.confirmBox(this.options);
-       bus.$on('showAlert', function(id){
+       bus.on('showAlert', function(id){
           if(id === vm.id){
               $("#"+vm.confirmModal).modal('show');
           }

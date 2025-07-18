@@ -7,7 +7,7 @@
                     <p>Mooring successfully updated</p>
                 </alert>
                 <alert :show.sync="showError" type="danger">
-                    <p>{{errorString}}<p/>
+                    <p>{{errorString}}</p>
                 </alert>
 					<div class="row">
 						<div class="col-lg-12">
@@ -35,7 +35,7 @@
                                         <div class="form-group pull-right">
                                             <a href="#" v-if="createCampground" class="btn btn-primary" @click.prevent="create">Create</a>
                                             <a href="#" v-else class="btn btn-primary" @click.prevent="update">Update</a>
-                                            <a href="#" class="btn btn-default" @click.prevent="goBack">Cancel</a>
+                                            <a href="#" class="btn btn-primary" @click.prevent="goBack">Cancel</a>
                                         </div>
                                     </div>
                                 </div>
@@ -48,6 +48,7 @@
 		</div>
 	</div>
 </template>
+
 <style>
 .alert{
     display:none;
@@ -70,7 +71,7 @@ import {
     bus,
 }
 from '../utils/eventBus.js';
-import Editor from 'quill';
+import Quill from 'quill';
 import Render from 'quill-render';
 import loader from '../utils/loader.vue'
 import alert from '../utils/alert.vue'
@@ -142,27 +143,32 @@ export default {
             helpers.goBack(this);
         },
 		validateForm:function () {
+            console.log("campground-additional.vue validateForm");
 			let vm = this;
             var isValid = vm.validateEditor($('#editor'))
             return  vm.form.valid() && isValid;
 		},
         create: function() {
-            console.log("CREATE");
+            console.log("in campground-additional.vue create");
 			if(this.validateForm()){
 				this.sendData(api_endpoints.campgrounds, 'POST');
 			}
         },
         update: function() {
+            console.log("in campground-additional.vue update");
 			if(this.validateForm()){
 				this.sendData(api_endpoints.campground(this.campground.id), 'PUT',true); 
 			}	
         },
         validateEditor: function(el){
+            console.log('in validateEditor');
+            console.log({el});
+
             let vm = this;
-			if (el.parents('.form-group').hasClass('has-error')) {
-				el.tooltip("destroy");
-				el.attr("data-original-title", "").parents('.form-group').removeClass('has-error');
-			}
+            if (el.parents('.form-group').hasClass('has-error')) {
+                el.tooltip("destroy");
+                el.attr("data-original-title", "").parents('.form-group').removeClass('has-error');
+            }
             if (vm.editor.getText().trim().length == 0) {
                 // add or update tooltips
                 el.tooltip({
@@ -178,25 +184,29 @@ export default {
             let vm = this;
             vm.isLoading =true;
             vm.reload = reload;
+            console.log('campground-additional.vue sendData');
             vm.$emit('updated', vm.campground);
             vm.$emit('save', url, method, reload, "additional");
         },
         showAlert: function() {
-            bus.$emit('showAlert', 'alert1');
+            // bus.$emit('showAlert', 'alert1');
+            bus.emit('showAlert', 'alert1');
         },
     },
     mounted: function() {
+        console.log('campground-additional.vue mounted');
         let vm = this;
-        vm.editor = new Editor('#editor', {
+        vm.editor = new Quill('#editor', {
             modules: {
                 toolbar: true
             },
             theme: 'snow'
         });
         vm.editor.on('text-change', function(delta, oldDelta, source) {
+            console.log('campground-additional.vue text-change');
             var text = $('#editor >.ql-editor').html();
             vm.campground.description = text;
-			vm.validateEditor($('#editor'));
+            vm.validateEditor($('#editor'));
         });
         vm.form = $('#additionalForm');
 
@@ -214,8 +224,10 @@ export default {
             }
         });
 
-        $('.form-control').blur(function(){
+        $('#cg_additional .form-control').on('blur', function(){
+            console.log('campground-additional.vue blur');
             if (vm.validateForm()){
+                console.log('campground-additional.vue blur');
                 vm.$emit('updated', vm.campground);
             }
         });

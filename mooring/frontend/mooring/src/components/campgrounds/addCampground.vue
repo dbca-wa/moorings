@@ -1,41 +1,66 @@
 <template lang="html" id="pkCGADD">
-
-   <div class="panel-group" id="applications-accordion" role="tablist" aria-multiselectable="true">
-      <div class="panel panel-default" id="applications">
-        <div class="panel-heading" role="tab" id="applications-heading">
-            <h4 class="panel-title">
-                <a role="button" data-toggle="collapse" href="#applications-collapse"
-                   aria-expanded="false" aria-controls="applications-collapse">
-                    <h3>Add Mooring</h3>
-                </a>
-            </h4>
+    <div class="card" id="applications">
+        <div class="card-header" role="tab" id="addmooring-heading">
+            <!-- <div class="row">
+                <h4 class='col-6 card-title'>Add Mooring</h4>
+                <div class='col-6 text-end'><i class="bi bi-chevron-down"></i></div>
+            </div> -->
+            <h2 class="mb-0">
+                <button 
+                    class="btn d-flex justify-content-between align-items-center w-100 text-start text-decoration-none"
+                    type="button"
+                    :aria-expanded="isExpandedAddMooring"
+                    aria-controls="addmooring-collapse"
+                    @click="toggleCollapseAddMooring"
+                >
+                    <h3 class="mb-0">Add Mooring</h3>
+                    <i :class="['bi', isExpandedAddMooring ? 'bi-chevron-up' : 'bi-chevron-down', 'fs-4', 'fw-bold']"></i>
+                </button>
+            </h2>
         </div>
-        <div id="applications-collapse" class="panel-collapse collapse in" role="tabpanel"
-             aria-labelledby="applications-heading">
-            <div class="panel-body">
-               <div class="col-lg-12">
-                  <div class="row">
-                    <div class="col-sm-12" style="overflow:visible;">
-                    </div>
-                     <campgroundAttr :campground="campground" :loadingDetails="loadingDetails" @updated="updateCampground" @save="sendData">
-                     </campgroundAttr>
-                  </div>
-               </div>
+        <!-- <div id="applications-collapse" class="card-body"> -->
+        <div
+            id="addmooring-collapse"
+            class="collapse show"
+            aria-labelledby="addmooring-heading"
+            ref="collapseElementAddMooring"
+        >
+            <div class="card-body">
+                <campgroundAttr :campground="campground" :loadingDetails="loadingDetails" @updated="updateCampground" @save="sendData" />
             </div>
-         </div>
-      </div>
-      <div class="navbar navbar-default" id="footer">
+        </div>
+    </div>
+    <!-- <div class="navbar navbar-default" id="footer">
         <div class="container">
             <div class="navbar navbar-nav navbar-right" style="margin-top:5px;">
                 <a href="#" class="btn btn-primary" @click.prevent="sendData">Create</a>
                 <a href="/dashboard/moorings/" class="btn btn-default">Cancel</a>
             </div>
         </div>
-    </div>
-   </div>
+    </div> -->
+    <!-- 
+    Using the semantic <footer> tag.
+    The 'mt-auto' class is useful for pushing the footer to the bottom
+    of the viewport when the page content is short (within a flexbox layout).
+    -->
+    <footer id="footer" class="bg-light border-top py-3 mt-auto">
+        <div class="container">
+            <!-- 
+                Use Flexbox to align content to the right.
+                d-flex: Enables Flexbox container.
+                justify-content-end: Aligns items to the end (right side).
+                gap-2: Adds a gap between flex items (e.g., 0.5rem).
+            -->
+            <div class="d-flex justify-content-end gap-2">
+                <!-- 'btn-primary' remains unchanged. -->
+                <a href="#" class="btn btn-primary" @click.prevent="sendData">Create</a>
 
+                <!-- 'btn-default' is replaced with 'btn-secondary' in Bootstrap 5. -->
+                <a href="/dashboard/moorings/" class="btn btn-secondary">Cancel</a>
+            </div>
+        </div>
+    </footer>
 </template>
-
 
 <script>
 import campgroundAttr from './campground-details.vue'
@@ -67,9 +92,17 @@ export default {
             title:'',
             errors:false,
             errorString: '',
+
+            isExpandedAddMooring: true,
+            collapseInstanceAddMooring: null,
         }
     },
     methods: {
+        toggleCollapseAddMooring: function() {
+            if (this.collapseInstanceAddMooring) {
+                this.collapseInstanceAddMooring.toggle();
+            }
+        },
        mooringSpecificationCheck: function() {
         let vm = this;
         console.log('mooringSpecificationCheck');
@@ -122,25 +155,8 @@ export default {
                          campground_class: "Select a mooring class from the options",
                      },
                      showErrors: function(errorMap, errorList) {
-                         $.each(this.validElements(), function(index, element) {
-                             var $element = $(element);
-                             $element.attr("data-original-title", "").parents('.form-group').removeClass('has-error');
-                         });
-
-                         // destroy tooltips on valid elements
-                         $("." + this.settings.validClass).tooltip("destroy");
-
-                         // add or update tooltips
-                         for (var i = 0; i < errorList.length; i++) {
-                             var error = errorList[i];
-                             $('#' + error.element.id).focus();
-                             $(error.element)
-                                 .tooltip({
-                                     trigger: "focus"
-                                 })
-                                 .attr("data-original-title", error.message)
-                                 .parents('.form-group').addClass('has-error');
-                         }
+                        const { showErrors } = helpers.useFormErrors();
+                        showErrors(errorMap, errorList, this.validElements());
                      }
                  });
 
@@ -162,25 +178,8 @@ export default {
                          campground_class: "Select a mooring class from the options",
                      },
                      showErrors: function(errorMap, errorList) {
-                         $.each(this.validElements(), function(index, element) {
-                             var $element = $(element);
-                             $element.attr("data-original-title", "").parents('.form-group').removeClass('has-error');
-                         });
-
-                         // destroy tooltips on valid elements
-                         $("." + this.settings.validClass).tooltip("destroy");
-
-                         // add or update tooltips
-                         for (var i = 0; i < errorList.length; i++) {
-                             var error = errorList[i];
-                             $('#' + error.element.id).focus();
-                             $(error.element)
-                                 .tooltip({
-                                     trigger: "focus"
-                                 })
-                                 .attr("data-original-title", error.message)
-                                 .parents('.form-group').addClass('has-error');
-                         }
+                        const { showErrors } = helpers.useFormErrors();
+                        showErrors(errorMap, errorList, this.validElements());
                      }
                  });
             }
@@ -326,6 +325,22 @@ export default {
     },
     mounted:function () {
         let vm = this;
+
+        vm.$nextTick(() => {
+            const collapseElAddMooring = vm.$refs.collapseElementAddMooring;
+            if (collapseElAddMooring) {
+                vm.collapseInstanceAddMooring = new bootstrap.Collapse(collapseElAddMooring, {
+                    toggle: false
+                });
+            }
+            collapseElAddMooring.addEventListener('show.bs.collapse', () => {
+                vm.isExpandedAddMooring = true;
+            });
+            collapseElAddMooring.addEventListener('hide.bs.collapse', () => {
+                vm.isExpandedAddMooring = false;
+            });
+        })
+
         vm.mooringSpecificationCheck();
         $( "#mooring_specification" ).change(function() {
           vm.mooringSpecificationCheck();

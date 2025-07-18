@@ -1,278 +1,289 @@
 <template lang="html">
-    <div class="panel-group" id="details-accordion" role="tablist" aria-multiselectable="true" style="padding:0;">
-        <pkCsClose ref="closeCampsite" @closeCampsite="closeCampsite()"></pkCsClose>
-        <pkCsOpen ref="openCampsite" @openCampsite="openCampsite()"></pkCsOpen>
-        <div class="row">
-            <div class="panel panel-default" id="details">
-                <div class="panel-heading" role="tab" id="details-heading">
-                    <h4 class="panel-title">
-                        <a role="button" data-toggle="collapse" href="#details-collapse"
-                        aria-expanded="false" ref="top" aria-controls="details-collapse" style="outline:none;">
-                            <div>
-                                <h3 style="display:inline;">Mooring Details</h3>
-                                <span id="collapse_details_span" class="glyphicon glyphicon-menu-up" style="float:right;"></span>
-                            </div>
-                        </a>
-                    </h4>
+    <div v-if="campground && campground.id">
+        <!-- <div class="panel-group" id="details-accordion" role="tablist" aria-multiselectable="true" style="padding:0;"> -->
+            <pkCsClose ref="closeCampsite" @closeCampsite="closeCampsite()"></pkCsClose>
+            <pkCsOpen ref="openCampsite" @openCampsite="openCampsite()"></pkCsOpen>
+
+            <div class="card" id="details">
+                <div class="card-header" role="tab" id="details-heading">
+                    <h2 class="mb-0">
+                        <button 
+                            class="btn d-flex justify-content-between align-items-center w-100 text-start text-decoration-none"
+                            type="button"
+                            :aria-expanded="isExpandedDetails"
+                            aria-controls="details-collapse"
+                            @click="toggleCollapseDetails"
+                        >
+                            <h3 class="mb-0">Mooring Details</h3>
+                            <i :class="['bi', isExpandedDetails ? 'bi-chevron-up' : 'bi-chevron-down', 'fs-4', 'fw-bold']"></i>
+                        </button>
+                    </h2>
                 </div>
-                <div id="details-collapse" class="panel-collapse collapse in" role="tabpanel" aria-labelledby="details-heading">
+                <div
+                    id="details-collapse"
+                    class="collapse show"
+                    aria-labelledby="details-heading"
+                    ref="collapseElementDetails"
+                >
+                    <div class="card-body">
+                        <campgroundAttr :createCampground=false :campground="campground" @updated="updateCampground" @save="sendData" />
+                    </div>
+                </div>
+            </div>
+
+            <div class="card mt-3" id="contact">
+                <div class="card-header" role="tab" id="contact-heading">
+                    <h2 class="mb-0">
+                        <button 
+                            class="btn d-flex justify-content-between align-items-center w-100 text-start text-decoration-none"
+                            type="button"
+                            :aria-expanded="isExpandedContact"
+                            aria-controls="contact-collapse"
+                            @click="toggleCollapseContact"
+                        >
+                            <h3 class="mb-0">Contact</h3>
+                            <i :class="['bi', isExpandedContact ? 'bi-chevron-up' : 'bi-chevron-down', 'fs-4', 'fw-bold']"></i>
+                        </button>
+                    </h2>
+                </div>
+                <div
+                    id="contact-collapse"
+                    class="collapse show"
+                    aria-labelledby="contact-heading"
+                    ref="collapseElementContact"
+                >
+                    <div class="card-body">
+                        <campgroundContact :createCampground=false :campground="campground" @error="swalMessage" @updated="updateCampground" @save="sendData" />
+                    </div>
+                </div>
+            </div>
+
+            <div class="card mt-3" id="limits">
+                <div class="card-header" role="tab" id="limits-heading">
+                    <h2 class="mb-0">
+                        <button 
+                            class="btn d-flex justify-content-between align-items-center w-100 text-start text-decoration-none"
+                            type="button"
+                            :aria-expanded="isExpandedLimits"
+                            aria-controls="limits-collapse"
+                            @click="toggleCollapseLimits"
+                        >
+                            <h3 class="mb-0">Vessel Limits</h3>
+                            <i :class="['bi', isExpandedLimits ? 'bi-chevron-up' : 'bi-chevron-down', 'fs-4', 'fw-bold']"></i>
+                        </button>
+                    </h2>
+                </div>
+                <div
+                    id="limits-collapse"
+                    class="collapse show"
+                    aria-labelledby="limits-heading"
+                    ref="collapseElementLimits"
+                >
+                    <div class="card-body">
+                        <campgroundLimits :createCampground=false :campground="campground" @error="swalMessage" @updated="updateCampground" @save="sendData" />
+                    </div>
+                </div>
+            </div>
+
+            <div class="card mt-3" id="images">
+                <div class="card-header" role="tab" id="images-heading">
+                    <h2 class="mb-0">
+                        <button 
+                            class="btn d-flex justify-content-between align-items-center w-100 text-start text-decoration-none"
+                            type="button"
+                            :aria-expanded="isExpandedImages"
+                            aria-controls="images-collapse"
+                            @click="toggleCollapseImages"
+                        >
+                            <h3 class="mb-0">Mooring Images</h3>
+                            <i :class="['bi', isExpandedImages ? 'bi-chevron-up' : 'bi-chevron-down', 'fs-4', 'fw-bold']"></i>
+                        </button>
+                    </h2>
+                </div>
+                <div
+                    id="images-collapse"
+                    class="collapse show"
+                    aria-labelledby="images-heading"
+                    ref="collapseElementImages"
+                >
+                    <div class="card-body">
+                        <campgroundImages :createCampground=false :campground="campground" @updated="updateCampground" @save="sendData" />
+                    </div>
+                </div>
+            </div>
+
+            <div class="card mt-3" id="mappanel">
+                <div class="card-header" role="tab" id="location-heading">
+                    <h2 class="mb-0">
+                        <button 
+                            class="btn d-flex justify-content-between align-items-center w-100 text-start text-decoration-none"
+                            type="button"
+                            :aria-expanded="isExpandedLocation"
+                            aria-controls="location-collapse"
+                            @click="toggleCollapseLocation"
+                        >
+                            <h3 class="mb-0">Mooring Location</h3>
+                            <i :class="['bi', isExpandedLocation ? 'bi-chevron-up' : 'bi-chevron-down', 'fs-4', 'fw-bold']"></i>
+                        </button>
+                    </h2>
+                </div>
+                <div
+                    id="location-collapse"
+                    class="collapse show"
+                    aria-labelledby="location-heading"
+                    ref="collapseElementLocation"
+                >
+                    <div class="card-body">
+                        <campgroundMap :createCampground=false :campground="campground" @error="swalMessage" @updated="updateCampground" @save="sendData" />
+                    </div>
+                </div>
+            </div>
+
+            <div class="card mt-3" id="additional">
+                <div class="card-header" role="tab" id="additional-heading">
+                    <h2 class="mb-0">
+                        <button 
+                            class="btn d-flex justify-content-between align-items-center w-100 text-start text-decoration-none"
+                            type="button"
+                            :aria-expanded="isExpandedAdditional"
+                            aria-controls="additional-collapse"
+                            @click="toggleCollapseAdditional"
+                        >
+                            <h3 class="mb-0">Additional Details</h3>
+                            <i :class="['bi', isExpandedAdditional ? 'bi-chevron-up' : 'bi-chevron-down', 'fs-4', 'fw-bold']"></i>
+                        </button>
+                    </h2>
+                </div>
+                <div
+                    id="additional-collapse"
+                    class="collapse show"
+                    aria-labelledby="additional-heading"
+                    ref="collapseElementAdditional"
+                >
+                    <div class="card-body">
+                        <campgroundAdditional :createCampground=false :campground="campground" @updated="updateCampground" @save="sendData" />
+                    </div>
+                </div>
+            </div>
+
+            <div class="card mt-3" id="stayhistory">
+                <div class="card-header" role="tab" id="stayhistory-heading">
+                    <h2 class="mb-0">
+                        <button 
+                            class="btn d-flex justify-content-between align-items-center w-100 text-start text-decoration-none"
+                            type="button"
+                            :aria-expanded="isExpandedStayHistory"
+                            aria-controls="stayhistory-collapse"
+                            @click="toggleCollapseStayHistory"
+                        >
+                            <h3 class="mb-0">Maximum Stay History</h3>
+                            <i :class="['bi', isExpandedStayHistory ? 'bi-chevron-up' : 'bi-chevron-down', 'fs-4', 'fw-bold']"></i>
+                        </button>
+                    </h2>
+                </div>
+                <div
+                    id="stayhistory-collapse"
+                    class="collapse show"
+                    aria-labelledby="stayhistory-heading"
+                    ref="collapseElementStayHistory"
+                >
+                    <div class="card-body">
+                        <stay-history :object_id="ID" :datatableURL="stayHistoryURL" />
+                    </div>
+                </div>
+            </div>
+
+            <div class="card mt-3" id="bookingperiod">
+                <div class="card-header" role="tab" id="bookingperiod-heading">
+                    <h2 class="mb-0">
+                        <button 
+                            class="btn d-flex justify-content-between align-items-center w-100 text-start text-decoration-none"
+                            type="button"
+                            :aria-expanded="isExpandedBookingPeriod"
+                            aria-controls="bookingperiod-collapse"
+                            @click="toggleCollapseBookingPeriod"
+                        >
+                            <h3 class="mb-0">Booking Period History</h3>
+                            <i :class="['bi', isExpandedBookingPeriod ? 'bi-chevron-up' : 'bi-chevron-down', 'fs-4', 'fw-bold']"></i>
+                        </button>
+                    </h2>
+                </div>
+                <div
+                    id="bookingperiod-collapse"
+                    class="collapse show"
+                    aria-labelledby="bookingperiod-heading"
+                    ref="collapseElementBookingPeriod"
+                >
+                    <div class="card-body">
+                        <priceHistory ref="price_dt" level="campground" :dt_options="ph_options" :historyDeleteURL="priceHistoryDeleteURL" :showAddBtn="hasCampsites" v-show="campground.price_level==0" :object_id="ID" />
+                    </div>
+                </div>
+            </div>
+
+            <div class="card mt-3" id="closures">
+                <div class="card-header" role="tab" id="closures-heading">
+                    <h2 class="mb-0">
+                        <button 
+                            class="btn d-flex justify-content-between align-items-center w-100 text-start text-decoration-none"
+                            type="button"
+                            :aria-expanded="isExpandedClosures"
+                            aria-controls="closures-collapse"
+                            @click="toggleCollapseClosures"
+                        >
+                            <h3 class="mb-0">Closure History</h3>
+                            <i :class="['bi', isExpandedClosures ? 'bi-chevron-up' : 'bi-chevron-down', 'fs-4', 'fw-bold']"></i>
+                        </button>
+                    </h2>
+                </div>
+                <!-- <div id="closures-collapse" class="card-body"> -->
+                <div
+                    id="closures-collapse"
+                    class="collapse show"
+                    aria-labelledby="closures-heading"
+                    ref="collapseElementClosures"
+                >
+                    <div class="card-body">
+                        <closureHistory ref="cg_closure_dt" :object_id="ID" :datatableURL="closureHistoryURL" />
+                    </div>
+                </div>
+            </div>
+
+            <div class="card mt-3" id="applications" style="margin-top:50px; display:none;">
+                <div class="card-header" role="tab" id="applications-heading">
+                    <div class="card-title">
+                        <h4 class='col-6 card-title'>Closure History</h4>
+                        <div class='col-6 text-end'><i class="bi bi-chevron-down"></i></div>
+                    </div>
+                </div>
+                <div class="card-collapse collapse in" role="tabpanel" aria-labelledby="applications-heading" id="campsites">
                     <div class="panel-body">
                         <div class="col-lg-12">
                             <div class="row">
-                                <campgroundAttr :createCampground=false :campground="campground" @updated="updateCampground" @save="sendData">
-                                </campgroundAttr>
+                                <div class="well">
+                                    <div class="col-sm-offset-8 col-sm-4">
+                                        <button @click="showBulkCloseCampsites = true" class="btn btn-primary pull-right table_btn" >Close Mooring Sites</button> 
+                                        <router-link :to="{name:'add_campsite',params:{id:campground_id}}" class="btn btn-primary pull-right table_btn" style="margin-right: 1em;">Add Mooring site</router-link>
+                                    </div>
+                                    <datatable ref="cg_campsites_dt" :dtHeaders ="cs_headers" :dtOptions="cs_options" id="cs_table"></datatable>
+                                </div>
                             </div>
                         </div>
                     </div>
                 </div>
             </div>
-        </div>
 
-        <div class="row" style="margin-top:20px;">
-            <div class="panel panel-default" id="contact">
-                <div class="panel-heading" role="tab" id="contact-heading">
-                    <h4 class="panel-title">
-                        <a role="button" data-toggle="collapse" href="#contact-collapse" id="collapse_contact"
-                        aria-expanded="false" aria-controls="contact-collapse" style="outline:none;">
-                            <div>
-                                <h3 style="display:inline;">Contact</h3>
-                                <span id="collapse_contact_span" class="glyphicon glyphicon-menu-up" style="float:right;"></span>
-                            </div>
-                        </a>
-                    </h4>
-                </div>
-                <div id="contact-collapse" class="panel-collapse collapse in" role="tabpanel" aria-labelledby="contact-heading">
-                    <div class="panel-body">
-                        <div class="col-lg-12">
-                            <div class="row">
-                                <campgroundContact :createCampground=false :campground="campground" @error="swalMessage" @updated="updateCampground" @save="sendData">
-                                </campgroundContact>
-                            </div>
-                        </div>
+            <confirmbox id="deleteRange" :options="deletePrompt"></confirmbox>
+            <bulk-close-campsites v-on:bulkCloseCampsites="bulkCloseCampsites" v-if="showBulkCloseCampsites" v-on:close="showBulkCloseCampsites = false" ref="bulkCloseCampsites" v-bind:campsites="campsites"/>
+            <div class="navbar navbar-default" id="footer" v-if="invent">
+                <div class="container">
+                    <div class="navbar navbar-nav navbar-right" style="margin-top:5px;">
+                        <a href="#" class="btn btn-primary" @click.prevent="sendData">Update</a>
+                        <a href="/dashboard/moorings/" class="btn btn-primary">Cancel</a>
                     </div>
                 </div>
             </div>
-        </div>
-
-        <div class="row" style="margin-top:20px;">
-            <div class="panel panel-default" id="limits">
-                <div class="panel-heading" role="tab" id="limits-heading">
-                    <h4 class="panel-title">
-                        <a role="button" data-toggle="collapse" href="#limits-collapse" id="collapse_limits"
-                        aria-expanded="false" aria-controls="limits-collapse" style="outline:none;">
-                            <div>
-                                <h3 style="display:inline;">Vessel Limits</h3>
-                                <span id="collapse_limits_span" class="glyphicon glyphicon-menu-up" style="float:right;"></span>
-                            </div>
-                        </a>
-                    </h4>
-                </div>
-                <div id="limits-collapse" class="panel-collapse collapse in" role="tabpanel" aria-labelledby="limits-heading">
-                    <div class="panel-body">
-                        <div class="col-lg-12">
-                            <div class="row">
-                                <campgroundLimits :createCampground=false :campground="campground" @error="swalMessage" @updated="updateCampground" @save="sendData">
-                                </campgroundLimits>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <div class="row" style="margin-top:20px;">
-            <div class="panel panel-default" id="images">
-                <div class="panel-heading" role="tab" id="images-heading">
-                    <h4 class="panel-title">
-                        <a role="button" data-toggle="collapse" href="#images-collapse" id="collapse_images"
-                        aria-expanded="false" aria-controls="images-collapse" style="outline:none;">
-                            <div>
-                                <h3 style="display:inline;">Mooring Images</h3>
-                                <span id="collapse_images_span" class="glyphicon glyphicon-menu-up" style="float:right;"></span>
-                            </div>
-                        </a>
-                    </h4>
-                </div>
-                <div id="images-collapse" class="panel-collapse collapse in" role="tabpanel" aria-labelledby="images-heading">
-                    <div class="panel-body">
-                        <div class="col-lg-12">
-                            <div class="row">
-                                <campgroundImages :createCampground=false :campground="campground" @updated="updateCampground" @save="sendData">
-                                </campgroundImages>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <div class="row" style="margin-top:20px;">
-            <div class="panel panel-default" id="mappanel">
-                <div class="panel-heading" role="tab" id="map-heading">
-                    <h4 class="panel-title">
-                        <a role="button" data-toggle="collapse" href="#map-collapse" id="collapse_map"
-                        aria-expanded="false" aria-controls="map-collapse" style="outline:none;">
-                            <div>
-                                <h3 style="display:inline;">Mooring Location</h3>
-                                <span id="collapse_map_span" class="glyphicon glyphicon-menu-up" style="float:right;"></span>
-                            </div>
-                        </a>
-                    </h4>
-                </div>
-                <div id="map-collapse" class="panel-collapse collapse in" role="tabpanel" aria-labelledby="map-heading">
-                    <div class="panel-body">
-                        <div class="col-lg-12">
-                            <div class="row">
-                                <campgroundMap :createCampground=false :campground="campground" @error="swalMessage" @updated="updateCampground" @save="sendData">
-                                </campgroundMap>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <div class="row" style="margin-top:20px;">
-            <div class="panel panel-default" id="additional">
-                <div class="panel-heading" role="tab" id="additional-heading">
-                    <h4 class="panel-title">
-                        <a role="button" data-toggle="collapse" href="#additional-collapse" id="collapse_additional"
-                        aria-expanded="false" aria-controls="additional-collapse" style="outline:none;">
-                            <div>
-                                <h3 style="display:inline;">Additional Details</h3>
-                                <span id="collapse_additional_span" class="glyphicon glyphicon-menu-up" style="float:right;"></span>
-                            </div>
-                        </a>
-                    </h4>
-                </div>
-                <div id="additional-collapse" class="panel-collapse collapse in" role="tabpanel" aria-labelledby="additional-heading">
-                    <div class="panel-body">
-                        <div class="col-lg-12">
-                            <div class="row">
-                                <campgroundAdditional :createCampground=false :campground="campground" @updated="updateCampground" @save="sendData">
-                                </campgroundAdditional>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <div class="row" style="margin-top:20px;">
-            <div class="panel panel-default" id="stayhistory">
-                <div class="panel-heading" role="tab" id="stayhistory-heading">
-                    <h4 class="panel-title">
-                        <a role="button" data-toggle="collapse" href="#stayhistory-collapse" id="collapse_stayhistory"
-                        aria-expanded="false" aria-controls="stayhistory-collapse" style="outline:none;">
-                        <div>
-                            <h3 style="display:inline;">Maximum Stay History</h3>
-                            <span id="collapse_stay_span" class="glyphicon glyphicon-menu-up" style="float:right;"></span>
-                        </div>
-                        </a>
-                    </h4>
-                </div>
-                <div id="stayhistory-collapse" class="panel-collapse collapse in" role="tabpanel"
-                    aria-labelledby="stayhistory-heading">
-                    <div class="panel-body">
-                        <div class="col-lg-12">
-                            <div class="row">
-                                <stay-history :object_id="ID" :datatableURL="stayHistoryURL"></stay-history>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <div class="row" style="margin-top:20px;">
-            <div class="panel panel-default" id="bookingperiod">
-                <div class="panel-heading" role="tab" id="bookingperiod-heading">
-                    <h4 class="panel-title">
-                        <a role="button" data-toggle="collapse" href="#bookingperiod-collapse" id="collapse_pricehistory"
-                        aria-expanded="false" aria-controls="bookingperiod-collapse" style="outline:none;">
-                            <div>
-                                <h3 style="display:inline;">Booking Period History</h3>
-                                <span id="collapse_booking_period_span" class="glyphicon glyphicon-menu-up" style="float:right;"></span>
-                            </div>
-                        </a>
-                    </h4>
-                </div>
-                <div id="bookingperiod-collapse" class="panel-collapse collapse in" role="tabpanel"
-                    aria-labelledby="bookingperiod-heading">
-                    <div class="panel-body">
-                        <div class="col-lg-12">
-                            <div class="row">
-                                <priceHistory ref="price_dt" level="campground" :dt_options="ph_options" :historyDeleteURL="priceHistoryDeleteURL" :showAddBtn="hasCampsites" v-show="campground.price_level==0" :object_id="ID"></priceHistory>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <div class="row" style="margin-top:20px;margin-bottom:60px;">
-            <div class="panel panel-default" id="closures">
-                <div class="panel-heading" role="tab" id="closures-heading">
-                    <h4 class="panel-title">
-                        <a role="button" data-toggle="collapse" href="#closures-collapse" id="collapse_closurehistory"
-                        aria-expanded="false" aria-controls="closures-collapse" style="outline:none;">
-                            <div>
-                                <h3 style="display:inline;">Closure History</h3>
-                                <span id="collapse_closure_span" class="glyphicon glyphicon-menu-up" style="float:right;"></span>
-                            </div>
-                        </a>
-                    </h4>
-                </div>
-                <div id="closures-collapse" class="panel-collapse collapse in" role="tabpanel"
-                    aria-labelledby="closures-heading">
-                    <div class="panel-body">
-                        <div class="col-lg-12">
-                            <div class="row">
-                                <closureHistory ref="cg_closure_dt" :object_id="ID" :datatableURL="closureHistoryURL"></closureHistory>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-    <div class="panel panel-default" id="applications" style="margin-top:50px; display:none;">
-        <div class="panel-heading" role="tab" id="applications-heading">
-            <h4 class="panel-title">
-                <a role="button" data-toggle="collapse" href="#campsites"
-                   aria-expanded="false" aria-controls="collapseOne">
-                    <h3>Mooring Sites</h3>
-                </a>
-            </h4>
-        </div>
-        <div class="panel-collapse collapse in" role="tabpanel"
-            aria-labelledby="applications-heading" id="campsites">
-            <div class="panel-body">
-                <div class="col-lg-12">
-                    <div class="row">
-                        <div class="well">
-                            <div class="col-sm-offset-8 col-sm-4">
-                                <button @click="showBulkCloseCampsites = true" class="btn btn-primary pull-right table_btn" >Close Mooring Sites</button> 
-                                <router-link :to="{name:'add_campsite',params:{id:campground_id}}" class="btn btn-primary pull-right table_btn" style="margin-right: 1em;">Add Mooring site</router-link>
-                            </div>
-                            <datatable ref="cg_campsites_dt" :dtHeaders ="cs_headers" :dtOptions="cs_options" id="cs_table"></datatable>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
+        <!-- </div> -->
     </div>
-    <confirmbox id="deleteRange" :options="deletePrompt"></confirmbox>
-    <bulk-close-campsites v-on:bulkCloseCampsites="bulkCloseCampsites" v-if="showBulkCloseCampsites" v-on:close="showBulkCloseCampsites = false" ref="bulkCloseCampsites" v-bind:campsites="campsites"/>
-    <div class="navbar navbar-default" id="footer" v-if="invent">
-        <div class="container">
-            <div class="navbar navbar-nav navbar-right" style="margin-top:5px;">
-                <a href="#" class="btn btn-primary" @click.prevent="sendData">Update</a>
-                <a href="/dashboard/moorings/" class="btn btn-default">Cancel</a>
-            </div>
-        </div>
-    </div>
-   </div>
 </template>
 
 <style>
@@ -317,6 +328,7 @@ import {
 }
 from '../utils/eventBus.js'
 import { mapGetters } from 'vuex'
+import { ref } from 'vue';
 
 $.extend($.fn.dataTableExt.oSort, {
     "extract-date-pre": function(value){
@@ -337,45 +349,6 @@ $.extend($.fn.dataTableExt.oSort, {
 
 export default {
     name: 'campground',
-    components: {
-        datatable,
-        campgroundAttr,
-        campgroundContact,
-        campgroundLimits,
-        campgroundImages,
-        campgroundMap,
-        campgroundAdditional,
-        confirmbox,
-        pkCsClose,
-        pkCsOpen,
-        closureHistory,
-        priceHistory,
-        "stay-history":stayHistory,
-        "bulk-close-campsites":bulkCloseCampsites,
-    },
-    computed: {
-        ...mapGetters([
-          'booking_periods'
-        ]),
-        closureHistoryURL: function() {
-            return api_endpoints.status_history(this.$route.params.id);
-        },
-        priceHistoryURL: function() {
-            return api_endpoints.campground_price_history(this.$route.params.id);
-        },
-        ID: function(){
-            return parseInt(this.$route.params.id);
-        },
-        hasCampsites: function() {
-            return this.campsites.length > 0;
-        },
-        campground_id: function (){
-            return this.campground.id ? this.campground.id : 0;
-        },
-        priceHistoryDeleteURL: function (){
-            return api_endpoints.delete_campground_price(this.ID);
-        }
-    },
     data: function() {
         let vm = this;
         return {
@@ -438,11 +411,8 @@ export default {
                             return "";
                         }
                     }
-//                }, {
-//                    data: 'concession'
-//                }, {
-//                    data: 'child'
                 }, {
+                    // Comment
                     data: 'details',
                     mRender: function(data, type, full) {
                         if (data){
@@ -451,7 +421,8 @@ export default {
                         return '';
                     }
                 }, {
-                    data: 'editable',
+                    // Action
+                    data: 'details',
                     mRender: function(data, type, full) {
                         if (data) {
                             var id = full.id;
@@ -486,7 +457,8 @@ export default {
                     url: api_endpoints.campgroundCampsites(this.$route.params.id),
                     dataSrc: ''
                 },
-                columnDefs: [{
+                columnDefs: [
+                {
                     responsivePriority: 1,
                     targets: 0
                 }, {
@@ -507,7 +479,7 @@ export default {
                         if (data){
                             var max_length = 25;
                             var name = (data.length > max_length) ? data.substring(0,max_length-1)+'...' : data;
-                            var column = '<td> <div class="name_popover" tabindex="0" data-toggle="popover" data-placement="top" data-content="__NAME__" >'+ name +'</div></td>';
+                            var column = '<td> <div class="name_popover" tabindex="0" data-bs-toggle="popover" data-placement="top" data-content="__NAME__" >'+ name +'</div></td>';
                             return column.replace('__NAME__', data);
                         }
                         return '';
@@ -520,7 +492,7 @@ export default {
                 }, {
                     data: 'price'
                 }, {
-                    data: 'editable',
+                    data: 'name',
                     mRender: function(data, type, full) {
                         var id = full.id;
                         if (full.active) {
@@ -559,64 +531,169 @@ export default {
                 }],
                 id: 'deleteRange'
             },
+            isMooringDetailsOpen: true,
 
+            isExpandedDetails: true,
+            collapseInstanceDetails: null,
+            isExpandedContact: true,
+            collapseInstanceContact: null,
+            isExpandedLimits: true,
+            collapseInstanceLimits: null,
+            isExpandedImages: true,
+            collapseInstanceImages: null,
+            isExpandedLocation: true,
+            collapseInstanceLocation: null,
+            isExpandedAdditional: true,
+            collapseInstanceAdditional: null,
+            isExpandedStayHistory: true,
+            collapseInstanceStayHistory: null,
+            isExpandedBookingPeriod: true,
+            collapseInstanceBookingPeriod: null,
+            isExpandedClosures: true,
+            collapseInstanceClosures: null,
+        }
+    },
+    components: {
+        datatable,
+        campgroundAttr,
+        campgroundContact,
+        campgroundLimits,
+        campgroundImages,
+        campgroundMap,
+        campgroundAdditional,
+        confirmbox,
+        pkCsClose,
+        pkCsOpen,
+        closureHistory,
+        priceHistory,
+        "stay-history":stayHistory,
+        "bulk-close-campsites":bulkCloseCampsites,
+    },
+    computed: {
+        ...mapGetters([
+          'booking_periods'
+        ]),
+        closureHistoryURL: function() {
+            return api_endpoints.status_history(this.$route.params.id);
+        },
+        priceHistoryURL: function() {
+            return api_endpoints.campground_price_history(this.$route.params.id);
+        },
+        ID: function(){
+            return parseInt(this.$route.params.id);
+        },
+        hasCampsites: function() {
+            return this.campsites.length > 0;
+        },
+        campground_id: function (){
+            return this.campground.id ? this.campground.id : 0;
+        },
+        priceHistoryDeleteURL: function (){
+            return api_endpoints.delete_campground_price(this.ID);
         }
     },
     methods: {
-       mooringSpecificationCheck: function() {
-        let vm = this;
-        console.log('mooringSpecificationCheck');
-        var mooring_specification = vm.campground.mooring_specification;
-        //$('#mooring_specification').val();
-        if (mooring_specification) {
-              $('#mooring_details').show();
-               if (mooring_specification == '2') {
-                   $('#mooring_details').show();
-                   $('#contact').hide();
-                   $('#limits').show();
-                   $('#images').hide();
-                   $('#mappanel').hide();
-                   $('#additional').hide();
-                   $('#stayhistory').hide();
-                   $('#bookingperiod').hide();
-                   $('#closures').hide();
-               } else if (mooring_specification == '1') { 
-                   $('#mooring_details').show();
-                   $('#contact').show();
-                   $('#limits').show();
-                   $('#images').show();
-                   $('#mappanel').show();
-                   $('#additional').show();
-                   $('#stayhistory').show();
-                   $('#bookingperiod').show();
-               } else {
-           
-                   $('#mooring_details').hide();
-                   $('#contact').hide();
-                   $('#limits').hide();
-                   $('#images').hide();
-                   $('#mappanel').hide();
-                   $('#additional').hide();
-                   $('#stayhistory').hide();
-                   $('#bookingperiod').hide();
-                   $('#closures').hide();
-               }
+        toggleCollapseDetails: function() {
+            if (this.collapseInstanceDetails) {
+                this.collapseInstanceDetails.toggle();
+            }
+        },
+        toggleCollapseContact: function() {
+            if (this.collapseInstanceContact) {
+                this.collapseInstanceContact.toggle();
+            }
+        },
+        toggleCollapseLimits: function() {
+            if (this.collapseInstanceLimits) {
+                this.collapseInstanceLimits.toggle();
+            }
+        },
+        toggleCollapseImages: function() {
+            if (this.collapseInstanceImages) {
+                this.collapseInstanceImages.toggle();
+            }
+        },
+        toggleCollapseLocation: function() {
+            if (this.collapseInstanceLocation) {
+                this.collapseInstanceLocation.toggle();
+            }
+        },
+        toggleCollapseAdditional: function() {
+            if (this.collapseInstanceAdditional) {
+                this.collapseInstanceAdditional.toggle();
+            }
+        },
+        toggleCollapseStayHistory: function() {
+            if (this.collapseInstanceStayHistory) {
+                this.collapseInstanceStayHistory.toggle();
+            }
+        },
+        toggleCollapseBookingPeriod: function() {
+            if (this.collapseInstanceBookingPeriod) {
+                this.collapseInstanceBookingPeriod.toggle();
+            }
+        },
+        toggleCollapseClosures: function() {
+            if (this.collapseInstanceClosures) {
+                this.collapseInstanceClosures.toggle();
+            }
+        },
+        isMooringDetailsOpenClicked: function() {
+            this.isMooringDetailsOpen = !this.isMooringDetailsOpen;
+        },
+        mooringSpecificationCheck: function() {
+            let vm = this;
+            console.log('mooringSpecificationCheck');
+            var mooring_specification = vm.campground.mooring_specification;
+            //$('#mooring_specification').val();
+            if (mooring_specification) {
+                $('#mooring_details').show();
+                if (mooring_specification == '2') {
+                    $('#mooring_details').show();
+                    $('#contact').hide();
+                    $('#limits').show();
+                    $('#images').hide();
+                    $('#mappanel').hide();
+                    $('#additional').hide();
+                    $('#stayhistory').hide();
+                    $('#bookingperiod').hide();
+                    $('#closures').hide();
+                } else if (mooring_specification == '1') { 
+                    $('#mooring_details').show();
+                    $('#contact').show();
+                    $('#limits').show();
+                    $('#images').show();
+                    $('#mappanel').show();
+                    $('#additional').show();
+                    $('#stayhistory').show();
+                    $('#bookingperiod').show();
+                } else {
             
-        } else {
+                    $('#mooring_details').hide();
+                    $('#contact').hide();
+                    $('#limits').hide();
+                    $('#images').hide();
+                    $('#mappanel').hide();
+                    $('#additional').hide();
+                    $('#stayhistory').hide();
+                    $('#bookingperiod').hide();
+                    $('#closures').hide();
+                }
+                
+            } else {
 
-              $('#mooring_details').hide();
-              $('#contact').hide();
-              $('#limits').hide();
-              $('#images').hide();
-              $('#mappanel').hide();
-              $('#additional').hide();
-              $('#stayhistory').hide();
-              $('#bookingperiod').hide();
-              $('#closures').hide();
-              
-        }
-        vm.addFormValidations();
-
+                $('#mooring_details').hide();
+                $('#contact').hide();
+                $('#limits').hide();
+                $('#images').hide();
+                $('#mappanel').hide();
+                $('#additional').hide();
+                $('#stayhistory').hide();
+                $('#bookingperiod').hide();
+                $('#closures').hide();
+                
+            }
+            vm.addFormValidations();
         },
         updateCampground: function(value){
             var vm = this;
@@ -721,67 +798,19 @@ export default {
                 success: function(data, stat, xhr) {
                     vm.campground = data;
                     vm.fetchCampsites();
-                    bus.$emit('campgroundFetched');
+                    // bus.$emit('campgroundFetched');
+                    bus.emit('campgroundFetched');
                     for (var i = 0; i < data.features.length; i++){
                         vm.features_selected.push(data.features[i].id);
                     }
                     vm.campground.features = vm.features_selected;
-                    vm.mooringSpecificationCheck()
+                    // vm.mooringSpecificationCheck()
                     console.log("Features updated");
                 }
             });
             vm.updateCampground(vm.campground);
             // vm.stopLoadingSection("all");
         },
-        // loadSection: function(section){
-        //     let vm = this;
-        //     if (section == "details"){
-        //         vm.loadingDetails = true;
-        //     } else if (section == "contact"){
-        //         vm.loadingContact = true;
-        //     } else if (section == "limits"){
-        //         vm.loadingLimits = true;
-        //     } else if (section == "images"){
-        //         vm.loadingImages = true;
-        //     } else if (section == "map"){
-        //         vm.loadingMap = true;
-        //     } else if (section == "additional"){
-        //         vm.loadingAdditional = true;
-        //     } else if (section == "all"){
-        //         vm.loadingDetails = true;
-        //         vm.loadingContact = true;
-        //         vm.loadingLimits = true;
-        //         vm.loadingImages = true;
-        //         vm.loadingMap = true;
-        //         vm.loadingAdditional = true;
-        //     }
-        // },
-        // stopLoadingSection: function(section){
-        //     let vm = this;
-        //     console.log(section);
-        //     console.log("ending the loading");
-        //     if (section == "details"){
-        //         vm.loadingDetails = false;
-        //     } else if (section == "contact"){
-        //         vm.loadingContact = false;
-        //     } else if (section == "limits"){
-        //         console.log("Ending limit loading");
-        //         vm.loadingLimits = false;
-        //     } else if (section == "images"){
-        //         vm.loadingImages = false;
-        //     } else if (section == "map"){
-        //         vm.loadingMap = false;
-        //     } else if (section == "additional"){
-        //         vm.loadingAdditional = false;
-        //     } else if (section == "all"){
-        //         vm.loadingDetails = false;
-        //         vm.loadingContact = false;
-        //         vm.loadingLimits = false;
-        //         vm.loadingImages = false;
-        //         vm.loadingMap = false;
-        //         vm.loadingAdditional = false;
-        //     }
-        // },
         swalMessage: function(value){
             swal({
             title: value.title,
@@ -794,66 +823,48 @@ export default {
             });
         },
         addFormValidations: function() {
-
-                   $('form').each(function(){
-                       $(this).validate({
-                           ignore:'div.ql-editor',
-                           rules: {
-                               name: "required",
-                               park: "required",
-                               campground_type: "required",
-                               campground_type_physical: "required",
-                               campground_class: "required",
-                               // contact: "required",
-                               //email: {
-                               //    required: true,
-                               //    email: true
-                               //},
-                               // telephone: "required",
-                               vessel_size_limit: "required",
-                               vessel_draft_limit: "required",
-                               // longitude: "required",
-                               // latitude: "required",
-                               // editor: "required",
-                           },
-                           messages: {
-                               name: "Enter a mooring name",
-                               park: "Select a park from the options",
-                               campground_type: "Select a booking type from the options",
-                               campground_type_physical: "Select a mooring type from the options",
-                               campground_class: "Select a mooring class from the options",
-                               // contact: "Select a contact",
-                               // email: "Please select a contact",
-                               // telephone: "Please select a contact",
-                               vessel_size_limit: "Please set a size limit greater than 0",
-                               vessel_draft_limit: "Please set a draft limit greater than 0",
-                               // longitude: "Please set a longitude",
-                               // latitude: "Please set a latitude",
-                               // editor : "Please enter a valid description",
-                           },
-                           showErrors: function(errorMap, errorList) {
-                               $.each(this.validElements(), function(index, element) {
-                                   var $element = $(element);
-                                   $element.attr("data-original-title", "").parents('.form-group').removeClass('has-error');
-                               });
-
-                               // destroy tooltips on valid elements
-                               $("." + this.settings.validClass).tooltip("destroy");
-
-                               // add or update tooltips
-                               for (var i = 0; i < errorList.length; i++) {
-                                   var error = errorList[i];
-                                   $('#' + error.element.id).focus();
-                                   $(error.element)
-                                       .tooltip({
-                                           trigger: "focus"
-                                       })
-                                       .attr("data-original-title", error.message)
-                                       .parents('.form-group').addClass('has-error');
-                               }
-                           }
-                       });
-                   });
+            $('form').each(function(){
+                $(this).validate({
+                    ignore:'div.ql-editor',
+                    rules: {
+                        name: "required",
+                        park: "required",
+                        campground_type: "required",
+                        campground_type_physical: "required",
+                        campground_class: "required",
+                        // contact: "required",
+                        //email: {
+                        //    required: true,
+                        //    email: true
+                        //},
+                        // telephone: "required",
+                        vessel_size_limit: "required",
+                        vessel_draft_limit: "required",
+                        // longitude: "required",
+                        // latitude: "required",
+                        // editor: "required",
+                    },
+                    messages: {
+                        name: "Enter a mooring name",
+                        park: "Select a park from the options",
+                        campground_type: "Select a booking type from the options",
+                        campground_type_physical: "Select a mooring type from the options",
+                        campground_class: "Select a mooring class from the options",
+                        // contact: "Select a contact",
+                        // email: "Please select a contact",
+                        // telephone: "Please select a contact",
+                        vessel_size_limit: "Please set a size limit greater than 0",
+                        vessel_draft_limit: "Please set a draft limit greater than 0",
+                        // longitude: "Please set a longitude",
+                        // latitude: "Please set a latitude",
+                        // editor : "Please enter a valid description",
+                    },
+                    showErrors: function(errorMap, errorList) {
+                        const { showErrors } = helpers.useFormErrors();
+                        showErrors(errorMap, errorList, this.validElements());
+                    }
+                });
+            });
         },
         validateSize: function(){
             let vm = this;
@@ -1147,45 +1158,209 @@ export default {
                 });
             }
             // vm.addFormValidations();
-        }
+        },
+        initializeDataTables: function() {
+            var vm = this;
+            console.log('initializeDataTables');
+            vm.$refs.cg_campsites_dt.vmDataTable.on('click', '.detailRoute', function(e) {
+                e.preventDefault();
+                var id = $(this).attr('data-campsite');
+                vm.$router.push({
+                    name: 'view_campsite',
+                    params: {
+                        id: vm.campground.id,
+                        campsite_id: id
+                    }
+                });
+            });
+            vm.$refs.cg_campsites_dt.vmDataTable.on('click', '.statusCS', function(e) {
+                e.preventDefault();
+                var id = $(this).attr('data-campsite');
+                var status = $(this).attr('data-status');
+                var current_closure = $(this).attr('data-current_closure') ? $(this).attr('data-current_closure') : '';
 
+                if (status === 'open'){
+                    vm.showOpenOpenCS();
+                    // Update open modal attributes
+                    vm.$refs.openCampsite.status = 0;
+                    vm.$refs.openCampsite.id = id;
+                    vm.$refs.openCampsite.current_closure = current_closure;
+                }else if (status === 'close'){
+                    vm.showCloseCS();
+                    // Update close modal attributes
+                    vm.$refs.closeCampsite.status = 1;
+                    vm.$refs.closeCampsite.id = id;
+                    vm.$refs.closeCampsite.current_closure = current_closure;
+                }
+            });
+            helpers.namePopover($,vm.$refs.cg_campsites_dt.vmDataTable);
+        }
+    },
+    watch: {
+        'campground.id': function(newId, oldId) {
+            if (newId && !oldId) { 
+                this.$nextTick(() => {
+                    this.initializeDataTables();
+                });
+            }
+        }
     },
     mounted: function() {
         var vm = this;
-        // vm.loadSection("all");
-        vm.$store.dispatch("fetchBookingPeriods");
-        vm.$refs.cg_campsites_dt.vmDataTable.on('click', '.detailRoute', function(e) {
-            e.preventDefault();
-            var id = $(this).attr('data-campsite');
-            vm.$router.push({
-                name: 'view_campsite',
-                params: {
-                    id: vm.campground.id,
-                    campsite_id: id
-                }
+
+        vm.$nextTick(() => {
+            const collapseElDetails = vm.$refs.collapseElementDetails;
+            if (collapseElDetails) {
+                vm.collapseInstanceDetails = new bootstrap.Collapse(collapseElDetails, {
+                    toggle: false
+                });
+            }
+            collapseElDetails.addEventListener('show.bs.collapse', () => {
+                vm.isExpandedDetails = true;
+            });
+            collapseElDetails.addEventListener('hide.bs.collapse', () => {
+                vm.isExpandedDetails = false;
+            });
+
+            const collapseElContact = vm.$refs.collapseElementContact;
+            if (collapseElContact) {
+                vm.collapseInstanceContact = new bootstrap.Collapse(collapseElContact, {
+                    toggle: false
+                });
+            }
+            collapseElContact.addEventListener('show.bs.collapse', () => {
+                vm.isExpandedContact = true;
+            });
+            collapseElContact.addEventListener('hide.bs.collapse', () => {
+                vm.isExpandedContact = false;
+            });
+
+            const collapseElLimits = vm.$refs.collapseElementLimits;
+            if (collapseElLimits) {
+                vm.collapseInstanceLimits = new bootstrap.Collapse(collapseElLimits, {
+                    toggle: false
+                });
+            }
+            collapseElLimits.addEventListener('show.bs.collapse', () => {
+                vm.isExpandedLimits = true;
+            });
+            collapseElLimits.addEventListener('hide.bs.collapse', () => {
+                vm.isExpandedLimits = false;
+            });
+
+            const collapseElImages = vm.$refs.collapseElementImages;
+            if (collapseElImages) {
+                vm.collapseInstanceImages = new bootstrap.Collapse(collapseElImages, {
+                    toggle: false
+                });
+            }
+            collapseElImages.addEventListener('show.bs.collapse', () => {
+                vm.isExpandedImages = true;
+            });
+            collapseElImages.addEventListener('hide.bs.collapse', () => {
+                vm.isExpandedImages = false;
+            });
+
+            const collapseElLocation = vm.$refs.collapseElementLocation;
+            if (collapseElLocation) {
+                vm.collapseInstanceLocation = new bootstrap.Collapse(collapseElLocation, {
+                    toggle: false
+                });
+            }
+            collapseElLocation.addEventListener('show.bs.collapse', () => {
+                vm.isExpandedLocation = true;
+            });
+            collapseElLocation.addEventListener('hide.bs.collapse', () => {
+                vm.isExpandedLocation = false;
+            });
+
+            const collapseElAdditional = vm.$refs.collapseElementAdditional;
+            if (collapseElAdditional) {
+                vm.collapseInstanceAdditional = new bootstrap.Collapse(collapseElAdditional, {
+                    toggle: false
+                });
+            }
+            collapseElAdditional.addEventListener('show.bs.collapse', () => {
+                vm.isExpandedAdditional = true;
+            });
+            collapseElAdditional.addEventListener('hide.bs.collapse', () => {
+                vm.isExpandedAdditional = false;
+            });
+
+            const collapseElStayHistory = vm.$refs.collapseElementStayHistory;
+            if (collapseElStayHistory) {
+                vm.collapseInstanceStayHistory = new bootstrap.Collapse(collapseElStayHistory, {
+                    toggle: false
+                });
+            }
+            collapseElStayHistory.addEventListener('show.bs.collapse', () => {
+                vm.isExpandedStayHistory = true;
+            });
+            collapseElStayHistory.addEventListener('hide.bs.collapse', () => {
+                vm.isExpandedStayHistory = false;
+            });
+
+            const collapseElBookingPeriod = vm.$refs.collapseElementBookingPeriod;
+            if (collapseElBookingPeriod) {
+                vm.collapseInstanceBookingPeriod = new bootstrap.Collapse(collapseElBookingPeriod, {
+                    toggle: false
+                });
+            }
+            collapseElBookingPeriod.addEventListener('show.bs.collapse', () => {
+                vm.isExpandedBookingPeriod = true;
+            });
+            collapseElBookingPeriod.addEventListener('hide.bs.collapse', () => {
+                vm.isExpandedBookingPeriod = false;
+            });
+
+            const collapseElClosures = vm.$refs.collapseElementClosures;
+            if (collapseElClosures) {
+                vm.collapseInstanceClosures = new bootstrap.Collapse(collapseElClosures, {
+                    toggle: false
+                });
+            }
+            collapseElClosures.addEventListener('show.bs.collapse', () => {
+                vm.isExpandedClosures = true;
+            });
+            collapseElClosures.addEventListener('hide.bs.collapse', () => {
+                vm.isExpandedClosures = false;
             });
         });
-        vm.$refs.cg_campsites_dt.vmDataTable.on('click', '.statusCS', function(e) {
-            e.preventDefault();
-            var id = $(this).attr('data-campsite');
-            var status = $(this).attr('data-status');
-            var current_closure = $(this).attr('data-current_closure') ? $(this).attr('data-current_closure') : '';
 
-            if (status === 'open'){
-                vm.showOpenOpenCS();
-                // Update open modal attributes
-                vm.$refs.openCampsite.status = 0;
-                vm.$refs.openCampsite.id = id;
-                vm.$refs.openCampsite.current_closure = current_closure;
-            }else if (status === 'close'){
-                vm.showCloseCS();
-                // Update close modal attributes
-                vm.$refs.closeCampsite.status = 1;
-                vm.$refs.closeCampsite.id = id;
-                vm.$refs.closeCampsite.current_closure = current_closure;
-            }
-        });
-        helpers.namePopover($,vm.$refs.cg_campsites_dt.vmDataTable);
+        // vm.loadSection("all");
+        vm.$store.dispatch("fetchBookingPeriods");
+        // vm.$refs.cg_campsites_dt.vmDataTable.on('click', '.detailRoute', function(e) {
+        //     e.preventDefault();
+        //     var id = $(this).attr('data-campsite');
+        //     vm.$router.push({
+        //         name: 'view_campsite',
+        //         params: {
+        //             id: vm.campground.id,
+        //             campsite_id: id
+        //         }
+        //     });
+        // });
+        // vm.$refs.cg_campsites_dt.vmDataTable.on('click', '.statusCS', function(e) {
+        //     e.preventDefault();
+        //     var id = $(this).attr('data-campsite');
+        //     var status = $(this).attr('data-status');
+        //     var current_closure = $(this).attr('data-current_closure') ? $(this).attr('data-current_closure') : '';
+
+        //     if (status === 'open'){
+        //         vm.showOpenOpenCS();
+        //         // Update open modal attributes
+        //         vm.$refs.openCampsite.status = 0;
+        //         vm.$refs.openCampsite.id = id;
+        //         vm.$refs.openCampsite.current_closure = current_closure;
+        //     }else if (status === 'close'){
+        //         vm.showCloseCS();
+        //         // Update close modal attributes
+        //         vm.$refs.closeCampsite.status = 1;
+        //         vm.$refs.closeCampsite.id = id;
+        //         vm.$refs.closeCampsite.current_closure = current_closure;
+        //     }
+        // });
+        // helpers.namePopover($,vm.$refs.cg_campsites_dt.vmDataTable);
         vm.fetchCampground();
         $.ajax({
             url: api_endpoints.profile,
@@ -1292,38 +1467,13 @@ export default {
             $('#collapse_closure_span').addClass("glyphicon glyphicon-menu-down");
         });
 
-        // $('#collapse_contact').click();
-        // $('#collapse_limits').click();
-        // $('#collapse_additional').click();
-        // $('#collapse_stayhistory').click();
-        // $('#collapse_pricehistory').click();
-        // $('#collapse_closurehistory').click();
-
-
-
-        //console.log("IIIICMAP");
-        //console.log(vm.campground);
-        //if (vm.campground) {
-        //    console.log('CC');
-        //    console.log(vm.campground.mooring_specification);
-        //    if (vm.campground.mooring_specification) {
-        //         $('#mooring_details').show();
-        //    } else {
-        //        $('#mooring_details').hide();
-        //    }
-        //} else {
-        //    $('#mooring_details').hide();
-        //}
-
-
-
         $( "#mooring_specification" ).change(function() {
-          vm.mooringSpecificationCheck();
+        //   vm.mooringSpecificationCheck();
         });
 
         setTimeout(function(){
             $(vm.$refs.top).focus();
-            vm.mooringSpecificationCheck();           
+            // vm.mooringSpecificationCheck();           
             vm.addFormValidations();
         }, 50);
     }

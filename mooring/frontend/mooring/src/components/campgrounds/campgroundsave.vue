@@ -6,7 +6,7 @@
             <div class="panel panel-default" id="details">
                 <div class="panel-heading" role="tab" id="details-heading">
                     <h4 class="panel-title">
-                        <a role="button" data-toggle="collapse" href="#details-collapse"
+                        <a role="button" data-bs-toggle="collapse" href="#details-collapse"
                         aria-expanded="false" aria-controls="details-collapse" style="outline:none;">
                             <div>
                                 <h3 style="display:inline;">{{title}}</h3>
@@ -32,7 +32,7 @@
             <div class="panel panel-default" id="stayhistory">
                 <div class="panel-heading" role="tab" id="stayhistory-heading">
                     <h4 class="panel-title">
-                        <a role="button" data-toggle="collapse" href="#stayhistory-collapse"
+                        <a role="button" data-bs-toggle="collapse" href="#stayhistory-collapse"
                         aria-expanded="false" aria-controls="stayhistory-collapse" style="outline:none;">
                         <div>
                             <h3 style="display:inline;">Maximum Stay History</h3>
@@ -58,7 +58,7 @@
             <div class="panel panel-default" id="bookingperiod">
                 <div class="panel-heading" role="tab" id="bookingperiod-heading">
                     <h4 class="panel-title">
-                        <a role="button" data-toggle="collapse" href="#bookingperiod-collapse"
+                        <a role="button" data-bs-toggle="collapse" href="#bookingperiod-collapse"
                         aria-expanded="false" aria-controls="bookingperiod-collapse" style="outline:none;">
                             <div>
                                 <h3 style="display:inline;">Booking Period History</h3>
@@ -84,7 +84,7 @@
             <div class="panel panel-default" id="closures">
                 <div class="panel-heading" role="tab" id="closures-heading">
                     <h4 class="panel-title">
-                        <a role="button" data-toggle="collapse" href="#closures-collapse"
+                        <a role="button" data-bs-toggle="collapse" href="#closures-collapse"
                         aria-expanded="false" aria-controls="closures-collapse" style="outline:none;">
                             <div>
                                 <h3 style="display:inline;">Closure History</h3>
@@ -109,7 +109,7 @@
       <div class="panel panel-default" id="applications" style="margin-top:50px; display:none;">
         <div class="panel-heading" role="tab" id="applications-heading">
             <h4 class="panel-title">
-                <a role="button" data-toggle="collapse" href="#campsites"
+                <a role="button" data-bs-toggle="collapse" href="#campsites"
                    aria-expanded="false" aria-controls="collapseOne">
                     <h3>Mooring Sites</h3>
                 </a>
@@ -261,10 +261,6 @@ export default {
                             return "";
                         }
                     }
-//                }, {
-//                    data: 'concession'
-//                }, {
-//                    data: 'child'
                 }, {
                     data: 'details',
                     mRender: function(data, type, full) {
@@ -329,7 +325,7 @@ export default {
                         if (data){
                             var max_length = 25;
                             var name = (data.length > max_length) ? data.substring(0,max_length-1)+'...' : data;
-                            var column = '<td> <div class="name_popover" tabindex="0" data-toggle="popover" data-placement="top" data-content="__NAME__" >'+ name +'</div></td>';
+                            var column = '<td> <div class="name_popover" tabindex="0" data-bs-toggle="popover" data-placement="top" data-bs-content="__NAME__" >'+ name +'</div></td>';
                             return column.replace('__NAME__', data);
                         }
                         return '';
@@ -397,7 +393,8 @@ export default {
                 async: false,
                 success: function(data, stat, xhr) {
                     vm.campground = data;
-                    bus.$emit('campgroundFetched');
+                    // bus.$emit('campgroundFetched');
+                    bus.emit('campgroundFetched');
                 }
             });
         },
@@ -499,7 +496,8 @@ export default {
                 success: function(data, stat, xhr) {
                     vm.campground = data;
                     vm.fetchCampsites();
-                    bus.$emit('campgroundFetched');
+                    // bus.$emit('campgroundFetched');
+                    bus.emit('campgroundFetched');
                 }
             });
         }

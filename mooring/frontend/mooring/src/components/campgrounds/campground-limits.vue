@@ -1,5 +1,5 @@
 <template lang="html">
-    <div  id="cg_limits" >
+    <div id="cg_limits" >
         <div>
             <form id="limitsForm">
                 <div class="col-sm-12">
@@ -7,7 +7,7 @@
                         <p>Mooring successfully updated</p>
                     </alert>
                     <alert :show.sync="showError" type="danger">
-                        <p>{{errorString}}<p/>
+                        <p>{{errorString}}</p>
                     </alert>
                     <div class="row">
                         <div class="col-lg-12">
@@ -40,7 +40,7 @@
                                     <div class="form-group pull-right">
                                         <a href="#" v-if="createCampground" class="btn btn-primary" @click.prevent="create">Create</a>
                                         <a href="#" v-else class="btn btn-primary" @click.prevent="update">Update</a>
-                                        <a href="#" class="btn btn-default" @click.prevent="goBack">Cancel</a>
+                                        <a href="#" class="btn btn-primary" @click.prevent="goBack">Cancel</a>
                                     </div>
                                 </div>
                             </div>
@@ -233,52 +233,21 @@ export default {
             } else {
                 vm.campground.vessel_beam_limit = 0;
             }
+            console.log('campground-limits.vue 1');
             vm.$emit('updated', vm.campground);
             vm.$emit('save', url, method, reload, "limits");
         },
         showAlert: function() {
-            bus.$emit('showAlert', 'alert1');
+            // bus.$emit('showAlert', 'alert1');
+            bus.emit('showAlert', 'alert1');
         },
-        // addFormValidations: function() {
-        //     this.form.validate({
-		// 		ignore:'div.ql-editor',
-        //         rules: {
-        //             vessel_size_limit: "required",
-        //             vessel_draft_limit: "required",
-        //         },
-        //         messages: {
-        //             vessel_size_limit: "Please set a size limit greater than 0",
-        //             vessel_draft_limit: "Please set a draft limit greater than 0",
-        //         },
-        //         showErrors: function(errorMap, errorList) {
-        //             $.each(this.validElements(), function(index, element) {
-        //                 var $element = $(element);
-
-        //                 $element.attr("data-original-title", "").parents('.form-group').removeClass('has-error');
-        //             });
-
-        //             // destroy tooltips on valid elements
-        //             $("." + this.settings.validClass).tooltip("destroy");
-
-        //             // add or update tooltips
-        //             for (var i = 0; i < errorList.length; i++) {
-        //                 var error = errorList[i];
-        //                 $('#'+ error.element.id).focus();
-        //                 $(error.element).tooltip({
-        //                         trigger: "focus"
-        //                     })
-        //                     .attr("data-original-title", error.message)
-        //                     .parents('.form-group').addClass('has-error');
-        //             }
-        //         }
-        //     });
-        // },
     },
     mounted: function() {
         let vm = this;
         vm.form = $('#limitsForm');
         // vm.addFormValidations();
-        $('.form-control').blur(function(){
+        $('#cg_limits .form-control').on('blur', function(){
+            console.log('campground-limits.vue 2');
             vm.$emit('updated', vm.campground);
         });
     },

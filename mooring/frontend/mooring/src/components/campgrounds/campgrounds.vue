@@ -1,102 +1,107 @@
 <template>
-<div id="groundsList">
-    <pkCgClose></pkCgClose>
-    <pkCgOpen></pkCgOpen>
-    <div class="panel-group" id="returns-accordion" role="tablist" aria-multiselectable="true">
-        <div class="row">
-            <div class="panel panel-default" id="returns">
-                <div class="panel-heading" role="tab" id="returns-heading">
-                    <h4 class="panel-title">
-                        <a role="button" data-toggle="collapse" href="#returns-collapse"
-                            aria-expanded="true" aria-controls="collapseOne" style="outline:none;">
-                            <div>
-                                <h3 style="display:inline;">{{title}}</h3>
-                                <span id="collapse_returns_span" class="glyphicon glyphicon-menu-up" style="float:right;"></span>
-                            </div>
-                        </a>
-                    </h4>
+    <div id="groundsList">
+        <pkCgClose></pkCgClose>
+        <pkCgOpen></pkCgOpen>
+
+        <!-- <div class="card" id="accordionReturns">
+            <div class="card-header" role="tab" id="returns-heading">
+                <div class="row">
+                    <h3 class="col-6 card-title">{{ title }}</h3>
+                    <div class='col-6 text-end'><i class="bi bi-chevron-down"></i></div>
                 </div>
-                <div id="returns-collapse" class="panel-collapse collapse in" role="tabpanel" aria-labelledby="returns-heading">
-                    <div class="panel-body">
-                        <div id="groundsList">
-                            <form class="form" id="campgrounds-filter-form">
-                                <div class="col-md-8">
+            </div> -->
+        <div class="card">
+            <div class="card-header" id="moorings-heading">
+                <h2 class="mb-0">
+                    <button 
+                        class="btn d-flex justify-content-between align-items-center w-100 text-start text-decoration-none"
+                        type="button"
+                        :aria-expanded="isExpanded"
+                        aria-controls="moorings-collapse"
+                        @click="toggleCollapse"
+                    >
+                        <h3 class="mb-0">Moorings</h3>
+                        <i :class="['bi', isExpanded ? 'bi-chevron-up' : 'bi-chevron-down', 'fs-4', 'fw-bold']"></i>
+                    </button>
+                </h2>
+            </div>
+
+            <div 
+                id="moorings-collapse"
+                class="collapse show"  
+                aria-labelledby="moorings-heading"
+                ref="collapseElement"
+            >
+                <div class="card-body">
+                    <form class="form" id="campgrounds-filter-form">
+                        <div class="row align-items-end">
+                            <div class="col-md-8">
+                                <div class="row">
                                     <div class="col-md-2">
-                                        <div class="form-group">
-                                            <label for="campgrounds-filter-status">Status: </label>
-                                            <select v-model="selected_status" class="form-control" name="status" id="campgrounds-filter-status">
+                                        <label for="campgrounds-filter-status" class="form-label">Status: </label>
+                                        <select v-model="selected_status" class="form-select" name="status" id="campgrounds-filter-status">
                                             <option value="All">All</option>
                                             <option value="Open">Open</option>
                                             <option value="Temporarily Closed">Temporarily Closed</option>
                                         </select>
-                                        </div>
                                     </div>
                                     <div class="col-md-2">
-                                        <div class="form-group">
-                                            <label for="applications-filter-region">Region: </label>
-                                            <select class="form-control" v-model="selected_region">
-                                                <option value="All">All</option>
-                                                <option v-for="region in regions" :value="region.name">{{ region.name }}</option>
-                                            </select>
-                                        </div>
+                                        <label for="applications-filter-region" class="form-label">Region: </label>
+                                        <select class="form-select" v-model="selected_region">
+                                            <option value="All">All</option>
+                                            <option v-for="region in regions" :value="region.name">{{ region.name }}</option>
+                                        </select>
                                     </div>
                                     <div class="col-md-2">
-                                        <div class="form-group">
-                                            <label for="applications-filter-region">District: </label>
-                                            <select class="form-control" v-model="selected_district">
-                                                <option value="All">All</option>
-                                                <option v-for="district in districts" :value="district.name">{{ district.name }}</option>
-                                            </select>
-                                        </div>
+                                        <label for="applications-filter-region" class="form-label">District: </label>
+                                        <select class="form-select" v-model="selected_district">
+                                            <option value="All">All</option>
+                                            <option v-for="district in districts" :value="district.name">{{ district.name }}</option>
+                                        </select>
                                     </div>
-                                    <div class="col-md-2">
-                                        <div class="form-group">
-                                            <label for="applications-filter-region">Park: </label>
-                                            <select class="form-control" v-model="selected_park">
-                                                <option value="All">All</option>
-                                                <option v-for="park in parks" :value="park.name">{{ park.name }}</option>
-                                            </select>
-                                        </div>
+                                    <div class="col-md-3">
+                                        <label for="applications-filter-region" class="form-label">Park: </label>
+                                        <select class="form-select" v-model="selected_park">
+                                            <option value="All">All</option>
+                                            <option v-for="park in parks" :value="park.name">{{ park.name }}</option>
+                                        </select>
                                     </div>
-
-                                    <div class="col-md-2">
-                                        <div class="form-group">
-                                            <label for="applications-filter-region">Specification: </label>
-                                            <select class="form-control" v-model="selected_specification">
-                                                <option value="All">All</option>
-                                                <option v-for="m in mooring_specification" :value="m.name" >{{m.name}}</option>
-
-                                            </select>
-                                        </div>
-                                    </div>
-
-
-                                </div>
-                                <div class="col-md-4">
-                                    <div class="form-group pull-right">
-                                        <a style="margin-top: 20px;" v-if="invent" class="btn btn-primary" @click="addCampground()">Add Mooring</a>
-                                        <a style="margin-top: 20px;" v-if="invent" class="btn btn-primary" @click="showBulkClose = true">Close Moorings</a>
-                                        <a style="margin-top: 20px;" v-if="invent" class="btn btn-primary" @click="showBulkBookingPeriod = true">Set Periods</a>
+                                    <div class="col-md-3">
+                                        <label for="applications-filter-region" class="form-label">Specification: </label>
+                                        <select class="form-select" v-model="selected_specification">
+                                            <option value="All">All</option>
+                                            <option v-for="m in mooring_specification" :value="m.name" >{{m.name}}</option>
+                                        </select>
                                     </div>
                                 </div>
-                            </form>
-                            <datatable :dtHeaders="['Mooring','Type', 'Status','Region','District','Park','Specification','Action']" :dtOptions="dtoptions" ref="dtGrounds" id="campground-table" ></datatable>
+                            </div>
+                            <div class="col-md-4 text-end">
+                                    <a v-if="invent" class="btn btn-primary" @click="addCampground()">Add Mooring</a>
+                                    <a v-if="invent" class="btn btn-primary ms-2" @click="showBulkClose = true">Close Moorings</a>
+                                    <a v-if="invent" class="btn btn-primary ms-2" @click="showBulkBookingPeriod = true">Set Periods</a>
+                            </div>
                         </div>
-                    </div>
+                    </form>
+                    <datatable
+                        :dtHeaders="['Mooring','Type', 'Status','Region','District','Park','Specification','Action']"
+                        :dtOptions="dtoptions"
+                        ref="dtGrounds"
+                        id="campground-table"
+                    ></datatable>
                 </div>
             </div>
         </div>
+
+        <bulk-close :show="showBulkClose" ref="bulkClose"/>
+        <bulk-booking :show="showBulkBookingPeriod" ref="bulkBooking"/>
     </div>
-    <bulk-close :show="showBulkClose" ref="bulkClose"/>
-    <bulk-booking :show="showBulkBookingPeriod" ref="bulkBooking"/>
-</div>
 </template>
 
 <script>
 import {
     $,
     api_endpoints
-} from '../../hooks'
+} from '../../hooks.js'
 import alert from '../utils/alert.vue'
 import datatable from '../utils/datatable.vue'
 import pkCgClose from './closeCampground.vue'
@@ -105,7 +110,8 @@ import bulkClose from '../utils/closureHistory/bulk-close.vue'
 import bulkBooking from '../utils/priceHistory/bulkPriceHistory.vue'
 import {bus} from '../utils/eventBus.js'
 import { mapGetters } from 'vuex'
-module.exports = {
+
+export default {
     name: 'pk-campgrounds',
     data: function() {
         let vm =this;
@@ -170,37 +176,35 @@ module.exports = {
                         var current_closure_text  ='';
                         if (current_closure_split.length > 1) {
                                current_closure_text = current_closure_split[0] + "<BR>"+current_closure_split[1];
-			}
+                        }
                         var status = (data == true) ? "Open" : "Temporarily Closed";
                         var column = "<td >__Status__</td>";
                         column += data ? "" : "<br/><br/>"+current_closure_text;
                         return column.replace('__Status__', status);
                     }
-                },{
+                }, {
                     "data": "region"
-                },{
+                }, {
                     "data": "district"
-                },{
+                }, {
                     "data": "park"
-                },{ "data": "park",
+                }, { "data": "park",
                      "mRender": function(data, type, full){
                               return full.mooring_specification;
                       }
-                },{
+                }, {
                     data: 'id',
                     mRender: function(data, type, full) {
                         var id = full.id;
-//                        var addBooking = "<br/><a href='#' class='addBooking' data-campground=\"__ID__\" >Add Booking</a>";
                         var addBooking = "";
                         var today = vm.date_today(0);
                         var today_week_later = vm.date_today(7);
-                        // var availability_admin = "<br/><a target='_blank' href='/availability_admin/?site_id=__ID__' >Availability</a>";
                         var availability_admin = "<a target='_blank' href='/availability2/?site_id=__ID__&arrival="+today+"&departure="+today_week_later+"&gear_type=all&num_adult=2&num_child=0&num_concession=0&num_infant=0&vessel_size=0.1&vessel_draft=0.1&vessel_beam=0.1&vessel_weight=0.1' >Availability</a>";
                         var column = "";
                         if(full.noinvent) {
-                            column = "<td ><a href='#' class='detailRoute' data-campground=\"__ID__\" >View</a><br/>";
+                            column = "<td><a href='#' class='detailRoute' data-campground=\"__ID__\" >View</a><br/>";
                         } else {
-                            column = "<td ><a href='__ID__' class='detailRoute' data-campground=\"__ID__\" >Edit</a><br/>";
+                            column = "<td><a href='__ID__' class='detailRoute' data-campground=\"__ID__\" >Edit</a><br/>";
                             if (full.active) {
                                 column += "<a href='#' class='statusCG' data-status='close' data-campground=\"__ID__\" > Close </a><br/>";
                             } else {
@@ -214,9 +218,11 @@ module.exports = {
                         column = column.replace(/__Current_Closure__/,full.current_closure);
                         return column.replace(/__ID__/g, id);
                     }
-                }, ],
+                }],
                 processing: true
-            }
+            },
+            isExpanded: true,
+            collapseInstance: null
         }
     },
     components: {
@@ -228,11 +234,11 @@ module.exports = {
         "bulk-booking": bulkBooking
     },
     computed:{
-       ...mapGetters([
-         'regions',
-         'districts',
-         'parks'
-       ]),
+        ...mapGetters([
+            'regions',
+            'districts',
+            'parks'
+        ]),
     },
     watch: {
         showBulkClose:function () {
@@ -283,7 +289,6 @@ module.exports = {
                 vm.$refs.dtGrounds.vmDataTable.columns(6).search('').draw();
             }
         }
-
     },
     methods: {
         flagFormat: function(flag) {
@@ -301,23 +306,23 @@ module.exports = {
             });
         },
         date_today(days) {
-           var today = new Date();
-           var res = today.setTime(today.getTime() + (days * 24 * 60 * 60 * 1000));
+            var today = new Date();
+            var res = today.setTime(today.getTime() + (days * 24 * 60 * 60 * 1000));
         
-           var today = new Date(res);
-           var dd = today.getDate();
-           var mm = today.getMonth() + 1; //January is 0!
+            var today = new Date(res);
+            var dd = today.getDate();
+            var mm = today.getMonth() + 1; //January is 0!
            
-           var yyyy = today.getFullYear();
-           if (dd < 10) {
-             dd = '0' + dd;
-           } 
-           if (mm < 10) {
-             mm = '0' + mm;
-           } 
-           //var today = yyyy + '/' + mm + '/'+ dd + '/';
-           var today = yyyy + '/' + mm + '/'+ dd; 
-           return today
+            var yyyy = today.getFullYear();
+            if (dd < 10) {
+              dd = '0' + dd;
+            } 
+            if (mm < 10) {
+              mm = '0' + mm;
+            } 
+            //var today = yyyy + '/' + mm + '/'+ dd + '/';
+            var today = yyyy + '/' + mm + '/'+ dd; 
+            return today
         },
         updateTable: function() {
             var vm = this;
@@ -330,6 +335,9 @@ module.exports = {
             this.isOpenOpenCG = true;
         },
         openDetail: function(cg_id) {
+            console.log('openDetail', cg_id);
+            console.log(this.$router);
+
             this.$router.push({
                 name: 'cg_detail',
                 params: {
@@ -348,15 +356,59 @@ module.exports = {
                 vm.$store.dispatch("fetchRegions");
             }
         },
-        fetchSpecifications: function() {
-           let vm = this;
+        // fetchSpecifications: function() {
+        //     console.log('fetchSpecifications');
+        //    let vm = this;
 
-           vm.$http.get(api_endpoints.mooring_specification).then((response) => {
-                   vm.mooring_specification = response.body
-           }, (error) => {
-                   console.log(error);
-           });
+        //    fetch(api_endpoints.mooring_specification).then((response) => {
+        //            vm.mooring_specification = response.body
+        //    }, (error) => {
+        //            console.log(error);
+        //    });
+        // },
+        // We declare the method as 'async' to use the 'await' keyword inside it.
+        async fetchMooringSpecification() {
+            // Use a try...catch block for robust error handling.
+            try {
+                const url = api_endpoints.mooring_specification;
+                console.log({url})
+                
+                // Pause the function execution until the fetch promise resolves.
+                // 'response' will be a Response object, not the final data.
+                const response = await fetch(url, {
+                    headers: {
+                        'X-Requested-With': 'XMLHttpRequest',
+                        'Accept': 'application/json'
+                    }
+                });
 
+                console.log({response})
+
+                // The 'fetch' API does not reject on HTTP errors (like 404 or 500).
+                // We must manually check if the response was successful.
+                // The 'ok' property is true if the status code is in the 200-299 range.
+                if (!response.ok) {
+                    // If the response is not ok, we throw an error to be caught by the catch block.
+                    throw new Error(`HTTP error! Status: ${response.status}`);
+                }
+
+                console.log('aho')
+
+                // The response.json() method also returns a promise.
+                // We 'await' it to get the parsed JSON data from the response body.
+                const data = await response.json();
+
+                console.log({data})
+                
+                // Finally, assign the fetched data to the component's data property.
+                // 'this' refers to the component instance (like 'vm').
+                this.mooring_specification = data;
+
+            } catch (error) {
+                // This block will catch both network errors (if fetch fails) 
+                // and the HTTP errors we threw manually.
+                console.error('Failed to fetch mooring specification:', error);
+            }
         },
         fetchParks: function() {
             let vm = this;
@@ -371,10 +423,13 @@ module.exports = {
             }
         },
         addTableListeners: function(){
+            console.log('addEventListeners...');
+
             let vm = this;
             vm.$refs.dtGrounds.vmDataTable.on('click', '.detailRoute', function(e) {
                 e.preventDefault();
                 var id = $(this).attr('data-campground');
+                console.log('id', id);
                 vm.openDetail(id);
             });
             vm.$refs.dtGrounds.vmDataTable.on('click', '.statusCG', function(e) {
@@ -387,7 +442,8 @@ module.exports = {
                     'id': id,
                     'closure': current_closure
                 }
-                bus.$emit('openclose', data);
+                // bus.$emit('openclose', data);
+                bus.emit('openclose', data);
                 if (status === 'open'){
                     vm.showOpenOpenCG();
                 }else if (status === 'close'){
@@ -404,10 +460,17 @@ module.exports = {
                     }
                 });
             });
-            bus.$on('refreshCGTable', function(){
+            bus.on('refreshCGTable', function(){
                 vm.$refs.dtGrounds.vmDataTable.ajax.reload();
             });
-        }
+        },
+        toggleCollapse: function() {
+            console.log('toggleCollapse()')
+            if (this.collapseInstance) {
+                console.log('Toggling collapse instance');
+                this.collapseInstance.toggle();
+            }
+        },
     },
     created: function(){
         let vm = this;
@@ -420,18 +483,32 @@ module.exports = {
                     vm.invent = true;
                 }
                 if(!vm.invent){
-                    
+
                 }
             }
         });
     },
     mounted: function() {
         var vm = this;
+
+        const collapseEl = vm.$refs.collapseElement;
+        if (collapseEl) {
+            vm.collapseInstance = new bootstrap.Collapse(collapseEl, {
+                toggle: false
+            });
+        }
+        collapseEl.addEventListener('show.bs.collapse', () => {
+            vm.isExpanded = true;
+        });
+        collapseEl.addEventListener('hide.bs.collapse', () => {
+            vm.isExpanded = false;
+        });
+
         vm.addTableListeners();
         vm.fetchRegions();
         vm.fetchParks();
         vm.fetchDistricts();
-        vm.fetchSpecifications();
+        vm.fetchMooringSpecification();
 
         $('#returns-collapse').on('shown.bs.collapse', function(){
             $('#collapse_returns_span').removeClass("glyphicon glyphicon-menu-down");
