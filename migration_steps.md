@@ -50,13 +50,15 @@ insert into django_migrations (id,app,name,applied) select * from  django_migrat
 delete from django_migrations where app = 'django_cron';
 ```
 
-
-## Step 9: Run Migrations
+## Step 9: Drop the django_cron table
 ```
-./manage_ml.py migrate auth
+drop table django_cron_cronjoblog;
+```
+
+
+## Step 10: Run Migrations
+```
 ./manage_ml.py migrate admin
 ./manage_ml.py migrate django_cron
-./manage_ml.py migrate sites
-./manage_ml.py migrate sessions
 ./manage_ml.py migrate 
 ```
