@@ -1136,20 +1136,12 @@ export default {
                                 }
                                 break;
                             case 25:
-                                ronsole.log('25')
-                                if (booking.vessel_details) {
-                                    bk[field] = booking.canceled_by;
-                                } else {
-                                    bk[field] = '';
-                                }
+                                console.log('25')
+                                bk[field] = booking.canceled_by;
                                 break;
                             case 26:
-                                ronsole.log('26')
-                                if (booking.vessel_details) {
-                                    bk[field] = booking.cancelation_reason;
-                                } else {
-                                    bk[field] = '';
-                                }
+                                console.log('26')
+                                bk[field] = booking.cancelation_reason;
                                 break;
                         }
                     });
