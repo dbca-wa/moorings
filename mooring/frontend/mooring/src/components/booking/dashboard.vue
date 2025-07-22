@@ -1227,8 +1227,24 @@ export default {
 
                 console.log({data})
 
-                var fields = ["Confirmation No", "Customer", "Email", "Mobile", "Overnight Stay", "Arrival Date", "Total Attendees", "Adults","Children","Infants", "Vessel Reg No", "Warning Reference", "Invoice Reference",'Cancelled By','Cancellation Reason']
-                
+                var fields = [
+                    "Confirmation No",
+                    "Customer",
+                    "Email",
+                    "Mobile",
+                    "Overnight Stay",
+                    "Arrival Date",
+                    "Total Attendees",
+                    "Adults",
+                    "Children",
+                    "Infants",
+                    "Vessel Reg No",
+                    "Warning Reference",
+                    "Invoice Reference",
+                    'Cancelled By',
+                    'Cancellation Reason'
+                ]
+
                 var bookings = [];
                 $.each(data,function (i,booking) {
                     var bk = {};
@@ -1236,14 +1252,13 @@ export default {
                         switch (j) {
                             case 0:
                                 bk[field] = "AD" + booking.id;
-                                
-                            break;
+                                break;
                             case 1:
                                 bk[field] = booking.customerName;
-                            break;
+                                break;
                             case 2:
                                 bk[field] = booking.email;
-                            break;
+                                break;
                             case 3: 
                                  bk[field] = booking.mobile;
                                  break;
@@ -1259,11 +1274,10 @@ export default {
                                         } else {
                                             answer += "No"
                                         }
-                                        
                                     }
                                 }
                                 bk[field] = answer;
-                            break;
+                                break;
                             case 5:
                                 var dates = ""
                                 if (booking.lines){
@@ -1275,35 +1289,34 @@ export default {
                                     }
                                 }
                                 bk[field] = dates
-                            break;
+                                break;
                             case 6:
                                 bk[field] = booking.noOfAdults + booking.noOfChildren + booking.noOfInfants;
-                            break;
+                                break;
                             case 7:
                                 bk[field] = booking.noOfAdults;
-                            break;
+                                break;
                             case 8:
                                 bk[field] = booking.noOfChildren;
-                            break;
+                                break;
                             case 9:
                                 bk[field] = booking.noOfInfants;
-                            break;
+                                break;
                             case 10:
                                 bk[field] = booking.vesselRegNo;
-                            break;
+                                break;
                             case 11:
                                 bk[field] = booking.warningReferenceNo;
-                            break;
+                                break;
                             case 12:
                                 bk[field] = booking.invoice_ref;
-                            break;
+                                break;
                             case 13:
                                 bk[field] = booking.canceled_by;
-                            break;
+                                break;
                             case 14:
                                 bk[field] = booking.cancellation_reason;
-                            break;
-
+                                break;
                         }
                     });
                     bookings.push(bk);
