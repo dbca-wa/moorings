@@ -1,13 +1,9 @@
 {% extends 'mooring/base.html' %}
 {% load static %}
 {% load users %}
+
 {% block extra_css %}
-    <link href="{% static 'common/css/bootstrap.min.css' %}" rel="stylesheet">
-    <link href="{% static 'common/css/dataTables.bootstrap.min.css' %}?ver={{ GIT_COMMIT_HASH }}" rel="stylesheet"/>
-    <link href="{% static 'common/css/select2.min.css' %}?ver={{ GIT_COMMIT_HASH }}" rel="stylesheet"/>
-    <link href="{% static 'common/css/select2-bootstrap.css' %}?ver={{ GIT_COMMIT_HASH }}" rel="stylesheet"/>
-    <link href="{% static 'common/css/font-awesome.css' %}?ver={{ GIT_COMMIT_HASH }}" rel="stylesheet"/>
-    <link href="{% static 'mooring/css/dashboard.css' %}?ver={{ GIT_COMMIT_HASH }}" rel="stylesheet">
+    {% include 'mooring/block_extra_css.html' %}
 {% endblock %}
 
 {% block extra_js %}
