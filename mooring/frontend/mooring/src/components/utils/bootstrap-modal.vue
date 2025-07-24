@@ -183,6 +183,10 @@
     .modal-enter .modal-backdrop, .modal-leave .modal-backdrop {
         opacity: 0;
     }
+    .modal-backdrop {
+        background-color: rgba(128, 128, 128, 0.3);
+        opacity: 1 !important;
+    }
     .close {
         color: #d9534f;
         opacity: 1;
