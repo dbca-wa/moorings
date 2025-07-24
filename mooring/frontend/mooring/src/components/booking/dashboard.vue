@@ -981,7 +981,7 @@ export default {
                     $.each(fields, function(j, field){
                         switch (j) {
                             case 0:
-                                bk[field] = Moment(booking.date).format("DD/MM/YYYY HH:mm:ss");
+                                bk[field] = booking.created_date;
                                 break;
                             case 1:
                                 bk[field] = "PS" + booking.id;
