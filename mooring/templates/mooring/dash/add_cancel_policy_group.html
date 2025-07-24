@@ -1,46 +1,47 @@
 {% extends 'mooring/base.html' %}
 {% load static %}
 {% load users %}
+
 {% block extra_css %}
-    <link href="/static/ledger/css/bootstrap.min.css" rel="stylesheet">
-    <link href="/static/common/css/dataTables.bootstrap.min.css?ver={{ GIT_COMMIT_HASH }}" rel="stylesheet"/>
-    <link href="/static/common/css/select2.min.css?ver={{ GIT_COMMIT_HASH }}" rel="stylesheet"/>
-    <link href="/static/common/css/select2-bootstrap.css?ver={{ GIT_COMMIT_HASH }}" rel="stylesheet"/>
-    <link href="/static/common/css/font-awesome.css?ver={{ GIT_COMMIT_HASH }}" rel="stylesheet"/>
-    <link rel="stylesheet" href="{% static 'mooring/css/dashboard.css' %}?ver={{ GIT_COMMIT_HASH }}">
+    {% include 'mooring/block_extra_css.html' %}
 {% endblock %}
+
 {% block extra_js %}
 {% endblock %}
+
 {% block requirements %}
 {% endblock %}
 
 {% block content %}
-    <div class="container" id="dashboard-table-container">
-    <div class="container" id="dashboard-table-container">
- <a href='{% url 'dash-bookingpolicy' %}' type="button" class="btn btn-primary" style="">Go Back</a><BR><BR>
-<div class="panel panel-default">
-    <div class="panel-heading" role="tab" id="title_heading">
-        <h1 class="panel-title">
-            <a role="button" data-bs-toggle="collapse" href="#search_person_company_collapse" aria-expanded="false" aria-controls="search_person_company_collapse">
-                Policy Group
+<div class="container" id="dashboard-table-container">
+<a href='{% url 'dash-bookingpolicy' %}' type="button" class="btn btn-primary" style="">Go Back</a><BR><BR>
+<div class="card">
+    <div class="card-header" role="tab" id="title_policy_group">
+        <h2 class="mb-0">
+            <a
+                class="btn d-flex justify-content-between align-items-center w-100 text-start text-decoration-none"
+                role="button"
+                data-bs-toggle="collapse"
+                data-bs-target="#collapse_policy_group"
+                aria-expanded="true"
+                aria-controls=#collapse_policy_group"
+            >
+                <h3 class="mb-0">Policy Group</h3>
             </a>
-        </h1>
+        </h2>
     </div>
 
-    <div class="panel-collapse collapse in" id="search_person_company_collapse" role="tabpanel" aria-labelledby="search_person_company_heading">
-        <div class="panel-body">
+    <div id="collapse_policy_group" class="collapse show" role="tabpanel" aria-labelledby="title_policy_group">
+        <div class="card-body">
+            {% load crispy_forms_tags %}
 
-
-	{% load crispy_forms_tags %}
-
-	{% block page_content_inner %}
-	<h1>{{ page_heading }}</h1>
-	{% crispy form %}
-	{% endblock %}
-   </div>
+            {% block page_content_inner %}
+                <h1>{{ page_heading }}</h1>
+                {% crispy form %}
+            {% endblock %}
+        </div>
+    </div>
 </div>
 </div>
-</div>
-
-   {% include "mooring/dash/policy_group_js.html" %} 
+{% include "mooring/dash/policy_group_js.html" %} 
 {% endblock %}

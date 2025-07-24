@@ -1,80 +1,73 @@
 {% extends 'mooring/base.html' %}
 {% load static %}
 {% load users %}
+
 {% block extra_css %}
-    <link href="/static/ledger/css/bootstrap.min.css" rel="stylesheet">
-    <link href="/static/common/css/dataTables.bootstrap.min.css?ver={{ GIT_COMMIT_HASH }}" rel="stylesheet"/>
-    <link href="/static/common/css/select2.min.css?ver={{ GIT_COMMIT_HASH }}" rel="stylesheet"/>
-    <link href="/static/common/css/select2-bootstrap.css?ver={{ GIT_COMMIT_HASH }}" rel="stylesheet"/>
-    <link href="/static/common/css/font-awesome.css?ver={{ GIT_COMMIT_HASH }}" rel="stylesheet"/>
-    <link rel="stylesheet" href="{% static 'mooring/css/dashboard.css' %}?ver={{ GIT_COMMIT_HASH }}">
+    {% include 'mooring/block_extra_css.html' %}
 {% endblock %}
+
 {% block extra_js %}
 {% endblock %}
+
 {% block requirements %}
 {% endblock %}
 
 {% block content %}
-
-
-
-    <div class="container" id="dashboard-table-container">
-
-
-<div class="panel panel-default">
-    <div class="panel-heading" role="tab" id="title_heading">
-        <h3 class="panel-title">
-            <a role="button" data-bs-toggle="collapse" href="#search_person_company_collapse" aria-expanded="false" aria-controls="search_person_company_collapse">
-                 Annual Booking Period Groups
+<div class="container" id="dashboard-table-container">
+<div class="card">
+    <div class="card-header" role="tab" id="title_annual_booking_period_groups">
+        <h2 class="mb-0">
+            <a
+                class="btn d-flex justify-content-between align-items-center w-100 text-start text-decoration-none"
+                role="button"
+                data-bs-toggle="collapse"
+                data-bs-target="#collapse_annual_booking_period_groups"
+                aria-expanded="true"
+                aria-controls="collapse_annual_booking_period_groups"
+            >
+                <h3 class="mb-0">Annual Booking Period Groups</h3>
             </a>
-        </h3>
+        </h2>
     </div>
 
-    <div class="panel-collapse collapse in" id="search_person_company_collapse" role="tabpanel" aria-labelledby="search_person_company_heading">
-        <div class="panel-body">
-
-        <div class="col-lg-12">
-          <div class="row">
-          <div class="col-lg-3">
-          </div>
-          <div class="col-lg-6">
-          </div>
-          <div class="col-lg-3">
-            <span class="pull-right"><a href='{% url 'dash-annual-bookingperiod-group-add' %}' type="button" class="btn btn-primary" style="">Add Group</a></span>
-          </div>
-	  
-          </div>
-        </div> 
-        <div class="col-lg-12">
-		&nbsp;
-	</div>	
-        <table width="100%" id='table-policy' class='hover table table-striped table-bordered dt-responsive nowrap dataTable no-footer dtr-inline'>
-        <thead>
-        <tr><th>ID</th><th>Booking Period Group</th><th>Letter</th><th>Action</th></tr>
-        </thead>
-        <tbody>
-        {% for bp in bp_groups %}
-            <tr>
-                <td>{{ bp.id }}</td>
-                <td>{{ bp.name }}</td>
-		<td>{% if bp.letter %}<a href='/private-media/{{ bp.letter.name }}' target='bppg_{{ bp.id }}'>{{ bp.letter.name }}</a>{% endif %}</td>
-                <td>
-                   <a href='{% url 'dash-annual-bookingperiod-group-edit' bp.id %}'>Edit</a><BR>
-                   <a href='{% url 'dash-annual-bookingperiod-group-view' bp.id %}'>View Periods</a><BR>
-		   <a href='{% url 'dash-annual-bookingperiod-group-delete' bp.id %}'>Delete</a><BR>
-                 
-
-                </td>
-            </tr>
-
-	{% endfor %}
-        </tbody>
-        </table>
-
+    <div id="collapse_annual_booking_period_groups" class="collapse show" aria-labelledby="title_annual_booking_period_groups role="tabpanel" aria-labelledby="search_person_company_heading">
+        <div class="card-body">
+            <div class="col-lg-12">
+                <div class="row">
+                    <div class="col-lg-3">
+                    </div>
+                    <div class="col-lg-6">
+                    </div>
+                    <div class="col-lg-3">
+                        <span class="pull-right"><a href='{% url 'dash-annual-bookingperiod-group-add' %}' type="button" class="btn btn-primary" style="">Add Group</a></span>
+                    </div>
+                </div>
+            </div> 
+            <table width="100%" id='table-policy' class='hover table table-striped table-bordered dt-responsive nowrap dataTable no-footer dtr-inline'>
+                <thead>
+                    <tr><th>ID</th><th>Booking Period Group</th><th>Letter</th><th>Action</th></tr>
+                </thead>
+                <tbody>
+                {% for bp in bp_groups %}
+                    <tr>
+                        <td>{{ bp.id }}</td>
+                        <td>{{ bp.name }}</td>
+                        <td>{% if bp.letter %}<a href='/private-media/{{ bp.letter.name }}' target='bppg_{{ bp.id }}'>{{ bp.letter.name }}</a>{% endif %}</td>
+                        <td>
+                        <a href='{% url 'dash-annual-bookingperiod-group-edit' bp.id %}'>Edit</a><BR>
+                        <a href='{% url 'dash-annual-bookingperiod-group-view' bp.id %}'>View Periods</a><BR>
+                            <a href='{% url 'dash-annual-bookingperiod-group-delete' bp.id %}'>Delete</a><BR>
+                        </td>
+                    </tr>
+                {% endfor %}
+                </tbody>
+            </table>
+        </div>
     </div>
 </div>
-<script>
+</div>
 
+<script>
 function loadTable() {
     $('#table-policy').dataTable({searching: false, paging: true, "pageLength": 25, "order": [[ 0, "asc" ]],
      columnDefs: [
