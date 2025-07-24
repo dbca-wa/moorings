@@ -14,7 +14,7 @@
                             <div class="row">
                                 <div class="col-sm-12 features">
                                     <div>
-                                        <div id="map" class="map" style='height:80%'>
+                                        <div id="map" class="map">
                                         </div>
                                         <input type='hidden' value='' iname='location_coordinates' id='location_coordinates'>
                                         <input type='hidden' value='Point' name='type' id='type'>
@@ -380,6 +380,10 @@ export default {
 </script>
 
 <style lang="css">
+    #map {
+    height: 80vh;
+    width: 100%;
+    }
     #editorhidden{
         height: 200px;
     }
