@@ -7,9 +7,9 @@
             <div class="row" style="overflow:visible;">
                 <div class="form-group" style="overflow:visible;">
                     <div class="col-md-2">
-                        <label>Period start: </label>
+                        <label for="period_start">Period start: </label>
                     </div>
-                    <div class="col-md-4" style="overflow:visible;">
+                    <!-- <div class="col-md-4" style="overflow:visible;">
                         <div class="input-group date" >
                             <input type="text" id="period_start" class="form-control"  placeholder="DD/MM/YYYY" v-model="priceHistory.period_start">
                             <span class="input-group-addon">
@@ -18,7 +18,7 @@
                         </div>
                     </div>
                     <div class="col-md-2" style="display:none;">
-                        <label>Period end: </label>
+                        <label for="period_end">Period end: </label>
                     </div>
                     <div class="col-md-4" style="overflow:visible;display:none;">
                         <div class='input-group date'>
