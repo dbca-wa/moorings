@@ -1,5 +1,4 @@
-
-module.exports = {
+export default {
     
     park_price_history:function (id) {
        return global.parkstayUrl + "/api/admissions/price_history.json";

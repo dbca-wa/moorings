@@ -4,9 +4,9 @@ import $ from 'jquery'
 import DataTable from 'datatables.net';
 import DataTableBs from 'datatables.net-bs';
 import DataTableRes from 'datatables.net-responsive-bs';
-import bootstrap from 'bootstrap';
+// import bootstrap from 'bootstrap';
 import moment from 'moment/moment.js';
-import extendMoment from 'moment-range';
+import { extendMoment } from 'moment-range';
 import datetimepicker from 'eonasdan-bootstrap-datetimepicker';
 import validate from 'jquery-validation';
 import slick from 'slick-carousel-browserify';

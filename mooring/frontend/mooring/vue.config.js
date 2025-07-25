@@ -8,6 +8,8 @@ module.exports = defineConfig({
     runtimeCompiler: true,
     outputDir: path.resolve(__dirname, '../../static/moorings_vue'),
     publicPath: '/static/moorings_vue/',
+    // outputDir: path.resolve(__dirname, '../../static/mooring_vue'),
+    // publicPath: '/static/mooring_vue/',
     filenameHashing: false,
     chainWebpack: (config) => {
         config.resolve.alias.set(
