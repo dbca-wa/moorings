@@ -181,6 +181,7 @@ export default {
             form: '',
             reasons: [],
             isOpen: false,
+            priceHistoryError: ''
         }
     },
     computed: {
