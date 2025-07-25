@@ -1462,7 +1462,7 @@ class MakeBookingsView(TemplateView):
         # already exists
         al_json = {}
         if booking.details['num_adult'] > 0:
-            adBooking = AdmissionsBooking.objects.create(customer=customer, booking_type=3, vesselRegNo=rego, noOfAdults=booking.details['num_adult'],
+            adBooking = AdmissionsBooking.objects.create(customer_id=customer.id, booking_type=3, vesselRegNo=rego, noOfAdults=booking.details['num_adult'],
                 noOfConcessions=0, noOfChildren=booking.details['num_child'], noOfInfants=booking.details['num_infants'], totalCost=admissionsTotal, created=datetime.now())
             
             for line in admissionsJson:
