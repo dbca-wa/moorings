@@ -1,7 +1,9 @@
 // The Vue build version to load with the `import` command
 // (runtime-only or standalone) has been set in webpack.base.conf with an alias.
-import './foundation-min.scss';
-import 'foundation-datepicker/css/foundation-datepicker.css';
+// import 'foundation-sites';
+// import 'foundation-datepicker/js/foundation-datepicker';
+// import './foundation-min.scss';
+// import 'foundation-datepicker/css/foundation-datepicker.css';
 // import Vue from 'vue';
 // import resource from 'vue-resource'
 // import VueRouter from 'vue-router'
@@ -79,6 +81,8 @@ if (document.getElementById("menu")) {
 //     },
 //     render: h => h(App)
 // }).$mount('#appdiv');
+
+// $(document).foundation();
 
 const app = createApp(App);
 app.use(store);
