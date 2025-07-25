@@ -874,7 +874,7 @@ export default {
             $(document).on('keydown', function(e) {
                 if(e.ctrlKey && (e.key == "p" || e.charCode == 16 || e.charCode == 112 || e.keyCode == 80) ){
                     e.preventDefault();
-                    bus.$emit('showAlert', 'printBooking');
+                    bus.emit('showAlert', 'printBooking');
                     e.stopImmediatePropagation();
                 }
             });
