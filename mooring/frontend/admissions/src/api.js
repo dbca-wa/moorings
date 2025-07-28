@@ -27,5 +27,5 @@ export default {
     priceReasons:function () {
         return global.parkstayUrl + "/api/admissionsReasons.json";
     },
-    profile: process.env.PARKSTAY_URL + "/api/profile",
+    profile: process.env.VUE_APP_PARKSTAY_URL + "/api/profile",
 };
