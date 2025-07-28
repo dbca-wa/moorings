@@ -125,10 +125,11 @@ export default {
             if (this.price.id || this.price.original){
                 return 'Update Price History';
             } else {
-                return 'Add Price History';
+                return 'Add Price History1';
             }
         },
         showHistory: function() {
+            console.log('showHistory()')
             this.$refs.historyModal.title = this.getTitle();
             this.$refs.historyModal.isOpen = true;
         },
@@ -298,7 +299,7 @@ export default {
                 else{
                     vm.deleteHistory = $(btn).data('rate');
                 }
-                bus.$emit('showAlert', 'deleteHistory');
+                bus.emit('showAlert', 'deleteHistory');
             });
         },
     },
