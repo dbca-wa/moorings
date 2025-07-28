@@ -1462,7 +1462,8 @@ class MakeBookingsView(TemplateView):
         # already exists
         al_json = {}
         if booking.details['num_adult'] > 0:
-            adBooking = AdmissionsBooking.objects.create(customer=customer, booking_type=3, vesselRegNo=rego, noOfAdults=booking.details['num_adult'],
+            # adBooking = AdmissionsBooking.objects.create(customer=customer, booking_type=3, vesselRegNo=rego, noOfAdults=booking.details['num_adult'],
+            adBooking = AdmissionsBooking.objects.create(customer_id=customer.id, booking_type=3, vesselRegNo=rego, noOfAdults=booking.details['num_adult'],
                 noOfConcessions=0, noOfChildren=booking.details['num_child'], noOfInfants=booking.details['num_infants'], totalCost=admissionsTotal, created=datetime.now())
             
             for line in admissionsJson:
@@ -3789,20 +3790,47 @@ class AdmissionFeesView(TemplateView):
         }
         return render(self.request, self.template_name, context)
 
-class AdmissionsCostView(TemplateView):
+# class AdmissionsCostView(TemplateView):
+#     template_name = 'mooring/admissions/admissions_cost.html'
+
+#     def get(self, *args, **kwargs):
+#         if self.request.user.is_authenticated:
+#             if self.request.user.is_staff:
+#                 mg_array = []
+#                 mooring_groups = MooringAreaGroup.objects.filter(members__in=[self.request.user])
+#                 for mg in mooring_groups: 
+#                      mg_array.append({'id': mg.id, 'name' : mg.name})
+#                 context = super().get_context_data(**kwargs)
+#                 context['mooring_groups'] = json.dumps(mg_array)
+#                 return render(self.request, self.template_name, context)
+#             return redirect('ps_home')
+#         return redirect('ps_home')
+
+
+class AdmissionsCostView(UserPassesTestMixin, TemplateView):
     template_name = 'mooring/admissions/admissions_cost.html'
 
-    def get(self, *args, **kwargs):
-        if self.request.user.is_authenticated:
-            if self.request.user.is_staff:
-                mg_array = []
-                mooring_groups = MooringAreaGroup.objects.filter(members__in=[self.request.user])
-                for mg in mooring_groups: 
-                     mg_array.append({'id': mg.id, 'name' : mg.name})
-                context = {'mooring_groups' : json.dumps(mg_array)} 
-                return render(self.request, self.template_name, context)
-            return redirect('ps_home')
-        return redirect('ps_home')
+    def test_func(self):
+        return self.request.user.is_authenticated and self.request.user.is_staff
+
+    def get_context_data(self, **kwargs):
+        print("--- 1. Inside get_context_data method. ---")
+
+        context = super().get_context_data(**kwargs)
+
+        print("--- 2. Context content AFTER super() call: ---")
+        print(context)
+        print(f"Is 'DEBUG' key in context? {'DEBUG' in context}")
+
+        mg_array = []
+        mooring_groups = MooringAreaGroup.objects.filter(members__in=[self.request.user])
+        for mg in mooring_groups:
+            mg_array.append({'id': mg.id, 'name': mg.name})
+        
+        context['mooring_groups'] = json.dumps(mg_array)
+
+        return context
+    
 
 class MarinastayRoutingView(TemplateView):
     template_name = 'mooring/index.html'
