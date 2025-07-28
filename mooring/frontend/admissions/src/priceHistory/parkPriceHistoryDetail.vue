@@ -1,5 +1,10 @@
 <template id="ParkPriceHistoryDetail">
-<bootstrapModal title="Add Price History" :large=true @ok="addHistory()" @cancel="close()" @close="close()">
+<bootstrapModal :large=true @ok="addHistory()" @cancel="close()" @close="close()">
+    <template #header>
+        <div class="modal-header">
+            <h4 class="modal-title">Add Price History</h4>
+        </div>
+    </template>
 
     <div class="modal-body" style="overflow:visible;">
         <form name="priceForm" class="form-horizontal" style="overflow:visible;">
@@ -16,17 +21,30 @@
                                 <span class="glyphicon glyphicon-calendar"></span>
                             </span>
                         </div>
+                    </div> -->
+                    <div class="col-md-4">
+                        <input type="date" 
+                            id="period_start" 
+                            class="form-control" 
+                            v-model="priceHistory.period_start">
                     </div>
                     <div class="col-md-2" style="display:none;">
                         <label for="period_end">Period end: </label>
                     </div>
-                    <div class="col-md-4" style="overflow:visible;display:none;">
+                    <!-- <div class="col-md-4" style="overflow:visible;display:none;">
                         <div class='input-group date'>
                             <input name="period_end" v-model="priceHistory.period_end" type='text' id="period_end" class="form-control" />
                             <span class="input-group-addon">
                                 <span class="glyphicon glyphicon-calendar"></span>
                             </span>
                         </div>
+                    </div> -->
+                    <div class="col-md-4" style="display:none;">
+                        <input type="date" 
+                            id="period_end"
+                            name="period_end"
+                            class="form-control" 
+                            v-model="priceHistory.period_end">
                     </div>
                 </div>
             </div>
@@ -129,14 +147,19 @@
 </template>
 
 <script>
-import 'foundation-sites';
-import 'foundation-datepicker/js/foundation-datepicker';
-import moment from 'moment'
 import JQuery from 'jquery'
+window.jQuery = JQuery
+window.$ = JQuery
+// import 'foundation-sites';
+// import 'foundation-datepicker/js/foundation-datepicker';
+
+import moment from 'moment'
 import bootstrapModal from '../utils/bootstrap-modal.vue'
 import reason from '../utils/reasons.vue'
 import { api_endpoints, validate, helpers, bus } from '../hooks'
 import alert from '../utils/alert.vue'
+import { Tooltip } from 'bootstrap';
+import { nextTick } from 'vue';
 
 export default {
     name: 'ParkPriceHistoryDetail',
@@ -162,6 +185,7 @@ export default {
             reasons: [],
             isOpen: false,
             mooring_groups: [],
+            tooltipInstances: null
         }
     },
     computed: {
@@ -295,9 +319,24 @@ export default {
             });
        }
     },
+    beforeUnmount: function(){
+        if (this.tooltipInstances && this.tooltipInstances.length > 0) {
+            this.tooltipInstances.forEach(tooltip => tooltip.dispose());
+        }
+    },
     mounted: function() {
+        nextTick(() => {
+
         var vm = this;
-        $('[data-toggle="tooltip"]').tooltip()
+        // $('[data-toggle="tooltip"]').tooltip()
+        const tooltipTriggerList = [].slice.call(
+            this.$el.querySelectorAll('[data-bs-toggle="tooltip"]')
+        );
+        const tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
+            return new Tooltip(tooltipTriggerEl);
+        });
+        vm.tooltipInstances = tooltipList;
+
         vm.form = document.forms.priceForm;
 
         var today = new Date();
@@ -338,36 +377,40 @@ export default {
         var mg = $('#mooring_groups').val();
         vm.mooring_groups = JSON.parse( mg );
 
-        $(document).foundation();
+        // $(document).foundation();
         var arrivalEl = $('#period_start');
         var arrivalDate = null;
 
-        this.arrivalData = arrivalEl.fdatepicker({
-            format: 'dd/mm/yyyy',
-            onRender: function (date) {
-                return;
-            }
-        }).on('changeDate', function (ev) {
-            ev.target.dispatchEvent(new CustomEvent('change'));
-        }).on('change', function (ev) {
-            vm.arrivalData.hide();
-            // console.log(vm.arrivalData.date);
-            // vm.priceHistory.period_start = moment(vm.arrivalData.date, "DD/MM/YYYY");
-            console.log(ev.target.value);
-            vm.priceHistory.period_start = ev.target.value;
+        // if ($.fn.fdatepicker){
+        //     this.arrivalData = arrivalEl.fdatepicker({
+        //         format: 'dd/mm/yyyy',
+        //         onRender: function (date) {
+        //             return;
+        //         }
+        //     }).on('changeDate', function (ev) {
+        //         ev.target.dispatchEvent(new CustomEvent('change'));
+        //     }).on('change', function (ev) {
+        //         vm.arrivalData.hide();
+        //         // console.log(vm.arrivalData.date);
+        //         // vm.priceHistory.period_start = moment(vm.arrivalData.date, "DD/MM/YYYY");
+        //         console.log(ev.target.value);
+        //         vm.priceHistory.period_start = ev.target.value;
 
-            // console.log(vm.priceHistory.period_start);
-        }).on('keydown', function (ev) {
-            if (ev.keyCode == 13) {
-                ev.target.dispatchEvent(new CustomEvent('change'));
-            }
-        }).data('datepicker');
+        //         // console.log(vm.priceHistory.period_start);
+        //     }).on('keydown', function (ev) {
+        //         if (ev.keyCode == 13) {
+        //             ev.target.dispatchEvent(new CustomEvent('change'));
+        //         }
+        //     }).data('datepicker');
 
-        if (arrivalDate != null){
-            this.arrivalData.date = arrivalDate.toDate();
-            this.arrivalData.setValue();
-            this.arrivalData.fill();
-        }
+        //     if (arrivalDate != null){
+        //         this.arrivalData.date = arrivalDate.toDate();
+        //         this.arrivalData.setValue();
+        //         this.arrivalData.fill();
+        //     }
+        // } else {
+        //     console.error('fdatepicker function is not available on jQuery object.')
+        // }
 
 
         // var picker = $(vm.form.period_start).closest('.date');
@@ -400,6 +443,8 @@ export default {
             bus.off('reasons', onDataLoadedOnce);
         };
         bus.on('reasons', onDataLoadedOnce);
+
+        })
     }
 };
 </script>
