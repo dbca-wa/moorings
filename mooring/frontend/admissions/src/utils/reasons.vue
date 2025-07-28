@@ -49,7 +49,7 @@ export default {
             let vm = this;
             $.get(api_endpoints.priceReasons(),function (data) {
                 vm.reasons = data;
-                bus.$emit('reasons', vm.reasons);
+                bus.emit('reasons', vm.reasons);
             });
         }
     },
