@@ -8,7 +8,8 @@ port = 8081
 module.exports = defineConfig({
     runtimeCompiler: true,
     outputDir: path.resolve(__dirname, '../../static/admissions'),
-    publicPath: '/static/admissions/',
+    // publicPath: '/static/admissions/',
+    publicPath: process.env.NODE_ENV === 'production' ? '/static/admissions/' : '/',
     filenameHashing: false,
     chainWebpack: (config) => {
         config.resolve.alias.set(
@@ -50,6 +51,7 @@ module.exports = defineConfig({
         devServer: {
             host: '0.0.0.0',
             allowedHosts: 'all',
+            port: port,
             devMiddleware: {
                 //index: true,
                 writeToDisk: true,
@@ -61,6 +63,16 @@ module.exports = defineConfig({
             },
             client: {
                 webSocketURL: 'ws://0.0.0.0:' + port + '/ws',
+            },
+            proxy: {
+                '/api': {
+                    target: 'http://127.0.0.1:9071',
+                    changeOrigin: true,
+                },
+                '/admin': {
+                    target: 'http://127.0.0.1:9071',
+                    changeOrigin: true,
+                }
             },
         },
         module: {

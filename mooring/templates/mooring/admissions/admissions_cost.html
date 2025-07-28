@@ -102,6 +102,11 @@ admissions_cost.html
     <script type="text/javascript">
         var parkstayUrl = window.location.protocol + '//' + window.location.host;
     </script>
-    <script type="text/javascript" src="{% static 'admissions/js/chunk-vendors.js' %}?ver={{ GIT_COMMIT_HASH }}"></script>
-    <script type="text/javascript" src="{% static 'admissions/js/main.js' %}?ver={{ GIT_COMMIT_HASH }}"></script>
+    {% if DEBUG %}
+        <script type="text/javascript" src="http://localhost:8081/js/chunk-vendors.js"></script>
+        <script type="text/javascript" src="http://localhost:8081/js/main.js"></script>
+    {% else %}
+        <script type="text/javascript" src="{% static 'admissions/js/chunk-vendors.js' %}?ver={{ GIT_COMMIT_HASH }}"></script>
+        <script type="text/javascript" src="{% static 'admissions/js/main.js' %}?ver={{ GIT_COMMIT_HASH }}"></script>
+    {% endif %}
 {% endblock %}
