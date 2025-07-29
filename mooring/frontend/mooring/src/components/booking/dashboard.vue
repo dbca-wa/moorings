@@ -976,12 +976,12 @@ export default {
 
                 var bookings = [];
                 console.log('before $each')
-                $.each(data,function (i, booking) {
+                $.each(data.results,function (i, booking) {
                     var bk = {};
                     $.each(fields, function(j, field){
                         switch (j) {
                             case 0:
-                                bk[field] = Moment(booking.created).format("DD/MM/YYYY HH:mm:ss");
+                                bk[field] = booking.created_date;
                                 break;
                             case 1:
                                 bk[field] = "PS" + booking.id;
@@ -993,7 +993,7 @@ export default {
                                 bk[field] = booking.email;
                                 break;
                             case 4:
-                                bk[field] = booking.phone;
+                                bk[field] = booking.booking_phone_number;
                                 break;
                             case 5:
                                 bk[field] = booking.regos?.[0]?.vessel ?? '';
