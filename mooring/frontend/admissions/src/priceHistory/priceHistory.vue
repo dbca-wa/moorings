@@ -1,6 +1,6 @@
 <template id="priceHistory">
 <div class="row">
-    <parkPriceHistory v-if="addParkPrice" ref="historyModal" @addParkPriceHistory="addParkHistory()" @updateParkPriceHistory="updateParkHistory()" :priceHistory="parkPrice" @cancel="closeHistory()"/>
+    <parkPriceHistory v-if="addParkPrice" ref="historyModal" @addParkPriceHistory="addParkPriceHistory()" @updateParkPriceHistory="updateParkHistory()" :priceHistory="parkPrice" @cancel="closeHistory()"/>
     <PriceHistoryDetail v-else ref="historyModal" @addPriceHistory="addHistory()" @updatePriceHistory="updateHistory()" :priceHistory="price"></PriceHistoryDetail>
         <div class="col-sm-8">
             <h3>Price History</h3>
@@ -193,14 +193,19 @@ export default {
                 this.sendData(this.getEditURL(),'POST',JSON.stringify(vm.price));
             }
         },
-        addParkHistory: function() {
+        addParkPriceHistory: function() {
             var data = this.validateNewPrice(this.parkPrice)
-            var start = this.parkPrice.period_start.split("/");
-            this.parkPrice.period_start = start[2] + "-" + start[1] + "-" + start[0];
+            console.log(data)
+            var start = this.parkPrice.period_start.split("-");
+            console.log(start)
+            // this.parkPrice.period_start = start[2] + "-" + start[1] + "-" + start[0];
+            this.parkPrice.period_start = start[0] + "-" + start[1] + "-" + start[2];
+            console.log(this.parkPrice.period_start)
             if (this.parkPrice.period_end){
                 var end = this.parkPrice.period_end.split("/") 
                 this.parkPrice.period_end = end[2] + "-" + end[1] +"-" + end[0];
             }
+            console.log(data)
             this.sendData(api_endpoints.park_add_price(),'POST',JSON.stringify(data));
         },
         validateNewPrice: function(data){
