@@ -107,6 +107,7 @@ wildlifecompliance/static/wildlifecompliance_vue/static/*
 # npm build files
 mooring/static/moorings_vue/*
 mooring/static/moorings_vue.back/*
+mooring/static/admissions/*
 
 # Temp back folders
 mooring/frontend/*.back/*
