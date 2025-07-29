@@ -8,8 +8,6 @@ module.exports = defineConfig({
     runtimeCompiler: true,
     outputDir: path.resolve(__dirname, '../../static/moorings_vue'),
     publicPath: '/static/moorings_vue/',
-    // outputDir: path.resolve(__dirname, '../../static/mooring_vue'),
-    // publicPath: '/static/mooring_vue/',
     filenameHashing: false,
     chainWebpack: (config) => {
         config.resolve.alias.set(
@@ -52,7 +50,7 @@ module.exports = defineConfig({
             host: '0.0.0.0',
             allowedHosts: 'all',
             devMiddleware: {
-                //index: true,
+                // Save file to disk so the Django server can serve them
                 writeToDisk: true,
             },
             headers: {

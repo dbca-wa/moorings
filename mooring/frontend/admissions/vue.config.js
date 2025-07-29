@@ -7,8 +7,7 @@ let port = process.env.PORT ? parseInt(process.env.PORT) : 8081;
 module.exports = defineConfig({
     runtimeCompiler: true,
     outputDir: path.resolve(__dirname, '../../static/admissions'),
-    // publicPath: '/static/admissions/',
-    publicPath: process.env.NODE_ENV === 'production' ? '/static/admissions/' : '/',
+    publicPath: '/static/admissions/',
     filenameHashing: false,
     chainWebpack: (config) => {
         config.resolve.alias.set(
@@ -52,7 +51,7 @@ module.exports = defineConfig({
             allowedHosts: 'all',
             port: port,
             devMiddleware: {
-                //index: true,
+                // Save file to disk so the Django server can serve them
                 writeToDisk: true,
             },
             headers: {
