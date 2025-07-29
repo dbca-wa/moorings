@@ -63,6 +63,16 @@ module.exports = defineConfig({
             client: {
                 webSocketURL: 'ws://0.0.0.0:' + port + '/ws',
             },
+            proxy: {
+                '/api': {
+                    target: 'http://127.0.0.1:9071',
+                    changeOrigin: true,
+                },
+                '/admin': {
+                    target: 'http://127.0.0.1:9071',
+                    changeOrigin: true,
+                }
+            },
         },
         module: {
             rules: [
