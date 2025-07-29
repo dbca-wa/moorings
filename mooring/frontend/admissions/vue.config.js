@@ -3,7 +3,6 @@ const path = require('path');
 const webpack = require('webpack');
 // const MomentLocalesPlugin = require('moment-locales-webpack-plugin');
 let port = process.env.PORT ? parseInt(process.env.PORT) : 8081;
-port = 8081
 
 module.exports = defineConfig({
     runtimeCompiler: true,
