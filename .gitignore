@@ -111,3 +111,6 @@ mooring/static/moorings_vue.back/*
 # Temp back folders
 mooring/frontend/*.back/*
 mooring/templates/mooring/*.back/*
+
+*.hot-update.js
+*.hot-update.json
