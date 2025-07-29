@@ -9,19 +9,11 @@
     <div class="modal-body" style="overflow:visible;">
         <form name="priceForm" class="form-horizontal" style="overflow:visible;">
 			<alert :show.sync="showError" type="danger">{{errorString}}</alert>
-            <div class="row" style="overflow:visible;">
+            <!-- <div class="row" style="overflow:visible;">
                 <div class="form-group" style="overflow:visible;">
                     <div class="col-md-2">
                         <label for="period_start">Period start: </label>
                     </div>
-                    <!-- <div class="col-md-4" style="overflow:visible;">
-                        <div class="input-group date" >
-                            <input type="text" id="period_start" class="form-control"  placeholder="DD/MM/YYYY" v-model="priceHistory.period_start">
-                            <span class="input-group-addon">
-                                <span class="glyphicon glyphicon-calendar"></span>
-                            </span>
-                        </div>
-                    </div> -->
                     <div class="col-md-4">
                         <input type="date" 
                             id="period_start" 
@@ -31,14 +23,6 @@
                     <div class="col-md-2" style="display:none;">
                         <label for="period_end">Period end: </label>
                     </div>
-                    <!-- <div class="col-md-4" style="overflow:visible;display:none;">
-                        <div class='input-group date'>
-                            <input name="period_end" v-model="priceHistory.period_end" type='text' id="period_end" class="form-control" />
-                            <span class="input-group-addon">
-                                <span class="glyphicon glyphicon-calendar"></span>
-                            </span>
-                        </div>
-                    </div> -->
                     <div class="col-md-4" style="display:none;">
                         <input type="date" 
                             id="period_end"
@@ -47,8 +31,31 @@
                             v-model="priceHistory.period_end">
                     </div>
                 </div>
-            </div>
+            </div> -->
             <div class="row">
+                <!-- Period start -->
+                <div class="col-md-6 mb-3">
+                    <label for="period_start" class="form-label">Period start:</label>
+                    <input 
+                        type="date" 
+                        id="period_start" 
+                        class="form-control" 
+                        v-model="priceHistory.period_start"
+                    >
+                </div>
+                <!-- Period end (hidden) -->
+                <div class="col-md-6 mb-3 d-none">
+                    <label for="period_end" class="form-label">Period end:</label>
+                    <input 
+                        type="date" 
+                        id="period_end"
+                        name="period_end"
+                        class="form-control" 
+                        v-model="priceHistory.period_end"
+                    >
+                </div>
+            </div>
+            <!-- <div class="row">
                 <div class="form-group">
                     <div class="col-md-2">
                         <label>Adult Cost Day: </label>
@@ -63,8 +70,33 @@
                         <input name="adult_overnight_cost"  v-model="priceHistory.adult_overnight_cost" type='number' class="form-control" />
                     </div>
                 </div>
-            </div>
+            </div> -->
             <div class="row">
+                <!-- Adult Cost Day -->
+                <div class="col-md-6 mb-3">
+                    <label for="adultCostDay" class="form-label">Adult Cost Day:</label>
+                    <input 
+                        id="adultCostDay"
+                        name="adult_cost"
+                        v-model="priceHistory.adult_cost"
+                        type="number" 
+                        class="form-control" 
+                    />
+                </div>
+                <!-- Adult Cost Overnight -->
+                <div class="col-md-6 mb-3">
+                    <label for="adultCostOvernight" class="form-label">Adult Cost Overnight:</label>
+                    <input 
+                        id="adultCostOvernight"
+                        name="adult_overnight_cost"
+                        v-model="priceHistory.adult_overnight_cost"
+                        type="number" 
+                        class="form-control"
+                    />
+                </div>
+            </div>
+
+            <!-- <div class="row">
                 <div class="form-group">
                     <div class="col-md-2">
                         <label>Child Cost Day: </label>
@@ -79,8 +111,34 @@
                         <input name="child_overnight_cost"  v-model="priceHistory.children_overnight_cost" type='number' class="form-control" />
                     </div>
                 </div>
-            </div>
+            </div> -->
+
             <div class="row">
+                <!-- Child Cost Day -->
+                <div class="col-md-6 mb-3">
+                    <label for="childCostDay" class="form-label">Child Cost Day:</label>
+                    <input 
+                        id="childCostDay"
+                        name="child_cost"
+                        v-model="priceHistory.children_cost"
+                        type="number"
+                        class="form-control" 
+                    />
+                </div>
+                <!-- Child Cost Overnight -->
+                <div class="col-md-6 mb-3">
+                    <label for="childCostOvernight" class="form-label">Child Cost Overnight:</label>
+                    <input 
+                        id="childCostOvernight"
+                        name="child_overnight_cost"
+                        v-model="priceHistory.children_overnight_cost"
+                        type="number"
+                        class="form-control"
+                    />
+                </div>
+            </div>
+
+            <!-- <div class="row">
                 <div class="form-group">
                     <div class="col-md-2">
                         <label>Infant Cost Day: </label>
@@ -95,8 +153,34 @@
                         <input name="infant_overnight_cost"  v-model="priceHistory.infant_overnight_cost" type='number' class="form-control" />
                     </div>
                 </div>
-            </div>
+            </div> -->
             <div class="row">
+                <!-- Infant Cost Day -->
+                <div class="col-md-6 mb-3">
+                    <label for="infantCostDay" class="form-label">Infant Cost Day:</label>
+                    <input 
+                        id="infantCostDay"
+                        name="infant_cost"
+                        v-model="priceHistory.infant_cost"
+                        type="number"
+                        class="form-control" 
+                    />
+                </div>
+
+                <!-- Infant Cost Overnight -->
+                <div class="col-md-6 mb-3">
+                    <label for="infantCostOvernight" class="form-label">Infant Cost Overnight:</label>
+                    <input 
+                        id="infantCostOvernight"
+                        name="infant_overnight_cost"
+                        v-model="priceHistory.infant_overnight_cost"
+                        type="number"
+                        class="form-control"
+                    />
+                </div>
+            </div>
+
+            <!-- <div class="row">
                 <div class="form-group">
                     <div class="col-md-2">
                         <label>Family Cost Day: </label>
@@ -111,9 +195,33 @@
                         <input name="family_overnight_cost"  v-model="priceHistory.family_overnight_cost" type='number' class="form-control" />
                     </div>
                 </div>
+            </div> -->
+            <div class="row">
+                <!-- Family Cost Day -->
+                <div class="col-md-6 mb-3">
+                    <label for="familyCostDay" class="form-label">Family Cost Day:</label>
+                    <input 
+                        id="familyCostDay"
+                        name="family_cost"
+                        v-model="priceHistory.family_cost"
+                        type="number"
+                        class="form-control" 
+                    />
+                </div>
+                <!-- Family Cost Overnight -->
+                <div class="col-md-6 mb-3">
+                    <label for="familyCostOvernight" class="form-label">Family Cost Overnight:</label>
+                    <input 
+                        id="familyCostOvernight"
+                        name="family_overnight_cost"
+                        v-model="priceHistory.family_overnight_cost"
+                        type="number"
+                        class="form-control"
+                    />
+                </div>
             </div>
 
-            <div class="row" id="div_mooring_groups">
+            <!-- <div class="row" id="div_mooring_groups">
                 <div class="form-group">
                     <div class="col-md-2">
                         <label>Mooring Group (Collecting Agency): </label>
@@ -125,10 +233,38 @@
                         </select>
                     </div>
                 </div>
+            </div> -->
+            <div class="row" id="div_mooring_groups">
+                <div class="col-md-6 mb-3">
+                    <label for="mooringGroup" class="form-label">Mooring Group (Collecting Agency):</label>
+                    <select 
+                        id="mooringGroup"
+                        name="mooring_group"
+                        class="form-select"
+                        v-model="priceHistory.mooring_group"
+                    >
+                        <option value=""></option>
+                        <option 
+                            v-for="mg in mooring_groups" 
+                            :key="mg.id" 
+                            :value="mg.id"
+                        >
+                            {{ mg.name }}
+                        </option>
+                    </select>
+                </div>
             </div>
 
-            <reason type="price" @blur="validateReason()" v-model="priceHistory.reason" ></reason>
-            <div v-show="requireDetails" class="row">
+            <!-- <reason type="price" @blur="validateReason()" v-model="priceHistory.reason" ></reason> -->
+            <div class="mb-3">
+                <reason 
+                    type="price" 
+                    @blur="validateReason()" 
+                    v-model="priceHistory.reason"
+                ></reason>
+            </div>
+
+            <!-- <div v-show="requireDetails" class="row">
                 <div class="form-group">
                     <div class="col-md-2">
                         <label>Comment: </label>
@@ -137,9 +273,19 @@
                         <textarea name="comments" @blur="validateReason()" v-model="priceHistory.comments" class="form-control"></textarea>
                     </div>
                 </div>
+            </div> -->
+            <div v-show="requireDetails" class="row">
+                <div class="col-12 mb-3">
+                    <label for="priceComments" class="form-label">Comment:</label>
+                    <textarea 
+                        id="priceComments"
+                        name="comments"
+                        @blur="validateReason()" 
+                        v-model="priceHistory.comments" 
+                        class="form-control"
+                    ></textarea>
+                </div>
             </div>
-
-
         </form>
     </div>
 
