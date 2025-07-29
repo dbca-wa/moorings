@@ -1,12 +1,10 @@
-import Vuex from 'vuex'
-import Vue from 'vue'
-
-Vue.use(Vuex)
+import { createStore } from 'vuex'
 import {
     $,
     api_endpoints
 } from '../hooks'
-var store = new Vuex.Store({
+
+var store = createStore({
     state: {
         alert:{
             visible:false,
@@ -128,3 +126,4 @@ var store = new Vuex.Store({
 });
 
 export default store;
+export const useStore = () => store;

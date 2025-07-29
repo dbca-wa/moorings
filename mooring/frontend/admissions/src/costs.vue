@@ -78,6 +78,7 @@ export default {
                     dataSrc: ''
                 },
                 columns: [{
+                    data: 'id',
                     mRender: function(data, type, full){
                         var row = full.id;
                         if (full.multi_group){

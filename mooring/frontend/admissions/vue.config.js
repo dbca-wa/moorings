@@ -2,12 +2,12 @@ const { defineConfig } = require('@vue/cli-service');
 const path = require('path');
 const webpack = require('webpack');
 // const MomentLocalesPlugin = require('moment-locales-webpack-plugin');
-const port = process.env.PORT ? parseInt(process.env.PORT) : 8080;
+let port = process.env.PORT ? parseInt(process.env.PORT) : 8081;
 
 module.exports = defineConfig({
     runtimeCompiler: true,
-    outputDir: path.resolve(__dirname, '../../static/moorings_vue'),
-    publicPath: '/static/moorings_vue/',
+    outputDir: path.resolve(__dirname, '../../static/admissions'),
+    publicPath: '/static/admissions/',
     filenameHashing: false,
     chainWebpack: (config) => {
         config.resolve.alias.set(
@@ -24,7 +24,7 @@ module.exports = defineConfig({
         );
     },
     configureWebpack: {
-        entry: './src/apps/main.js',
+        entry: './src/main.js',
         devtool: 'source-map',
         resolve: {
             fallback: {
@@ -49,6 +49,7 @@ module.exports = defineConfig({
         devServer: {
             host: '0.0.0.0',
             allowedHosts: 'all',
+            port: port,
             devMiddleware: {
                 // Save file to disk so the Django server can serve them
                 writeToDisk: true,
