@@ -215,7 +215,7 @@ class MooringAreaFeed(ICalFeed):
 
 class DashboardAnnualAdmissionView(UserPassesTestMixin, ListView):
     template_name = 'mooring/dash/dash_tables_annual_admissions.html'
-    model = RefundFailed
+    model = BookingAnnualAdmission
 
     def get(self, request, *args, **kwargs):
         if is_officer(request.user) == True:

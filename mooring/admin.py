@@ -251,16 +251,16 @@ class BookingAdmin(admin.ModelAdmin):
     def has_add_permission(self, request, obj=None):
         return False
 
-
+#Temporarily made some changes. Will revet back when segregation completed. TODO: revert changes
 @admin.register(models.BookingAnnualAdmission)
 class BookingAnnualAdmissionAdmin(admin.ModelAdmin):
     # raw_id_fields = ('customer','created_by','overridden_by','canceled_by',)
-    raw_id_fields = ('customer','created_by','overridden_by','canceled_by',)
-    list_display = ('id','customer','start_dt','expiry_dt','rego_no','booking_type','cost_total','created_by','created')
+    # raw_id_fields = ('customer','created_by','overridden_by','canceled_by',)
+    # list_display = ('id','customer','start_dt','expiry_dt','rego_no','booking_type','cost_total','created_by','created')
     ordering = ('-id',)
-    search_fields = ('customer__first_name','customer__last_name','id',)
+    # search_fields = ('customer__first_name','customer__last_name','id',)
     list_filter = ('booking_type',)
-    readonly_fields=('created','sticker_no_history','sticker_created')
+    # readonly_fields=('created','sticker_no_history','sticker_created')
     inlines = [BookingAnnualInvoiceInline,]
 
     def has_add_permission(self, request, obj=None):
