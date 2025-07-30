@@ -27,6 +27,8 @@ from ledger_api_client.ledger_models import EmailUserRO as EmailUser
 import datetime
 import hashlib
 import requests
+from django.contrib.auth import get_user_model
+User = get_user_model()
 
 default_from_email = settings.DEFAULT_FROM_EMAIL
 default_campground_email = settings.CAMPGROUNDS_EMAIL
@@ -193,7 +195,8 @@ def send_annual_admission_booking_invoice(booking,context_processor):
     bcc = None
     from_email = None
     context= {'booking': booking, 'context_processor': context_processor, 'signature': 'off'}
-    to = booking.customer.email
+    booking_customer = User.objects.get(id=booking.customer_id)
+    to = booking_customer.email
     filename = 'invoice-annual_admission-{}.pdf'.format(booking.id)
     references = [b.invoice_reference for b in BookingAnnualInvoice.objects.filter(booking_annual_admission=booking)]
     invoice = Invoice.objects.filter(reference__in=references).order_by('-created')[0]

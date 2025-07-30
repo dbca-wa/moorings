@@ -36,7 +36,7 @@ delete from django_migrations where id > 11;
 
 ## Step 6: Run Migrations
 ```
-./manage_ml.py migrate ledger_api_client
+./manage_mo.py migrate ledger_api_client
 ```
 
 ## Step 7 Reinsert the migrations that were deleted in Step5
@@ -56,9 +56,19 @@ drop table django_cron_cronjoblog;
 ```
 
 
-## Step 10: Run Migrations
+## Step 10: Run Migrations for admin and django_cron
 ```
-./manage_ml.py migrate admin
-./manage_ml.py migrate django_cron
-./manage_ml.py migrate 
+./manage_mo.py migrate admin
+./manage_mo.py migrate django_cron
+```
+
+
+## Step 11: Run fake mooring migrations
+```
+./manage_mo.py migrate mooring 0168 --fake
+```
+
+## Step 12: Run remianing migrations
+```
+./manage_mo.py migrate
 ```

@@ -256,6 +256,7 @@ export default {
                     var msg = helpers.apiError(resp);
                     vm.$refs.historyModal.errorString = msg;
                     vm.$refs.historyModal.errors = true;
+                    vm.$refs.historyModal.priceHistoryError = msg;
                     console.log(resp);
                     $('#pricehistory_error').html(resp.responseJSON[0]);
                 }

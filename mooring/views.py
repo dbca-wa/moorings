@@ -215,7 +215,7 @@ class MooringAreaFeed(ICalFeed):
 
 class DashboardAnnualAdmissionView(UserPassesTestMixin, ListView):
     template_name = 'mooring/dash/dash_tables_annual_admissions.html'
-    model = RefundFailed
+    model = BookingAnnualAdmission
 
     def get(self, request, *args, **kwargs):
         if is_officer(request.user) == True:
@@ -1462,7 +1462,6 @@ class MakeBookingsView(TemplateView):
         # already exists
         al_json = {}
         if booking.details['num_adult'] > 0:
-            # adBooking = AdmissionsBooking.objects.create(customer=customer, booking_type=3, vesselRegNo=rego, noOfAdults=booking.details['num_adult'],
             adBooking = AdmissionsBooking.objects.create(customer_id=customer.id, booking_type=3, vesselRegNo=rego, noOfAdults=booking.details['num_adult'],
                 noOfConcessions=0, noOfChildren=booking.details['num_child'], noOfInfants=booking.details['num_infants'], totalCost=admissionsTotal, created=datetime.now())
             

@@ -2484,21 +2484,23 @@ def booking_annual_admission_success(basket, booking, context_processor):
     invoice = Invoice.objects.get(order_number=order.number)
     invoice_ref = invoice.reference
     book_inv, created = models.BookingAnnualInvoice.objects.get_or_create(booking_annual_admission=booking, invoice_reference=invoice_ref)
-
+    from django.contrib.auth import get_user_model
+    User = get_user_model()
     #invoice_ref = request.GET.get('invoice')
     if booking.booking_type == 3:
         try:
             inv = Invoice.objects.get(reference=invoice_ref)
+            booking_customer = User.objects.get(id=booking.customer_id)
             order = Order.objects.get(number=inv.order_number)
-            order.user = booking.customer
+            order.user = booking_customer
             order.save()
         except Invoice.DoesNotExist:
             print ("INVOICE ERROR")
-            logger.error('{} tried making a booking with an incorrect invoice'.format('User {} with id {}'.format(booking.customer.get_full_name(),booking.customer.id) if booking.customer else 'An anonymous user'))
+            logger.error('{} tried making a booking with an incorrect invoice'.format('User {} with id {}'.format(booking_customer.first_name + booking_customer.last_name, booking.customer_id) if booking_customer else 'An anonymous user'))
             return redirect('public_make_booking')
         if inv.system not in ['0516']:
             print ("SYSTEM ERROR")
-            logger.error('{} tried making a booking with an invoice from another system with reference number {}'.format('User {} with id {}'.format(booking.customer.get_full_name(),booking.customer.id) if booking.customer else 'An anonymous user',inv.reference))
+            logger.error('{} tried making a booking with an invoice from another system with reference number {}'.format('User {} with id {}'.format(booking_customer.first_name + booking_customer.last_name,booking.customer_id) if booking_customer else 'An anonymous user',inv.reference))
             return redirect('public_make_booking')
 
         if book_inv:
