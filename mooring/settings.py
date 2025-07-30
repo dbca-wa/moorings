@@ -7,6 +7,7 @@ os.environ.setdefault("BASE_DIR", BASE_DIR)
 from ledger_api_client.settings_base import *
 from decimal import Decimal
 
+DEBUG = decouple.config('DEBUG', default=True)
 BASE_DIR = None
 BASE_DIR_ENV = decouple.config('BASE_DIR', default=None)
 if BASE_DIR_ENV is None:
@@ -38,6 +39,7 @@ INSTALLED_APPS += [
 MIDDLEWARE_CLASSES += [
     'mooring.middleware.BookingTimerMiddleware',
     'mooring.middleware.CacheHeaders',
+    'mooring.middleware.ForceDebugInContextMiddleware',
 ]
 MIDDLEWARE = MIDDLEWARE_CLASSES
 MIDDLEWARE_CLASSES = None

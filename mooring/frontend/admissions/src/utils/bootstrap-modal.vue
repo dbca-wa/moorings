@@ -48,6 +48,10 @@
                 type: Boolean,
                 default: false
             },
+            xlarge: {
+                type: Boolean,
+                default: false
+            },
             large: {
                 type: Boolean,
                 default: false
@@ -82,11 +86,11 @@
             },
             okClass: {
                 type: String,
-                default: 'btn btn-default'
+                default: 'btn btn-primary'
             },
             cancelClass: {
                 type: String,
-                default: 'btn btn-default'
+                default: 'btn btn-secondary'
             },
             closeWhenOK: {
                 type: Boolean,
@@ -101,6 +105,7 @@
         computed: {
             modalClass () {
                 return {
+                    'modal-xl': this.xlarge,
                     'modal-lg': this.large,
                     'modal-sm': this.small,
                     'modal-full': this.full

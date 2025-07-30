@@ -1,13 +1,9 @@
 import { createStore } from 'vuex'
-// import Vue from 'vue'
-
-
-// Vue.use(Vuex)
 import {
     $,
     api_endpoints
 } from '../hooks'
-// var store = new Vuex.Store({
+
 var store = createStore({
     state: {
         alert:{

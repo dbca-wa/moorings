@@ -1,5 +1,4 @@
-
-module.exports = {
+export default {
     
     park_price_history:function (id) {
        return global.parkstayUrl + "/api/admissions/price_history.json";
@@ -28,5 +27,5 @@ module.exports = {
     priceReasons:function () {
         return global.parkstayUrl + "/api/admissionsReasons.json";
     },
-    profile: process.env.PARKSTAY_URL + "/api/profile",
+    profile: process.env.VUE_APP_PARKSTAY_URL + "/api/profile",
 };

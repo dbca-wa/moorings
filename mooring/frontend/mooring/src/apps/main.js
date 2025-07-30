@@ -46,7 +46,6 @@ global.debounce = function (func, wait, immediate) {
 
 const router = createRouter({
   history: createWebHistory(),
-
   routes: routes,
 });
 

@@ -7,6 +7,7 @@ from django.contrib import messages
 from django.urls import reverse
 from django.http import Http404, HttpResponse, JsonResponse, HttpResponseRedirect
 from django.utils import timezone
+from mooring import settings
 from mooring.models import AdmissionsBooking, Booking, BookingAnnualAdmission
 import hashlib
 
@@ -257,4 +258,32 @@ class BookingTimerMiddleware(object):
 
     def pr(self, request):
         response= self.get_response(request)
+        return response
+
+
+class ForceDebugInContextMiddleware:
+    """
+    A middleware that forcefully injects the DEBUG value into the
+    template context for every request. This is a workaround for
+    when the 'debug' context processor fails to run.
+    """
+    def __init__(self, get_response):
+        self.get_response = get_response
+
+    def __call__(self, request):
+        # This part runs before the view is called
+        response = self.get_response(request)
+        # This part runs after the view is called
+        return response
+
+    def process_template_response(self, request, response):
+        """
+        This method is called only for responses that have a `render` method,
+        which indicates they are TemplateResponse objects or similar.
+        This is the perfect place to modify the template context.
+        """
+        if hasattr(response, 'context_data') and response.context_data is not None:
+            # Add the DEBUG value to the response's context data
+            response.context_data['DEBUG'] = settings.DEBUG
+            print(f"--- Middleware injected DEBUG: {response.context_data['DEBUG']} ---")
         return response
