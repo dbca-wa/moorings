@@ -34,6 +34,8 @@ module.exports = defineConfig({
             },
         },
         plugins: [
+            // This plugin makes jQuery available to all modules
+            // without needing to import it everywhere.
             new webpack.ProvidePlugin({
                 $: 'jquery',
                 jQuery: 'jquery',
