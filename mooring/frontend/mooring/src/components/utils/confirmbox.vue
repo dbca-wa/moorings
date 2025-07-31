@@ -54,10 +54,10 @@ import {bus} from './eventBus.js'
 export default {
     data:function () {
         return {
-            confirmModal: 'confirmModal'+this._uid,
-            icon: 'modalIcon'+this._uid,
-            text: 'modalText'+this._uid,
-            buttons: 'modalButtons'+this._uid,
+            confirmModal: '',
+            icon: '',
+            text: '',
+            buttons: '',
             eventHandler: Array(),
         }
     },
@@ -92,8 +92,8 @@ export default {
             {
                $.each(Obj.buttons, function (i, btn)
                {
-                   var eventHandler = (typeof btn.eventHandler != "undefined") ? btn.eventHandler : "@click";
-                   $(buttons).append("<button type=\"button\" data-click="+btn.event+" class=\"btn " + btn.bsColor + "\" style='margin-bottom:10px;'>" + btn.text + "</button>");
+                   var eventHandler = (typeof btn.handler != "undefined") ? btn.handler : "@click";
+                   $(buttons).append("<button type=\"button\" data-click="+btn.event+" class=\"btn " + btn.bsColor + "\" style='margin-bottom:10px;margin-right:10px;'>" + btn.text + "</button>");
                    $(function () {
                           if(passed_id === vm.id){
                                $('button[data-click]').on('click',function () {
@@ -102,27 +102,53 @@ export default {
                                       btn.handler();
                                    }
                                    if(autoclose){
-                                       $(confirmModal).modal('hide');
+                                       vm.hideConfirmModal();
                                    }
                                });
                           }
                    })
                });
             }
-            $(buttons).append("<button type=\"button\" data-dismiss=\"modal\" class=\"btn btn-primary\" style='margin-bottom:10px;'>"+vm.cancelText+"</button>");
+            $(buttons).append(`<button type="button" class="btn btn-primary cancel-btn" style="margin-bottom:10px;">${vm.cancelText}</button>`);
+                $(buttons).find('.cancel-btn').on('click', function () {
+                     vm.hideConfirmModal();
+                });
+        },
+        showConfirmModal:function() {
+            const $modal = $("#"+this.confirmModal);
+            $modal.addClass('show');
+            $modal.css('display', 'block');
+            $('body').addClass('modal-open');
+
+             $('<div class="modal-backdrop fade show confirm-box-modal"></div>').appendTo(document.body);
+        },
+        hideConfirmModal:function() {
+            const $modal = $("#"+this.confirmModal);
+
+            $modal.removeClass('show');
+            $modal.css('display', 'none');
+            $('body').removeClass('modal-open');
+
+            $('.modal-backdrop.fade.show.confirm-box-modal').remove();
         }
+
    },
    mounted:function () {
        var vm = this;
        vm.confirmBox(this.options);
-       bus.on('showAlert', function(id){
-          if(id === vm.id){
-              $("#"+vm.confirmModal).modal('show');
-          }
-      });
-
-
-   }
+       bus.on('showAlert', function(id) {
+            if(id === vm.id){
+            vm.showConfirmModal();
+            }
+        });
+    },
+    created() {
+        this._uid  = Math.random().toString(36).substring(2, 16);
+        this.confirmModal = 'confirmModal' + this._uid;
+        this.icon = 'modalIcon' + this._uid;
+        this.text = 'mdalText' + this._uid;
+        this.buttons = 'modalButtons' + this._uid;
+  }
 }
 
 </script>
@@ -135,5 +161,9 @@ export default {
     .modal-footer .btn+.btn {
         margin-bottom: 10px;
         margin-left: 5px;
+    }
+    .modal-backdrop {
+        background-color: rgba(128, 128, 128, 0.3);
+        opacity: 1 !important;
     }
 </style>
