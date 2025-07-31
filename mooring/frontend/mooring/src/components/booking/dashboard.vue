@@ -1238,7 +1238,7 @@ export default {
                 ]
 
                 var bookings = [];
-                $.each(data,function (i,booking) {
+                $.each(data.results,function (i,booking) {
                     var bk = {};
                     $.each(fields,function (j,field) {
                         switch (j) {
