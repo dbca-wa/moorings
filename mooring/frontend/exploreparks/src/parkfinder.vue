@@ -1942,55 +1942,6 @@ export default {
         this.arrivalEl = $('#dateArrival');
         this.departureEl = $('#dateDeparture');
 
-        // this.arrivalData = this.arrivalEl.fdatepicker({
-        //     format: 'dd/mm/yyyy',
-        //     onRender: function (date) {
-        //         // disallow start dates before today
-        //         return date.valueOf() < now.valueOf() ? 'disabled': '';
-        //         //return '';
-        //     }
-        // }).on('changeDate', function (ev) {
-        //     //console.log('arrivalEl changeDate');
-        //     ev.target.dispatchEvent(new CustomEvent('change'));
-        // }).on('change', function (ev) {
-        //     if (vm.arrivalData.date.valueOf() >= vm.departureData.date.valueOf()) {
-        //         var newDate = moment(vm.arrivalData.date).add(1, 'days').toDate();
-        //         vm.departureData.date = newDate;
-        //         vm.departureData.setValue();
-        //         vm.departureData.fill();
-        //         vm.departureEl.trigger('changeDate');
-        //     }
-        //     vm.arrivalData.hide();
-        //     vm.arrivalDate = moment(vm.arrivalData.date);
-        // }).on('keydown', function (ev) {
-        //     if (ev.keyCode == 13) {
-        //         ev.target.dispatchEvent(new CustomEvent('change'));
-        //     }
-        // }).data('datepicker');
-        // this.arrivalEl.fdatepicker('update', now);
-
-        // this.departureData = this.departureEl.fdatepicker({
-        //     format: 'dd/mm/yyyy',
-        //     onRender: function (date) {
-        //         return (date.valueOf() <= vm.arrivalData.date.valueOf()) ? 'disabled': '';
-        //     }
-        // }).on('changeDate', function (ev) {
-        //     //console.log('departureEl changeDate');
-        //     ev.target.dispatchEvent(new CustomEvent('change'));
-        // }).on('change', function (ev) {
-        //     vm.departureData.hide();
-        //     vm.departureDate = moment(vm.departureData.date);
-        // }).on('keydown', function (ev) {
-        //     if (ev.keyCode == 13) {
-        //         ev.target.dispatchEvent(new CustomEvent('change'));
-        //     }
-        // }).data('datepicker');
-        // var fivedays = new Date();
-        // fivedays.setDate(fivedays.getDate() + 5);
-        // fivedays = moment.utc({year: fivedays.getFullYear(), month: fivedays.getMonth(), day: fivedays.getDate(), hour: 0, minute: 0, second: 0}).toDate();
-        
-        // this.departureEl.fdatepicker('update', fivedays);
-
         // load autosuggest choices
         var search = document.getElementById('searchInput');
         var autocomplete = new Awesomplete(search);
