@@ -36,8 +36,8 @@
                         <input
                             type="date"
                             id="dateArrival"
-                            v-model="arrivalDate"
-                            :min="minArrivalDate"
+                            v-model="arrivalDateForInput"
+                            :min="minArrivalDateForInput"
                             @change="handleArrivalDateChange"
                         >
                     </div>
@@ -46,8 +46,8 @@
                         <input
                             type="date"
                             id="dateDeparture"
-                            v-model="departureDate"
-                            :min="minDepartureDate"
+                            v-model="departureDateForInput"
+                            :min="minDepartureDateForInput"
                         >
                     </div>
                     
@@ -510,6 +510,54 @@ export default {
         }
     },
     computed: {
+        // --- Translator for Arrival Date ---
+        arrivalDateForInput: {
+            /**
+             * GET: Formats the internal Date object into a 'YYYY-MM-DD' string
+             * for the <input type="date"> element.
+             */
+            get() {
+                return this.formatDateForInput(this.arrivalDate);
+            },
+            /**
+             * SET: Parses the 'YYYY-MM-DD' string from the input
+             * back into a Date object to update the internal state.
+             */
+            set(value) {
+                // value is a string like '2023-10-27' from the input
+                this.arrivalDate = new Date(value + 'T00:00:00'); // Use T00:00:00 to avoid timezone shifts
+
+                // --- Validation Logic ---
+                // If the new arrival date makes the departure date invalid, reset it.
+                if (this.departureDate && this.departureDate <= this.arrivalDate) {
+                    // ...then automatically set the departure date to the day AFTER the new arrival date.
+                    const nextDay = new Date(this.arrivalDate);
+                    nextDay.setDate(nextDay.getDate() + 1);
+                    this.departureDate = nextDay;
+                }
+            }
+        },
+        // --- Translator for Departure Date ---
+        departureDateForInput: {
+            get() {
+                return this.formatDateForInput(this.departureDate);
+            },
+            set(value) {
+                this.departureDate = value ? new Date(value + 'T00:00:00') : null;
+            }
+        },
+        // --- Dynamic 'min' attributes for the inputs ---
+        minArrivalDateForInput() {
+            return this.formatDateForInput(new Date());
+        },
+        minDepartureDateForInput() {
+            if (!this.arrivalDate) {
+                return this.minArrivalDateForInput;
+            }
+            const nextDay = new Date(this.arrivalDate);
+            nextDay.setDate(nextDay.getDate() + 1);
+            return this.formatDateForInput(nextDay);
+        },
         bookableOnly: {
             cache: false,
             get: function() {
@@ -537,13 +585,15 @@ export default {
         arrivalDateString: {
             cache: false,
             get: function() {
-                return this.arrivalEl[0].value ? moment(this.arrivalData.getDate()).format('YYYY/MM/DD') : null; 
+                // return this.arrivalEl[0].value ? moment(this.arrivalData.getDate()).format('YYYY/MM/DD') : null; 
+                return this.arrivalEl[0].value ? moment(this.arrivalDate).format('YYYY/MM/DD') : null; 
             }
         },
         departureDateString: {
             cache: false,
             get: function() {
-                return this.departureEl[0].value ? moment(this.departureData.getDate()).format('YYYY/MM/DD') : null; 
+                // return this.departureEl[0].value ? moment(this.departureData.getDate()).format('YYYY/MM/DD') : null; 
+                return this.departureEl[0].value ? moment(this.departureDate).format('YYYY/MM/DD') : null; 
             }
         },
         numPeople: {
@@ -693,6 +743,20 @@ export default {
         }
     },
     methods: {
+        /**
+         * A helper function to format a Date object into 'YYYY-MM-DD' string
+         * for the <input type="date"> element.
+         * @param {Date} date - The input date.
+         * @returns {string} - The formatted date string.
+         */
+        formatDateForInput: function(date) {
+            if (!date) return '';
+            // `get...()` methods are based on the local timezone, which is what users see.
+            const year = date.getFullYear();
+            const month = (date.getMonth() + 1).toString().padStart(2, '0');
+            const day = date.getDate().toString().padStart(2, '0');
+            return `${year}-${month}-${day}`;
+        },
         searchRego: function(){
             let vm = this;
             vm.vesselRego = vm.vesselRego.replace(/ /g, "");
@@ -2077,7 +2141,6 @@ export default {
                     var params = {format: 'json'};
                     var isCustom = false;
 
-                    // if ((vm.arrivalDate.date) && (vm.departureData.date)) {
                     if (vm.arrivalDate && vm.departureDate) {
                         isCustom = true;
                         var arrival = vm.arrivalDateString;
