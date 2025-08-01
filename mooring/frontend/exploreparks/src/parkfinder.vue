@@ -351,339 +351,40 @@
     </div>
 </template>
 
-<style lang="scss">
-
-[v-cloak] {
-    display: none;
-}
-@font-face {
-    font-family: "DPaWSymbols";
-    src: url('/static/exploreparks/fonts/boating.woff') format("woff"); 
-}
-
-.symb {
-    font-family: "DPaWSymbols";
-    font-style: normal;
-    font-size: 1.5rem;
-}
-
-.symb.RC2:before {
-    content: "a";
-}
-
-.symb.RC4:before {
-    content: "b";
-}
-
-.symb.RV10:before {
-    content: "c";
-}
-
-.symb.RG2:before {
-    content: "d";
-}
-
-.symb.RG15:before {
-    content: "e";
-}
-
-.symb.RV2:before {
-    content: "f";
-}
-
-.symb.RF10:before {
-    content: "g";
-}
-
-.symb.RF13:before {
-    content: "h";
-}
-
-.symb.RF15:before {
-    content: "i";
-}
-
-.symb.RF17:before {
-    content: "j";
-}
-
-.symb.RF1:before {
-    content: "k";
-}
-
-.symb.RF6:before {
-    content: "l";
-}
-
-.symb.RF7:before {
-    content: "m";
-}
-
-.symb.RF19:before {
-    content: "n";
-}
-
-.symb.RF8G:before {
-    content: "o";
-}
-
-.symb.RC1:before {
-    content: "p";
-}
-
-.symb.RC3:before {
-    content: "q";
-}
-
-.symb.LOC:before {
-    content: "r";
-}
-
-.symb.RW3:before {
-    content: "s";
-}
-
-.symb.MAINS:before {
-    content: "t";
-}
-
-.symb.RC20:before {
-    content: "v";
-}
-
-.f6inject {
-
-    .search-params hr {
-        margin: 0;
-    }
-
-    .search-params label {
-        cursor: pointer;
-        font-size: 0.8em;
-    }
-
-    /* filter hiding on small screens */
-    @media print, screen and (max-width: 63.9375em) {
-        .filter-hide {
-            display: none;
-        }
-    }
-
-    @media print, screen and (min-width: 64em) {
-        .filter-button {
-            display: none; 
-        }
-    }
-
-    #map {
-        height: 75vh;
-    }
-
-    /* set on the #map element when mousing over a feature */
-    .click {
-        cursor: pointer;
-    }
-
-    input + .symb {
-        color: #000000;
-        transition: color 0.25s ease-out;
-    }
-
-    input:checked + .symb {
-        color: #2199e8;
-    }
-
-    .button.formButton {
-        display: block;
-        width: 100%;
-    }
-
-    .button.selector {
-        background-color: #fff;
-        border: 1px solid #777;
-        border-radius: 4px;
-        color: #000;
-    }
-
-    .button.selector:hover {
-        background-color: #d6eaff;
-        border: 1px solid #729fcf;
-    }
-
-    .button.selector ~ input:checked {
-        color: #fff;
-        background-color: #0060c4;
-        border: 1px solid #00366e;
-    }
-
-    .button.selector:hover ~ input:checked {
-        color: #fff;
-        background-color: #0e83ff;
-        border: 1px solid #004d9f;
-    }
-
-    .pagination {
-        padding: 0;
-        text-align: center;
-        margin-left: auto;
-        margin-right: auto;
-        margin-bottom: 1em;
-    }
-
-    .pagination .active {
-        background: #2199e8;
-        color: #fefefe;
-        cursor: default;
-    }
-
-    .pagination li {
-        display: inline-block;
-        cursor: pointer;
-    }
-
-    .tooltip {
-        position: relative;
-        border-radius: 4px;
-        background-color: #ffcc33;
-        color: black;
-        padding: 4px 8px;
-        opacity: 0.7;
-        white-space: nowrap;
-    }
-
-    .tooltip:before {
-        border-top: 6px solid rgba(0, 0, 0, 0.5);
-        border-right: 6px solid transparent;
-        border-left: 6px solid transparent;
-        content: "";
-        position: absolute;
-        bottom: -6px;
-        margin-left: -7px;
-        left: 50%;
-    }
-
-    .mapPopup {
-        position: absolute;
-        background-color: white;
-        -webkit-filter: drop-shadow(0 1px 4px rgba(0,0,0,0.2));
-        filter: drop-shadow(0 1px 4px rgba(0,0,0,0.2));
-        padding: 15px;
-        border-radius: 10px;
-        border: 1px solid #cccccc;
-        bottom: 32px;
-        left: -140px;
-        width: 280px;
-    }
-
-    .mapPopup:after, .mapPopup:before {
-        top: 100%;
-        border: solid transparent;
-        content: " ";
-        height: 0;
-        width: 0;
-        position: absolute;
-        pointer-events: none;
-    }
-
-    .mapPopup:after {
-        border-top-color: white;
-        border-width: 10px;
-        left: 138px;
-        margin-left: -10px; 
-    }
-
-    .mapPopup:before {
-        border-top-color: #cccccc;
-        border-width: 11px;
-        left: 138px;
-        margin-left: -11px;
-    }
-
-    .mapPopupClose {
-        text-decoration: none;
-        position: absolute;
-        top: 2px;
-        right: 8px;
-    }
-
-    .mapPopupClose:after {
-        content: "✖";
-    }
-
-    .searchTitle {
-        font-size: 150%;
-        font-weight: bold;
-    }
-
-    .resultList {
-        padding: 0;
-    }
-
-    .map-toggle-black {
-       width: 80px;
-       height: 80px;
-       background-color: #FFFFFF;
-       color: black;
-       position: relative;
-       right: 10px;
-       top: -90px;
-       z-index: 300;
-       border: 2px solid #FFFFFF;
-       cursor: pointer;
-       border-radius: 2px;
-       box-shadow: 0px 1px 4px rgba(0, 0, 0, 0.3);
-    }
-    .map-toggle-white {
-       width: 80px;
-       height: 80px;
-       background-color: #FFFFFF;
-       color: black;
-       position: relative;
-       right: 10px;
-       top: -90px;
-       z-index: 300;
-       border: 2px solid #000000;
-       cursor: pointer;
-       border-radius: 2px;
-       box-shadow: 0px 1px 4px rgba(0, 0, 0, 0.3);
-    }
-    .map-loading {
-       position: relative;
-       top: 14px;
-       background-color: #FFFFFF;
-       border: 1px solid #bab9b9;
-       z-index: 5;
-       width: 110px;
-       text-align: center;
-       opacity: 0.7;
-       margin-right: 8px;
-       font-size: 12px;
-       padding: 4px;
-    }
-}
-
-/* hacks to make awesomeplete play nice with F6 */
-div.awesomplete {
-    display: block;
-}
-
-div.awesomplete > input {
-    display: table-cell;
-}
-
-/* hacks to make openlayers widgets more accessible */
-.ol-control button {
-    height: 2em;
-    width: 2em;
-}
-
-
-</style>
-
 <script>
+// CSS files for Foundation and its plugins
+// import 'foundation-sites/dist/css/foundation.min.css';
+// import 'foundation-datepicker/css/foundation-datepicker.min.css';
+
+// JS files for Foundation and its plugins
+// Thanks to ProvidePlugin, we don't need to import jQuery here.
+// import 'foundation-sites';
+// import 'foundation-datepicker/js/foundation-datepicker'; // Adjust path if needed
 
 import Awesomplete from 'awesomplete';
-import ol from 'openlayers';
+
+
+// import ol from 'openlayers';
+import Map from 'ol/Map'
+import { get as getProjection } from 'ol/proj';
+import { getWidth, getTopLeft } from 'ol/extent';
+import WMTSTileGrid from 'ol/tilegrid/WMTS';
+import TileLayer from 'ol/layer/Tile';
+import VectorLayer from 'ol/layer/Vector';
+import WMTS from 'ol/source/WMTS';
+import GeoJSON from 'ol/format/GeoJSON';
+import Collection from 'ol/Collection';
+import VectorSource from 'ol/source/Vector';
+import Overlay from 'ol/Overlay';
+import Feature from 'ol/Feature';
+import { Style, Icon, Text, Fill, Stroke } from 'ol/style';
+import View from 'ol/View';
+import { defaults as defaultControls, ScaleLine, Zoom } from 'ol/control';
+import { defaults as defaultInteractions, PinchZoom } from 'ol/interaction';
+import Geolocation from 'ol/Geolocation';
+import { transform, METERS_PER_UNIT, fromLonLat, toLonLat } from 'ol/proj';
+import Point from 'ol/geom/Point';
+
 //var ol = require('openlayers/dist/ol-debug');
 import 'foundation-sites';
 import 'foundation-datepicker/js/foundation-datepicker';
@@ -2785,3 +2486,330 @@ export default {
     }
 };
 </script>
+
+<style lang="scss">
+    [v-cloak] {
+        display: none;
+    }
+    @font-face {
+        font-family: "DPaWSymbols";
+        // src: url('/static/exploreparks/fonts/boating.woff') format("woff"); 
+        src: url('~@/assets/fonts/boating.woff') format("woff");
+    }
+
+    .symb {
+        font-family: "DPaWSymbols";
+        font-style: normal;
+        font-size: 1.5rem;
+    }
+
+    .symb.RC2:before {
+        content: "a";
+    }
+
+    .symb.RC4:before {
+        content: "b";
+    }
+
+    .symb.RV10:before {
+        content: "c";
+    }
+
+    .symb.RG2:before {
+        content: "d";
+    }
+
+    .symb.RG15:before {
+        content: "e";
+    }
+
+    .symb.RV2:before {
+        content: "f";
+    }
+
+    .symb.RF10:before {
+        content: "g";
+    }
+
+    .symb.RF13:before {
+        content: "h";
+    }
+
+    .symb.RF15:before {
+        content: "i";
+    }
+
+    .symb.RF17:before {
+        content: "j";
+    }
+
+    .symb.RF1:before {
+        content: "k";
+    }
+
+    .symb.RF6:before {
+        content: "l";
+    }
+
+    .symb.RF7:before {
+        content: "m";
+    }
+
+    .symb.RF19:before {
+        content: "n";
+    }
+
+    .symb.RF8G:before {
+        content: "o";
+    }
+
+    .symb.RC1:before {
+        content: "p";
+    }
+
+    .symb.RC3:before {
+        content: "q";
+    }
+
+    .symb.LOC:before {
+        content: "r";
+    }
+
+    .symb.RW3:before {
+        content: "s";
+    }
+
+    .symb.MAINS:before {
+        content: "t";
+    }
+
+    .symb.RC20:before {
+        content: "v";
+    }
+
+    .f6inject {
+
+        .search-params hr {
+            margin: 0;
+        }
+
+        .search-params label {
+            cursor: pointer;
+            font-size: 0.8em;
+        }
+
+        /* filter hiding on small screens */
+        @media print, screen and (max-width: 63.9375em) {
+            .filter-hide {
+                display: none;
+            }
+        }
+
+        @media print, screen and (min-width: 64em) {
+            .filter-button {
+                display: none; 
+            }
+        }
+
+        #map {
+            height: 75vh;
+        }
+
+        /* set on the #map element when mousing over a feature */
+        .click {
+            cursor: pointer;
+        }
+
+        input + .symb {
+            color: #000000;
+            transition: color 0.25s ease-out;
+        }
+
+        input:checked + .symb {
+            color: #2199e8;
+        }
+
+        .button.formButton {
+            display: block;
+            width: 100%;
+        }
+
+        .button.selector {
+            background-color: #fff;
+            border: 1px solid #777;
+            border-radius: 4px;
+            color: #000;
+        }
+
+        .button.selector:hover {
+            background-color: #d6eaff;
+            border: 1px solid #729fcf;
+        }
+
+        .button.selector ~ input:checked {
+            color: #fff;
+            background-color: #0060c4;
+            border: 1px solid #00366e;
+        }
+
+        .button.selector:hover ~ input:checked {
+            color: #fff;
+            background-color: #0e83ff;
+            border: 1px solid #004d9f;
+        }
+
+        .pagination {
+            padding: 0;
+            text-align: center;
+            margin-left: auto;
+            margin-right: auto;
+            margin-bottom: 1em;
+        }
+
+        .pagination .active {
+            background: #2199e8;
+            color: #fefefe;
+            cursor: default;
+        }
+
+        .pagination li {
+            display: inline-block;
+            cursor: pointer;
+        }
+
+        .tooltip {
+            position: relative;
+            border-radius: 4px;
+            background-color: #ffcc33;
+            color: black;
+            padding: 4px 8px;
+            opacity: 0.7;
+            white-space: nowrap;
+        }
+
+        .tooltip:before {
+            border-top: 6px solid rgba(0, 0, 0, 0.5);
+            border-right: 6px solid transparent;
+            border-left: 6px solid transparent;
+            content: "";
+            position: absolute;
+            bottom: -6px;
+            margin-left: -7px;
+            left: 50%;
+        }
+
+        .mapPopup {
+            position: absolute;
+            background-color: white;
+            -webkit-filter: drop-shadow(0 1px 4px rgba(0,0,0,0.2));
+            filter: drop-shadow(0 1px 4px rgba(0,0,0,0.2));
+            padding: 15px;
+            border-radius: 10px;
+            border: 1px solid #cccccc;
+            bottom: 32px;
+            left: -140px;
+            width: 280px;
+        }
+
+        .mapPopup:after, .mapPopup:before {
+            top: 100%;
+            border: solid transparent;
+            content: " ";
+            height: 0;
+            width: 0;
+            position: absolute;
+            pointer-events: none;
+        }
+
+        .mapPopup:after {
+            border-top-color: white;
+            border-width: 10px;
+            left: 138px;
+            margin-left: -10px; 
+        }
+
+        .mapPopup:before {
+            border-top-color: #cccccc;
+            border-width: 11px;
+            left: 138px;
+            margin-left: -11px;
+        }
+
+        .mapPopupClose {
+            text-decoration: none;
+            position: absolute;
+            top: 2px;
+            right: 8px;
+        }
+
+        .mapPopupClose:after {
+            content: "✖";
+        }
+
+        .searchTitle {
+            font-size: 150%;
+            font-weight: bold;
+        }
+
+        .resultList {
+            padding: 0;
+        }
+
+        .map-toggle-black {
+        width: 80px;
+        height: 80px;
+        background-color: #FFFFFF;
+        color: black;
+        position: relative;
+        right: 10px;
+        top: -90px;
+        z-index: 300;
+        border: 2px solid #FFFFFF;
+        cursor: pointer;
+        border-radius: 2px;
+        box-shadow: 0px 1px 4px rgba(0, 0, 0, 0.3);
+        }
+        .map-toggle-white {
+        width: 80px;
+        height: 80px;
+        background-color: #FFFFFF;
+        color: black;
+        position: relative;
+        right: 10px;
+        top: -90px;
+        z-index: 300;
+        border: 2px solid #000000;
+        cursor: pointer;
+        border-radius: 2px;
+        box-shadow: 0px 1px 4px rgba(0, 0, 0, 0.3);
+        }
+        .map-loading {
+        position: relative;
+        top: 14px;
+        background-color: #FFFFFF;
+        border: 1px solid #bab9b9;
+        z-index: 5;
+        width: 110px;
+        text-align: center;
+        opacity: 0.7;
+        margin-right: 8px;
+        font-size: 12px;
+        padding: 4px;
+        }
+    }
+
+    /* hacks to make awesomeplete play nice with F6 */
+    div.awesomplete {
+        display: block;
+    }
+
+    div.awesomplete > input {
+        display: table-cell;
+    }
+
+    /* hacks to make openlayers widgets more accessible */
+    .ol-control button {
+        height: 2em;
+        width: 2em;
+    }
+</style>
