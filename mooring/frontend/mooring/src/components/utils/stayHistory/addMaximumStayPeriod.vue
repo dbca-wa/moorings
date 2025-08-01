@@ -159,7 +159,7 @@ export default {
         },
         addMaxStay: function() {
             let vm = this;
-            if ($(vm.form).valid()){
+            if ($(vm.form).valid() && vm.stay.reason) {
                 vm.stay.range_start = Moment(vm.stay.range_start).format('DD/MM/YYYY');
                 vm.stay.range_end = Moment(vm.stay.range_end).format('DD/MM/YYYY');
                 if (!vm.stay.id){
