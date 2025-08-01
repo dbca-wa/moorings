@@ -181,6 +181,7 @@ export default {
             form: '',
             reasons: [],
             isOpen: false,
+            priceHistoryError: ''
         }
     },
     computed: {
@@ -271,6 +272,7 @@ export default {
             this.priceHistory.period_start= '';
             this.priceHistory.details= '';
             this.priceHistory.booking_period_id = '';
+            this.priceHistoryError = '';
 
             this.errorString = '';
             this.isOpen = false;

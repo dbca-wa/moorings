@@ -162,6 +162,8 @@ from mooring import emails
 from mooring import exceptions
 from django.contrib.gis.geos import Point
 from django.contrib.gis.measure import Distance  
+from django.contrib.auth import get_user_model
+User = get_user_model()
 
 
 logger = logging.getLogger(__name__)
@@ -2899,9 +2901,6 @@ class AdmissionsBookingViewSet(viewsets.ModelViewSet):
         brokenrow_section = "START"
         broken_booking_id = 0
 
-        from django.contrib.auth import get_user_model
-        User = get_user_model()
-
         try:
             data_temp = AdmissionsBooking.objects.filter(booking_type__in=bt).order_by('-pk')
 
@@ -4988,7 +4987,7 @@ def cancel_annual_admissions(request):
                   raise ValidationError('Annual booking already cancelled')
              baa.booking_type=4
              baa.is_canceled=True
-             baa.canceled_by=request.user
+             baa.canceled_by_id=request.user.id
              baa.cancelation_time=nowdt
              baa.cancellation_reason = cancellation_reason
              baa.save()
@@ -5021,7 +5020,7 @@ def get_annual_admission_letter(request, *args, **kwargs):
         return HttpResponse('Annual Admission Booking unavailable', status=403)
 
     # check permissions
-    if not ((request.user == booking.customer) or is_officer(request.user)):
+    if not ((request.user.id == booking.customer_id) or is_officer(request.user)):
         return HttpResponse('Permission Denied', status=403)
 
     response = HttpResponse(content_type='application/pdf')
@@ -5142,8 +5141,8 @@ def get_annual_admission_booking(request):
             mg.append(m.id)
 
        status = 'success'
-       booking_period = request.GET.get('booking_period','')
-       booking_status = request.GET.get('booking_status','')
+       booking_period = request.GET.get('booking_period','ALL')
+       booking_status = request.GET.get('booking_status','ALL')
        keyword = request.GET.get('keyword','')
 
        nowdt = datetime.strptime(str(datetime.utcnow().strftime('%Y-%m-%d %H:%M:%S')), '%Y-%m-%d %H:%M:%S')
@@ -5158,8 +5157,52 @@ def get_annual_admission_booking(request):
                 baainvoices_temp[b['booking_annual_admission__id']] = []
            baainvoices_temp[b['booking_annual_admission__id']].append(b['invoice_reference'])
        baa = []
-       baarows = models.BookingAnnualAdmission.objects.filter(Q(booking_type=1) | Q(booking_type=4)).values('id','customer','customer__first_name','customer__last_name','start_dt','expiry_dt','details','booking_type','annual_booking_period_group__id','annual_booking_period_group','annual_booking_period_group__name','override_price','override_reason','override_reason__text','override_reason_info','overridden_by','overridden_by__first_name','overridden_by__last_name','is_canceled','send_invoice','cancellation_reason','cancelation_time','confirmation_sent','created','created_by__first_name','created_by__last_name','canceled_by','canceled_by__first_name','canceled_by__last_name','override_lines','sticker_no','sticker_no_history','booking_type','sticker_no','override_lines','annual_booking_period_group__mooring_group','cost_total')
+       bookings = models.BookingAnnualAdmission.objects.filter(Q(booking_type=1) | Q(booking_type=4)).values('id','customer_id','overridden_by_id','created_by_id','canceled_by_id')
+
+       # 2. Collect all unique user IDs from the bookings.
+       user_ids = {b['customer_id'] for b in bookings if b['customer_id']}  # start with customer IDs
+
+       for b in bookings:
+            for field in ('canceled_by_id', 'overridden_by_id', 'created_by_id'):
+                uid = b.get(field)
+                if uid and uid not in user_ids:
+                    user_ids.add(uid)
+
+        # 3. Fetch all relevant user data in a single, efficient query.
+       users_data = User.objects.filter(id__in=user_ids).values('id', 'first_name', 'last_name')
+
+        # 4. Create a dictionary mapping customer IDs to their data for fast lookups.
+        # e.g., {123: {'id': 123, 'first_name': 'John', 'last_name': 'Doe'}, ...}
+       users_map = {u['id']: u for u in users_data}
        
+        # 5. Initialize the final results dictionary.
+       ba_details_obj = {}
+
+        # 6. Process each booking to build the final dictionary.
+       for booking in bookings:
+           broken_booking_id = booking['id']
+           customer_id = booking['customer_id']
+
+           # Find the corresponding customer details from the map.
+           customer_info = users_map.get(customer_id)
+
+           # Check if customer exists and has valid first/last name strings.
+           if customer_info and isinstance(customer_info.get('first_name'), str) and isinstance(customer_info.get('last_name'), str):
+               # If valid, store the UTF-8 encoded names.
+               ba_details_obj[booking['id']] = {
+                   'first': customer_info['first_name'].encode('utf-8'),
+                   'last': customer_info['last_name'].encode('utf-8')
+               }
+           else:
+               # Handle cases where customer is not found or name is not a string.
+               logger.warning(f"Not a Str or customer not found: {booking['id']}")
+               ba_details_obj[booking['id']] = {
+                   'first': b'Not a String or customer not found(' + str(booking['id']).encode('utf-8') + b')',
+                   'last': b'Not a String or customer not found(' + str(booking['id']).encode('utf-8') + b')'
+               }
+       
+
+       baarows = models.BookingAnnualAdmission.objects.filter(Q(booking_type=1) | Q(booking_type=4)).values('id','customer_id','start_dt','expiry_dt','details','booking_type','annual_booking_period_group__id','annual_booking_period_group','annual_booking_period_group__name','override_price','override_reason','override_reason__text','override_reason_info','overridden_by_id','is_canceled','send_invoice','cancellation_reason','cancelation_time','confirmation_sent','created','created_by_id','canceled_by_id','override_lines','sticker_no','sticker_no_history','booking_type','sticker_no','override_lines','annual_booking_period_group__mooring_group','cost_total')
        for c in baarows:
            appendrow = False
            start_dt = datetime.strptime(str(c['start_dt'].strftime('%Y-%m-%d %H:%M:%S')), '%Y-%m-%d %H:%M:%S')
@@ -5167,10 +5210,10 @@ def get_annual_admission_booking(request):
 
            row = {}
            row['id'] = c['id']
-           row['customer_name'] = c['customer__first_name']+' '+c['customer__last_name']
+           row['customer_name'] = ba_details_obj[c['id']]['first'].decode('utf-8') + ' ' + ba_details_obj[c['id']]['last'].decode('utf-8')
            row['customer'] = {}
-           if c['customer']:
-              row['customer'] = {"fullname": c['customer__first_name']+' '+c['customer__last_name'], 'first_name' : c['customer__first_name'], 'last_name' : c['customer__last_name']}
+           if c['customer_id']:
+              row['customer'] = {"fullname": ba_details_obj[c['id']]['first'].decode('utf-8') +' '+ ba_details_obj[c['id']]['last'].decode('utf-8'), 'first_name' : ba_details_obj[c['id']]['first'].decode('utf-8'), 'last_name' : ba_details_obj[c['id']]['last'].decode('utf-8')}
            row['start_dt'] = c['start_dt'].strftime('%d/%m/%Y %H:%M %p')
            row['expiry_dt'] = c['expiry_dt'].strftime('%d/%m/%Y %H:%M %p')
            row['details'] = c['details']
@@ -5192,8 +5235,8 @@ def get_annual_admission_booking(request):
            if c['override_reason_info'] is not None:
                row['override_reason_info'] = c['override_reason_info']
            row['overridden_by'] = {"fullname":'', 'first_name' : '', 'last_name' : ''}
-           if c['overridden_by']:
-               row['overridden_by'] = {"fullname": c['overridden_by__first_name']+' '+c['overridden_by__last_name'], 'first_name' : c['overridden_by__first_name'], 'last_name' : c['overridden_by__last_name']}
+           if c['overridden_by_id']:
+               row['overridden_by'] = {"fullname": users_map[c['overridden_by_id']]['first_name'] +' '+users_map[c['overridden_by_id']]['last_name'], 'first_name' : users_map[c['overridden_by_id']]['first_name'], 'last_name' : users_map[c['overridden_by_id']]['last_name']}
            row['is_canceled'] = c['is_canceled']
            row['send_invoice'] = c['send_invoice']
            row['cancellation_reason'] =  ''
@@ -5206,10 +5249,10 @@ def get_annual_admission_booking(request):
            row['confirmation_sent'] = c['confirmation_sent']
            created= c['created']+timedelta(hours=8)
            row['created'] = created.strftime('%d/%m/%Y %H:%M %p')
-           row['created_by'] = {"fullname": c['created_by__first_name']+' '+c['created_by__last_name'], 'first_name' : c['created_by__first_name'], 'last_name' : c['created_by__last_name']} 
+           row['created_by'] = {"fullname": users_map[c['created_by_id']]['first_name'] +' '+users_map[c['created_by_id']]['last_name'], 'first_name' : users_map[c['created_by_id']]['first_name'], 'last_name' : users_map[c['created_by_id']]['last_name']}
            row['canceled_by'] = {"fullname":'', 'first_name' : '', 'last_name' : ''}
-           if c['canceled_by']:
-               row['canceled_by'] = {"fullname": c['canceled_by__first_name']+' '+c['canceled_by__last_name'], 'first_name' : c['canceled_by__first_name'], 'last_name' : c['canceled_by__last_name']}
+           if c['canceled_by_id']:
+               row['canceled_by'] = {"fullname": users_map[c['canceled_by_id']]['first_name'] +' '+users_map[c['canceled_by_id']]['last_name'], 'first_name' : users_map[c['canceled_by_id']]['first_name'], 'last_name' : users_map[c['canceled_by_id']]['last_name']}
            row['override_lines'] = c['override_lines']
            row['sticker_no'] = c['sticker_no']
            row['sticker_no_history'] = []
@@ -5496,8 +5539,8 @@ class AnnualAdmissionRefundOracleView(views.APIView):
                         info = {'amount': Decimal('{:.2f}'.format(float(bp_txn['line-amount']))), 'details' : 'Refund via system'}
                         if info['amount'] > 0:
                              lines.append({'ledger_description':str("Temp fund transfer "+bp_txn['txn_number']),"quantity":1,"price_incl_tax":Decimal('{:.2f}'.format(float(bp_txn['line-amount']))),"oracle_code":str(settings.UNALLOCATED_ORACLE_CODE), 'line_status': 1})
-
-                    order = utils.allocate_refund_to_invoice(request, booking, lines, invoice_text=None, internal=False, order_total='0.00',user=booking.customer)
+                    booking_customer = User.objects.get(id=booking.customer_id)
+                    order = utils.allocate_refund_to_invoice(request, booking, lines, invoice_text=None, internal=False, order_total='0.00',user=booking_customer)
                     new_invoice = Invoice.objects.get(order_number=order.number)
                     update_payments(new_invoice.reference)
                     #order = utils.allocate_refund_to_invoice(request, booking, lines, invoice_text=None, internal=False, order_total='0.00',user=booking.customer)
