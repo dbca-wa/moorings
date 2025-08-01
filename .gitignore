@@ -96,10 +96,6 @@ importo.py
 uwsgi*.ini
 *.djcache
 
-# wildlifecompliance build static files
-wildlifecompliance/static/wildlifecompliance_vue/static/*
-
-
 # npm locks
 *-lock.json
 
