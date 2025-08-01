@@ -99,11 +99,12 @@ uwsgi*.ini
 # npm locks
 *-lock.json
 
-
 # npm build files
 mooring/static/moorings_vue/*
 mooring/static/moorings_vue.back/*
 mooring/static/admissions/*
+mooring/static/availability2/*
+mooring/static/exploreparks/*
 
 # Temp back folders
 mooring/frontend/*.back/*
