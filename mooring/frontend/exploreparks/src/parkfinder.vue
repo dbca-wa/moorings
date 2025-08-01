@@ -305,68 +305,71 @@
                 </div>
             </div>
         </div>
-        <!-- <template v-if="extentFeatures.length > 0"> -->
-        <template v-if="filteredItems.length > 0">
-            <!-- <paginate name="filterResults" class="resultList" :list="extentFeatures" :per="9"> -->
-                <div class="row">
-                    <!-- <div class="small-12 medium-4 large-4 columns" v-for="f in paginated('filterResults')" v-if="f.vessel_size_limit >= vesselSize && f.vessel_draft_limit >= vesselDraft && weightBeam(f) == true"> -->
-                     <div class="small-12 medium-4 large-4 columns" v-for="f in paginatedItems" :key="f.id">
-                        <div class="row">
-                            <div class="small-12 columns">
-                                <span class="searchTitle">{{ f.name }}</span>
-                            </div>
-                            <div class="small-12 medium-12 large-12 columns" >
-                                <img v-if="f.images[0]" class="thumbnail" v-bind:src="f.images[0].image" style='width: 230px; height: 230px;' />
-                                <img v-else class="thumbnail" src="/static/exploreparks/mooring_photo_scaled.png" style='width: 230px; height: 230px;'/>
-                            </div>
-                            <div class="small-12 medium-9 large-9 columns">
-                                <div v-html="f.description"/>
-                                <p v-if="f.price_hint && Number(f.price_hint)"><i><small>From ${{ f.price_hint }} per night</small></i></p>
-                                <!-- <p style='display:none'><i><small>Vessel Size Limit: {{ f.vessel_size_limit }} </small></i></p>
-                                <p ><i><small>Max Stay Period: {{ f.max_advance_booking }} day/s </small></i></p> -->
-                                <p>Mooring Limits</p>
-                                <div class="row">
-                                    <div class="col-md-6"  style='display:none'>
-                                        <small>Max Stay: {{ f.max_advance_booking }} day/s</small>
-                                    </div>
-                                    <div class="col-md-6">
-                                        <small>Max Size: {{ f.vessel_size_limit }}</small>
-                                    </div>
-                                </div>
-                                <div class="row">
-                                    <div class="col-md-6">
-                                        <small>Max Draft: {{ f.vessel_draft_limit }}</small>
-                                    </div>
-                                    <div class="col-md-6">
-                                        <small v-if="f.mooring_physical_type == 0"> Max Weight: {{ f.vessel_weight_limit }}</small>
-                                        <small v-else> Max Beam: {{ f.vessel_beam_limit }}</small>
-                                    </div>
-                                </div>
 
-                                <a class="button" v-bind:href="f.info_url" target="_blank">More info</a>
-                                 
-                                <a v-if="f.mooring_type == 0 && vesselSize > 0 && vesselDraft > 0 && vesselWeight > 0 && vesselRego != '' && vesselRego !== ' '" class="button" v-bind:href="parkstayUrl+'/availability2/?site_id='+f.id+'&'+bookingParam">Book now</a>
-                                <a v-else-if="f.mooring_type == 1 && vesselSize > 0 && vesselDraft > 0 && vesselBeam > 0 && vesselRego != '' && vesselRego !== ' '" class="button" v-bind:href="parkstayUrl+'/availability2/?site_id='+f.id+'&'+bookingParam">Book now</a>
-                                <a v-else-if="f.mooring_type == 2 && vesselSize > 0 && vesselDraft > 0 && vesselBeam > 0 && vesselRego != '' && vesselRego !== ' '" class="button" v-bind:href="parkstayUrl+'/availability2/?site_id='+f.id+'&'+bookingParam">Book now</a>
-                                <a v-else-if="f.mooring_type == 0" class="button" v-on:click="BookNow('mooring')">Book now</a>
-                                <a v-else-if="f.mooring_type == 1 || f.mooring_type == 2 " class="button" v-on:click="BookNow('jettybeach')">Book now</a>
-                                <a v-else /> 
+        <template v-if="filteredItems.length > 0">
+            <div class="row">
+                <!-- <div class="small-12 medium-4 large-4 columns" v-for="f in paginated('filterResults')" v-if="f.vessel_size_limit >= vesselSize && f.vessel_draft_limit >= vesselDraft && weightBeam(f) == true"> -->
+                    <div class="small-12 medium-4 large-4 columns" v-for="f in paginatedItems" :key="f.id">
+                    <div class="row">
+                        <div class="small-12 columns">
+                            <span class="searchTitle">{{ f.name }}</span>
+                        </div>
+                        <div class="small-12 medium-12 large-12 columns" >
+                            <img v-if="f.images[0]" class="thumbnail" v-bind:src="f.images[0].image" style='width: 230px; height: 230px;' />
+                            <img v-else class="thumbnail" src="/static/exploreparks/mooring_photo_scaled.png" style='width: 230px; height: 230px;'/>
+                        </div>
+                        <div class="small-12 medium-9 large-9 columns">
+                            <div v-html="f.description"/>
+                            <p v-if="f.price_hint && Number(f.price_hint)"><i><small>From ${{ f.price_hint }} per night</small></i></p>
+                            <!-- <p style='display:none'><i><small>Vessel Size Limit: {{ f.vessel_size_limit }} </small></i></p>
+                            <p ><i><small>Max Stay Period: {{ f.max_advance_booking }} day/s </small></i></p> -->
+                            <p>Mooring Limits</p>
+                            <div class="row">
+                                <div class="col-md-6"  style='display:none'>
+                                    <small>Max Stay: {{ f.max_advance_booking }} day/s</small>
+                                </div>
+                                <div class="col-md-6">
+                                    <small>Max Size: {{ f.vessel_size_limit }}</small>
+                                </div>
                             </div>
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <small>Max Draft: {{ f.vessel_draft_limit }}</small>
+                                </div>
+                                <div class="col-md-6">
+                                    <small v-if="f.mooring_physical_type == 0"> Max Weight: {{ f.vessel_weight_limit }}</small>
+                                    <small v-else> Max Beam: {{ f.vessel_beam_limit }}</small>
+                                </div>
+                            </div>
+
+                            <a class="button" v-bind:href="f.info_url" target="_blank">More info</a>
+                                
+                            <a v-if="f.mooring_type == 0 && vesselSize > 0 && vesselDraft > 0 && vesselWeight > 0 && vesselRego != '' && vesselRego !== ' '" class="button" v-bind:href="parkstayUrl+'/availability2/?site_id='+f.id+'&'+bookingParam">Book now</a>
+                            <a v-else-if="f.mooring_type == 1 && vesselSize > 0 && vesselDraft > 0 && vesselBeam > 0 && vesselRego != '' && vesselRego !== ' '" class="button" v-bind:href="parkstayUrl+'/availability2/?site_id='+f.id+'&'+bookingParam">Book now</a>
+                            <a v-else-if="f.mooring_type == 2 && vesselSize > 0 && vesselDraft > 0 && vesselBeam > 0 && vesselRego != '' && vesselRego !== ' '" class="button" v-bind:href="parkstayUrl+'/availability2/?site_id='+f.id+'&'+bookingParam">Book now</a>
+                            <a v-else-if="f.mooring_type == 0" class="button" v-on:click="BookNow('mooring')">Book now</a>
+                            <a v-else-if="f.mooring_type == 1 || f.mooring_type == 2 " class="button" v-on:click="BookNow('jettybeach')">Book now</a>
+                            <a v-else /> 
                         </div>
                     </div>
                 </div>
-            <!-- </paginate> -->
-            <!-- <div class="row">
-                <paginate-links for="filterResults" :classes="{
-                    'ul': 'pagination'
-                }"></paginate-links>
-            </div> -->
-            <div class="pagination-controls" v-if="totalPages > 1">
-                <button @click="prevPage" :disabled="currentPage === 1"> « Previous </button>
-                <span> Page {{ currentPage }} / {{ totalPages }} </span>
-                <button @click="nextPage" :disabled="currentPage === totalPages"> Next » </button>
+            </div>
+
+            <div class="row text-center">
+                <div class="button-group">
+                    <button class="button" @click="prevPage" :disabled="currentPage === 1">
+                    « Prev
+                    </button>
+                    <span class="button secondary disabled">
+                    Page {{ currentPage }} / {{ totalPages }}
+                    </span>
+                    <button class="button" @click="nextPage" :disabled="currentPage === totalPages">
+                    Next »
+                    </button>
+                </div>
             </div>
         </template>
+
         <template v-else>
             <div class="row align-center">
                 <div class="small-12 medium-12 large-12 columns">
@@ -1009,11 +1012,9 @@ export default {
             // this.reload();
         },
         reload: debounce(function () {
-              this.groundsSource.loadSource();
-              // this.removePinAnchors();
-              this.anchorPinLevelChange = true;
-              this.buildmarkers();
-         //   this.refreshPopup();
+            this.groundsSource.loadSource();
+            this.anchorPinLevelChange = true;
+            this.buildmarkers();
         }, 250),
         removePinGroups: function() {
             // this.pinsCache = {};
@@ -1819,11 +1820,9 @@ export default {
                 }
             });
 
-
-            this.groundsSource = new ol.source.Vector({
+            this.groundsSource = new VectorSource({
                 features: vm.groundsFilter
             });
-
 
             // Marker Popup Code
             $('#mapPopupClose').on('click', function(ev) {
@@ -1928,161 +1927,158 @@ export default {
     },
     mounted: function() {
         this.$nextTick(() => {
-        var vm = this;
+            var vm = this;
 
-        // $(document).foundation();
-        console.log('Loading map...');
-        var template_group = $('#template_group').val();
-        if (template_group == 'rottnest') { 
-            vm.admissions_key = 'ria';
-        }
-        var nowTemp = new Date();
-        var now = moment.utc({year: nowTemp.getFullYear(), month: nowTemp.getMonth(), day: nowTemp.getDate(), hour: 0, minute: 0, second: 0}).toDate();
+            // $(document).foundation();
+            console.log('Loading map...');
+            var template_group = $('#template_group').val();
+            if (template_group == 'rottnest') { 
+                vm.admissions_key = 'ria';
+            }
 
-        this.arrivalEl = $('#dateArrival');
-        this.departureEl = $('#dateDeparture');
+            this.arrivalEl = $('#dateArrival');
+            this.departureEl = $('#dateDeparture');
 
-        // load autosuggest choices
-        var search = document.getElementById('searchInput');
-        var autocomplete = new Awesomplete(search);
-        autocomplete.autoFirst = true;
+            // load autosuggest choices
+            var search = document.getElementById('searchInput');
+            var autocomplete = new Awesomplete(search);
+            autocomplete.autoFirst = true;
 
-        $.ajax({
-            url: vm.parkstayUrl+'/api/search_suggest',
-            dataType: 'json',
-            success: function (response, stat, xhr) {
-                vm.suggestions = response;
-                $(search).on('awesomplete-selectcomplete', function(ev) {
+            $.ajax({
+                url: vm.parkstayUrl+'/api/search_suggest',
+                dataType: 'json',
+                success: function (response, stat, xhr) {
+                    vm.suggestions = response;
+                    $(search).on('awesomplete-selectcomplete', function(ev) {
+                        this.blur();
+                    });
+
+                    autocomplete.list = response['features'].map(function (el) {
+                        return el['properties']['name'];
+                    });
+                }
+            });
+
+            // wire up search box
+            $(search).on('blur', function(ev) {
+                vm.search(ev.target.value);
+            }).on('keypress', function(ev) {
+                if (!ev) {
+                    ev = window.event;
+                }
+                // intercept enter keys 
+                var keyCode = ev.keyCode || ev.which;
+                if (keyCode == '13') {
                     this.blur();
-                });
+                    return false;
+                }
+            });
 
-                autocomplete.list = response['features'].map(function (el) {
-                    return el['properties']['name'];
-                });
+            // generate WMTS tile grid
+            // this.projection = ol.proj.get('EPSG:3857');
+            this.projection = getProjection('EPSG:3857');
+            this.projectionExtent = this.projection.getExtent();
+            // var size = ol.extent.getWidth(this.projectionExtent) / 256;
+            var size = getWidth(this.projectionExtent) / 256;
+            this.matrixSet = 'mercator';
+            this.resolutions = new Array(21);
+            this.matrixIds = new Array(21);
+            for (var z = 0; z < 21; ++z) {
+                // generate resolutions and matrixIds arrays for this WMTS
+                this.resolutions[z] = size / Math.pow(2, z);
+                this.matrixIds[z] = this.matrixSet + ':' + z;
             }
-        });
 
-        // wire up search box
-        $(search).on('blur', function(ev) {
-            vm.search(ev.target.value);
-        }).on('keypress', function(ev) {
-            if (!ev) {
-                ev = window.event;
-            }
-            // intercept enter keys 
-            var keyCode = ev.keyCode || ev.which;
-            if (keyCode == '13') {
-                this.blur();
-                return false;
-            }
-        });
+            // var tileGrid = new ol.tilegrid.WMTS({
+            //     origin: ol.extent.getTopLeft(this.projectionExtent),
+            //     resolutions: this.resolutions,
+            //     matrixIds: this.matrixIds
+            // });
+            const tileGrid = new WMTSTileGrid({
+                origin: getTopLeft(this.projectionExtent),
+                resolutions: this.resolutions,
+                matrixIds: this.matrixIds
+            });
 
-        // generate WMTS tile grid
-        // this.projection = ol.proj.get('EPSG:3857');
-        this.projection = getProjection('EPSG:3857');
-        this.projectionExtent = this.projection.getExtent();
-        // var size = ol.extent.getWidth(this.projectionExtent) / 256;
-        var size = getWidth(this.projectionExtent) / 256;
-        this.matrixSet = 'mercator';
-        this.resolutions = new Array(21);
-        this.matrixIds = new Array(21);
-        for (var z = 0; z < 21; ++z) {
-            // generate resolutions and matrixIds arrays for this WMTS
-            this.resolutions[z] = size / Math.pow(2, z);
-            this.matrixIds[z] = this.matrixSet + ':' + z;
-        }
+            this.streets = new TileLayer({
+                name: 'street',
+                canDelete: "no",
+                visible: true,
+                source: new WMTS({
+                    url: 'https://kmi.dpaw.wa.gov.au/geoserver/gwc/service/wmts',
+                    format: 'image/png',
+                    layer: 'public:mapbox-streets',
+                    matrixSet: this.matrixSet,
+                    projection: this.projection,
+                    tileGrid: tileGrid
+                })
+            });
 
-        // var tileGrid = new ol.tilegrid.WMTS({
-        //     origin: ol.extent.getTopLeft(this.projectionExtent),
-        //     resolutions: this.resolutions,
-        //     matrixIds: this.matrixIds
-        // });
-        const tileGrid = new WMTSTileGrid({
-            origin: getTopLeft(this.projectionExtent),
-            resolutions: this.resolutions,
-            matrixIds: this.matrixIds
-        });
+            this.satellite = new TileLayer({
+                name: 'satellite',
+                canDelete: "no",
+                visible: false,
+                source: new WMTS({
+                    url: 'https://kmi.dpaw.wa.gov.au/geoserver/gwc/service/wmts',
+                    format: 'image/png',
+                    layer: 'public:mapbox-satellite',
+                    matrixSet: this.matrixSet,
+                    projection: this.projection,
+                    tileGrid: tileGrid
+                })
+            });
 
-        this.streets = new TileLayer({
-            name: 'street',
-            canDelete: "no",
-            visible: true,
-            source: new WMTS({
-                url: 'https://kmi.dpaw.wa.gov.au/geoserver/gwc/service/wmts',
-                format: 'image/png',
-                layer: 'public:mapbox-streets',
-                matrixSet: this.matrixSet,
-                projection: this.projection,
-                tileGrid: tileGrid
-            })
-        });
+            this.tenure = new TileLayer({
+                name: 'tenure',
+                canDelete: "no",
+                opacity: 0.6,
+                source: new WMTS({
+                    url: 'https://kmi.dpaw.wa.gov.au/geoserver/gwc/service/wmts',
+                    format: 'image/png',
+                    layer: 'public:dpaw_lands_and_waters',
+                    matrixSet: this.matrixSet,
+                    projection: this.projection,
+                    tileGrid: tileGrid
+                })
+            });
 
-        this.satellite = new TileLayer({
-            name: 'satellite',
-            canDelete: "no",
-            visible: false,
-            source: new WMTS({
-                url: 'https://kmi.dpaw.wa.gov.au/geoserver/gwc/service/wmts',
-                format: 'image/png',
-                layer: 'public:mapbox-satellite',
-                matrixSet: this.matrixSet,
-                projection: this.projection,
-                tileGrid: tileGrid
-            })
-        });
+            // this.geojson = new ol.format.GeoJSON({
+            //     featureProjection: 'EPSG:3857'   
+            // });
 
-        this.tenure = new TileLayer({
-            name: 'tenure',
-            canDelete: "no",
-            opacity: 0.6,
-            source: new WMTS({
-                url: 'https://kmi.dpaw.wa.gov.au/geoserver/gwc/service/wmts',
-                format: 'image/png',
-                layer: 'public:dpaw_lands_and_waters',
-                matrixSet: this.matrixSet,
-                projection: this.projection,
-                tileGrid: tileGrid
-            })
-        });
+            // this.groundsData = new ol.Collection();
+            // this.groundsIds = new Set();
+            // this.groundsFilter = new ol.Collection();
+            this.geojson = new GeoJSON({
+                featureProjection: 'EPSG:3857'
+            });
+            this.groundsData = new Collection();
+            this.groundsIds = new Set();
+            this.groundsFilter = new Collection();
 
-        // this.geojson = new ol.format.GeoJSON({
-        //     featureProjection: 'EPSG:3857'   
-        // });
+            $.ajax({
+                url: vm.parkstayUrl+'/api/mooring_map/?format=json',
+                dataType: 'json',
+                success: function (response, stat, xhr) {
+                    vm.mooring_map_data = response;
+                    var features = vm.geojson.readFeatures(response);
+                    vm.groundsData.clear();
+                    vm.groundsData.extend(features);
+                    // vm.groundsSource.loadSource();
+                    vm.buildmarkers();
+                }
+            });
 
-        // this.groundsData = new ol.Collection();
-        // this.groundsIds = new Set();
-        // this.groundsFilter = new ol.Collection();
-        this.geojson = new GeoJSON({
-            featureProjection: 'EPSG:3857'
-        });
-        this.groundsData = new Collection();
-        this.groundsIds = new Set();
-        this.groundsFilter = new Collection();
-
-        $.ajax({
-            url: vm.parkstayUrl+'/api/mooring_map/?format=json',
-            dataType: 'json',
-            success: function (response, stat, xhr) {
-               vm.mooring_map_data = response;
-               var features = vm.geojson.readFeatures(response);
-               vm.groundsData.clear();
-               vm.groundsData.extend(features);
-               // vm.groundsSource.loadSource();
-               vm.buildmarkers();
- 
-            }
-        });
-
-        vm.updateBooking();
-        // this.groundsSource = new ol.source.Vector({
-        //     features: vm.groundsFilter   
-        // });
-        this.groundsSource = new VectorSource({
-            features: this.groundsFilter
-        });
-        this.groundsSource.loadSource = function (onSuccess) {
-            
-            if (vm.dateCache != vm.arrivalDateString+vm.departureDateString+vm.gearType+vm.penType) {
+            vm.updateBooking();
+            // this.groundsSource = new ol.source.Vector({
+            //     features: vm.groundsFilter   
+            // });
+            this.groundsSource = new VectorSource({
+                features: this.groundsFilter
+            });
+            // Defines the custom function to fetch and load filtered mooring data from the API into the map's vector source.
+            this.groundsSource.loadSource = function (onSuccess) {
+                if (vm.dateCache != vm.arrivalDateString+vm.departureDateString+vm.gearType+vm.penType) {
                     vm.mapLoading = true;
                     vm.loadingID = vm.loadingID + 1;
                     vm.removePinAnchors();
@@ -2117,339 +2113,308 @@ export default {
                         success: function (response, stat, xhr) {
                             vm.groundsIds.clear();
                             response.forEach(function(el) {
-                               vm.groundsIds.add(el.id);
+                                vm.groundsIds.add(el.id);
 
-                               vm.dateCache = vm.arrivalDateString+vm.departureDateString+vm.gearType+vm.penType;
-                               vm.markerAvail[el.id] = el.avail;
+                                vm.dateCache = vm.arrivalDateString+vm.departureDateString+vm.gearType+vm.penType;
+                                vm.markerAvail[el.id] = el.avail;
                             });
 
                             vm.updateFilter();
-                       //     vm.removePinAnchors();
-                       //     vm.anchorPinLevelChange = true;
                             vm.buildmarkers();
                             if (vm.loadingID == this.loadID) {
-                               vm.mapLoading = false;
+                                vm.mapLoading = false;
                             }
-
                         },
                         error: function(xhr, stat, err) {
                             if (vm.loadingID == this.loadID) {
-	                            vm.mapLoading = false;
+                                vm.mapLoading = false;
                             }
                             if (err) {
-                            swal({
-                              title: 'Error',
-                              text: "There was and error loading map data please try again.",
-                              type: 'error',
-                              showCancelButton: false,
-                              confirmButtonText: 'Close',
-                              showLoaderOnConfirm: true,
-                              allowOutsideClick: false
-                            });
+                                swal({
+                                    title: 'Error',
+                                    text: "There was and error loading map data please try again.",
+                                    type: 'error',
+                                    showCancelButton: false,
+                                    confirmButtonText: 'Close',
+                                    showLoaderOnConfirm: true,
+                                    allowOutsideClick: false
+                                });
                             }
-			},
+                        },
                         dataType: 'json'
                     });
-          }
-       };
-       this.grounds = new VectorLayer({
-           source: this.groundsSource,
-            style: function (feature) {
-                var style = feature.get('style');
-                return style;
-            }
-        });
-	    // Marker Popup Code
-        $('#mapPopupClose').on('click', function(ev) {
-            $('#mapPopup').hide();
-            vm.popup.setPosition(undefined);
-            vm.selectedFeature = null;
-            return false;
-        });
-        this.popupContent = document.getElementById('mapPopupContent');
-        this.popup = new Overlay({
-            element: document.getElementById('mapPopup'),
-            autoPan: true,
-            autoPanAnimation: {
-                duration: 250
-            }
-        });
-
-        this.posFeature = new Feature();
-        this.posFeature.setStyle(new Style({
-            image: new Icon({
-                src: vm.locationIcon,
-                snapToPixel: true,
-                anchor: [0.5, 0.5],
-                anchorXUnits: 'fraction',
-                anchorYUnits: 'fraction',
-                imgSize: [32, 32] // JM
-            })
-        }));
-
-        this.posLayer = new VectorLayer({
-            source: new VectorSource({
-                features: [this.posFeature]
-            })
-        });
-	    // End of Marker Popup Code
-
-
-        // create OpenLayers map object, prefill with all the stuff we made
-        this.olmap = new Map({
-            logo: false,
-            renderer: 'canvas',
-            target: 'map',
-            view: new View({
-                projection: 'EPSG:3857',
-                center: vm.defaultCenter,
-                zoom: 5,
-                maxZoom: 21,
-                minZoom: 5
-            }),
-            controls: [
-                new Zoom(),
-                new ScaleLine()
-            ],
-            // interactions: ol.interaction.defaults({
-            //     altShiftDragRotate: false,
-            //     pinchRotate: false,
-            // }),
-            // interactions: ol.interaction.defaults({}).extend([
-            //       new ol.interaction.PinchZoom({
-            //           constrainResolution: true
-            //        })
-            // ]),
-            interactions: defaultInteractions({
-                // This correctly disables rotation interactions.
-                altShiftDragRotate: false,
-                pinchRotate: false
-            }).extend([
-                // The original code tried to add a custom PinchZoom.
-                // Note: The default set already includes PinchZoom. `extend` adds another one.
-                // If the goal is to *replace* it, a more advanced pattern is needed.
-                // This corrected code assumes the primary goal was to disable rotation
-                // while keeping other defaults.
-            ]),
-            layers: [
-                this.streets,
-                this.satellite,
-                this.tenure,
-                this.grounds,
-                this.posLayer
-            ],
-            overlays: [this.popup]
-        });
-
-        $('#map-toggle').hide();
-        // spawn geolocation tracker
-        this.geolocation = new Geolocation({
-            tracking: true,
-            projection: this.olmap.getView().getProjection()
-        });
-        this.geolocation.on('change:position', function() {
-            var coords = vm.geolocation.getPosition();
-            vm.posFeature.setGeometry(coords ? new Point(coords) : null);
-        });
-
-        // JASON ADDED
-        var map = this.olmap;
-
-        this.olmap.getView().on('change:resolution', function(evt) {
-            var resolution = evt.target.get('resolution');
-            var units = map.getView().getProjection().getUnits();
-            var dpi = 25.4 / 0.28;
-            var mpu = METERS_PER_UNIT[units];
-
-            var scale_res = resolution * mpu * 39.37 * dpi;
-            vm.current_map_scale = scale_res;
-            setTimeout(function() { if (scale_res == vm.current_map_scale) { vm.buildmarkers(); vm.updateViewport(); }}, 400);
-        });
-
-        $('#vesselRego').blur(function() {
-            vm.searchRego();
-        });
-        $('#vesselSize').blur(function() { 
-            vm.vesselSize = this.value;
-            vm.removePinAnchors();
-            vm.removePinGroups();
-            vm.buildmarkers();
-        });
-        $('#vesselDraft').blur(function() { 
-            vm.vesselDraft = this.value;
-            vm.removePinAnchors();
-            vm.removePinGroups();
-            vm.buildmarkers();
-        });
-        $('#vesselBeam').blur(function() { 
-            vm.vesselBeam = this.value;
-            vm.removePinAnchors();
-            vm.removePinGroups();
-            vm.buildmarkers();
-        });
-        $('#vesselWeight').blur(function() { 
-            vm.vesselWeight = this.value;
-            vm.removePinAnchors();
-            vm.removePinGroups();
-            vm.buildmarkers();
-        });
-        $('#vesselDraft').blur(function() {
-               vm.vesselDraft = this.value;
-               vm.removePinAnchors();
-               vm.removePinGroups();
-               vm.buildmarkers();
-        });
-        $('#dateArrival').change(function() {
-               // vm.groundsSource.loadSource();
-               vm.reload();
-        });
-        $('#dateDeparture').change(function() {
-                vm.reload();
-               // vm.groundsSource.loadSource();
-        });
-        $('#vesselSize').val('0');
-        $('#vesselDraft').val('0');
- 
-        // loop to change the pointer when mousing over a vector layer
-        this.olmap.on('pointermove', function(ev) {
-            if (ev.dragging) {
-                return;
-            }
-            var result = map.forEachFeatureAtPixel(ev.pixel, function(feature, layer) {
-               $('#map').attr('title', feature.get('name'));
-               return feature;
+                }
+            };
+            this.grounds = new VectorLayer({
+                source: this.groundsSource,
+                style: function (feature) {
+                    var style = feature.get('style');
+                    return style;
+                }
             });
-            if (result) {
+            // Marker Popup Code
+            $('#mapPopupClose').on('click', function(ev) {
+                $('#mapPopup').hide();
+                vm.popup.setPosition(undefined);
+                vm.selectedFeature = null;
+                return false;
+            });
+            this.popupContent = document.getElementById('mapPopupContent');
+            this.popup = new Overlay({
+                element: document.getElementById('mapPopup'),
+                autoPan: true,
+                autoPanAnimation: {
+                    duration: 250
+                }
+            });
+
+            this.posFeature = new Feature();
+            this.posFeature.setStyle(new Style({
+                image: new Icon({
+                    src: vm.locationIcon,
+                    snapToPixel: true,
+                    anchor: [0.5, 0.5],
+                    anchorXUnits: 'fraction',
+                    anchorYUnits: 'fraction',
+                    imgSize: [32, 32] // JM
+                })
+            }));
+
+            this.posLayer = new VectorLayer({
+                source: new VectorSource({
+                    features: [this.posFeature]
+                })
+            });
+            // End of Marker Popup Code
+
+            // create OpenLayers map object, prefill with all the stuff we made
+            this.olmap = new Map({
+                logo: false,
+                renderer: 'canvas',
+                target: 'map',
+                view: new View({
+                    projection: 'EPSG:3857',
+                    center: vm.defaultCenter,
+                    zoom: 5,
+                    maxZoom: 21,
+                    minZoom: 5
+                }),
+                controls: [
+                    new Zoom(),
+                    new ScaleLine()
+                ],
+                // interactions: ol.interaction.defaults({
+                //     altShiftDragRotate: false,
+                //     pinchRotate: false,
+                // }),
+                // interactions: ol.interaction.defaults({}).extend([
+                //       new ol.interaction.PinchZoom({
+                //           constrainResolution: true
+                //        })
+                // ]),
+                interactions: defaultInteractions({
+                    // This correctly disables rotation interactions.
+                    altShiftDragRotate: false,
+                    pinchRotate: false
+                }).extend([
+                    // The original code tried to add a custom PinchZoom.
+                    // Note: The default set already includes PinchZoom. `extend` adds another one.
+                    // If the goal is to *replace* it, a more advanced pattern is needed.
+                    // This corrected code assumes the primary goal was to disable rotation
+                    // while keeping other defaults.
+                ]),
+                layers: [
+                    this.streets,
+                    this.satellite,
+                    this.tenure,
+                    this.grounds,
+                    this.posLayer
+                ],
+                overlays: [this.popup]
+            });
+
+            $('#map-toggle').hide();
+            // spawn geolocation tracker
+            this.geolocation = new Geolocation({
+                tracking: true,
+                projection: this.olmap.getView().getProjection()
+            });
+            this.geolocation.on('change:position', function() {
+                var coords = vm.geolocation.getPosition();
+                vm.posFeature.setGeometry(coords ? new Point(coords) : null);
+            });
+
+            // JASON ADDED
+            var map = this.olmap;
+
+            this.olmap.getView().on('change:resolution', function(evt) {
+                var resolution = evt.target.get('resolution');
+                var units = map.getView().getProjection().getUnits();
+                var dpi = 25.4 / 0.28;
+                var mpu = METERS_PER_UNIT[units];
+
+                var scale_res = resolution * mpu * 39.37 * dpi;
+                vm.current_map_scale = scale_res;
+                setTimeout(function() { if (scale_res == vm.current_map_scale) { vm.buildmarkers(); vm.updateViewport(); }}, 400);
+            });
+
+            $('#vesselRego').on('blur', function() {
+                vm.searchRego();
+            });
+            $('#vesselSize').on('blur', function() { 
+                vm.vesselSize = this.value;
+                vm.removePinAnchors();
+                vm.removePinGroups();
+                vm.buildmarkers();
+            });
+            $('#vesselDraft').on('blur', function() { 
+                vm.vesselDraft = this.value;
+                vm.removePinAnchors();
+                vm.removePinGroups();
+                vm.buildmarkers();
+            });
+            $('#vesselBeam').on('blur', function() { 
+                vm.vesselBeam = this.value;
+                vm.removePinAnchors();
+                vm.removePinGroups();
+                vm.buildmarkers();
+            });
+            $('#vesselWeight').on('blur', function() { 
+                vm.vesselWeight = this.value;
+                vm.removePinAnchors();
+                vm.removePinGroups();
+                vm.buildmarkers();
+            });
+            $('#vesselDraft').on('blur', function() {
+                vm.vesselDraft = this.value;
+                vm.removePinAnchors();
+                vm.removePinGroups();
+                vm.buildmarkers();
+            });
+            $('#dateArrival').on('change', function() {
+                vm.reload();
+            });
+            $('#dateDeparture').on('change', function() {
+                vm.reload();
+            });
+            $('#vesselSize').val('0');
+            $('#vesselDraft').val('0');
+    
+            // loop to change the pointer when mousing over a vector layer
+            this.olmap.on('pointermove', function(ev) {
+                if (ev.dragging) {
+                    return;
+                }
+                var result = map.forEachFeatureAtPixel(ev.pixel, function(feature, layer) {
+                $('#map').attr('title', feature.get('name'));
+                return feature;
+                });
+                if (result) {
                     // console.log($('#map').hasClass('click'));
                     if ($('#map').hasClass('click')) { 
                     } else {
-			$('#map').addClass('click', result);
-		    }
-	    } else {
-                   $('#map').removeClass('click', result);
-            }
-            if (!result) {
-                $('#map').removeAttr('title');
-            }
-         
- 
-        });
-
-
-       var element = document.getElementById('mapPopup');
-
-       var popup = new Overlay({
-          element: element,
-          positioning: 'bottom-center',
-          stopEvent: false
-       });
-
-       map.addOverlay(popup);
-       // another loop to spawn the popup on click
-       this.olmap.on('singleclick', function(ev) {
-          var feature = ev.map.forEachFeatureAtPixel(ev.pixel, 
-             function(feature, layer) {
-                return feature;
-             });
-
-          if (feature) {
-            var geometry = feature.getGeometry();
-            var coord = geometry.getCoordinates();
-            var properties = feature.getProperties();
-            if (properties.marker_group == 'mooring_marker') {
-
-                $('#mapPopupName').html(properties.props.name);
-                $('#mapPopupInfo').attr('href', properties.props.info_url);
-                if (properties.props.mooring_type == 0 || properties.props.mooring_type == 1 || properties.props.mooring_type == 2) {
-                    $('#mapPopupMooringType').val(properties.props.mooring_physical_type);
-                    if (properties.bookable == true) { 
-                        $('#mapPopupBook').show();
-                    } else {
-                        $('#mapPopupBook').hide();
-		            }
-                    $("#mapPopupImage").show();
-                    if (properties.props.images.length > 0) { 
-			            $("#mapPopupImage").attr('src',  properties.props.images[0].image);
-		            } else {
-	                    $("#mapPopupImage").attr('src',  '/static/exploreparks/mooring_photo_scaled.png');
-		            }
-		            $("#max_stay_period").html(properties.props.max_advance_booking);
-                    $("#vessel_size_popup").html(properties.props.vessel_size_limit);
-                    $("#vessel_draft_popup").html(properties.props.vessel_draft_limit);
-                    if(properties.props.mooring_physical_type == 0){
-                        $("#vessel_beam_weight_popup").html("Max Weight: " + properties.props.vessel_weight_limit);
+                        $('#map').addClass('click', result);
                     }
-                    else {
-                        $("#vessel_beam_weight_popup").html("Max Beam: " + properties.props.vessel_beam_limit);
-                    }
-                    var vessel_size = $('#vesselSize').val();
-                    var vessel_draft = $('#vesselDraft').val();
-                    var vessel_rego = $('#vesselRego').val();
-                    var vessel_beam = $('#vesselBeam').val();
-                    var vessel_weight = $('#vesselWeight').val();
-
-                    if (properties.props.mooring_physical_type == 0 && vessel_size > 0 && vessel_draft > 0 && vessel_weight > 0 &&vessel_rego.length > 1) {
-                        var distance_radius = properties.props.park.distance_radius;
-                        $("#mapPopupBook").attr('href', vm.parkstayUrl+'/availability2/?site_id='+properties.marker_id+'&distance_radius='+distance_radius+'&'+vm.bookingParam);
-                        // $("#mapPopupBook").attr('target','_blank');
-
-                    } else if ((properties.props.mooring_physical_type == 1 || properties.props.mooring_physical_type == 2 ) && ( vessel_size > 0 && vessel_draft > 0 && vessel_beam > 0 && vessel_rego.length > 1)) { 
-			var distance_radius = properties.props.park.distance_radius;
-		        $("#mapPopupBook").attr('href', vm.parkstayUrl+'/availability2/?site_id='+properties.marker_id+'&distance_radius='+distance_radius+'&'+vm.bookingParam);
-                    } else {
-	                      $("#mapPopupBook").attr('href','javascript:void(0);');
-                              $("#mapPopupBook").attr('target','');
-                   }
                 } else {
-                    $("#max_stay_period").html(properties.props.max_advance_booking);
-                    $("#vessel_size_popup").html(properties.props.vessel_size_limit);
-                    $("#vessel_draft_popup").html(properties.props.vessel_draft_limit);
-                    if(properties.props.mooring_physical_type == 0){
-                        $("#vessel_beam_weight_popup").html("Vessel Weight: " + properties.props.vessel_weight_limit);
-                    }
-                    else {
-                        $("#vessel_beam_weight_popup").html("Vessel Beam: " + properties.props.vessel_beam_limit);
-                    }   
-                    $('#mapPopupBook').hide();
+                    $('#map').removeClass('click', result);
                 }
+                if (!result) {
+                    $('#map').removeAttr('title');
+                }
+            });
 
-                popup.setPosition(coord);
+            var element = document.getElementById('mapPopup');
 
-                $(element).show();
+            var popup = new Overlay({
+                element: element,
+                positioning: 'bottom-center',
+                stopEvent: false
+            });
 
-                } else if (properties.marker_group == 'group_marker') {
-                    var view = vm.olmap.getView();
-                    var resolution = vm.resolutions[properties.zoom_level];
-                    view.animate({
-                          center: coord,
-                          resolution: resolution,
-                          duration: 1000
-                    }); 
-                    //if (properties.props) { 
-                    //if (properties.props.mooring_type == 0) {
-                    //    $('#mapPopupBook').show();
-                    //    $("#mapPopupImage").hide();
-                    //    var vessel_size = $('#vesselSize').val();
-                    //    var vessel_rego = $('#vesselRego').val();
-                    //    var vessel_draft = $('#vesselDraft').val();
-                    //    if (vessel_size > 0 && vessel_draft > 0 && vessel_rego.length > 1) { 
-                    //           var distance_radius = properties.props.park.distance_radius;
-                    //           $("#mapPopupBook").attr('href', vm.parkstayUrl+'/availability2/?site_id='+properties.marker_id+'&distance_radius='+distance_radius+'&'+vm.bookingParam);
-                    //    } else {
-		    //    	 $("#mapPopupBook").attr('href','javascript:void;');
-		    //    }
-                    //} else {
-                    //    $('#mapPopupBook').hide();
-                    //}
-		    //} else {
-		    //    $('#mapPopupBook').hide();
-		    //}
-	        } 
+            map.addOverlay(popup);
+            // another loop to spawn the popup on click
+            this.olmap.on('singleclick', function(ev) {
+                var feature = ev.map.forEachFeatureAtPixel(ev.pixel, 
+                    function(feature, layer) {
+                        return feature;
+                    }
+                );
 
-          } else {
-             $(element).hide();
-          }
-        });
+                if (feature) {
+                    var geometry = feature.getGeometry();
+                    var coord = geometry.getCoordinates();
+                    var properties = feature.getProperties();
+                    if (properties.marker_group == 'mooring_marker') {
+                        $('#mapPopupName').html(properties.props.name);
+                        $('#mapPopupInfo').attr('href', properties.props.info_url);
+                        if (properties.props.mooring_type == 0 || properties.props.mooring_type == 1 || properties.props.mooring_type == 2) {
+                            $('#mapPopupMooringType').val(properties.props.mooring_physical_type);
+                            if (properties.bookable == true) { 
+                                $('#mapPopupBook').show();
+                            } else {
+                                $('#mapPopupBook').hide();
+                            }
+                            $("#mapPopupImage").show();
+                            if (properties.props.images.length > 0) { 
+                                $("#mapPopupImage").attr('src',  properties.props.images[0].image);
+                            } else {
+                                $("#mapPopupImage").attr('src',  '/static/exploreparks/mooring_photo_scaled.png');
+                            }
+                            $("#max_stay_period").html(properties.props.max_advance_booking);
+                            $("#vessel_size_popup").html(properties.props.vessel_size_limit);
+                            $("#vessel_draft_popup").html(properties.props.vessel_draft_limit);
+                            if(properties.props.mooring_physical_type == 0){
+                                $("#vessel_beam_weight_popup").html("Max Weight: " + properties.props.vessel_weight_limit);
+                            }
+                            else {
+                                $("#vessel_beam_weight_popup").html("Max Beam: " + properties.props.vessel_beam_limit);
+                            }
+                            var vessel_size = $('#vesselSize').val();
+                            var vessel_draft = $('#vesselDraft').val();
+                            var vessel_rego = $('#vesselRego').val();
+                            var vessel_beam = $('#vesselBeam').val();
+                            var vessel_weight = $('#vesselWeight').val();
+
+                            if (properties.props.mooring_physical_type == 0 && vessel_size > 0 && vessel_draft > 0 && vessel_weight > 0 &&vessel_rego.length > 1) {
+                                var distance_radius = properties.props.park.distance_radius;
+                                $("#mapPopupBook").attr('href', vm.parkstayUrl+'/availability2/?site_id='+properties.marker_id+'&distance_radius='+distance_radius+'&'+vm.bookingParam);
+                            } else if ((properties.props.mooring_physical_type == 1 || properties.props.mooring_physical_type == 2 ) && ( vessel_size > 0 && vessel_draft > 0 && vessel_beam > 0 && vessel_rego.length > 1)) { 
+                                var distance_radius = properties.props.park.distance_radius;
+                                $("#mapPopupBook").attr('href', vm.parkstayUrl+'/availability2/?site_id='+properties.marker_id+'&distance_radius='+distance_radius+'&'+vm.bookingParam);
+                            } else {
+                                $("#mapPopupBook").attr('href','javascript:void(0);');
+                                $("#mapPopupBook").attr('target','');
+                            }
+                        } else {
+                            $("#max_stay_period").html(properties.props.max_advance_booking);
+                            $("#vessel_size_popup").html(properties.props.vessel_size_limit);
+                            $("#vessel_draft_popup").html(properties.props.vessel_draft_limit);
+                            if(properties.props.mooring_physical_type == 0){
+                                $("#vessel_beam_weight_popup").html("Vessel Weight: " + properties.props.vessel_weight_limit);
+                            }
+                            else {
+                                $("#vessel_beam_weight_popup").html("Vessel Beam: " + properties.props.vessel_beam_limit);
+                            }   
+                            $('#mapPopupBook').hide();
+                        }
+
+                        popup.setPosition(coord);
+
+                        $(element).show();
+
+                    } else if (properties.marker_group == 'group_marker') {
+                        var view = vm.olmap.getView();
+                        var resolution = vm.resolutions[properties.zoom_level];
+                        view.animate({
+                            center: coord,
+                            resolution: resolution,
+                            duration: 1000
+                        }); 
+                    } 
+                } else {
+                    $(element).hide();
+                }
+            });
 
             var x = document.cookie.split('vessel_rego=');
             if(x.length == 2){
@@ -2475,7 +2440,7 @@ export default {
                     // clearInterval(timer);
                     // var loc = window.location;
                     // window.location = loc.protocol + '//' + loc.host + loc.pathname;
-               }
+                }
             }, 1000);
 
             // hook to update the visible feature list on viewport change
@@ -2483,11 +2448,8 @@ export default {
                 vm.updateViewport();
                 vm.buildmarkers();
             });
-        this.reload();
-    
-    
-        })
-
+            this.reload();
+        }) // End $nextTick
     }
 };
 </script>
