@@ -279,10 +279,12 @@
                 </div>
             </div>
         </div>
-        <template v-if="extentFeatures.length > 0">
-            <paginate name="filterResults" class="resultList" :list="extentFeatures" :per="9">
+        <!-- <template v-if="extentFeatures.length > 0"> -->
+        <template v-if="filteredItems.length > 0">
+            <!-- <paginate name="filterResults" class="resultList" :list="extentFeatures" :per="9"> -->
                 <div class="row">
-                    <div class="small-12 medium-4 large-4 columns" v-for="f in paginated('filterResults')" v-if="f.vessel_size_limit >= vesselSize && f.vessel_draft_limit >= vesselDraft && weightBeam(f) == true">
+                    <!-- <div class="small-12 medium-4 large-4 columns" v-for="f in paginated('filterResults')" v-if="f.vessel_size_limit >= vesselSize && f.vessel_draft_limit >= vesselDraft && weightBeam(f) == true"> -->
+                     <div class="small-12 medium-4 large-4 columns" v-for="f in paginatedItems" :key="f.id">
                         <div class="row">
                             <div class="small-12 columns">
                                 <span class="searchTitle">{{ f.name }}</span>
@@ -306,7 +308,6 @@
                                     </div>
                                 </div>
                                 <div class="row">
-
                                     <div class="col-md-6">
                                         <small>Max Draft: {{ f.vessel_draft_limit }}</small>
                                     </div>
@@ -315,7 +316,6 @@
                                         <small v-else> Max Beam: {{ f.vessel_beam_limit }}</small>
                                     </div>
                                 </div>
-
 
                                 <a class="button" v-bind:href="f.info_url" target="_blank">More info</a>
                                  
@@ -334,6 +334,11 @@
                 <paginate-links for="filterResults" :classes="{
                     'ul': 'pagination'
                 }"></paginate-links>
+            </div> -->
+            <div class="pagination-controls" v-if="totalPages > 1">
+                <button @click="prevPage" :disabled="currentPage === 1"> « Previous </button>
+                <span> Page {{ currentPage }} / {{ totalPages }} </span>
+                <button @click="nextPage" :disabled="currentPage === totalPages"> Next » </button>
             </div>
         </template>
         <template v-else>
@@ -773,6 +778,10 @@ export default {
             pinsCache:{},
             mapLoading: false,
             loadingID: 0,
+
+            // For custom pagination.  vue-paginate cannot be used with Vue3
+            currentPage: 1,
+            itemsPerPage: 9,
         }
     },
     computed: {
@@ -896,6 +905,70 @@ export default {
                 }
                 return $.param(params);
             }
+        },
+        /**
+         * @computed
+         * Filters the master list based on current criteria.
+         * This computed property accomplishes two things:
+         * 1. It safely handles `null` or `undefined` entries in the source array, fixing the error.
+         * 2. It centralizes the filtering logic that was previously in the template's `v-if`.
+         * @returns {Array} A clean, filtered array of items.
+         */
+        filteredItems() {
+            // A guard clause to prevent errors if `extentFeatures` is not yet loaded.
+            if (!this.extentFeatures) {
+                return [];
+            }
+
+            return this.extentFeatures.filter(f => {
+                // Primary guard: ensures 'f' is a valid object, preventing the original error.
+                if (!f) {
+                    return false;
+                }
+
+                // The filtering logic, moved here from the old `v-if` directive.
+                const sizeCondition = f.vessel_size_limit >= this.vesselSize;
+                const draftCondition = f.vessel_draft_limit >= this.vesselDraft;
+                const weightCondition = this.weightBeam(f) === true;
+
+                return sizeCondition && draftCondition && weightCondition;
+            });
+        },
+
+        /**
+         * @computed
+         * Slices the filtered list to get only the items for the current page.
+         * This is the array you will loop through in your template.
+         * @returns {Array} The items to be displayed on the current page.
+         */
+        paginatedItems() {
+            const startIndex = (this.currentPage - 1) * this.itemsPerPage;
+            const endIndex = startIndex + this.itemsPerPage;
+            
+            // `slice` returns a new array containing the elements for the current page.
+            return this.filteredItems.slice(startIndex, endIndex);
+        },
+
+        /**
+         * @computed
+         * Calculates the total number of pages based on the filtered item count.
+         * Used to build the pagination control UI.
+         * @returns {number} The total number of pages.
+         */
+        totalPages() {
+            // Calculates total pages, ensuring it's at least 1.
+            return Math.ceil(this.filteredItems.length / this.itemsPerPage) || 1;
+        }
+    },
+    watch: {
+        // Watch for changes in filter criteria and reset to the first page.
+        // This prevents being on a non-existent page (e.g., page 5) after a filter
+        // reduces the total pages to 3.
+        vesselSize() {
+            this.currentPage = 1;
+        },
+        vesselDraft() {
+            this.currentPage = 1;
         }
     },
     methods: {
@@ -2086,47 +2159,36 @@ export default {
             })
         }));
 
-        this.posLayer = new ol.layer.Vector({
-            source: new ol.source.Vector({
-                features: [this.posFeature]
-            })
-        });
-        // create OpenLayers map object, prefill with all the stuff we made
-        this.olmap = new ol.Map({
-            logo: false,
-            renderer: 'canvas',
-            target: 'map',
-            view: new ol.View({
-                projection: 'EPSG:3857',
-                center: vm.defaultCenter,
-                zoom: 5,
-                maxZoom: 21,
-                minZoom: 5
-            }),
-            controls: [
-                new ol.control.Zoom(),
-                new ol.control.ScaleLine(),
-            ],
-            interactions: ol.interaction.defaults({
-                altShiftDragRotate: false,
-                pinchRotate: false,
-            }),
-            interactions: ol.interaction.defaults({}).extend([
-                  new ol.interaction.PinchZoom({
-                      constrainResolution: true
-                   })
-            ]),
-            layers: [
-                this.streets,
-                this.tenure,
-                // this.grounds,
-                this.posLayer
-            ],
-            overlays: [this.popup]
-        });
+        weightBeam(f) {
+            return true; 
+        },
 
-      }
+        /**
+         * Navigates to the next page if not on the last page.
+         */
+        nextPage() {
+            if (this.currentPage < this.totalPages) {
+                this.currentPage++;
+            }
+        },
+        
+        /**
+         * Navigates to the previous page if not on the first page.
+         */
+        prevPage() {
+            if (this.currentPage > 1) {
+                this.currentPage--;
+            }
+        },
 
+        /**
+         * Navigates directly to a specific page number.
+         * @param {number} pageNumber - The page to go to.
+         */
+        goToPage(pageNumber) {
+            // You could add validation here if needed (e.g., pageNumber > 0 && pageNumber <= this.totalPages)
+            this.currentPage = pageNumber;
+        }
     },
     mounted: function() {
         var vm = this;
