@@ -1,30 +1,29 @@
-<!DOCTYPE html>
 <template>
     <div v-cloak class="f6inject">
        <div class="row">
         <div class="small-12 medium-3 large-6 columns search-params">
-        <div class="columns small-12 medium-12 large-12" v-show="current_booking.length > 0">
-             
-        <div class="row">
-                <div class="columns small-12 medium-12 large-12" >
-                      <button  title="Please add items into your trolley." v-show="ongoing_booking" style="color: #FFFFFF; background-color: rgb(255, 0, 0);" class="button small-12 medium-12 large-12" >Time Left {{ timeleft }}</button>  <a  v-show="current_booking.length > 0" class="button small-12 medium-12 large-12" :href="parkstayUrl+'/booking'" style="border-radius: 4px; border: 1px solid #2e6da4">Proceed to Check Out</a> <a type="button" :href="parkstayUrl+'/booking/abort'" class="button float-right warning continueBooking" style="color: #fff; background-color: #f0ad4e;  border-color: #eea236; border-radius: 4px;">
+            <div class="columns small-12 medium-12 large-12" v-show="current_booking.length > 0">
+                <div class="row">
+                    <div class="columns small-12 medium-12 large-12" >
+                        <button  title="Please add items into your trolley." v-show="ongoing_booking" style="color: #FFFFFF; background-color: rgb(255, 0, 0);" class="button small-12 medium-12 large-12" >Time Left {{ timeleft }}</button>
+                        <a v-show="current_booking.length > 0" class="button small-12 medium-12 large-12" :href="parkstayUrl+'/booking'" style="border-radius: 4px; border: 1px solid #2e6da4">Proceed to Check Out</a> <a type="button" :href="parkstayUrl+'/booking/abort'" class="button float-right warning continueBooking" style="color: #fff; background-color: #f0ad4e;  border-color: #eea236; border-radius: 4px;">
                             Cancel in-progress booking
                         </a>
-		</div>
-                <div class="small-12 medium-12 large-12">
+                    </div>
+                    <div class="small-12 medium-12 large-12">
                         <div class="panel panel-default">
-                             <div class="panel-heading"><h3 class="panel-title">Trolley: <span id='total_trolley'>${{ total_booking }}</span></h3></div>
-                              <div class='columns small-12 medium-12 large-12'>
-                                 <div v-for="item in current_booking" class="row small-12 medium-12 large-12">
-                                         <div class="columns small-12 medium-9 large-9">{{ item.item }}</div>
-                                         <div class="columns small-12 medium-2 large-2">${{ item.amount }}</div>
-                                         <div class="columns small-12 medium-1 large-1"><a v-show="item.past_booking == false" style='color: red; opacity: 1;' type="button" class="close" @click="deleteBooking(item.id)">x</a></div>
-                                 </div>
-                              </div>
+                            <div class="panel-heading"><h3 class="panel-title">Trolley: <span id='total_trolley'>${{ total_booking }}</span></h3></div>
+                            <div class='columns small-12 medium-12 large-12'>
+                                <div v-for="item in current_booking" class="row small-12 medium-12 large-12">
+                                        <div class="columns small-12 medium-9 large-9">{{ item.item }}</div>
+                                        <div class="columns small-12 medium-2 large-2">${{ item.amount }}</div>
+                                        <div class="columns small-12 medium-1 large-1"><a v-show="item.past_booking == false" style='color: red; opacity: 1;' type="button" class="close" @click="deleteBooking(item.id)">x</a></div>
+                                </div>
+                            </div>
                         </div>
+                    </div>
                 </div>
-        </div>
-        </div>
+            </div>
 
                 <div class="row">
                     <div class="small-12 columns">
@@ -33,10 +32,23 @@
                 </div>
                 <div class="row">
                     <div class="small-12 medium-12 large-6 columns">
-                        <label>Arrival <input id="dateArrival" autocomplete="off" name="arrival" type="text" placeholder="dd/mm/yyyy" v-on:change="updateDates"/></label>
+                        <label for="dateArrival">Arrival</label>
+                        <input
+                            type="date"
+                            id="dateArrival"
+                            v-model="arrivalDate"
+                            :min="minArrivalDate"
+                            @change="handleArrivalDateChange"
+                        >
                     </div>
                     <div class="small-12 medium-12 large-6 columns">
-                        <label>Departure <input id="dateDeparture" autocomplete="off" name="departure" type="text" placeholder="dd/mm/yyyy" v-on:change="updateDates"/></label>
+                        <label for="dateDeparture">Departure</label>
+                        <input
+                            type="date"
+                            id="dateDeparture"
+                            v-model="departureDate"
+                            :min="minDepartureDate"
+                        >
                     </div>
                     
                     <div class="small-12 medium-12 large-12 columns" style="display:none;">
@@ -70,10 +82,10 @@
                         <div class="dropdown-pane" id="guests-dropdown" data-dropdown data-auto-focus="true">
                             <div class="row">
                                 <div class="small-6 columns">
-                                    <label for="num_adults" class="text-right">Adults<label>
+                                    <label for="num_adults" class="text-right">Adults</label>
                                 </div>
                                 <div class="small-6 columns">
-                                    <input type="number" id="numAdults" name="num_adults" v-model="numAdults" min="0" max="16"/></label>
+                                    <input type="number" id="numAdults" name="num_adults" v-model="numAdults" min="0" max="16"/>
                                 </div>
                             </div>
                             <div class="row" style="display:none;">
@@ -88,34 +100,33 @@
                                         - Department of Veterans' Affairs">Concessions</span>
                                     </label>
                                 </div><div class="small-6 columns">
-                                    <input type="number" id="numConcessions" name="num_concessions" v-model="numConcessions" min="0" max="16"/></label>
+                                    <input type="number" id="numConcessions" name="num_concessions" v-model="numConcessions" min="0" max="16"/>
                                 </div>
                             </div>
                             <div class="row">
                                 <div class="small-6 columns">
-                                    <label for="num_children" class="text-right">Children (4-16)<label>
+                                    <label for="num_children" class="text-right">Children (4-16)</label>
                                 </div>
                                 <div class="small-6 columns">
-                                    <input type="number" id="numChildren" name="num_children" v-model="numChildren" min="0" max="16"/></label>
+                                    <input type="number" id="numChildren" name="num_children" v-model="numChildren" min="0" max="16"/>
                                 </div>
                             </div>
                             <div class="row">
                                 <div class="small-6 columns">
-                                    <label for="num_children" class="text-right">Infants (under 4)<label>
+                                    <label for="num_children" class="text-right">Infants (under 4)</label>
                                 </div>
                                 <div class="small-6 columns">
-                                    <input type="number" id="numInfants" name="num_infants" v-model="numInfants" min="0" max="16"/></label>
+                                    <input type="number" id="numInfants" name="num_infants" v-model="numInfants" min="0" max="16"/>
                                 </div>
                             </div>
                             <div class="row" style="display:none;">
                                 <div class="small-6 columns">
-                                    <label for="num_children" class="text-right">Moorings<label>
+                                    <label for="num_children" class="text-right">Moorings</label>
                                 </div>
                                 <div class="small-6 columns">
-                                    <input type="number" id="numMooring" name="num_mooring" v-model="numMooring" min="0" max="16"/></label>
+                                    <input type="number" id="numMooring" name="num_mooring" v-model="numMooring" min="0" max="16"/>
                                 </div>
                             </div>
-
                        </div>
                     </div>
                 </div>
@@ -195,7 +206,6 @@
                     </div>
                 </div>
 
-
                 <div class="row"><div class="small-12 columns">
                     <hr class="search"/>
                 </div>
@@ -236,18 +246,34 @@
             </div>
 <!-- here -->
             <div class="small-12 medium-9 large-6 columns">
-		<div class="alert alert-warning" style='text-align: center' role="alert" v-if="admissions_key" id="admissions_link"> <strong style='font-size: 16px;' ></span><a :href='"/annual-admissions/" + admissions_key + "/"'>Click here for paying annual admission fees only</a></strong><br></div>   
-                <div class="alert alert-warning" style='text-align: center' role="alert" v-if="admissions_key" id="admissions_link"> <strong style='font-size: 16px;' ></span><a :href='"/admissions/" + admissions_key + "/"'>Click here for paying individual admission fees for a single visit</a></strong><br></div>
-		<div class="alert alert-info" style='text-align: center' role="alert" v-if="admissions_key" id="admissions_link"> <strong style='font-size: 16px;' ></span><a href='https://rottnestisland.com/boating/Fees'>Click here for more information on admission fees</a></strong><br></div>
+		        <div class="alert alert-warning" style='text-align: center' role="alert" v-if="admissions_key" id="admissions_link">
+                    <strong style='font-size: 16px;'>
+                        <a :href='"/annual-admissions/" + admissions_key + "/"'>Click here for paying annual admission fees only</a>
+                    </strong><br>
+                </div>   
+                <div class="alert alert-warning" style='text-align: center' role="alert" v-if="admissions_key" id="admissions_link">
+                    <strong style='font-size: 16px;'>
+                        <a :href='"/admissions/" + admissions_key + "/"'>Click here for paying individual admission fees for a single visit</a>
+                    </strong><br>
+                </div>
+                <div class="alert alert-info" style='text-align: center' role="alert" v-if="admissions_key" id="admissions_link">
+                    <strong style='font-size: 16px;'>
+                        <a href='https://rottnestisland.com/boating/Fees'>Click here for more information on admission fees</a>
+                    </strong><br>
+                </div>
 
                 <div style='width: 100%; height: 1px;' align='right'>
-                       <div v-show='mapLoading == true' class='map-loading' style='border: 1px solid #00000' ><img style='width:20px; height: 20px;' src='/static/common/img/ajax-loader-spinner.gif'>&nbsp;&nbsp;Please Wait</div>
+                    <div v-show='mapLoading == true' class='map-loading' style='border: 1px solid #00000'>
+                        <img style='width:20px; height: 20px;' src='/static/common/img/ajax-loader-spinner.gif'>&nbsp;&nbsp;Please Wait
+                    </div>
                 </div>
+
                 <div id="map"></div>
+
                 <div style='width: 100%' align='right'>
-	                <img id='satellite-toggle' class='map-toggle-white'  type='button'  @click="toggleMap('satellite');" src='./assets/img/satellite_icon.png'  >
-                        <img id='map-toggle' class='map-toggle-black'  type='button'  @click="toggleMap('map');" src='./assets/img/map_icon.png'  >
-		</div>
+	                <img id='satellite-toggle' class='map-toggle-white'  type='button'  @click="toggleMap('satellite');" src='./assets/img/satellite_icon.png' />
+                    <img id='map-toggle' class='map-toggle-black'  type='button'  @click="toggleMap('map');" src='./assets/img/map_icon.png' />
+                </div>
                 <div id="mapPopup" class="mapPopup" v-cloak>
                     <a href="#" id="mapPopupClose" class="mapPopupClose"></a>
                     <div id="mapPopupContent">
@@ -279,10 +305,12 @@
                 </div>
             </div>
         </div>
-        <template v-if="extentFeatures.length > 0">
-            <paginate name="filterResults" class="resultList" :list="extentFeatures" :per="9">
+        <!-- <template v-if="extentFeatures.length > 0"> -->
+        <template v-if="filteredItems.length > 0">
+            <!-- <paginate name="filterResults" class="resultList" :list="extentFeatures" :per="9"> -->
                 <div class="row">
-                    <div class="small-12 medium-4 large-4 columns" v-for="f in paginated('filterResults')" v-if="f.vessel_size_limit >= vesselSize && f.vessel_draft_limit >= vesselDraft && weightBeam(f) == true">
+                    <!-- <div class="small-12 medium-4 large-4 columns" v-for="f in paginated('filterResults')" v-if="f.vessel_size_limit >= vesselSize && f.vessel_draft_limit >= vesselDraft && weightBeam(f) == true"> -->
+                     <div class="small-12 medium-4 large-4 columns" v-for="f in paginatedItems" :key="f.id">
                         <div class="row">
                             <div class="small-12 columns">
                                 <span class="searchTitle">{{ f.name }}</span>
@@ -306,7 +334,6 @@
                                     </div>
                                 </div>
                                 <div class="row">
-
                                     <div class="col-md-6">
                                         <small>Max Draft: {{ f.vessel_draft_limit }}</small>
                                     </div>
@@ -316,12 +343,11 @@
                                     </div>
                                 </div>
 
-
                                 <a class="button" v-bind:href="f.info_url" target="_blank">More info</a>
                                  
                                 <a v-if="f.mooring_type == 0 && vesselSize > 0 && vesselDraft > 0 && vesselWeight > 0 && vesselRego != '' && vesselRego !== ' '" class="button" v-bind:href="parkstayUrl+'/availability2/?site_id='+f.id+'&'+bookingParam">Book now</a>
                                 <a v-else-if="f.mooring_type == 1 && vesselSize > 0 && vesselDraft > 0 && vesselBeam > 0 && vesselRego != '' && vesselRego !== ' '" class="button" v-bind:href="parkstayUrl+'/availability2/?site_id='+f.id+'&'+bookingParam">Book now</a>
-				<a v-else-if="f.mooring_type == 2 && vesselSize > 0 && vesselDraft > 0 && vesselBeam > 0 && vesselRego != '' && vesselRego !== ' '" class="button" v-bind:href="parkstayUrl+'/availability2/?site_id='+f.id+'&'+bookingParam">Book now</a>
+                                <a v-else-if="f.mooring_type == 2 && vesselSize > 0 && vesselDraft > 0 && vesselBeam > 0 && vesselRego != '' && vesselRego !== ' '" class="button" v-bind:href="parkstayUrl+'/availability2/?site_id='+f.id+'&'+bookingParam">Book now</a>
                                 <a v-else-if="f.mooring_type == 0" class="button" v-on:click="BookNow('mooring')">Book now</a>
                                 <a v-else-if="f.mooring_type == 1 || f.mooring_type == 2 " class="button" v-on:click="BookNow('jettybeach')">Book now</a>
                                 <a v-else /> 
@@ -329,11 +355,16 @@
                         </div>
                     </div>
                 </div>
-            </paginate>
-            <div class="row">
+            <!-- </paginate> -->
+            <!-- <div class="row">
                 <paginate-links for="filterResults" :classes="{
                     'ul': 'pagination'
                 }"></paginate-links>
+            </div> -->
+            <div class="pagination-controls" v-if="totalPages > 1">
+                <button @click="prevPage" :disabled="currentPage === 1"> « Previous </button>
+                <span> Page {{ currentPage }} / {{ totalPages }} </span>
+                <button @click="nextPage" :disabled="currentPage === totalPages"> Next » </button>
             </div>
         </template>
         <template v-else>
@@ -346,342 +377,41 @@
     </div>
 </template>
 
-<style lang="scss">
-
-[v-cloak] {
-    display: none;
-}
-@font-face {
-    font-family: "DPaWSymbols";
-    src: url('/static/exploreparks/fonts/boating.woff') format("woff"); 
-}
-
-.symb {
-    font-family: "DPaWSymbols";
-    font-style: normal;
-    font-size: 1.5rem;
-}
-
-.symb.RC2:before {
-    content: "a";
-}
-
-.symb.RC4:before {
-    content: "b";
-}
-
-.symb.RV10:before {
-    content: "c";
-}
-
-.symb.RG2:before {
-    content: "d";
-}
-
-.symb.RG15:before {
-    content: "e";
-}
-
-.symb.RV2:before {
-    content: "f";
-}
-
-.symb.RF10:before {
-    content: "g";
-}
-
-.symb.RF13:before {
-    content: "h";
-}
-
-.symb.RF15:before {
-    content: "i";
-}
-
-.symb.RF17:before {
-    content: "j";
-}
-
-.symb.RF1:before {
-    content: "k";
-}
-
-.symb.RF6:before {
-    content: "l";
-}
-
-.symb.RF7:before {
-    content: "m";
-}
-
-.symb.RF19:before {
-    content: "n";
-}
-
-.symb.RF8G:before {
-    content: "o";
-}
-
-.symb.RC1:before {
-    content: "p";
-}
-
-.symb.RC3:before {
-    content: "q";
-}
-
-.symb.LOC:before {
-    content: "r";
-}
-
-.symb.RW3:before {
-    content: "s";
-}
-
-.symb.MAINS:before {
-    content: "t";
-}
-
-.symb.RC20:before {
-    content: "v";
-}
-
-.f6inject {
-
-    .search-params hr {
-        margin: 0;
-    }
-
-    .search-params label {
-        cursor: pointer;
-        font-size: 0.8em;
-    }
-
-    /* filter hiding on small screens */
-    @media print, screen and (max-width: 63.9375em) {
-        .filter-hide {
-            display: none;
-        }
-    }
-
-    @media print, screen and (min-width: 64em) {
-        .filter-button {
-            display: none; 
-        }
-    }
-
-    #map {
-        height: 75vh;
-    }
-
-    /* set on the #map element when mousing over a feature */
-    .click {
-        cursor: pointer;
-    }
-
-    input + .symb {
-        color: #000000;
-        transition: color 0.25s ease-out;
-    }
-
-    input:checked + .symb {
-        color: #2199e8;
-    }
-
-    .button.formButton {
-        display: block;
-        width: 100%;
-    }
-
-    .button.selector {
-        background-color: #fff;
-        border: 1px solid #777;
-        border-radius: 4px;
-        color: #000;
-    }
-
-    .button.selector:hover {
-        background-color: #d6eaff;
-        border: 1px solid #729fcf;
-    }
-
-    .button.selector ~ input:checked {
-        color: #fff;
-        background-color: #0060c4;
-        border: 1px solid #00366e;
-    }
-
-    .button.selector:hover ~ input:checked {
-        color: #fff;
-        background-color: #0e83ff;
-        border: 1px solid #004d9f;
-    }
-
-    .pagination {
-        padding: 0;
-        text-align: center;
-        margin-left: auto;
-        margin-right: auto;
-        margin-bottom: 1em;
-    }
-
-    .pagination .active {
-        background: #2199e8;
-        color: #fefefe;
-        cursor: default;
-    }
-
-    .pagination li {
-        display: inline-block;
-        cursor: pointer;
-    }
-
-    .tooltip {
-        position: relative;
-        border-radius: 4px;
-        background-color: #ffcc33;
-        color: black;
-        padding: 4px 8px;
-        opacity: 0.7;
-        white-space: nowrap;
-    }
-
-    .tooltip:before {
-        border-top: 6px solid rgba(0, 0, 0, 0.5);
-        border-right: 6px solid transparent;
-        border-left: 6px solid transparent;
-        content: "";
-        position: absolute;
-        bottom: -6px;
-        margin-left: -7px;
-        left: 50%;
-    }
-
-    .mapPopup {
-        position: absolute;
-        background-color: white;
-        -webkit-filter: drop-shadow(0 1px 4px rgba(0,0,0,0.2));
-        filter: drop-shadow(0 1px 4px rgba(0,0,0,0.2));
-        padding: 15px;
-        border-radius: 10px;
-        border: 1px solid #cccccc;
-        bottom: 32px;
-        left: -140px;
-        width: 280px;
-    }
-
-    .mapPopup:after, .mapPopup:before {
-        top: 100%;
-        border: solid transparent;
-        content: " ";
-        height: 0;
-        width: 0;
-        position: absolute;
-        pointer-events: none;
-    }
-
-    .mapPopup:after {
-        border-top-color: white;
-        border-width: 10px;
-        left: 138px;
-        margin-left: -10px; 
-    }
-
-    .mapPopup:before {
-        border-top-color: #cccccc;
-        border-width: 11px;
-        left: 138px;
-        margin-left: -11px;
-    }
-
-    .mapPopupClose {
-        text-decoration: none;
-        position: absolute;
-        top: 2px;
-        right: 8px;
-    }
-
-    .mapPopupClose:after {
-        content: "✖";
-    }
-
-    .searchTitle {
-        font-size: 150%;
-        font-weight: bold;
-    }
-
-    .resultList {
-        padding: 0;
-    }
-
-    .map-toggle-black {
-       width: 80px;
-       height: 80px;
-       background-color: #FFFFFF;
-       color: black;
-       position: relative;
-       right: 10px;
-       top: -90px;
-       z-index: 300;
-       border: 2px solid #FFFFFF;
-       cursor: pointer;
-       border-radius: 2px;
-       box-shadow: 0px 1px 4px rgba(0, 0, 0, 0.3);
-    }
-    .map-toggle-white {
-       width: 80px;
-       height: 80px;
-       background-color: #FFFFFF;
-       color: black;
-       position: relative;
-       right: 10px;
-       top: -90px;
-       z-index: 300;
-       border: 2px solid #000000;
-       cursor: pointer;
-       border-radius: 2px;
-       box-shadow: 0px 1px 4px rgba(0, 0, 0, 0.3);
-    }
-    .map-loading {
-       position: relative;
-       top: 14px;
-       background-color: #FFFFFF;
-       border: 1px solid #bab9b9;
-       z-index: 5;
-       width: 110px;
-       text-align: center;
-       opacity: 0.7;
-       margin-right: 8px;
-       font-size: 12px;
-       padding: 4px;
-    }
-}
-
-/* hacks to make awesomeplete play nice with F6 */
-div.awesomplete {
-    display: block;
-}
-
-div.awesomplete > input {
-    display: table-cell;
-}
-
-/* hacks to make openlayers widgets more accessible */
-.ol-control button {
-    height: 2em;
-    width: 2em;
-}
-
-
-</style>
-
 <script>
+// CSS files for Foundation and its plugins
+// import 'foundation-sites/dist/css/foundation.min.css';
+// import 'foundation-datepicker/css/foundation-datepicker.min.css';
+
+// JS files for Foundation and its plugins
+// Thanks to ProvidePlugin, we don't need to import jQuery here.
+// import 'foundation-sites';
+// import 'foundation-datepicker/js/foundation-datepicker'; // Adjust path if needed
 
 import Awesomplete from 'awesomplete';
-import ol from 'openlayers';
+
+
+// import ol from 'openlayers';
+import Map from 'ol/Map'
+import { get as getProjection } from 'ol/proj';
+import { getWidth, getTopLeft } from 'ol/extent';
+import WMTSTileGrid from 'ol/tilegrid/WMTS';
+import TileLayer from 'ol/layer/Tile';
+import VectorLayer from 'ol/layer/Vector';
+import WMTS from 'ol/source/WMTS';
+import GeoJSON from 'ol/format/GeoJSON';
+import Collection from 'ol/Collection';
+import VectorSource from 'ol/source/Vector';
+import Overlay from 'ol/Overlay';
+import Feature from 'ol/Feature';
+import { Style, Icon, Text, Fill, Stroke } from 'ol/style';
+import View from 'ol/View';
+import { defaults as defaultControls, ScaleLine, Zoom } from 'ol/control';
+import { defaults as defaultInteractions, PinchZoom } from 'ol/interaction';
+import Geolocation from 'ol/Geolocation';
+import { transform, METERS_PER_UNIT, fromLonLat, toLonLat } from 'ol/proj';
+import Point from 'ol/geom/Point';
+
 //var ol = require('openlayers/dist/ol-debug');
-import 'foundation-sites';
-import 'foundation-datepicker/js/foundation-datepicker';
 import debounce from 'debounce';
 import moment from 'moment';
 import swal from 'sweetalert2';
@@ -705,9 +435,9 @@ export default {
                 ['cddp:dpaw_tenure', {}],
             ],
             filterList: [
-//                {name: '2WD accessible', symb: 'RV2', key: 'twowheel', 'remoteKey': ['2WD/SUV ACCESS']},
-//                {name: 'Campfires allowed', symb: 'RF10', key: 'campfire', 'remoteKey': ['FIREPIT']},
-//                {name: 'Dogs allowed', symb: 'RG2', key: 'dogs', 'remoteKey': ['DOGS']}
+                // {name: '2WD accessible', symb: 'RV2', key: 'twowheel', 'remoteKey': ['2WD/SUV ACCESS']},
+                // {name: 'Campfires allowed', symb: 'RF10', key: 'campfire', 'remoteKey': ['FIREPIT']},
+                // {name: 'Dogs allowed', symb: 'RG2', key: 'dogs', 'remoteKey': ['DOGS']}
             ],
             extraFilterList: [
                 // {name: 'BBQ', symb: 'RF8G', key: 'bbq', 'remoteKey': ['BBQ']},
@@ -773,6 +503,10 @@ export default {
             pinsCache:{},
             mapLoading: false,
             loadingID: 0,
+
+            // For custom pagination.  vue-paginate cannot be used with Vue3
+            currentPage: 1,
+            itemsPerPage: 9,
         }
     },
     computed: {
@@ -863,19 +597,15 @@ export default {
             get: function() {
                 if (this.vesselSize % 1 != 0){
                     this.vesselSize = parseFloat(this.vesselSize);
-//                    this.vesselSize = Math.ceil(this.vesselSize);
                 }
                 if (this.vesselDraft % 1 != 0){
                     this.vesselDraft = parseFloat(this.vesselDraft);
-//                    this.vesselDraft = Math.ceil(this.vesselDraft);
                 }
                 if (this.vesselBeam % 1 != 0){
                     this.vesselBeam = parseFloat(this.vesselBeam);
-//                    this.vesselBeam = Math.ceil(this.vesselBeam);
                 }
                 if (this.vesselWeight % 1 != 0){
                     this.vesselWeight = parseFloat(this.vesselWeight);
-//                    this.vesselWeight = Math.ceil(this.vesselWeight);
                 }
                 var params = {
                     'num_adult': this.numAdults,
@@ -896,6 +626,70 @@ export default {
                 }
                 return $.param(params);
             }
+        },
+        /**
+         * @computed
+         * Filters the master list based on current criteria.
+         * This computed property accomplishes two things:
+         * 1. It safely handles `null` or `undefined` entries in the source array, fixing the error.
+         * 2. It centralizes the filtering logic that was previously in the template's `v-if`.
+         * @returns {Array} A clean, filtered array of items.
+         */
+        filteredItems() {
+            // A guard clause to prevent errors if `extentFeatures` is not yet loaded.
+            if (!this.extentFeatures) {
+                return [];
+            }
+
+            return this.extentFeatures.filter(f => {
+                // Primary guard: ensures 'f' is a valid object, preventing the original error.
+                if (!f) {
+                    return false;
+                }
+
+                // The filtering logic, moved here from the old `v-if` directive.
+                const sizeCondition = f.vessel_size_limit >= this.vesselSize;
+                const draftCondition = f.vessel_draft_limit >= this.vesselDraft;
+                const weightCondition = this.weightBeam(f) === true;
+
+                return sizeCondition && draftCondition && weightCondition;
+            });
+        },
+
+        /**
+         * @computed
+         * Slices the filtered list to get only the items for the current page.
+         * This is the array you will loop through in your template.
+         * @returns {Array} The items to be displayed on the current page.
+         */
+        paginatedItems() {
+            const startIndex = (this.currentPage - 1) * this.itemsPerPage;
+            const endIndex = startIndex + this.itemsPerPage;
+            
+            // `slice` returns a new array containing the elements for the current page.
+            return this.filteredItems.slice(startIndex, endIndex);
+        },
+
+        /**
+         * @computed
+         * Calculates the total number of pages based on the filtered item count.
+         * Used to build the pagination control UI.
+         * @returns {number} The total number of pages.
+         */
+        totalPages() {
+            // Calculates total pages, ensuring it's at least 1.
+            return Math.ceil(this.filteredItems.length / this.itemsPerPage) || 1;
+        }
+    },
+    watch: {
+        // Watch for changes in filter criteria and reset to the first page.
+        // This prevents being on a non-existent page (e.g., page 5) after a filter
+        // reduces the total pages to 3.
+        vesselSize() {
+            this.currentPage = 1;
+        },
+        vesselDraft() {
+            this.currentPage = 1;
         }
     },
     methods: {
@@ -996,15 +790,15 @@ export default {
                     resolution = vm.resolutions[14];
                 }
                 if ('zoom_level' in target['properties']) {
-                        var zoom_level = target['properties']['zoom_level'];
-			if (zoom_level > 0) {
-			     resolution = vm.resolutions[target['properties']['zoom_level']];
-			}
-		}
+                    var zoom_level = target['properties']['zoom_level'];
+                    if (zoom_level > 0) {
+                        resolution = vm.resolutions[target['properties']['zoom_level']];
+                    }
+                }
 
                 // pan to the spot, zoom slightly closer in for campgrounds
                 view.animate({
-                    center: ol.proj.fromLonLat(target['coordinates']),
+                    center: fromLonLat(target['coordinates']),
                     resolution: resolution,
                     duration: 1000
                 });
@@ -1043,7 +837,7 @@ export default {
 
             console.log('Load search');
             // no match, forward on to mapbox geocode query
-            var center = ol.proj.toLonLat(vm.center);
+            var center = toLonLat(vm.center);
             $.ajax({
                 url: 'https://mapbox.dpaw.wa.gov.au/geocoding/v5/mapbox.places/'+encodeURIComponent(place)+'.json?'+ $.param({
                     country: 'au',
@@ -1056,7 +850,7 @@ export default {
                     if (data.features && data.features.length > 0) {
                         var view = vm.olmap.getView();
                         view.animate({
-                            center: ol.proj.fromLonLat(data.features[0].geometry.coordinates),
+                            center: fromLonLat(data.features[0].geometry.coordinates),
                             resolution: vm.resolutions[12],
                             duration: 1000
                         });
@@ -1158,124 +952,92 @@ export default {
          //   this.refreshPopup();
         }, 250),
         removePinGroups: function() {
-                // this.pinsCache = {};
-                var layerRemoved = false;
-                var map = this.olmap;
-                var refArray = map.getLayers().getArray().slice();
-//              refArray.forEach(function(layer2) {
-                for (var i = 0; i < refArray.length; i++) {
-                    var layer2 = refArray[i];
-                    if (layer2 != null) {
-                        var layer = layer2.I;
-                        if (layer != null) {
-                            // map.removeLayer(layer2);
-                            if (layer.hasOwnProperty("markerGroup")) {
-                                if (layer.markerGroup == 'circle') {
-                                    map.removeLayer(layer2);
-                                    layerRemoved = true;
-                                }
+            // this.pinsCache = {};
+            var layerRemoved = false;
+            var map = this.olmap;
+            var refArray = map.getLayers().getArray().slice();
+            // refArray.forEach(function(layer2) {
+            for (var i = 0; i < refArray.length; i++) {
+                var layer2 = refArray[i];
+                if (layer2 != null) {
+                    var layer = layer2.I;
+                    if (layer != null) {
+                        // map.removeLayer(layer2);
+                        if (layer.hasOwnProperty("markerGroup")) {
+                            if (layer.markerGroup == 'circle') {
+                                map.removeLayer(layer2);
+                                layerRemoved = true;
                             }
                         }
                     }
                 }
-//              });
-                if (layerRemoved == true) {
-                    // We do this because when we call map.removeLayer it causes the layer 
-                    // to go out of sync resulting in pins not being removed as foreach loop is 
-                    // changed.  This loop ensure all pins have been removed
+            }
+            if (layerRemoved == true) {
+                // We do this because when we call map.removeLayer it causes the layer 
+                // to go out of sync resulting in pins not being removed as foreach loop is 
+                // changed.  This loop ensure all pins have been removed
 
-	            this.removePinGroups();
-		}
-                return layerRemoved; 
-	},
+                this.removePinGroups();
+            }
+            return layerRemoved; 
+        },
         removePinAnchors: function() {
-                // return false;
-                // this.pinsCache = {};
-                var layerRemoved = false;
-                var map = this.olmap;
-                var refArray = map.getLayers().getArray().slice();
-                for (var i = 0; i < refArray.length; i++) {
-                        var layer2 = refArray[i];
-                    if (layer2 != null) {
-                        var layer = layer2.I;
-                        if (layer != null) {
-                            // map.removeLayer(layer2);
-                            if (layer.hasOwnProperty("markerGroup")) {
-                                if (layer.markerGroup == 'anchor') {
-                                    layer2.setVisible(false);
-                                    // map.removeLayer(layer2);
-                                    // layerRemoved = true;
-                                }
+            // return false;
+            // this.pinsCache = {};
+            var layerRemoved = false;
+            var map = this.olmap;
+            var refArray = map.getLayers().getArray().slice();
+            for (var i = 0; i < refArray.length; i++) {
+                    var layer2 = refArray[i];
+                if (layer2 != null) {
+                    var layer = layer2.I;
+                    if (layer != null) {
+                        // map.removeLayer(layer2);
+                        if (layer.hasOwnProperty("markerGroup")) {
+                            if (layer.markerGroup == 'anchor') {
+                                layer2.setVisible(false);
+                                // map.removeLayer(layer2);
+                                // layerRemoved = true;
                             }
                         }
                     }
-
                 }
 
-//                refArray.forEach(function(layer2) {
-//                    if (layer2 != null) {
-//                        var layer = layer2.I;
-//                        if (layer != null) {
-//                            // map.removeLayer(layer2);
-//                            if (layer.hasOwnProperty("markerGroup")) {
-//                                if (layer.markerGroup == 'anchor') {
-//                                    map.removeLayer(layer2);
-//                                    layerRemoved = true;
-//                                }
-//                            }
-//                        }
-//                    }
-//                });
+            }
 
-                // var layersToRemove = [];
 
-                // map.getLayers().forEach(function(layer) {
-                //     if (layer.I.hasOwnProperty("markerGroup")){
-                //         layersToRemove.push(layer);
-                //     }
-                // });
-                // var len = layersToRemove.length;
-                // for (var i=0; i < len; i++){
-                //     map.removeLayer(layersToRemove[i]);
-                //     layerRemoved = true;
-                // }
+            if (layerRemoved == true) {
+                // We do this because when we call map.removeLayer it causes the layer
+                // to go out of sync resulting in pins not being removed as foreach loop is
+                // changed.  This loop ensure all pins have been removed
 
-                if (layerRemoved == true) {
-                    // We do this because when we call map.removeLayer it causes the layer
-                    // to go out of sync resulting in pins not being removed as foreach loop is
-                    // changed.  This loop ensure all pins have been removed
-
-                    // this.removePinAnchors();
-                }
-                return layerRemoved;
+                // this.removePinAnchors();
+            }
+            return layerRemoved;
         },
         toggleMap: function(current_selection) {
-	   var vm = this;
-           var map = this.olmap;
-           map.getLayers().forEach(function (layer) {
-             var name = layer.get('name');
-             if (name != undefined) {
-                var visible = layer.getVisible();
-                if (visible == false) {
-                    layer.setVisible(true);
-		}
-                if (visible == true) {
-                    layer.setVisible(false);
+            var vm = this;
+            var map = this.olmap;
+            map.getLayers().forEach(function (layer) {
+                var name = layer.get('name');
+                if (name != undefined) {
+                    var visible = layer.getVisible();
+                    if (visible == false) {
+                        layer.setVisible(true);
+                    }
+                    if (visible == true) {
+                        layer.setVisible(false);
+                    }
                 }
-
-             }
-   
-           });
-                if (current_selection == 'satellite') {
-                  $('#satellite-toggle').hide();
-                  $('#map-toggle').show();
-                } else {
-                  $('#satellite-toggle').show();
-                  $('#map-toggle').hide();
-                }
-
-
-	},
+            });
+            if (current_selection == 'satellite') {
+                $('#satellite-toggle').hide();
+                $('#map-toggle').show();
+            } else {
+                $('#satellite-toggle').show();
+                $('#map-toggle').hide();
+            }
+        },
         updateFilter: function() {
             var vm = this;
             // make a lookup table of campground features to filter on
@@ -1286,12 +1048,7 @@ export default {
                          console.log(i);
                          console.log(el.remoteKey[i]);
                          legit.add(el.remoteKey[i]);
-		    }                  
- 
-
-                    // el.remoteKey.forEach(function (fl) {
-                    //   legit.add(fl);
-                    // });
+                    }                  
                 }
             };
             this.filterList.forEach(filterCb);
@@ -1347,7 +1104,7 @@ export default {
             var map = this.olmap;
             var mooring_type =  $("input:radio[name=gear_type]:checked").val(); 
 
-        if (scale >= 0 && scale <= 1300000) {
+            if (scale >= 0 && scale <= 1300000) {
             
             if (vm.groupPinLevelChange == true) { 
                 this.removePinGroups(); 
@@ -1360,11 +1117,6 @@ export default {
                  var response = this.mooring_map_data;
                  vm.anchorPins = response; 
             }
-//             this.groundsSource.loadSource();
-
-
-
-//          map.updateSize();
            
             var response = vm.anchorPins;
             var pin_count = 0;
@@ -1560,10 +1312,10 @@ export default {
 	        }
 	      }
             }
-        } else if (scale >= 1300001) {
+            } else if (scale >= 1300001) {
 	        var center = map.getView().getCenter();
             if (center) {
-                var latLon = ol.proj.transform([center[0],center[1]], 'EPSG:3857', 'EPSG:4326');
+                var latLon = transform([center[0],center[1]], 'EPSG:3857', 'EPSG:4326');
 	        }
             if (vm.anchorPinLevelChange == true) { 
                 this.removePinAnchors();
@@ -1617,38 +1369,36 @@ export default {
         }
 //        document.getElementById('scale').innerHTML = "Scale = 1 : " + scale;
       },
-      buildMarkerBookable: function(lat,lon,props,name,marker_id) {
-            var mooring_type =  $("input:radio[name=gear_type]:checked").val();
-            var pin_type=require('assets/map_pins/pin_red.png'); 
-            var bookable = false;
-            var vectorLayer;
-            var vm = this;
-            if (vm.pinsCache[marker_id] == null) { 
+    buildMarkerBookable: function(lat,lon,props,name,marker_id) {
+        var mooring_type =  $("input:radio[name=gear_type]:checked").val();
+        var pin_type=require('./assets/map_pins/pin_red.png'); 
+        var bookable = false;
+        var vectorLayer;
+        var vm = this;
+        if (vm.pinsCache[marker_id] == null) { 
             if (this.groundsIds.has(marker_id)) {
                 if (vm.markerAvail[marker_id] == 'free') { 
-                     pin_type=require('assets/map_pins/pin_orange.png');
+                     pin_type=require('./assets/map_pins/pin_orange.png');
                      bookable = true;
                 } else if (vm.markerAvail[marker_id] == 'partial') {
-                     pin_type=require('assets/map_pins/pin_orange_red.png');
+                     pin_type=require('./assets/map_pins/pin_orange_red.png');
                      bookable = true;
                 } else {
-                     pin_type=require('assets/map_pins/pin_red.png');
+                     pin_type=require('./assets/map_pins/pin_red.png');
                      bookable = false;
-	            }	
-	        }
-
-                //this.anchorPinsActive.push(marker_id);
-            var iconFeature = new ol.Feature({
+                }	
+            }
+            var iconFeature = new Feature({
                 marker_group: 'mooring_marker',
-                geometry: new ol.geom.Point(ol.proj.transform([lat, lon], 'EPSG:4326', 'EPSG:3857')),
+                geometry: new Point(transform([lat, lon], 'EPSG:4326', 'EPSG:3857')),
                 name: name,
                 bookable: bookable,
                 marker_id: marker_id,
                 props: props
             });
 
-            var iconStyle = new ol.style.Style({
-                image: new ol.style.Icon(/** @type {olx.style.IconOptions} */ ({
+            var iconStyle = new Style({
+                image: new Icon(/** @type {olx.style.IconOptions} */ ({
                     imgSize: [32, 32],
                     size: [32,32],
                     snapToPixel: true,
@@ -1662,27 +1412,26 @@ export default {
             // console.log("SET buildMarkerBookable");
             iconFeature.setStyle(iconStyle);
 
-            var vectorSource = new ol.source.Vector({
+            var vectorSource = new VectorSource({
                 features: [iconFeature]
             });
-
-            vectorLayer = new ol.layer.Vector({
-               canDelete: "yes",
-               markerGroup: "anchor",
-               source: vectorSource
+            vectorLayer = new VectorLayer({
+                canDelete: "yes",
+                markerGroup: "anchor",
+                source: vectorSource
             });
-             vm.pinsCache[marker_id+'-'+vm.markerAvail[marker_id]] = vectorLayer; 
-            } else {
-              vectorLayer = vm.pinsCache[marker_id+'-'+vm.markerAvail[marker_id]];
-	    }
-            return vectorLayer;
-        },
+            vm.pinsCache[marker_id+'-'+vm.markerAvail[marker_id]] = vectorLayer; 
+        } else {
+            vectorLayer = vm.pinsCache[marker_id+'-'+vm.markerAvail[marker_id]];
+        }
+        return vectorLayer;
+    },
     buildMarkerNotBookable: function(lat,lon,props,name,marker_id) {
                 var vm = this; 
                 if (vm.pinsCache[marker_id+'-'+vm.markerAvail[marker_id]] == null) {
-		var iconFeature = new ol.Feature({
+		var iconFeature = new Feature({
                   marker_group: 'mooring_marker',
-		  geometry: new ol.geom.Point(ol.proj.transform([lat, lon], 'EPSG:4326', 'EPSG:3857')),
+		  geometry: new Point(transform([lat, lon], 'EPSG:4326', 'EPSG:3857')),
 		  name: name,
 		  population: 4000,
 		  rainfall: 500,
@@ -1690,8 +1439,8 @@ export default {
                   props: props
 		});
 
-		var iconStyle = new ol.style.Style({
-		  image: new ol.style.Icon(/** @type {olx.style.IconOptions} */ ({
+		var iconStyle = new Style({
+		  image: new Icon(/** @type {olx.style.IconOptions} */ ({
                     imgSize: [32, 32],
                     size: [32,32], 
                     snapToPixel: true,
@@ -1700,18 +1449,18 @@ export default {
 		    anchorXUnits: 'fraction',
                     anchorYUnits: 'fraction',
 		    opacity: 0.95,
-		    src: require('assets/map_pins/pin_gray.png')
+		    src: require('./assets/map_pins/pin_gray.png')
 
 	         }))
 	    });
             // console.log("SET buildMarkerNotBookable");
 	    iconFeature.setStyle(iconStyle);
 	
-	    var vectorSource = new ol.source.Vector({
+	    var vectorSource = new VectorSource({
 	        features: [iconFeature]
 	    });
 
-	    var vectorLayer = new ol.layer.Vector({
+	    var vectorLayer = new VectorLayer({
 	       canDelete: "yes",
                markerGroup: "anchor",
 	       source: vectorSource
@@ -1724,24 +1473,24 @@ export default {
     },
     buildMarkerGroup:function(lat,lon,text, name, zoom_level) {
 
-              var iconFeature = new ol.Feature({
+              var iconFeature = new Feature({
                   marker_group: 'group_marker',
-                  geometry: new ol.geom.Point(ol.proj.transform([lat, lon], 'EPSG:4326', 'EPSG:3857')),
+                  geometry: new Point(transform([lat, lon], 'EPSG:4326', 'EPSG:3857')),
                   name: name,
                   zoom_level: zoom_level
               });
               
-              var icon = require('assets/map_pins/geo_group_red.png');
+              var icon = require('./assets/map_pins/geo_group_red.png');
               if (text > 30) {
-                       icon = require('assets/map_pins/geo_group2.png');
+                       icon = require('./assets/map_pins/geo_group2.png');
               } else if (text > 10) {
-                       icon = require('assets/map_pins/geo_group_orange.png');
+                       icon = require('./assets/map_pins/geo_group_orange.png');
               } else {
-                       icon = require('assets/map_pins/geo_group_red.png');
+                       icon = require('./assets/map_pins/geo_group_red.png');
               }
 
-              var iconStyle = new ol.style.Style({
-                        image: new ol.style.Icon(/** @type {olx.style.IconOptions} */ ({
+              var iconStyle = new Style({
+                        image: new Icon(/** @type {olx.style.IconOptions} */ ({
                           imgSize: [48, 46],
                           size: [48,46],
                           anchor: [0.5, 24],
@@ -1751,10 +1500,10 @@ export default {
                           src: icon
                         })),
 
-                        text: new ol.style.Text({
+                        text: new Text({
                           text: text.toString(),
                           scale: 1.2,
-                          fill: new ol.style.Fill({
+                          fill: new Fill({
                             color: '#000000'
                           }),
                         //          stroke: new ol.style.Stroke({
@@ -1766,11 +1515,11 @@ export default {
               // console.log("SET buildMarkerGroup");
               iconFeature.setStyle(iconStyle);
 
-              var vectorSource = new ol.source.Vector({
+              var vectorSource = new VectorSource({
                   features: [iconFeature]
               });
 
-              var vectorLayer = new ol.layer.Vector({
+              var vectorLayer = new VectorLayer({
                    canDelete: "yes",
                    markerGroup: "circle",
                    source: vectorSource
@@ -1898,299 +1647,285 @@ export default {
             })
         }
       },
-      loadMap: function() {
+        loadMap: function() {
 
-        var vm = this;
+            var vm = this;
 
-        console.log('Loading map...');
-        var nowTemp = new Date();
-        var now = moment.utc({year: nowTemp.getFullYear(), month: nowTemp.getMonth(), day: nowTemp.getDate(), hour: 0, minute: 0, second: 0}).toDate();
+            console.log('Loading map...');
+            var nowTemp = new Date();
+            var now = moment.utc({year: nowTemp.getFullYear(), month: nowTemp.getMonth(), day: nowTemp.getDate(), hour: 0, minute: 0, second: 0}).toDate();
 
-        // load autosuggest choices
-        var search = document.getElementById('searchInput');
-        var autocomplete = new Awesomplete(search);
-        autocomplete.autoFirst = true;
+            // load autosuggest choices
+            var search = document.getElementById('searchInput');
+            var autocomplete = new Awesomplete(search);
+            autocomplete.autoFirst = true;
 
 
-        $.ajax({
-            url: vm.parkstayUrl+'/api/search_suggest',
-            dataType: 'json',
-            success: function (response, stat, xhr) {
-                vm.suggestions = response;
-                $(search).on('awesomplete-selectcomplete', function(ev) {
+            $.ajax({
+                url: vm.parkstayUrl+'/api/search_suggest',
+                dataType: 'json',
+                success: function (response, stat, xhr) {
+                    vm.suggestions = response;
+                    $(search).on('awesomplete-selectcomplete', function(ev) {
+                        this.blur();
+                    });
+
+                    autocomplete.list = response['features'].map(function (el) {
+                        return el['properties']['name'];
+                    });
+                }
+            });
+
+            // wire up search box
+            $(search).on('blur', function(ev) {
+                vm.search(ev.target.value);
+            }).on('keypress', function(ev) {
+                if (!ev) {
+                    ev = window.event;
+                }
+                // intercept enter keys
+                var keyCode = ev.keyCode || ev.which;
+                if (keyCode == '13') {
                     this.blur();
-                });
+                    return false;
+                }
+            });
 
-                autocomplete.list = response['features'].map(function (el) {
-                    return el['properties']['name'];
-                });
+            // generate WMTS tile grid
+            // this.projection = ol.proj.get('EPSG:3857');
+            this.projection = getProjection('EPSG:3857');
+            this.projectionExtent = this.projection.getExtent();
+            // var size = ol.extent.getWidth(this.projectionExtent) / 256;
+            var size = getWidth(this.projectionExtent) / 256;
+            this.matrixSet = 'mercator';
+            this.resolutions = new Array(21);
+            this.matrixIds = new Array(21);
+            for (var z = 0; z < 21; ++z) {
+                // generate resolutions and matrixIds arrays for this WMTS
+                this.resolutions[z] = size / Math.pow(2, z);
+                this.matrixIds[z] = this.matrixSet + ':' + z;
             }
-        });
 
-        // wire up search box
-        $(search).on('blur', function(ev) {
-            vm.search(ev.target.value);
-        }).on('keypress', function(ev) {
-            if (!ev) {
-                ev = window.event;
-            }
-            // intercept enter keys
-            var keyCode = ev.keyCode || ev.which;
-            if (keyCode == '13') {
-                this.blur();
+            var tileGrid = new WMTSTileGrid({
+                origin: getTopLeft(this.projectionExtent),
+                resolutions: this.resolutions,
+                matrixIds: this.matrixIds
+            });
+            this.streets = new TileLayer({
+                canDelete: "no",
+                source: new ol.source.WMTS({
+                    url: 'https://kmi.dpaw.wa.gov.au/geoserver/gwc/service/wmts',
+                    format: 'image/png',
+                    layer: 'public:mapbox-satellite',
+                    matrixSet: this.matrixSet,
+                    projection: this.projection,
+                    tileGrid: tileGrid
+                })
+            });
+
+            this.tenure = new TileLayer({
+                canDelete: "no",
+                opacity: 0.6,
+                source: new ol.source.WMTS({
+                    url: 'https://kmi.dpaw.wa.gov.au/geoserver/gwc/service/wmts',
+                    format: 'image/png',
+                    layer: 'public:dpaw_lands_and_waters',
+                    matrixSet: this.matrixSet,
+                    projection: this.projection,
+                    tileGrid: tileGrid
+                })
+            });
+
+            this.geojson = new ol.format.GeoJSON({
+                featureProjection: 'EPSG:3857'
+            });
+
+            this.groundsData = new ol.Collection();
+            this.groundsIds = new Set();
+            this.groundsFilter = new ol.Collection();
+
+            $.ajax({
+                url: vm.parkstayUrl+'/api/mooring_map/?format=json',
+                dataType: 'json',
+                success: function (response, stat, xhr) {
+                    var features = vm.geojson.readFeatures(response);
+                    vm.groundsData.clear();
+                    vm.groundsData.extend(features);
+                    vm.groundsSource.loadSource();
+                }
+            });
+
+
+            this.groundsSource = new ol.source.Vector({
+                features: vm.groundsFilter
+            });
+
+
+            // Marker Popup Code
+            $('#mapPopupClose').on('click', function(ev) {
+                $('#mapPopup').hide();
+                vm.popup.setPosition(undefined);
+                vm.selectedFeature = null;
                 return false;
-            }
-        });
+            });
+            this.popupContent = document.getElementById('mapPopupContent');
+            this.popup = new Overlay({
+                element: document.getElementById('mapPopup'),
+                autoPan: true,
+                autoPanAnimation: {
+                    duration: 250
+                }
+            });
 
-        // generate WMTS tile grid
-        this.projection = ol.proj.get('EPSG:3857');
-        this.projectionExtent = this.projection.getExtent();
-        var size = ol.extent.getWidth(this.projectionExtent) / 256;
-        this.matrixSet = 'mercator';
-        this.resolutions = new Array(21);
-        this.matrixIds = new Array(21);
-        for (var z = 0; z < 21; ++z) {
-            // generate resolutions and matrixIds arrays for this WMTS
-            this.resolutions[z] = size / Math.pow(2, z);
-            this.matrixIds[z] = this.matrixSet + ':' + z;
+            this.posFeature = new Feature();
+            this.posFeature.setStyle(new ol.style.Style({
+                image: new ol.style.Icon({
+                    src: vm.locationIcon,
+                    snapToPixel: true,
+                    anchor: [0.5, 0.5],
+                    anchorXUnits: 'fraction',
+                    anchorYUnits: 'fraction'
+                })
+            }));
+
+            this.posLayer = new ol.layer.Vector({
+                source: new ol.source.Vector({
+                    features: [this.posFeature]
+                })
+            });
+            // create OpenLayers map object, prefill with all the stuff we made
+            this.olmap = new Map({
+                logo: false,
+                renderer: 'canvas',
+                target: 'map',
+                view: new View({
+                    projection: 'EPSG:3857',
+                    center: vm.defaultCenter,
+                    zoom: 5,
+                    maxZoom: 21,
+                    minZoom: 5
+                }),
+                controls: [
+                    new Zoom(),
+                    new ScaleLine(),
+                ],
+                interactions: defaultInteractions({
+                    // This correctly disables rotation interactions.
+                    altShiftDragRotate: false,
+                    pinchRotate: false
+                }).extend([
+                    // The original code tried to add a custom PinchZoom.
+                    // Note: The default set already includes PinchZoom. `extend` adds another one.
+                    // If the goal is to *replace* it, a more advanced pattern is needed.
+                    // This corrected code assumes the primary goal was to disable rotation
+                    // while keeping other defaults.
+                ]),
+                layers: [
+                    this.streets,
+                    this.tenure,
+                    // this.grounds,
+                    this.posLayer
+                ],
+                overlays: [this.popup]
+            });
+        },
+
+
+        weightBeam(f) {
+            return true; 
+        },
+
+        /**
+         * Navigates to the next page if not on the last page.
+         */
+        nextPage() {
+            if (this.currentPage < this.totalPages) {
+                this.currentPage++;
+            }
+        },
+        
+        /**
+         * Navigates to the previous page if not on the first page.
+         */
+        prevPage() {
+            if (this.currentPage > 1) {
+                this.currentPage--;
+            }
+        },
+
+        /**
+         * Navigates directly to a specific page number.
+         * @param {number} pageNumber - The page to go to.
+         */
+        goToPage(pageNumber) {
+            // You could add validation here if needed (e.g., pageNumber > 0 && pageNumber <= this.totalPages)
+            this.currentPage = pageNumber;
         }
-
-        var tileGrid = new ol.tilegrid.WMTS({
-            origin: ol.extent.getTopLeft(this.projectionExtent),
-            resolutions: this.resolutions,
-            matrixIds: this.matrixIds
-        });
-        this.streets = new ol.layer.Tile({
-            canDelete: "no",
-            source: new ol.source.WMTS({
-                url: 'https://kmi.dpaw.wa.gov.au/geoserver/gwc/service/wmts',
-                format: 'image/png',
-                layer: 'public:mapbox-satellite',
-                matrixSet: this.matrixSet,
-                projection: this.projection,
-                tileGrid: tileGrid
-            })
-        });
-
-        this.tenure = new ol.layer.Tile({
-            canDelete: "no",
-            opacity: 0.6,
-            source: new ol.source.WMTS({
-                url: 'https://kmi.dpaw.wa.gov.au/geoserver/gwc/service/wmts',
-                format: 'image/png',
-                layer: 'public:dpaw_lands_and_waters',
-                matrixSet: this.matrixSet,
-                projection: this.projection,
-                tileGrid: tileGrid
-            })
-        });
-
-        this.geojson = new ol.format.GeoJSON({
-            featureProjection: 'EPSG:3857'
-        });
-
-        this.groundsData = new ol.Collection();
-        this.groundsIds = new Set();
-        this.groundsFilter = new ol.Collection();
-
-        $.ajax({
-            url: vm.parkstayUrl+'/api/mooring_map/?format=json',
-            dataType: 'json',
-            success: function (response, stat, xhr) {
-                var features = vm.geojson.readFeatures(response);
-                vm.groundsData.clear();
-                vm.groundsData.extend(features);
-                vm.groundsSource.loadSource();
-            }
-        });
-
-
-        this.groundsSource = new ol.source.Vector({
-            features: vm.groundsFilter
-        });
-
-//        this.groundsSource.loadSource = function (onSuccess) {
-//
-//            if (vm.dateCache != vm.arrivalDateString+vm.departureDateString+vm.gearType+vm.penType) {
-//            var urlBase = vm.parkstayUrl+'/api/mooring_map_filter/?';
-//            var params = {format: 'json'};
-//            var isCustom = false;
-//
-//
-//            if ((vm.arrivalData.date) && (vm.departureData.date)) {
-//                isCustom = true;
-//                var arrival = vm.arrivalDateString;
-//                if (arrival) {
-//                    params.arrival = arrival;
-//                }
-//                var departure = vm.departureDateString;
-//                if (departure) {
-//                    params.departure = vm.departureDateString;
-//                }
-//                params.num_adult = vm.numAdults;
-//                params.num_concessions = vm.numConcessions;
-//                params.num_children = vm.numChildren;
-//                params.num_infant = vm.numInfants;
-//                params.num_mooring = vm.numMooring;
-//                params.gear_type = vm.gearType;
-//                params.pen_type = vm.penType;
-//                
-//            }
-//            $.ajax({
-//                url: urlBase+$.param(params),
-//                success: function (response, stat, xhr) {
-//                    vm.groundsIds.clear();
-//                    response.forEach(function(el) {
-//                        vm.groundsIds.add(el.id);
-//                    });
-//                    vm.updateFilter();
-//                    vm.dateCache = vm.arrivalDateString+vm.departureDateString+vm.gearType+vm.penType;
-//                },
-//                dataType: 'json'
-//            });
-//            }
-//        };
-
-//        this.grounds = new ol.layer.Vector({
-//            source: this.groundsSource,
-//            style: function (feature) {
-//                var style = feature.get('style');
-//                return style;
-//            }
-//        });
-
-        // Marker Popup Code
-        $('#mapPopupClose').on('click', function(ev) {
-            $('#mapPopup').hide();
-            vm.popup.setPosition(undefined);
-            vm.selectedFeature = null;
-            return false;
-        });
-        this.popupContent = document.getElementById('mapPopupContent');
-        this.popup = new ol.Overlay({
-            element: document.getElementById('mapPopup'),
-            autoPan: true,
-            autoPanAnimation: {
-                duration: 250
-            }
-        });
-
-        this.posFeature = new ol.Feature();
-        this.posFeature.setStyle(new ol.style.Style({
-            image: new ol.style.Icon({
-                src: vm.locationIcon,
-                snapToPixel: true,
-                anchor: [0.5, 0.5],
-                anchorXUnits: 'fraction',
-                anchorYUnits: 'fraction'
-            })
-        }));
-
-        this.posLayer = new ol.layer.Vector({
-            source: new ol.source.Vector({
-                features: [this.posFeature]
-            })
-        });
-        // create OpenLayers map object, prefill with all the stuff we made
-        this.olmap = new ol.Map({
-            logo: false,
-            renderer: 'canvas',
-            target: 'map',
-            view: new ol.View({
-                projection: 'EPSG:3857',
-                center: vm.defaultCenter,
-                zoom: 5,
-                maxZoom: 21,
-                minZoom: 5
-            }),
-            controls: [
-                new ol.control.Zoom(),
-                new ol.control.ScaleLine(),
-            ],
-            interactions: ol.interaction.defaults({
-                altShiftDragRotate: false,
-                pinchRotate: false,
-            }),
-            interactions: ol.interaction.defaults({}).extend([
-                  new ol.interaction.PinchZoom({
-                      constrainResolution: true
-                   })
-            ]),
-            layers: [
-                this.streets,
-                this.tenure,
-                // this.grounds,
-                this.posLayer
-            ],
-            overlays: [this.popup]
-        });
-
-      }
-
     },
     mounted: function() {
+        this.$nextTick(() => {
         var vm = this;
 
-        $(document).foundation();
+        // $(document).foundation();
         console.log('Loading map...');
         var template_group = $('#template_group').val();
         if (template_group == 'rottnest') { 
-		vm.admissions_key = 'ria';
-	}
+            vm.admissions_key = 'ria';
+        }
         var nowTemp = new Date();
         var now = moment.utc({year: nowTemp.getFullYear(), month: nowTemp.getMonth(), day: nowTemp.getDate(), hour: 0, minute: 0, second: 0}).toDate();
 
         this.arrivalEl = $('#dateArrival');
         this.departureEl = $('#dateDeparture');
 
-        this.arrivalData = this.arrivalEl.fdatepicker({
-            format: 'dd/mm/yyyy',
-            onRender: function (date) {
-                // disallow start dates before today
-                return date.valueOf() < now.valueOf() ? 'disabled': '';
-                //return '';
-            }
-        }).on('changeDate', function (ev) {
-            //console.log('arrivalEl changeDate');
-            ev.target.dispatchEvent(new CustomEvent('change'));
-        }).on('change', function (ev) {
-            if (vm.arrivalData.date.valueOf() >= vm.departureData.date.valueOf()) {
-                var newDate = moment(vm.arrivalData.date).add(1, 'days').toDate();
-                vm.departureData.date = newDate;
-                vm.departureData.setValue();
-                vm.departureData.fill();
-                vm.departureEl.trigger('changeDate');
-            }
-            vm.arrivalData.hide();
-            vm.arrivalDate = moment(vm.arrivalData.date);
-        }).on('keydown', function (ev) {
-            if (ev.keyCode == 13) {
-                ev.target.dispatchEvent(new CustomEvent('change'));
-            }
-        }).data('datepicker');
-        this.arrivalEl.fdatepicker('update', now);
+        // this.arrivalData = this.arrivalEl.fdatepicker({
+        //     format: 'dd/mm/yyyy',
+        //     onRender: function (date) {
+        //         // disallow start dates before today
+        //         return date.valueOf() < now.valueOf() ? 'disabled': '';
+        //         //return '';
+        //     }
+        // }).on('changeDate', function (ev) {
+        //     //console.log('arrivalEl changeDate');
+        //     ev.target.dispatchEvent(new CustomEvent('change'));
+        // }).on('change', function (ev) {
+        //     if (vm.arrivalData.date.valueOf() >= vm.departureData.date.valueOf()) {
+        //         var newDate = moment(vm.arrivalData.date).add(1, 'days').toDate();
+        //         vm.departureData.date = newDate;
+        //         vm.departureData.setValue();
+        //         vm.departureData.fill();
+        //         vm.departureEl.trigger('changeDate');
+        //     }
+        //     vm.arrivalData.hide();
+        //     vm.arrivalDate = moment(vm.arrivalData.date);
+        // }).on('keydown', function (ev) {
+        //     if (ev.keyCode == 13) {
+        //         ev.target.dispatchEvent(new CustomEvent('change'));
+        //     }
+        // }).data('datepicker');
+        // this.arrivalEl.fdatepicker('update', now);
 
-        this.departureData = this.departureEl.fdatepicker({
-            format: 'dd/mm/yyyy',
-            onRender: function (date) {
-                return (date.valueOf() <= vm.arrivalData.date.valueOf()) ? 'disabled': '';
-            }
-        }).on('changeDate', function (ev) {
-            //console.log('departureEl changeDate');
-            ev.target.dispatchEvent(new CustomEvent('change'));
-        }).on('change', function (ev) {
-            vm.departureData.hide();
-            vm.departureDate = moment(vm.departureData.date);
-        }).on('keydown', function (ev) {
-            if (ev.keyCode == 13) {
-                ev.target.dispatchEvent(new CustomEvent('change'));
-            }
-        }).data('datepicker');
-        var fivedays = new Date();
-        fivedays.setDate(fivedays.getDate() + 5);
-        fivedays = moment.utc({year: fivedays.getFullYear(), month: fivedays.getMonth(), day: fivedays.getDate(), hour: 0, minute: 0, second: 0}).toDate();
+        // this.departureData = this.departureEl.fdatepicker({
+        //     format: 'dd/mm/yyyy',
+        //     onRender: function (date) {
+        //         return (date.valueOf() <= vm.arrivalData.date.valueOf()) ? 'disabled': '';
+        //     }
+        // }).on('changeDate', function (ev) {
+        //     //console.log('departureEl changeDate');
+        //     ev.target.dispatchEvent(new CustomEvent('change'));
+        // }).on('change', function (ev) {
+        //     vm.departureData.hide();
+        //     vm.departureDate = moment(vm.departureData.date);
+        // }).on('keydown', function (ev) {
+        //     if (ev.keyCode == 13) {
+        //         ev.target.dispatchEvent(new CustomEvent('change'));
+        //     }
+        // }).data('datepicker');
+        // var fivedays = new Date();
+        // fivedays.setDate(fivedays.getDate() + 5);
+        // fivedays = moment.utc({year: fivedays.getFullYear(), month: fivedays.getMonth(), day: fivedays.getDate(), hour: 0, minute: 0, second: 0}).toDate();
         
-        this.departureEl.fdatepicker('update', fivedays);
+        // this.departureEl.fdatepicker('update', fivedays);
 
         // load autosuggest choices
         var search = document.getElementById('searchInput');
@@ -2228,9 +1963,11 @@ export default {
         });
 
         // generate WMTS tile grid
-        this.projection = ol.proj.get('EPSG:3857');
+        // this.projection = ol.proj.get('EPSG:3857');
+        this.projection = getProjection('EPSG:3857');
         this.projectionExtent = this.projection.getExtent();
-        var size = ol.extent.getWidth(this.projectionExtent) / 256;
+        // var size = ol.extent.getWidth(this.projectionExtent) / 256;
+        var size = getWidth(this.projectionExtent) / 256;
         this.matrixSet = 'mercator';
         this.resolutions = new Array(21);
         this.matrixIds = new Array(21);
@@ -2240,17 +1977,22 @@ export default {
             this.matrixIds[z] = this.matrixSet + ':' + z;
         }
 
-        var tileGrid = new ol.tilegrid.WMTS({
-            origin: ol.extent.getTopLeft(this.projectionExtent),
+        // var tileGrid = new ol.tilegrid.WMTS({
+        //     origin: ol.extent.getTopLeft(this.projectionExtent),
+        //     resolutions: this.resolutions,
+        //     matrixIds: this.matrixIds
+        // });
+        const tileGrid = new WMTSTileGrid({
+            origin: getTopLeft(this.projectionExtent),
             resolutions: this.resolutions,
             matrixIds: this.matrixIds
         });
 
-        this.streets = new ol.layer.Tile({
+        this.streets = new TileLayer({
             name: 'street',
             canDelete: "no",
             visible: true,
-            source: new ol.source.WMTS({
+            source: new WMTS({
                 url: 'https://kmi.dpaw.wa.gov.au/geoserver/gwc/service/wmts',
                 format: 'image/png',
                 layer: 'public:mapbox-streets',
@@ -2260,13 +2002,11 @@ export default {
             })
         });
 
-
-
-        this.satellite = new ol.layer.Tile({
+        this.satellite = new TileLayer({
             name: 'satellite',
             canDelete: "no",
             visible: false,
-            source: new ol.source.WMTS({
+            source: new WMTS({
                 url: 'https://kmi.dpaw.wa.gov.au/geoserver/gwc/service/wmts',
                 format: 'image/png',
                 layer: 'public:mapbox-satellite',
@@ -2276,12 +2016,11 @@ export default {
             })
         });
 
-
-        this.tenure = new ol.layer.Tile({
+        this.tenure = new TileLayer({
             name: 'tenure',
             canDelete: "no",
             opacity: 0.6,
-            source: new ol.source.WMTS({
+            source: new WMTS({
                 url: 'https://kmi.dpaw.wa.gov.au/geoserver/gwc/service/wmts',
                 format: 'image/png',
                 layer: 'public:dpaw_lands_and_waters',
@@ -2291,13 +2030,20 @@ export default {
             })
         });
 
-        this.geojson = new ol.format.GeoJSON({
-            featureProjection: 'EPSG:3857'   
-        });
+        // this.geojson = new ol.format.GeoJSON({
+        //     featureProjection: 'EPSG:3857'   
+        // });
 
-        this.groundsData = new ol.Collection();
+        // this.groundsData = new ol.Collection();
+        // this.groundsIds = new Set();
+        // this.groundsFilter = new ol.Collection();
+        this.geojson = new GeoJSON({
+            featureProjection: 'EPSG:3857'
+        });
+        this.groundsData = new Collection();
         this.groundsIds = new Set();
-        this.groundsFilter = new ol.Collection();
+        this.groundsFilter = new Collection();
+
         $.ajax({
             url: vm.parkstayUrl+'/api/mooring_map/?format=json',
             dataType: 'json',
@@ -2313,10 +2059,12 @@ export default {
         });
 
         vm.updateBooking();
-        this.groundsSource = new ol.source.Vector({
-            features: vm.groundsFilter   
+        // this.groundsSource = new ol.source.Vector({
+        //     features: vm.groundsFilter   
+        // });
+        this.groundsSource = new VectorSource({
+            features: this.groundsFilter
         });
-
         this.groundsSource.loadSource = function (onSuccess) {
             
             if (vm.dateCache != vm.arrivalDateString+vm.departureDateString+vm.gearType+vm.penType) {
@@ -2329,7 +2077,8 @@ export default {
                     var params = {format: 'json'};
                     var isCustom = false;
 
-                    if ((vm.arrivalData.date) && (vm.departureData.date)) {
+                    // if ((vm.arrivalDate.date) && (vm.departureData.date)) {
+                    if (vm.arrivalDate && vm.departureDate) {
                         isCustom = true;
                         var arrival = vm.arrivalDateString;
                         if (arrival) {
@@ -2389,14 +2138,14 @@ export default {
                     });
           }
        };
-       this.grounds = new ol.layer.Vector({
+       this.grounds = new VectorLayer({
            source: this.groundsSource,
             style: function (feature) {
                 var style = feature.get('style');
                 return style;
             }
         });
-	// Marker Popup Code
+	    // Marker Popup Code
         $('#mapPopupClose').on('click', function(ev) {
             $('#mapPopup').hide();
             vm.popup.setPosition(undefined);
@@ -2404,7 +2153,7 @@ export default {
             return false;
         });
         this.popupContent = document.getElementById('mapPopupContent');
-        this.popup = new ol.Overlay({
+        this.popup = new Overlay({
             element: document.getElementById('mapPopup'),
             autoPan: true,
             autoPanAnimation: {
@@ -2412,9 +2161,9 @@ export default {
             }
         });
 
-        this.posFeature = new ol.Feature();
-        this.posFeature.setStyle(new ol.style.Style({
-            image: new ol.style.Icon({
+        this.posFeature = new Feature();
+        this.posFeature.setStyle(new Style({
+            image: new Icon({
                 src: vm.locationIcon,
                 snapToPixel: true,
                 anchor: [0.5, 0.5],
@@ -2424,20 +2173,20 @@ export default {
             })
         }));
 
-        this.posLayer = new ol.layer.Vector({
-            source: new ol.source.Vector({
+        this.posLayer = new VectorLayer({
+            source: new VectorSource({
                 features: [this.posFeature]
             })
         });
-	// End of Marker Popup Code
+	    // End of Marker Popup Code
 
 
         // create OpenLayers map object, prefill with all the stuff we made
-        this.olmap = new ol.Map({
+        this.olmap = new Map({
             logo: false,
             renderer: 'canvas',
             target: 'map',
-            view: new ol.View({
+            view: new View({
                 projection: 'EPSG:3857',
                 center: vm.defaultCenter,
                 zoom: 5,
@@ -2445,17 +2194,28 @@ export default {
                 minZoom: 5
             }),
             controls: [
-                new ol.control.Zoom(),
-                new ol.control.ScaleLine(),
+                new Zoom(),
+                new ScaleLine()
             ],
-            interactions: ol.interaction.defaults({
+            // interactions: ol.interaction.defaults({
+            //     altShiftDragRotate: false,
+            //     pinchRotate: false,
+            // }),
+            // interactions: ol.interaction.defaults({}).extend([
+            //       new ol.interaction.PinchZoom({
+            //           constrainResolution: true
+            //        })
+            // ]),
+            interactions: defaultInteractions({
+                // This correctly disables rotation interactions.
                 altShiftDragRotate: false,
-                pinchRotate: false,
-            }),
-            interactions: ol.interaction.defaults({}).extend([
-                  new ol.interaction.PinchZoom({
-                      constrainResolution: true
-                   })
+                pinchRotate: false
+            }).extend([
+                // The original code tried to add a custom PinchZoom.
+                // Note: The default set already includes PinchZoom. `extend` adds another one.
+                // If the goal is to *replace* it, a more advanced pattern is needed.
+                // This corrected code assumes the primary goal was to disable rotation
+                // while keeping other defaults.
             ]),
             layers: [
                 this.streets,
@@ -2469,80 +2229,72 @@ export default {
 
         $('#map-toggle').hide();
         // spawn geolocation tracker
-        this.geolocation = new ol.Geolocation({
+        this.geolocation = new Geolocation({
             tracking: true,
             projection: this.olmap.getView().getProjection()
         });
         this.geolocation.on('change:position', function() {
             var coords = vm.geolocation.getPosition();
-            vm.posFeature.setGeometry(coords ? new ol.geom.Point(coords) : null);
+            vm.posFeature.setGeometry(coords ? new Point(coords) : null);
         });
 
         // JASON ADDED
         var map = this.olmap;
 
         this.olmap.getView().on('change:resolution', function(evt) {
-               var resolution = evt.target.get('resolution');
-               var units = map.getView().getProjection().getUnits();
-               var dpi = 25.4 / 0.28;
-               var mpu = ol.proj.METERS_PER_UNIT[units];
- 
-               var scale_res = resolution * mpu * 39.37 * dpi;
-               vm.current_map_scale = scale_res;
-               setTimeout(function() { if (scale_res == vm.current_map_scale) { vm.buildmarkers(); vm.updateViewport(); }}, 400);
+            var resolution = evt.target.get('resolution');
+            var units = map.getView().getProjection().getUnits();
+            var dpi = 25.4 / 0.28;
+            var mpu = METERS_PER_UNIT[units];
+
+            var scale_res = resolution * mpu * 39.37 * dpi;
+            vm.current_map_scale = scale_res;
+            setTimeout(function() { if (scale_res == vm.current_map_scale) { vm.buildmarkers(); vm.updateViewport(); }}, 400);
         });
-
-
 
         $('#vesselRego').blur(function() {
-               vm.searchRego();
+            vm.searchRego();
         });
-
         $('#vesselSize').blur(function() { 
-               vm.vesselSize = this.value;
-               vm.removePinAnchors();
-               vm.removePinGroups();
-	       vm.buildmarkers();
+            vm.vesselSize = this.value;
+            vm.removePinAnchors();
+            vm.removePinGroups();
+            vm.buildmarkers();
         });
         $('#vesselDraft').blur(function() { 
-               vm.vesselDraft = this.value;
-               vm.removePinAnchors();
-               vm.removePinGroups();
-	       vm.buildmarkers();
+            vm.vesselDraft = this.value;
+            vm.removePinAnchors();
+            vm.removePinGroups();
+            vm.buildmarkers();
         });
         $('#vesselBeam').blur(function() { 
-               vm.vesselBeam = this.value;
-               vm.removePinAnchors();
-               vm.removePinGroups();
-	       vm.buildmarkers();
+            vm.vesselBeam = this.value;
+            vm.removePinAnchors();
+            vm.removePinGroups();
+            vm.buildmarkers();
         });
         $('#vesselWeight').blur(function() { 
-               vm.vesselWeight = this.value;
-               vm.removePinAnchors();
-               vm.removePinGroups();
-	       vm.buildmarkers();
-	    });
-
+            vm.vesselWeight = this.value;
+            vm.removePinAnchors();
+            vm.removePinGroups();
+            vm.buildmarkers();
+        });
         $('#vesselDraft').blur(function() {
                vm.vesselDraft = this.value;
                vm.removePinAnchors();
                vm.removePinGroups();
                vm.buildmarkers();
         });
-
         $('#dateArrival').change(function() {
                // vm.groundsSource.loadSource();
                vm.reload();
         });
-
         $('#dateDeparture').change(function() {
                 vm.reload();
                // vm.groundsSource.loadSource();
         });
-
         $('#vesselSize').val('0');
         $('#vesselDraft').val('0');
- 
  
         // loop to change the pointer when mousing over a vector layer
         this.olmap.on('pointermove', function(ev) {
@@ -2572,7 +2324,7 @@ export default {
 
        var element = document.getElementById('mapPopup');
 
-       var popup = new ol.Overlay({
+       var popup = new Overlay({
           element: element,
           positioning: 'bottom-center',
           stopEvent: false
@@ -2706,20 +2458,349 @@ export default {
                 }
 
                 if ((vm.timer <= -1)) {
-//                   clearInterval(timer);
-//                    var loc = window.location;
-//                    window.location = loc.protocol + '//' + loc.host + loc.pathname;
+                    // clearInterval(timer);
+                    // var loc = window.location;
+                    // window.location = loc.protocol + '//' + loc.host + loc.pathname;
                }
             }, 1000);
 
+            // hook to update the visible feature list on viewport change
+            this.olmap.getView().on('propertychange', function(ev) {
+                vm.updateViewport();
+                vm.buildmarkers();
+            });
+        this.reload();
+    
+    
+        })
 
-
-        // hook to update the visible feature list on viewport change
-        this.olmap.getView().on('propertychange', function(ev) {
-            vm.updateViewport();
-            vm.buildmarkers();
-        });
-	this.reload();
     }
 };
 </script>
+
+<style lang="scss">
+    [v-cloak] {
+        display: none;
+    }
+    @font-face {
+        font-family: "DPaWSymbols";
+        // src: url('/static/exploreparks/fonts/boating.woff') format("woff"); 
+        src: url('~@/assets/fonts/boating.woff') format("woff");
+    }
+
+    .symb {
+        font-family: "DPaWSymbols";
+        font-style: normal;
+        font-size: 1.5rem;
+    }
+
+    .symb.RC2:before {
+        content: "a";
+    }
+
+    .symb.RC4:before {
+        content: "b";
+    }
+
+    .symb.RV10:before {
+        content: "c";
+    }
+
+    .symb.RG2:before {
+        content: "d";
+    }
+
+    .symb.RG15:before {
+        content: "e";
+    }
+
+    .symb.RV2:before {
+        content: "f";
+    }
+
+    .symb.RF10:before {
+        content: "g";
+    }
+
+    .symb.RF13:before {
+        content: "h";
+    }
+
+    .symb.RF15:before {
+        content: "i";
+    }
+
+    .symb.RF17:before {
+        content: "j";
+    }
+
+    .symb.RF1:before {
+        content: "k";
+    }
+
+    .symb.RF6:before {
+        content: "l";
+    }
+
+    .symb.RF7:before {
+        content: "m";
+    }
+
+    .symb.RF19:before {
+        content: "n";
+    }
+
+    .symb.RF8G:before {
+        content: "o";
+    }
+
+    .symb.RC1:before {
+        content: "p";
+    }
+
+    .symb.RC3:before {
+        content: "q";
+    }
+
+    .symb.LOC:before {
+        content: "r";
+    }
+
+    .symb.RW3:before {
+        content: "s";
+    }
+
+    .symb.MAINS:before {
+        content: "t";
+    }
+
+    .symb.RC20:before {
+        content: "v";
+    }
+
+    .f6inject {
+
+        .search-params hr {
+            margin: 0;
+        }
+
+        .search-params label {
+            cursor: pointer;
+            font-size: 0.8em;
+        }
+
+        /* filter hiding on small screens */
+        @media print, screen and (max-width: 63.9375em) {
+            .filter-hide {
+                display: none;
+            }
+        }
+
+        @media print, screen and (min-width: 64em) {
+            .filter-button {
+                display: none; 
+            }
+        }
+
+        #map {
+            height: 75vh;
+        }
+
+        /* set on the #map element when mousing over a feature */
+        .click {
+            cursor: pointer;
+        }
+
+        input + .symb {
+            color: #000000;
+            transition: color 0.25s ease-out;
+        }
+
+        input:checked + .symb {
+            color: #2199e8;
+        }
+
+        .button.formButton {
+            display: block;
+            width: 100%;
+        }
+
+        .button.selector {
+            background-color: #fff;
+            border: 1px solid #777;
+            border-radius: 4px;
+            color: #000;
+        }
+
+        .button.selector:hover {
+            background-color: #d6eaff;
+            border: 1px solid #729fcf;
+        }
+
+        .button.selector ~ input:checked {
+            color: #fff;
+            background-color: #0060c4;
+            border: 1px solid #00366e;
+        }
+
+        .button.selector:hover ~ input:checked {
+            color: #fff;
+            background-color: #0e83ff;
+            border: 1px solid #004d9f;
+        }
+
+        .pagination {
+            padding: 0;
+            text-align: center;
+            margin-left: auto;
+            margin-right: auto;
+            margin-bottom: 1em;
+        }
+
+        .pagination .active {
+            background: #2199e8;
+            color: #fefefe;
+            cursor: default;
+        }
+
+        .pagination li {
+            display: inline-block;
+            cursor: pointer;
+        }
+
+        .tooltip {
+            position: relative;
+            border-radius: 4px;
+            background-color: #ffcc33;
+            color: black;
+            padding: 4px 8px;
+            opacity: 0.7;
+            white-space: nowrap;
+        }
+
+        .tooltip:before {
+            border-top: 6px solid rgba(0, 0, 0, 0.5);
+            border-right: 6px solid transparent;
+            border-left: 6px solid transparent;
+            content: "";
+            position: absolute;
+            bottom: -6px;
+            margin-left: -7px;
+            left: 50%;
+        }
+
+        .mapPopup {
+            position: absolute;
+            background-color: white;
+            -webkit-filter: drop-shadow(0 1px 4px rgba(0,0,0,0.2));
+            filter: drop-shadow(0 1px 4px rgba(0,0,0,0.2));
+            padding: 15px;
+            border-radius: 10px;
+            border: 1px solid #cccccc;
+            bottom: 32px;
+            left: -140px;
+            width: 280px;
+        }
+
+        .mapPopup:after, .mapPopup:before {
+            top: 100%;
+            border: solid transparent;
+            content: " ";
+            height: 0;
+            width: 0;
+            position: absolute;
+            pointer-events: none;
+        }
+
+        .mapPopup:after {
+            border-top-color: white;
+            border-width: 10px;
+            left: 138px;
+            margin-left: -10px; 
+        }
+
+        .mapPopup:before {
+            border-top-color: #cccccc;
+            border-width: 11px;
+            left: 138px;
+            margin-left: -11px;
+        }
+
+        .mapPopupClose {
+            text-decoration: none;
+            position: absolute;
+            top: 2px;
+            right: 8px;
+        }
+
+        .mapPopupClose:after {
+            content: "✖";
+        }
+
+        .searchTitle {
+            font-size: 150%;
+            font-weight: bold;
+        }
+
+        .resultList {
+            padding: 0;
+        }
+
+        .map-toggle-black {
+        width: 80px;
+        height: 80px;
+        background-color: #FFFFFF;
+        color: black;
+        position: relative;
+        right: 10px;
+        top: -90px;
+        z-index: 300;
+        border: 2px solid #FFFFFF;
+        cursor: pointer;
+        border-radius: 2px;
+        box-shadow: 0px 1px 4px rgba(0, 0, 0, 0.3);
+        }
+        .map-toggle-white {
+        width: 80px;
+        height: 80px;
+        background-color: #FFFFFF;
+        color: black;
+        position: relative;
+        right: 10px;
+        top: -90px;
+        z-index: 300;
+        border: 2px solid #000000;
+        cursor: pointer;
+        border-radius: 2px;
+        box-shadow: 0px 1px 4px rgba(0, 0, 0, 0.3);
+        }
+        .map-loading {
+        position: relative;
+        top: 14px;
+        background-color: #FFFFFF;
+        border: 1px solid #bab9b9;
+        z-index: 5;
+        width: 110px;
+        text-align: center;
+        opacity: 0.7;
+        margin-right: 8px;
+        font-size: 12px;
+        padding: 4px;
+        }
+    }
+
+    /* hacks to make awesomeplete play nice with F6 */
+    div.awesomplete {
+        display: block;
+    }
+
+    div.awesomplete > input {
+        display: table-cell;
+    }
+
+    /* hacks to make openlayers widgets more accessible */
+    .ol-control button {
+        height: 2em;
+        width: 2em;
+    }
+</style>

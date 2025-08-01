@@ -2,16 +2,22 @@
 // (runtime-only or standalone) has been set in webpack.base.conf with an alias.
 import './foundation-min.scss';
 import 'foundation-datepicker/css/foundation-datepicker.css';
-import 'openlayers/css/ol.css';
+import 'ol/ol.css';
 import 'awesomplete/awesomplete.css';
 
-import Vue from 'vue';
-import VuePaginate from 'vue-paginate';
+// import Vue from 'vue';
+import { createApp } from 'vue';
+// import VuePaginate from 'vue-paginate';
 import ParkFinder from './parkfinder.vue';
 
-require('custom-event-polyfill');
-require('ie-array-find-polyfill');
+// import 'bootstrap/dist/css/bootstrap.min.css'
+// import 'bootstrap'
 
-Vue.use(VuePaginate);
+// require('custom-event-polyfill');
+// require('ie-array-find-polyfill');
 
-global.parkfinder = new Vue(ParkFinder);
+// Vue.use(VuePaginate);
+const app = createApp(ParkFinder)
+app.mount('#parkfinder')
+
+// global.parkfinder = app
