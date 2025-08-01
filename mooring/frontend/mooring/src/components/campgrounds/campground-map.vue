@@ -179,21 +179,40 @@ export default {
         update: function() {
             this.sendData(api_endpoints.campground(this.campground.id), 'PUT',true);
         },
-        validateEditor: function(el){
+        validateEditor: function(el) {
             let vm = this;
-			if (el.parents('.form-group').hasClass('has-error')) {
-				el.tooltip("destroy");
-				el.attr("data-original-title", "").parents('.form-group').removeClass('has-error');
-			}
-            if (vm.editor.getText().trim().length == 0) {
-                // add or update tooltips
-                el.tooltip({
-                        trigger: "focus"
-                    })
-                    .attr("data-original-title", 'Description is required')
-                    .parents('.form-group').addClass('has-error');
+            el = el[0] || el; // Ensure el is a DOM element
+            const formGroup = el.closest('.form-group');
+
+            // Remove existing error tooltip
+            const existingTooltip = bootstrap.Tooltip.getInstance(el);
+            if (formGroup && formGroup.classList.contains('has-error')) {
+                if (existingTooltip) {
+                    existingTooltip.dispose();
+                }
+                el.removeAttribute('title');
+                el.removeAttribute('data-bs-original-title');
+                formGroup.classList.remove('has-error');
+            }
+
+            // Validate editor content
+            if (vm.editor.getText().trim().length === 0) {
+                // Set tooltip attributes
+                el.setAttribute('title', 'Description is required');
+                el.setAttribute('data-bs-toggle', 'tooltip');
+                el.setAttribute('data-bs-trigger', 'focus');
+                el.setAttribute('data-bs-placement', 'top');
+
+                // Create tooltip if not already instantiated
+                let tooltip = bootstrap.Tooltip.getInstance(el);
+                if (!tooltip) {
+                    tooltip = new bootstrap.Tooltip(el);
+                }
+
+                formGroup?.classList.add('has-error');
                 return false;
             }
+
             return true;
         },
         sendData: function(url, method, reload=false) {

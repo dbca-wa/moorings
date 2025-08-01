@@ -1074,7 +1074,7 @@
                 var override_checked = $('#override').prop("checked");
 
                 var fields = $(form).find(':input');
-                $('.tooltip-err').tooltip("destroy");
+                $('.tooltip-err').tooltip("dispose");
                 $.each(fields, function(i, field) {
                     $(field).removeClass('tooltip-err');
                     $(field).closest('.form-group').removeClass('has-error');

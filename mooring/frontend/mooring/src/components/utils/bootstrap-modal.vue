@@ -184,7 +184,7 @@
         opacity: 0;
     }
     .modal-backdrop {
-        background-color: rgba(128, 128, 128, 0.3);
+        background-color: rgba(128, 128, 128, 0.5);
         opacity: 1 !important;
     }
     .close {
