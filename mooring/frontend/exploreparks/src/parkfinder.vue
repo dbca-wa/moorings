@@ -1778,7 +1778,7 @@ export default {
             });
             this.streets = new TileLayer({
                 canDelete: "no",
-                source: new ol.source.WMTS({
+                source: new WMTS({
                     url: 'https://kmi.dpaw.wa.gov.au/geoserver/gwc/service/wmts',
                     format: 'image/png',
                     layer: 'public:mapbox-satellite',
@@ -1791,7 +1791,7 @@ export default {
             this.tenure = new TileLayer({
                 canDelete: "no",
                 opacity: 0.6,
-                source: new ol.source.WMTS({
+                source: new WMTS({
                     url: 'https://kmi.dpaw.wa.gov.au/geoserver/gwc/service/wmts',
                     format: 'image/png',
                     layer: 'public:dpaw_lands_and_waters',
@@ -1801,13 +1801,13 @@ export default {
                 })
             });
 
-            this.geojson = new ol.format.GeoJSON({
+            this.geojson = new GeoJSON({
                 featureProjection: 'EPSG:3857'
             });
 
-            this.groundsData = new ol.Collection();
+            this.groundsData = new Collection();
             this.groundsIds = new Set();
-            this.groundsFilter = new ol.Collection();
+            this.groundsFilter = new Collection();
 
             $.ajax({
                 url: vm.parkstayUrl+'/api/mooring_map/?format=json',
@@ -1841,8 +1841,8 @@ export default {
             });
 
             this.posFeature = new Feature();
-            this.posFeature.setStyle(new ol.style.Style({
-                image: new ol.style.Icon({
+            this.posFeature.setStyle(new Style({
+                image: new Icon({
                     src: vm.locationIcon,
                     snapToPixel: true,
                     anchor: [0.5, 0.5],
@@ -1851,8 +1851,8 @@ export default {
                 })
             }));
 
-            this.posLayer = new ol.layer.Vector({
-                source: new ol.source.Vector({
+            this.posLayer = new VectorLayer({
+                source: new VectorSource({
                     features: [this.posFeature]
                 })
             });
