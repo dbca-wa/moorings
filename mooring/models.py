@@ -30,6 +30,7 @@ from django.core.files.storage import FileSystemStorage
 from django.core import serializers
 from django.utils.crypto import get_random_string
 from ledger_api_client import utils as ledger_api_utils
+from django.db.models.deletion import ProtectedError
 
 logger = logging.getLogger(__name__)
 
@@ -785,6 +786,14 @@ class BookingPeriod(models.Model):
 
     def __unicode__(self):
         return unicode(self.name) or u''
+
+    def delete(self, *args, **kwargs):
+        try:
+            return super().delete(*args, **kwargs)
+        except ProtectedError as e:
+            logger.warning(f'Deletion of BookingPeriod[{self}] is protected by ProtectedError.')
+        except Exception as e:
+            logger.error(f'{e}')
 
 class BookingRange(models.Model):
     BOOKING_RANGE_CHOICES = (
