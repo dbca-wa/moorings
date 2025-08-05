@@ -454,7 +454,6 @@
                 sticker_table_history +=
                     '<tr style="background-color: #ececec;"><th>Value</th><th>Changed By</th><th>Change Date</th><th>Comment</th></tr>';
                 for (var s = 0, l = d[20].length; s < l; s++) {
-                    console.log(d[20][s]);
                     var sticker_comment = "";
                     if (d[20][s]["sticker_comment"] != null) {
                         sticker_comment = d[20][s]["sticker_comment"];
@@ -777,7 +776,6 @@
                             i++
                         ) {
                             //+data['data'][i]['short']+"'>"+data['data'][i]['name']+"</option>";
-                            console.log(data["data"][i]);
                             var bookingid =
                                 "AA" + data["data"][i]["id"];
                             var fullname =
@@ -979,7 +977,6 @@
                                     .draw();
                         }
 
-                        console.log(data);
                     },
                 });
             }

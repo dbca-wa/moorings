@@ -404,21 +404,39 @@ export default {
 				this.sendData(api_endpoints.campground(this.campground.id), 'PUT',true); 
 			}	
         },
-        validateEditor: function(el){
+        validateEditor: function(el) {
             let vm = this;
-			if (el.parents('.form-group').hasClass('has-error')) {
-				el.tooltip("destroy");
-				el.attr("data-original-title", "").parents('.form-group').removeClass('has-error');
-			}
-            if (vm.editor.getText().trim().length == 0) {
-                // add or update tooltips
-                el.tooltip({
-                        trigger: "focus"
-                    })
-                    .attr("data-original-title", 'Description is required')
-                    .parents('.form-group').addClass('has-error');
+            el = el[0] || el; // Ensure el is a DOM element
+            const formGroup = el.closest('.form-group');
+
+            // Remove existing error tooltip if present
+            if (formGroup && formGroup.classList.contains('has-error')) {
+                const instance = bootstrap.Tooltip.getInstance(el);
+                if (instance) {
+                    instance.dispose(); // destroys the existing tooltip
+                }
+                el.removeAttribute('title');
+                el.removeAttribute('data-bs-original-title');
+                formGroup.classList.remove('has-error');
+            }
+
+            // If editor is empty
+            if (vm.editor.getText().trim().length === 0) {
+                el.setAttribute('title', 'Description is required');
+                el.setAttribute('data-bs-placement', 'top');
+                el.setAttribute('data-bs-trigger', 'focus');
+                el.setAttribute('data-bs-toggle', 'tooltip');
+
+                // Create a new tooltip if one doesn't exist
+                let tooltip = bootstrap.Tooltip.getInstance(el);
+                if (!tooltip) {
+                    tooltip = new bootstrap.Tooltip(el);
+                }
+
+                formGroup?.classList.add('has-error');
                 return false;
             }
+
             return true;
         },
         sendData: function(url, method, reload=false) {

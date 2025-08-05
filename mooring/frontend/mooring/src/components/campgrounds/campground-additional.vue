@@ -160,24 +160,41 @@ export default {
 				this.sendData(api_endpoints.campground(this.campground.id), 'PUT',true); 
 			}	
         },
-        validateEditor: function(el){
+        validateEditor: function(el) {
             console.log('in validateEditor');
-            console.log({el});
+            console.log({ el });
+            el = el[0] || el; // Ensure el is a DOM element
+            const vm = this;
+            const formGroup = el.closest('.form-group');
 
-            let vm = this;
-            if (el.parents('.form-group').hasClass('has-error')) {
-                el.tooltip("destroy");
-                el.attr("data-original-title", "").parents('.form-group').removeClass('has-error');
+            // Remove error tooltip if already exists
+            if (formGroup.classList && formGroup.classList.contains('has-error')) {
+                const instance = bootstrap.Tooltip.getInstance(el);
+                if (instance) {
+                    instance.dispose();
+                }
+                el.removeAttribute('data-bs-original-title');
+                formGroup.classList.remove('has-error');
             }
-            if (vm.editor.getText().trim().length == 0) {
-                // add or update tooltips
-                el.tooltip({
-                        trigger: "focus"
-                    })
-                    .attr("data-original-title", 'Description is required')
-                    .parents('.form-group').addClass('has-error');
+
+            // Check if editor is empty
+            if (vm.editor.getText().trim().length === 0) {
+                el.setAttribute('data-bs-toggle', 'tooltip');
+                el.setAttribute('data-bs-placement', 'top');
+                el.setAttribute('title', 'Description is required');
+
+                // Create tooltip instance (only once)
+                let tooltip = bootstrap.Tooltip.getInstance(el);
+                if (!tooltip) {
+                    tooltip = new bootstrap.Tooltip(el, {
+                        trigger: 'focus',
+                    });
+                }
+
+                formGroup.classList.add('has-error');
                 return false;
             }
+
             return true;
         },
         sendData: function(url, method, reload=false) {
