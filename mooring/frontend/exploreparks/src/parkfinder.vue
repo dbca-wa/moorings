@@ -1017,34 +1017,26 @@ export default {
             this.buildmarkers();
         }, 250),
         removePinGroups: function() {
-            // this.pinsCache = {};
-            var layerRemoved = false;
-            var map = this.olmap;
-            var refArray = map.getLayers().getArray().slice();
-            // refArray.forEach(function(layer2) {
-            for (var i = 0; i < refArray.length; i++) {
-                var layer2 = refArray[i];
-                if (layer2 != null) {
-                    var layer = layer2.I;
-                    if (layer != null) {
-                        // map.removeLayer(layer2);
-                        if (layer.hasOwnProperty("markerGroup")) {
-                            if (layer.markerGroup == 'circle') {
-                                map.removeLayer(layer2);
-                                layerRemoved = true;
-                            }
-                        }
-                    }
+            // A guard clause to ensure the map object is available.
+            const map = this.olmap;
+            if (!map) {
+                return;
+            }
+
+            const layers = map.getLayers();
+            
+            // Loop backwards through the layers array.
+            // This is the standard, safest way to remove items from a collection
+            // while iterating over it, as it avoids issues with changing array indices.
+            // This eliminates the need for recursion (`this.removePinGroups()`).
+            for (let i = layers.getLength() - 1; i >= 0; i--) {
+                const layer = layers.item(i);
+                
+                if (layer.get('markerGroup') === 'circle') {
+                    // Remove the layer directly from the map.
+                    map.removeLayer(layer);
                 }
             }
-            if (layerRemoved == true) {
-                // We do this because when we call map.removeLayer it causes the layer 
-                // to go out of sync resulting in pins not being removed as foreach loop is 
-                // changed.  This loop ensure all pins have been removed
-
-                this.removePinGroups();
-            }
-            return layerRemoved; 
         },
         removePinAnchors: function() {
             // return false;
