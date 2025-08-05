@@ -1039,29 +1039,22 @@ export default {
             }
         },
         removePinAnchors: function() {
+            console.log('in removePinAnchors')
             // return false;
             // this.pinsCache = {};
             var layerRemoved = false;
-            var map = this.olmap;
-            var refArray = map.getLayers().getArray().slice();
-            for (var i = 0; i < refArray.length; i++) {
-                    var layer2 = refArray[i];
-                if (layer2 != null) {
-                    var layer = layer2.I;
-                    if (layer != null) {
-                        // map.removeLayer(layer2);
-                        if (layer.hasOwnProperty("markerGroup")) {
-                            if (layer.markerGroup == 'anchor') {
-                                layer2.setVisible(false);
-                                // map.removeLayer(layer2);
-                                // layerRemoved = true;
-                            }
-                        }
-                    }
+            const map = this.olmap;
+            const layers = map.getLayers();
+    
+            // Use the backwards-looping for rubustness
+            for (let i = layers.getLength() - 1; i >= 0; i--) {
+                const layer = layers.item(i);
+                
+                if (layer.get('markerGroup') === 'anchor') {
+                    // map.removeLayer(layer);
+                    layer.setVisible(false)
                 }
-
             }
-
 
             if (layerRemoved == true) {
                 // We do this because when we call map.removeLayer it causes the layer
