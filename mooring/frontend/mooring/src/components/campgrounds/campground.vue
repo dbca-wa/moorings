@@ -1144,7 +1144,7 @@ export default {
                         console.log("There was an error sending data.");
                         console.log(resp);
                         var message = {
-                            title: "Failure: There was and error updating the mooring",
+                            title: "Failure: There was an error updating the mooring",
                             text: resp.responseText,
                             type: "error"
                         }

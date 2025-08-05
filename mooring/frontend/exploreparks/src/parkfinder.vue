@@ -2132,7 +2132,7 @@ export default {
                             if (err) {
                                 swal({
                                     title: 'Error',
-                                    text: "There was and error loading map data please try again.",
+                                    text: "There was an error loading map data please try again.",
                                     type: 'error',
                                     showCancelButton: false,
                                     confirmButtonText: 'Close',

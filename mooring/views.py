@@ -2755,7 +2755,7 @@ class AnnualBookingPeriodDeleteOption(DeleteView):
            self.delete(request, *args, **kwargs)
            messages.success(self.request, 'Annual Booking Period Option Successfully Removed')
         except Exception as e:
-           messages.error(self.request, 'There was and error trying to deleting annual booking option.')
+           messages.error(self.request, 'There was an error trying to deleting annual booking option.')
         return HttpResponseRedirect(self.get_absolute_url())
 
 
@@ -2928,7 +2928,7 @@ class BookingPeriodDeleteGroup(DeleteView):
            self.delete(request, *args, **kwargs)
            messages.success(self.request, 'Booking Group Successfully Removed')
         except Exception as e:
-           messages.error(self.request, 'There was and error trying to delete booking group ')
+           messages.error(self.request, 'There was an error trying to delete booking group ')
            return HttpResponseRedirect(reverse('dash-bookingperiod-group-delete', args=(pk,)))
         return HttpResponseRedirect(self.get_success_url())
 
@@ -2969,7 +2969,7 @@ class AnnualBookingPeriodDeleteGroup(DeleteView):
            self.delete(request, *args, **kwargs)
            messages.success(self.request, 'Annual Booking Group Successfully Removed')
         except Exception as e:
-           messages.error(self.request, 'There was and error trying to delete annual booking group ')
+           messages.error(self.request, 'There was an error trying to delete annual booking group ')
            return HttpResponseRedirect(reverse('dash-annual-bookingperiod-group-delete', args=(pk,)))
         return HttpResponseRedirect(self.get_success_url())
 
@@ -3011,7 +3011,7 @@ class BookingPeriodDeleteOption(DeleteView):
            self.delete(request, *args, **kwargs)
            messages.success(self.request, 'Booking Period Option Successfully Removed')
         except Exception as e:
-           messages.error(self.request, 'There was and error trying to delete booking option.')
+           messages.error(self.request, 'There was an error trying to delete booking option.')
         return HttpResponseRedirect(self.get_absolute_url())
         #return HttpResponseRedirect(reverse('dash-booking-period-option-delete', args=(bp_group_id,pk,)))
         #return super(BookingPeriodDeleteOption, self).post(request, *args, **kwargs)
