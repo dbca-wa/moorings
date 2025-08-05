@@ -1433,287 +1433,285 @@ export default {
             scale = Math.round(scale);
         }
 //        document.getElementById('scale').innerHTML = "Scale = 1 : " + scale;
-      },
-    buildMarkerBookable: function(lat,lon,props,name,marker_id) {
-        var mooring_type =  $("input:radio[name=gear_type]:checked").val();
-        var pin_type=require('./assets/map_pins/pin_red.png'); 
-        var bookable = false;
-        var vectorLayer;
-        var vm = this;
-        if (vm.pinsCache[marker_id] == null) { 
-            if (this.groundsIds.has(marker_id)) {
-                if (vm.markerAvail[marker_id] == 'free') { 
-                     pin_type=require('./assets/map_pins/pin_orange.png');
-                     bookable = true;
-                } else if (vm.markerAvail[marker_id] == 'partial') {
-                     pin_type=require('./assets/map_pins/pin_orange_red.png');
-                     bookable = true;
-                } else {
-                     pin_type=require('./assets/map_pins/pin_red.png');
-                     bookable = false;
-                }	
+        },
+        buildMarkerBookable: function(lat,lon,props,name,marker_id) {
+            var mooring_type =  $("input:radio[name=gear_type]:checked").val();
+            var pin_type=require('./assets/map_pins/pin_red.png'); 
+            var bookable = false;
+            var vectorLayer;
+            var vm = this;
+            if (vm.pinsCache[marker_id] == null) { 
+                if (this.groundsIds.has(marker_id)) {
+                    if (vm.markerAvail[marker_id] == 'free') { 
+                        pin_type=require('./assets/map_pins/pin_orange.png');
+                        bookable = true;
+                    } else if (vm.markerAvail[marker_id] == 'partial') {
+                        pin_type=require('./assets/map_pins/pin_orange_red.png');
+                        bookable = true;
+                    } else {
+                        pin_type=require('./assets/map_pins/pin_red.png');
+                        bookable = false;
+                    }	
+                }
+                var iconFeature = new Feature({
+                    marker_group: 'mooring_marker',
+                    geometry: new Point(transform([lat, lon], 'EPSG:4326', 'EPSG:3857')),
+                    name: name,
+                    bookable: bookable,
+                    marker_id: marker_id,
+                    props: props
+                });
+
+                var iconStyle = new Style({
+                    image: new Icon(/** @type {olx.style.IconOptions} */ ({
+                        imgSize: [32, 32],
+                        size: [32,32],
+                        snapToPixel: true,
+                        anchor: [0.5, 1.0],
+                        anchorXUnits: 'fraction',
+                        anchorYUnits: 'fraction',
+                        opacity: 0.95,
+                        src: pin_type 
+                    })),
+                });
+                // console.log("SET buildMarkerBookable");
+                iconFeature.setStyle(iconStyle);
+
+                var vectorSource = new VectorSource({
+                    features: [iconFeature]
+                });
+                vectorLayer = new VectorLayer({
+                    canDelete: "yes",
+                    markerGroup: "anchor",
+                    source: vectorSource
+                });
+                vm.pinsCache[marker_id+'-'+vm.markerAvail[marker_id]] = vectorLayer; 
+            } else {
+                vectorLayer = vm.pinsCache[marker_id+'-'+vm.markerAvail[marker_id]];
             }
+            return vectorLayer;
+        },
+        buildMarkerNotBookable: function(lat,lon,props,name,marker_id) {
+                    var vm = this; 
+                    if (vm.pinsCache[marker_id+'-'+vm.markerAvail[marker_id]] == null) {
             var iconFeature = new Feature({
-                marker_group: 'mooring_marker',
-                geometry: new Point(transform([lat, lon], 'EPSG:4326', 'EPSG:3857')),
-                name: name,
-                bookable: bookable,
-                marker_id: marker_id,
-                props: props
+                    marker_group: 'mooring_marker',
+            geometry: new Point(transform([lat, lon], 'EPSG:4326', 'EPSG:3857')),
+            name: name,
+            population: 4000,
+            rainfall: 500,
+                    marker_id: marker_id,
+                    props: props
             });
 
             var iconStyle = new Style({
-                image: new Icon(/** @type {olx.style.IconOptions} */ ({
-                    imgSize: [32, 32],
-                    size: [32,32],
-                    snapToPixel: true,
-                    anchor: [0.5, 1.0],
-                    anchorXUnits: 'fraction',
-                    anchorYUnits: 'fraction',
-                    opacity: 0.95,
-                    src: pin_type 
-                })),
-            });
-            // console.log("SET buildMarkerBookable");
-            iconFeature.setStyle(iconStyle);
+            image: new Icon(/** @type {olx.style.IconOptions} */ ({
+                        imgSize: [32, 32],
+                        size: [32,32], 
+                        snapToPixel: true,
+                        anchor: [0.5, 1.0],
+                //    anchor: [115.864627, -32.007385],
+                anchorXUnits: 'fraction',
+                        anchorYUnits: 'fraction',
+                opacity: 0.95,
+                src: require('./assets/map_pins/pin_gray.png')
 
+                }))
+            });
+                // console.log("SET buildMarkerNotBookable");
+            iconFeature.setStyle(iconStyle);
+        
             var vectorSource = new VectorSource({
                 features: [iconFeature]
             });
-            vectorLayer = new VectorLayer({
-                canDelete: "yes",
+
+            var vectorLayer = new VectorLayer({
+            canDelete: "yes",
                 markerGroup: "anchor",
-                source: vectorSource
+            source: vectorSource
             });
-            vm.pinsCache[marker_id+'-'+vm.markerAvail[marker_id]] = vectorLayer; 
-        } else {
-            vectorLayer = vm.pinsCache[marker_id+'-'+vm.markerAvail[marker_id]];
-        }
-        return vectorLayer;
-    },
-    buildMarkerNotBookable: function(lat,lon,props,name,marker_id) {
-                var vm = this; 
-                if (vm.pinsCache[marker_id+'-'+vm.markerAvail[marker_id]] == null) {
-		var iconFeature = new Feature({
-                  marker_group: 'mooring_marker',
-		  geometry: new Point(transform([lat, lon], 'EPSG:4326', 'EPSG:3857')),
-		  name: name,
-		  population: 4000,
-		  rainfall: 500,
-                  marker_id: marker_id,
-                  props: props
-		});
+                vm.pinsCache[marker_id+'-'+vm.markerAvail[marker_id]] = vectorLayer;
+                } else {
+                    vectorLayer = vm.pinsCache[marker_id+'-'+vm.markerAvail[marker_id]];
+                }
+            return vectorLayer;
+        },
+        buildMarkerGroup:function(lat,lon,text, name, zoom_level) {
 
-		var iconStyle = new Style({
-		  image: new Icon(/** @type {olx.style.IconOptions} */ ({
-                    imgSize: [32, 32],
-                    size: [32,32], 
-                    snapToPixel: true,
-                    anchor: [0.5, 1.0],
-			//    anchor: [115.864627, -32.007385],
-		    anchorXUnits: 'fraction',
-                    anchorYUnits: 'fraction',
-		    opacity: 0.95,
-		    src: require('./assets/map_pins/pin_gray.png')
+                var iconFeature = new Feature({
+                    marker_group: 'group_marker',
+                    geometry: new Point(transform([lat, lon], 'EPSG:4326', 'EPSG:3857')),
+                    name: name,
+                    zoom_level: zoom_level
+                });
+                
+                var icon = require('./assets/map_pins/geo_group_red.png');
+                if (text > 30) {
+                        icon = require('./assets/map_pins/geo_group2.png');
+                } else if (text > 10) {
+                        icon = require('./assets/map_pins/geo_group_orange.png');
+                } else {
+                        icon = require('./assets/map_pins/geo_group_red.png');
+                }
 
-	         }))
-	    });
-            // console.log("SET buildMarkerNotBookable");
-	    iconFeature.setStyle(iconStyle);
-	
-	    var vectorSource = new VectorSource({
-	        features: [iconFeature]
-	    });
+                var iconStyle = new Style({
+                            image: new Icon(/** @type {olx.style.IconOptions} */ ({
+                            imgSize: [48, 46],
+                            size: [48,46],
+                            anchor: [0.5, 24],
+                            anchorXUnits: 'fraction',
+                            anchorYUnits: 'pixels',
+                            opacity: 15,
+                            src: icon
+                            })),
 
-	    var vectorLayer = new VectorLayer({
-	       canDelete: "yes",
-               markerGroup: "anchor",
-	       source: vectorSource
-	    });
-            vm.pinsCache[marker_id+'-'+vm.markerAvail[marker_id]] = vectorLayer;
+                            text: new Text({
+                            text: text.toString(),
+                            scale: 1.2,
+                            fill: new Fill({
+                                color: '#000000'
+                            }),
+                            //          stroke: new ol.style.Stroke({
+                            //            color: '#FFFF99',
+                            //            width: 3.5
+                            //          })
+                            })
+                });
+                // console.log("SET buildMarkerGroup");
+                iconFeature.setStyle(iconStyle);
+
+                var vectorSource = new VectorSource({
+                    features: [iconFeature]
+                });
+
+                var vectorLayer = new VectorLayer({
+                    canDelete: "yes",
+                    markerGroup: "circle",
+                    source: vectorSource
+                });
+
+                return vectorLayer;
+        },
+        deleteBooking: function(booking_item_id) {
+            var vm = this;
+            var submitData = {
+                booking_item: booking_item_id,
+            };
+
+            $.ajax({
+                url: vm.parkstayUrl + '/api/booking/delete',
+                dataType: 'json',
+                method: 'POST',
+                data: submitData,
+                success: function(data, stat, xhr) {
+                    vm.updateBooking();
+                },
+                error: function(xhr, stat, err) {
+                    vm.updateBooking();
+                }
+            });  
+        },
+        updateBooking: function() {
+            var vm = this;
+            $.ajax({
+                url: vm.parkstayUrl+'/api/current_booking',
+                dataType: 'json',
+                // async: false,
+                success: function (response, stat, xhr) {
+                    vm.current_booking = response.current_booking.current_booking;
+                    vm.total_booking = response.current_booking.total_price;
+                    vm.timer = response.current_booking.timer;
+                    vm.ongoing_booking = response.current_booking.ongoing_booking[0];
+                    if (response.current_booking.details != null) {  
+                        vm.numAdults = parseInt(response.current_booking.details[0].num_adults) > 0 ? parseInt(response.current_booking.details[0].num_adults) : 2;
+                        vm.numChildren = parseInt(response.current_booking.details[0].num_children) > 0 ? parseInt(response.current_booking.details[0].num_children) : 0;
+                        vm.numInfants =  parseInt(response.current_booking.details[0].num_infants) > 0 ? parseFloat(response.current_booking.details[0].num_infants) : 0;
+                        vm.vesselSize = parseFloat(response.current_booking.details[0].vessel_size) > 0 ? parseFloat(response.current_booking.details[0].vessel_size) : 0;
+                        vm.vesselDraft = parseFloat(response.current_booking.details[0].vessel_draft) > 0 ? parseFloat(response.current_booking.details[0].vessel_draft) : 0;
+                        vm.vesselBeam = parseFloat(response.current_booking.details[0].vessel_beam) > 0 ? parseFloat(response.current_booking.details[0].vessel_beam) : 0;
+                        vm.vesselWeight = parseFloat(response.current_booking.details[0].vessel_weight) > 0 ? parseFloat(response.current_booking.details[0].vessel_weight) : 0;
+                        vm.vesselRego = response.current_booking.details[0].vessel_rego ? response.current_booking.details[0].vessel_rego : "";
+                    }
+
+                }
+            });
+
+        },
+        BookNowCheck: function() {
+            var mooring_type = $('#mapPopupMooringType').val();
+            if (mooring_type == 0) { 
+                this.BookNow('mooring');
             } else {
-                 vectorLayer = vm.pinsCache[marker_id+'-'+vm.markerAvail[marker_id]];
+                    this.BookNow('jettybeach');
             }
-	    return vectorLayer;
-    },
-    buildMarkerGroup:function(lat,lon,text, name, zoom_level) {
-
-              var iconFeature = new Feature({
-                  marker_group: 'group_marker',
-                  geometry: new Point(transform([lat, lon], 'EPSG:4326', 'EPSG:3857')),
-                  name: name,
-                  zoom_level: zoom_level
-              });
-              
-              var icon = require('./assets/map_pins/geo_group_red.png');
-              if (text > 30) {
-                       icon = require('./assets/map_pins/geo_group2.png');
-              } else if (text > 10) {
-                       icon = require('./assets/map_pins/geo_group_orange.png');
-              } else {
-                       icon = require('./assets/map_pins/geo_group_red.png');
-              }
-
-              var iconStyle = new Style({
-                        image: new Icon(/** @type {olx.style.IconOptions} */ ({
-                          imgSize: [48, 46],
-                          size: [48,46],
-                          anchor: [0.5, 24],
-                          anchorXUnits: 'fraction',
-                          anchorYUnits: 'pixels',
-                          opacity: 15,
-                          src: icon
-                        })),
-
-                        text: new Text({
-                          text: text.toString(),
-                          scale: 1.2,
-                          fill: new Fill({
-                            color: '#000000'
-                          }),
-                        //          stroke: new ol.style.Stroke({
-                        //            color: '#FFFF99',
-                        //            width: 3.5
-                        //          })
-                        })
-              });
-              // console.log("SET buildMarkerGroup");
-              iconFeature.setStyle(iconStyle);
-
-              var vectorSource = new VectorSource({
-                  features: [iconFeature]
-              });
-
-              var vectorLayer = new VectorLayer({
-                   canDelete: "yes",
-                   markerGroup: "circle",
-                   source: vectorSource
-              });
-
-              return vectorLayer;
-      },
-      deleteBooking: function(booking_item_id) {
-              var vm = this;
-              var submitData = {
-                  booking_item: booking_item_id,
-              };
-
-              $.ajax({
-                  url: vm.parkstayUrl + '/api/booking/delete',
-                  dataType: 'json',
-                  method: 'POST',
-                  data: submitData,
-                  success: function(data, stat, xhr) {
-                      vm.updateBooking();
-                  },
-                  error: function(xhr, stat, err) {
-                       vm.updateBooking();
-                  }
-              });  
-      },
-      updateBooking: function() {
-        var vm = this;
-        $.ajax({
-            url: vm.parkstayUrl+'/api/current_booking',
-            dataType: 'json',
-            // async: false,
-            success: function (response, stat, xhr) {
-                vm.current_booking = response.current_booking.current_booking;
-                vm.total_booking = response.current_booking.total_price;
-                vm.timer = response.current_booking.timer;
-                vm.ongoing_booking = response.current_booking.ongoing_booking[0];
-                if (response.current_booking.details != null) {  
-                     vm.numAdults = parseInt(response.current_booking.details[0].num_adults) > 0 ? parseInt(response.current_booking.details[0].num_adults) : 2;
-                     vm.numChildren = parseInt(response.current_booking.details[0].num_children) > 0 ? parseInt(response.current_booking.details[0].num_children) : 0;
-                     vm.numInfants =  parseInt(response.current_booking.details[0].num_infants) > 0 ? parseFloat(response.current_booking.details[0].num_infants) : 0;
-                     vm.vesselSize = parseFloat(response.current_booking.details[0].vessel_size) > 0 ? parseFloat(response.current_booking.details[0].vessel_size) : 0;
-                     vm.vesselDraft = parseFloat(response.current_booking.details[0].vessel_draft) > 0 ? parseFloat(response.current_booking.details[0].vessel_draft) : 0;
-                     vm.vesselBeam = parseFloat(response.current_booking.details[0].vessel_beam) > 0 ? parseFloat(response.current_booking.details[0].vessel_beam) : 0;
-                     vm.vesselWeight = parseFloat(response.current_booking.details[0].vessel_weight) > 0 ? parseFloat(response.current_booking.details[0].vessel_weight) : 0;
-                     vm.vesselRego = response.current_booking.details[0].vessel_rego ? response.current_booking.details[0].vessel_rego : "";
-		}
-
-            }
-        });
-
-      },
-      BookNowCheck: function() {
-         var mooring_type = $('#mapPopupMooringType').val();
-         if (mooring_type == 0) { 
-             this.BookNow('mooring');
-	 } else {
-             this.BookNow('jettybeach');
-	 }
-
-      },
-      BookNow: function(mooring_type) { 
-        var vessel_size = $('#vesselSize').val();
-        var vessel_draft = $('#vesselDraft').val();
-        var vessel_beam = $('#vesselBeam').val();
-        var vessel_weight = $('#vesselWeight').val();
-        var vessel_rego = $('#vesselRego').val();
-        if (!(vessel_draft > 0)){
-            swal({
-            title: 'Missing Vessel Draft',
-            text: "Please enter vessel draft:",
-            type: 'warning',
-            showCancelButton: false,
-            confirmButtonText: 'OK',
-            showLoaderOnConfirm: true,
-            allowOutsideClick: false
-            })
-        }
-        if (!(vessel_size > 0) ) {
-            swal({
-            title: 'Missing Vessel Size',
-            text: "Please enter vessel size:",
-            type: 'warning',
-            showCancelButton: false,
-            confirmButtonText: 'OK',
-            showLoaderOnConfirm: true,
-            allowOutsideClick: false
-            })
-        }
-        if (mooring_type == 'jettybeach') {  
-        if (!(vessel_beam > 0)){
-            swal({
-            title: 'Missing Vessel Beam',
-            text: "Please enter vessel beam:",
-            type: 'warning',
-            showCancelButton: false,
-            confirmButtonText: 'OK',
-            showLoaderOnConfirm: true,
-            allowOutsideClick: false
-            })
-        }
-        }
-        if (mooring_type == 'mooring') {
-        if (!(vessel_weight > 0)){
-            swal({
-            title: 'Missing Vessel Weight',
-            text: "Please enter vessel weight:",
-            type: 'warning',
-            showCancelButton: false,
-            confirmButtonText: 'OK',
-            showLoaderOnConfirm: true,
-            allowOutsideClick: false
-            })
-        }
-        }
-        if (!vessel_rego || vessel_rego == "" || vessel_rego == " "){
-            swal({
-                title: 'Missing Vessel Registration',
-                text: "Please enter a vessel registration.",
+        },
+        BookNow: function(mooring_type) { 
+            var vessel_size = $('#vesselSize').val();
+            var vessel_draft = $('#vesselDraft').val();
+            var vessel_beam = $('#vesselBeam').val();
+            var vessel_weight = $('#vesselWeight').val();
+            var vessel_rego = $('#vesselRego').val();
+            if (!(vessel_draft > 0)){
+                swal({
+                title: 'Missing Vessel Draft',
+                text: "Please enter vessel draft:",
                 type: 'warning',
                 showCancelButton: false,
                 confirmButtonText: 'OK',
                 showLoaderOnConfirm: true,
-                allowOutsideClick: false,
-            })
-        }
-      },
+                allowOutsideClick: false
+                })
+            }
+            if (!(vessel_size > 0) ) {
+                swal({
+                title: 'Missing Vessel Size',
+                text: "Please enter vessel size:",
+                type: 'warning',
+                showCancelButton: false,
+                confirmButtonText: 'OK',
+                showLoaderOnConfirm: true,
+                allowOutsideClick: false
+                })
+            }
+            if (mooring_type == 'jettybeach') {  
+                if (!(vessel_beam > 0)){
+                    swal({
+                    title: 'Missing Vessel Beam',
+                    text: "Please enter vessel beam:",
+                    type: 'warning',
+                    showCancelButton: false,
+                    confirmButtonText: 'OK',
+                    showLoaderOnConfirm: true,
+                    allowOutsideClick: false
+                    })
+                }
+            }
+            if (mooring_type == 'mooring') {
+                if (!(vessel_weight > 0)){
+                    swal({
+                    title: 'Missing Vessel Weight',
+                    text: "Please enter vessel weight:",
+                    type: 'warning',
+                    showCancelButton: false,
+                    confirmButtonText: 'OK',
+                    showLoaderOnConfirm: true,
+                    allowOutsideClick: false
+                    })
+                }
+            }
+            if (!vessel_rego || vessel_rego == "" || vessel_rego == " "){
+                swal({
+                    title: 'Missing Vessel Registration',
+                    text: "Please enter a vessel registration.",
+                    type: 'warning',
+                    showCancelButton: false,
+                    confirmButtonText: 'OK',
+                    showLoaderOnConfirm: true,
+                    allowOutsideClick: false,
+                })
+            }
+        },
         loadMap: function() {
-
             var vm = this;
 
             console.log('Loading map...');
@@ -1724,7 +1722,6 @@ export default {
             var search = document.getElementById('searchInput');
             var autocomplete = new Awesomplete(search);
             autocomplete.autoFirst = true;
-
 
             $.ajax({
                 url: vm.parkstayUrl+'/api/search_suggest',
@@ -1892,12 +1889,9 @@ export default {
                 overlays: [this.popup]
             });
         },
-
-
         weightBeam(f) {
             return true; 
         },
-
         /**
          * Navigates to the next page if not on the last page.
          */
@@ -1906,7 +1900,6 @@ export default {
                 this.currentPage++;
             }
         },
-        
         /**
          * Navigates to the previous page if not on the first page.
          */
@@ -1915,7 +1908,6 @@ export default {
                 this.currentPage--;
             }
         },
-
         /**
          * Navigates directly to a specific page number.
          * @param {number} pageNumber - The page to go to.
