@@ -59,7 +59,8 @@ WSGI_APPLICATION = 'mooring.wsgi.application'
 REST_FRAMEWORK = {
     'DEFAULT_PERMISSION_CLASSES': (
         'mooring.perms.OfficerPermission',
-    )
+    ),
+    'EXCEPTION_HANDLER': 'mooring.exceptions.custom_exception_handler',
 }
 
 LANGUAGE_CODE = 'en-au'  # This affects time formats.
