@@ -822,19 +822,18 @@ export default {
             }
         },
         bookingExpired: function() {
-                swal({
-                  title: 'Booking Expired',
-                  text: "Please click start again to begin booking again:",
-                  type: 'warning',
-                  showCancelButton: false,
-                  confirmButtonText: 'Start Again',
-                  showLoaderOnConfirm: true,
-                  allowOutsideClick: false
-                }).then((value) => {
-                        var loc = window.location;
-                        window.location = loc.protocol + '//' + loc.host + '/map/';
-                });
-
+            swal.fire({
+                title: 'Booking Expired',
+                text: "Please click start again to begin booking again:",
+                type: 'warning',
+                showCancelButton: false,
+                confirmButtonText: 'Start Again',
+                showLoaderOnConfirm: true,
+                allowOutsideClick: false
+            }).then((value) => {
+                    var loc = window.location;
+                    window.location = loc.protocol + '//' + loc.host + '/map/';
+            });
         },
         toggleShowFilters: function() {
             this.hideExtraFilters = !this.hideExtraFilters;
@@ -1637,55 +1636,55 @@ export default {
             var vessel_weight = $('#vesselWeight').val();
             var vessel_rego = $('#vesselRego').val();
             if (!(vessel_draft > 0)){
-                swal({
-                title: 'Missing Vessel Draft',
-                text: "Please enter vessel draft:",
-                type: 'warning',
-                showCancelButton: false,
-                confirmButtonText: 'OK',
-                showLoaderOnConfirm: true,
-                allowOutsideClick: false
-                })
-            }
-            if (!(vessel_size > 0) ) {
-                swal({
-                title: 'Missing Vessel Size',
-                text: "Please enter vessel size:",
-                type: 'warning',
-                showCancelButton: false,
-                confirmButtonText: 'OK',
-                showLoaderOnConfirm: true,
-                allowOutsideClick: false
-                })
-            }
-            if (mooring_type == 'jettybeach') {  
-                if (!(vessel_beam > 0)){
-                    swal({
-                    title: 'Missing Vessel Beam',
-                    text: "Please enter vessel beam:",
+                swal.fire({
+                    title: 'Missing Vessel Draft',
+                    text: "Please enter vessel draft:",
                     type: 'warning',
                     showCancelButton: false,
                     confirmButtonText: 'OK',
                     showLoaderOnConfirm: true,
                     allowOutsideClick: false
+                })
+            }
+            if (!(vessel_size > 0) ) {
+                swal.fire({
+                    title: 'Missing Vessel Size',
+                    text: "Please enter vessel size:",
+                    type: 'warning',
+                    showCancelButton: false,
+                    confirmButtonText: 'OK',
+                    showLoaderOnConfirm: true,
+                    allowOutsideClick: false
+                })
+            }
+            if (mooring_type == 'jettybeach') {  
+                if (!(vessel_beam > 0)){
+                    swal.fire({
+                        title: 'Missing Vessel Beam',
+                        text: "Please enter vessel beam:",
+                        type: 'warning',
+                        showCancelButton: false,
+                        confirmButtonText: 'OK',
+                        showLoaderOnConfirm: true,
+                        allowOutsideClick: false
                     })
                 }
             }
             if (mooring_type == 'mooring') {
                 if (!(vessel_weight > 0)){
-                    swal({
-                    title: 'Missing Vessel Weight',
-                    text: "Please enter vessel weight:",
-                    type: 'warning',
-                    showCancelButton: false,
-                    confirmButtonText: 'OK',
-                    showLoaderOnConfirm: true,
-                    allowOutsideClick: false
+                    swal.fire({
+                        title: 'Missing Vessel Weight',
+                        text: "Please enter vessel weight:",
+                        type: 'warning',
+                        showCancelButton: false,
+                        confirmButtonText: 'OK',
+                        showLoaderOnConfirm: true,
+                        allowOutsideClick: false
                     })
                 }
             }
             if (!vessel_rego || vessel_rego == "" || vessel_rego == " "){
-                swal({
+                swal.fire({
                     title: 'Missing Vessel Registration',
                     text: "Please enter a vessel registration.",
                     type: 'warning',
@@ -2107,7 +2106,7 @@ export default {
                                 vm.mapLoading = false;
                             }
                             if (err) {
-                                swal({
+                                swal.fire({
                                     title: 'Error',
                                     text: "There was an error loading map data please try again.",
                                     type: 'error',
