@@ -395,7 +395,7 @@ export default {
                                 vm.message = msg;
                                 vm.$modal.show('messageModal');
                             } else {
-			            swal({
+			            swal.fire({
 				            title: 'Error',
 				            text: data.error[1],
 				            type: 'error',
@@ -404,9 +404,6 @@ export default {
 				            showLoaderOnConfirm: true,
 				            allowOutsideClick: false
 			            })
-	
-
-
 			    }
                         }
                     },
