@@ -60,14 +60,14 @@
                 <div class="small-8 medium-9 large-10">
                         <div class="card">
                              <div class="card-body"><h3 class="card-title">Trolley: <span id='total_trolley'>${{ total_booking }}</span></h3></div>
-                              <div class='columns small-12 medium-12 large-12'> 
-                                 <div v-for="item in current_booking" class="row small-12 medium-12 large-12">
+                        </div>
+                        <div class='columns small-12 medium-12 large-12' style="margin-top:10px; margin-bottom:10px;"> 
+                                 <div v-for="item in current_booking" class="row small-12 medium-12 large-12" >
                                          <div class="columns small-12 medium-9 large-9">{{ item.item }}</div>
                                          <div class="columns small-12 medium-2 large-2">${{ item.amount }}</div>
                                          <div class="columns small-12 medium-1 large-1"><a v-show="item.past_booking == false" style='color: red; opacity: 1;' type="button" class="close" @click="deleteBooking(item.id, item.past_booking)">x</a></div>
                                  </div>
-			      </div>
-                        </div>
+			            </div>
                 </div>
                 <div class="columns small-4 medium-3 large-2">
                         <div v-if="vesselRego.length < 0.1 || vesselRego == ' ' || vesselSize < 0.1 || vesselDraft < 0.1 ">

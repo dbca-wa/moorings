@@ -5,22 +5,22 @@
             <div class="columns small-12 medium-12 large-12" v-show="current_booking.length > 0">
                 <div class="row">
                     <div class="columns small-12 medium-12 large-12" >
-                        <button  title="Please add items into your trolley." v-show="ongoing_booking" style="color: #FFFFFF; background-color: rgb(255, 0, 0);" class="button small-12 medium-12 large-12" >Time Left {{ timeleft }}</button>
+                        <button  title="Please add items into your trolley." v-show="ongoing_booking" style="color: #FFFFFF; background-color: rgb(255, 0, 0); margin-right:10px;" class="button small-12 medium-12 large-12" >Time Left {{ timeleft }}</button>
                         <a v-show="current_booking.length > 0" class="button small-12 medium-12 large-12" :href="parkstayUrl+'/booking'" style="border-radius: 4px; border: 1px solid #2e6da4">Proceed to Check Out</a> <a type="button" :href="parkstayUrl+'/booking/abort'" class="button float-right warning continueBooking" style="color: #fff; background-color: #f0ad4e;  border-color: #eea236; border-radius: 4px;">
                             Cancel in-progress booking
                         </a>
                     </div>
                     <div class="small-12 medium-12 large-12">
-                        <div class="panel panel-default">
-                            <div class="panel-heading"><h3 class="panel-title">Trolley: <span id='total_trolley'>${{ total_booking }}</span></h3></div>
-                            <div class='columns small-12 medium-12 large-12'>
+                        <div class="card">
+                            <div class="card-body"><h3 class="card-title">Trolley: <span id='total_trolley'>${{ total_booking }}</span></h3></div>
+                        </div>
+                          <div class='columns small-12 medium-12 large-12' style="margin-top:10px; margin-bottom:10px;">
                                 <div v-for="item in current_booking" class="row small-12 medium-12 large-12">
                                         <div class="columns small-12 medium-9 large-9">{{ item.item }}</div>
                                         <div class="columns small-12 medium-2 large-2">${{ item.amount }}</div>
                                         <div class="columns small-12 medium-1 large-1"><a v-show="item.past_booking == false" style='color: red; opacity: 1;' type="button" class="close" @click="deleteBooking(item.id)">x</a></div>
                                 </div>
-                            </div>
-                        </div>
+                           </div>
                     </div>
                 </div>
             </div>
@@ -2754,5 +2754,13 @@ export default {
     .ol-control button {
         height: 2em;
         width: 2em;
+    }
+    .card{
+        background-color: #f5f5f5;
+        height:40px;
+    }
+    .card-title{
+        margin-top:-7px;
+        font-size: 16px;
     }
 </style>
