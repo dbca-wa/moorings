@@ -1,4 +1,3 @@
-<!DOCTYPE html>
 <template>
     <div class="addBooking">
         <form name="admissionsBooking" @submit.prevent="processForm">
