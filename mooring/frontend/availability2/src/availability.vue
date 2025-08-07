@@ -49,7 +49,7 @@
                 <div class="small-8 medium-9 large-10">
 
 		<button v-show="ongoing_booking" style="color: #FFFFFF; background-color: rgb(255, 0, 0);" class="button small-12 medium-12 large-12" >Time Left {{ timeleft }} to complete booking.</button>
-		<a type="button" :href="parkstayUrl+'/booking/abort'" class="button float-right warning continueBooking" style="color: #fff; background-color: #f0ad4e;  border-color: #eea236; border-radius: 4px;">
+		<a type="button" :href="parkstayUrl+'/booking/abort'" class="button float-right warning continueBooking" style="color: #fff; background-color: #f0ad4e;  border-color: #eea236; border-radius: 4px; margin-left:4px;">
                       Cancel in-progress booking
                 </a>
               </div>
@@ -58,8 +58,8 @@
         <div class="columns small-12 medium-12 large-12">
         <div class="row">
                 <div class="small-8 medium-9 large-10">
-                        <div class="panel panel-default">
-                             <div class="panel-heading"><h3 class="panel-title">Trolley: <span id='total_trolley'>${{ total_booking }}</span></h3></div>
+                        <div class="card">
+                             <div class="card-body"><h3 class="card-title">Trolley: <span id='total_trolley'>${{ total_booking }}</span></h3></div>
                               <div class='columns small-12 medium-12 large-12'> 
                                  <div v-for="item in current_booking" class="row small-12 medium-12 large-12">
                                          <div class="columns small-12 medium-9 large-9">{{ item.item }}</div>
@@ -136,12 +136,12 @@
             </div>
             <div class="columns small-6 medium-6 large-2">
                 <label>Arrival
-                    <input id="date-arrival" type="text" placeholder="dd/mm/yyyy" v-on:change="update"/>
+                    <input id="date-arrival" type="date" placeholder="dd/mm/yyyy" v-on:change="update" v-model="arrivalDateFormatted"/>
                 </label>
             </div>
             <div class="columns small-6 medium-6 large-2">
                 <label>Departure
-                    <input id="date-departure" type="text" placeholder="dd/mm/yyyy" v-on:change="update"/>
+                    <input id="date-departure" type="date" placeholder="dd/mm/yyyy" v-on:change="update" v-model="departureDateFormatted"/>
                 </label>
             </div>
             <div class="small-6 medium-6 large-2 columns" >
@@ -487,6 +487,14 @@
       border-style: solid;
       border-color: transparent transparent black transparent;
     }
+    .card{
+        background-color: #f5f5f5;
+        height:40px;
+    }
+    .card-title{
+        margin-top:-7px;
+        font-size: 16px;
+    }
 
 }
 
@@ -547,7 +555,7 @@ export default {
             name: '',
             arrivalDate: moment.utc(getQueryParam('arrival', moment.utc(now).format('YYYY/MM/DD')), 'YYYY/MM/DD'),
             departureDate:  moment.utc(getQueryParam('departure', moment.utc(now).add(5, 'days').format('YYYY/MM/DD')), 'YYYY/MM/DD'),
-            parkstayUrl: global.parkstayUrl || process.env.PARKSTAY_URL,
+            parkstayUrl: global.parkstayUrl || process.env.VUE_APP_PARKSTAY_URL,
             useAdminApi: global.useAdminApi || false,
             // order of preference:
             // - GET parameter 'site_id'
@@ -583,6 +591,7 @@ export default {
             classes: {},
             sites: [],
             long_description: '',
+            isLoading: false,
             map: null,
             showMoreInfo: false,
             ongoing_booking: false,
@@ -616,15 +625,44 @@ export default {
         arrivalDateString: {
             cache: false,
             get: function() {
-                return this.arrivalEl[0].value ? moment(this.arrivalData.getDate()).format('YYYY/MM/DD') : null; 
+                return this.arrivalDate ? moment(this.arrivalDate).format('YYYY/MM/DD') : null;
             }
         },
         departureDateString: {
             cache: false,
             get: function() {
-                return this.departureEl[0].value ? moment(this.departureData.getDate()).format('YYYY/MM/DD') : null; 
+                return this.departureDate ? moment(this.departureDate).format('YYYY/MM/DD') : null;
             }
         },
+
+        arrivalDateFormatted: {
+            get() {
+            if (!this.arrivalDate) return '';
+            const d = new Date(this.arrivalDate);
+            const year = d.getFullYear();
+            const month = String(d.getMonth() + 1).padStart(2, '0');
+            const day = String(d.getDate()).padStart(2, '0');
+            return `${year}-${month}-${day}`;
+            },
+            set(value) {
+            this.arrivalDate = new Date(value); // Converts yyyy-MM-dd back to Date object
+            }
+        },
+
+        departureDateFormatted: {
+            get() {
+            if (!this.departureDate) return '';
+            const d = new Date(this.departureDate);
+            const year = d.getFullYear();
+            const month = String(d.getMonth() + 1).padStart(2, '0');
+            const day = String(d.getDate()).padStart(2, '0');
+            return `${year}-${month}-${day}`;
+            },
+            set(value) {
+            this.departureDate = new Date(value); // Converts yyyy-MM-dd back to Date object
+            }
+        },
+
         timeleft: {
                 cache: false,
                 get: function get() {
@@ -1295,59 +1333,59 @@ export default {
 
         $(document).foundation();
         this.arrivalEl = $('#date-arrival');
-        this.arrivalData = this.arrivalEl.fdatepicker({
-            format: 'dd/mm/yyyy',
-            onRender: function (date) {
-                // disallow start dates before today
-                return date.valueOf() < now.valueOf() ? 'disabled': '';
-                //return '';
-            }
-        }).on('changeDate', function (ev) {
-            ev.target.dispatchEvent(new CustomEvent('change'));
-        }).on('change', function (ev) {
-            if (vm.arrivalData.date.valueOf() >= vm.departureData.date.valueOf()) {
-                var newDate = moment(vm.arrivalData.date).add(1, 'days').toDate();
-                vm.departureData.date = newDate;
-                vm.departureData.setValue();
-                vm.departureData.fill();
-                vm.departureEl.trigger('changeDate');
-            }
-            vm.arrivalData.hide();
-            vm.arrivalDate = moment(vm.arrivalData.date);
-            vm.days = Math.floor(moment.duration(vm.departureDate.diff(vm.arrivalDate)).asDays());
-            vm.sites = [];
-        }).on('keydown', function (ev) {
-            if (ev.keyCode == 13) {
-                ev.target.dispatchEvent(new CustomEvent('change'));
-            }
-        }).data('datepicker');
+        // this.arrivalData = this.arrivalEl.fdatepicker({
+        //     format: 'dd/mm/yyyy',
+        //     onRender: function (date) {
+        //         // disallow start dates before today
+        //         return date.valueOf() < now.valueOf() ? 'disabled': '';
+        //         //return '';
+        //     }
+        // }).on('changeDate', function (ev) {
+        //     ev.target.dispatchEvent(new CustomEvent('change'));
+        // }).on('change', function (ev) {
+        //     if (vm.arrivalData.date.valueOf() >= vm.departureData.date.valueOf()) {
+        //         var newDate = moment(vm.arrivalData.date).add(1, 'days').toDate();
+        //         vm.departureData.date = newDate;
+        //         vm.departureData.setValue();
+        //         vm.departureData.fill();
+        //         vm.departureEl.trigger('changeDate');
+        //     }
+        //     vm.arrivalData.hide();
+        //     vm.arrivalDate = moment(vm.arrivalData.date);
+        //     vm.days = Math.floor(moment.duration(vm.departureDate.diff(vm.arrivalDate)).asDays());
+        //     vm.sites = [];
+        // }).on('keydown', function (ev) {
+        //     if (ev.keyCode == 13) {
+        //         ev.target.dispatchEvent(new CustomEvent('change'));
+        //     }
+        // }).data('datepicker');
 
-        this.departureEl = $('#date-departure');
-        this.departureData = this.departureEl.fdatepicker({
-            format: 'dd/mm/yyyy',
-            onRender: function (date) {
-                return (date.valueOf() <= vm.arrivalData.date.valueOf()) ? 'disabled': '';
-            }
-        }).on('changeDate', function (ev) {
-            ev.target.dispatchEvent(new CustomEvent('change'));
-        }).on('change', function (ev) {
-            vm.departureData.hide();
-            vm.departureDate = moment(vm.departureData.date);
-            vm.days = Math.floor(moment.duration(vm.departureDate.diff(vm.arrivalDate)).asDays());
-            vm.sites = [];
-        }).on('keydown', function (ev) {
-            if (ev.keyCode == 13) {
-                ev.target.dispatchEvent(new CustomEvent('change'));
-            }
-        }).data('datepicker');
+        // this.departureEl = $('#date-departure');
+        // this.departureData = this.departureEl.fdatepicker({
+        //     format: 'dd/mm/yyyy',
+        //     onRender: function (date) {
+        //         return (date.valueOf() <= vm.arrivalData.date.valueOf()) ? 'disabled': '';
+        //     }
+        // }).on('changeDate', function (ev) {
+        //     ev.target.dispatchEvent(new CustomEvent('change'));
+        // }).on('change', function (ev) {
+        //     vm.departureData.hide();
+        //     vm.departureDate = moment(vm.departureData.date);
+        //     vm.days = Math.floor(moment.duration(vm.departureDate.diff(vm.arrivalDate)).asDays());
+        //     vm.sites = [];
+        // }).on('keydown', function (ev) {
+        //     if (ev.keyCode == 13) {
+        //         ev.target.dispatchEvent(new CustomEvent('change'));
+        //     }
+        // }).data('datepicker');
 
 
-        this.arrivalData.date = this.arrivalDate.toDate();
-        this.arrivalData.setValue();
-        this.arrivalData.fill();
-        this.departureData.date = this.departureDate.toDate();
-        this.departureData.setValue();
-        this.departureData.fill();
+        // this.arrivalData.date = this.arrivalDate.toDate();
+        // this.arrivalData.setValue();
+        // this.arrivalData.fill();
+        // this.departureData.date = this.departureDate.toDate();
+        // this.departureData.setValue();
+        // this.departureData.fill();
         this.update();
 
             var saneTz = (0 < Math.floor((vm.expiry - moment.now())/1000) < vm.timer);
