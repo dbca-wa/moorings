@@ -355,8 +355,6 @@ export default {
             }
         },
     },
-    watch: {
-    },
     components: {
         bootstrapModal,
         alert,
