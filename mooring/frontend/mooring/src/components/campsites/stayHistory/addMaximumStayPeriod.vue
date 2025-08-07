@@ -4,7 +4,7 @@
     <div class="modal-body">
         <form id="addMaxStayForm" class="form-horizontal">
             <div class="row">
-			    <alert :show.sync="showError" type="danger">{{errorString}}</alert>
+			    <alert v-model:show="showError" type="danger">{{errorString}}</alert>
                 <div class="form-group">
                     <div class="col-md-2">
                         <label for="stay_maximum">Maximum Stay: </label>

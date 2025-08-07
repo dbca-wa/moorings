@@ -4,7 +4,7 @@
     <div class="modal-body">
         <form id="openCGForm" class="form-horizontal">
             <div class="row">
-			    <alert :show.sync="showError" type="danger"></alert>
+			    <alert v-model:show="showError" type="danger"></alert>
                 <div class="form-group">
                     <div class="col-md-2">
                         <label for="open_cg_current_closure">Current Closure: </label>

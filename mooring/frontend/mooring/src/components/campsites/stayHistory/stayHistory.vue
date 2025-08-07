@@ -1,8 +1,8 @@
 <template id="stayHistory">
 <div class="row">
-    <StayHistoryDetail :stay="stay" :campsite.sync="campsite" ref="addMaxStayModal" @addStayHistory="addStayHistory()" @updateStayHistory="updateStayHistory()"></StayHistoryDetail>
+    <StayHistoryDetail :stay="stay" v-model:campsite="campsite" ref="addMaxStayModal" @addStayHistory="addStayHistory()" @updateStayHistory="updateStayHistory()"></StayHistoryDetail>
     <div class="well">
-        <alert ref="retrieveStayAlert" :show.sync="retrieve_stay.error" type="danger" :duration="retrieve_stay.timeout">{{retrieve_stay.errorString}}</alert>
+        <alert ref="retrieveStayAlert" v-model:show="retrieve_stay.error" type="danger" :duration="retrieve_stay.timeout">{{retrieve_stay.errorString}}</alert>
         <div class="col-sm-8">
             <h1>Maximum Stay History</h1>
         </div>

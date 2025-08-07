@@ -3,7 +3,7 @@
 
     <div class="modal-body">
         <form name="priceForm" class="form-horizontal">
-			<alert :show.sync="showError" type="danger">{{errorString}}</alert>
+			<alert v-model:show="showError" type="danger">{{errorString}}</alert>
             <div class="row">
                 <div class="form-group">
                     <div class="col-md-2">

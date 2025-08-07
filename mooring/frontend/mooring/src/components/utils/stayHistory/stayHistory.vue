@@ -1,7 +1,7 @@
 <template id="stayHistory">
     <StayHistoryDetail :stay="stay" :mooringarea="mooringarea" ref="addMaxStayModal" @addCgStayHistory="addStayHistory()" @updateStayHistory="updateStayHistory()"></StayHistoryDetail>
     <div class="row">
-        <alert ref="retrieveStayAlert" :show.sync="retrieve_stay.error" type="danger" :duration="retrieve_stay.timeout">{{retrieve_stay.errorString}}</alert>
+        <alert ref="retrieveStayAlert" v-model:show="retrieve_stay.error" type="danger" :duration="retrieve_stay.timeout">{{retrieve_stay.errorString}}</alert>
         <div class="row" v-if="invent">
             <div class="col-12 text-end">
                 <button @click="showAddStay()" class="btn btn-primary pull-right table_btn">Add Max Stay Period</button>

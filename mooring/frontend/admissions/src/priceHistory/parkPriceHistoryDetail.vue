@@ -8,7 +8,7 @@
 
     <div class="modal-body" style="overflow:visible;">
         <form name="priceForm" class="form-horizontal" style="overflow:visible;">
-			<alert :show.sync="showError" type="danger">{{errorString}}</alert>
+			<alert v-model:show="showError" type="danger">{{errorString}}</alert>
             <!-- <div class="row" style="overflow:visible;">
                 <div class="form-group" style="overflow:visible;">
                     <div class="col-md-2">
