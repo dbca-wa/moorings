@@ -8,7 +8,7 @@
 
     <div class="modal-body">
         <form name="priceForm" class="form-horizontal">
-            <alert :show.sync="showError" type="danger">{{errorString}}</alert>
+            <alert v-model:show="showError" type="danger">{{errorString}}</alert>
 
             <div class="row mb-3">
                 <label for="booking-period-select" class="col-md-3 col-form-label">Booking Period:</label>

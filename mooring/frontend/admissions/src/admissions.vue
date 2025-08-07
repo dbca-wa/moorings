@@ -1,4 +1,3 @@
-<!DOCTYPE html>
 <template>
     <div class="addBooking">
         <form name="admissionsBooking" @submit.prevent="processForm">
@@ -148,7 +147,7 @@
                                         <label for="Total Price">Total Price <span class="text-muted">(GST inclusive.)</span></label>
                                         <div class="input-group">
                                             <span class="input-group-addon">AUD $</span>
-                                            <input type="text" class="form-control" :value="total|formatMoney(2)" readonly="true">
+                                            <input type="text" class="form-control" :value="formatMoney(total, 2)" readonly="true">
                                         </div>
                                     </div>
                                 </div>
@@ -308,7 +307,21 @@ export default {
             this.validateNoOfPeople();
         }
     },
-    filters: {
+    // filters: {
+    //     formatMoney:function(n,c, d, t){
+    //         c = isNaN(c = Math.abs(c)) ? 2 : c;
+    //         d = d == undefined ? "." : d;
+    //         t = t == undefined ? "," : t;
+    //         var s = n < 0 ? "-" : "";
+    //         var i = String(parseInt(n = Math.abs(Number(n) || 0).toFixed(c)));
+    //         var j = (j = i.length) > 3 ? j % 3 : 0;
+    //         return s + (j ? i.substr(0, j) + t : "") + i.substr(j).replace(/(\d{3})(?=\d)/g, "$1" + t) + (c ? d + Math.abs(n - i).toFixed(c).slice(2) : "");
+    //     }
+    // },
+    props: {
+
+    },
+    methods: {
         formatMoney:function(n,c, d, t){
             c = isNaN(c = Math.abs(c)) ? 2 : c;
             d = d == undefined ? "." : d;
@@ -317,12 +330,7 @@ export default {
             var i = String(parseInt(n = Math.abs(Number(n) || 0).toFixed(c)));
             var j = (j = i.length) > 3 ? j % 3 : 0;
             return s + (j ? i.substr(0, j) + t : "") + i.substr(j).replace(/(\d{3})(?=\d)/g, "$1" + t) + (c ? d + Math.abs(n - i).toFixed(c).slice(2) : "");
-        }
-    },
-    props: {
-
-    },
-    methods: {
+        },
         messageModalConfirm: function(){
             this.message = null;
             this.$modal.hide('messageModal');
@@ -395,7 +403,7 @@ export default {
                                 vm.message = msg;
                                 vm.$modal.show('messageModal');
                             } else {
-			            swal({
+			            swal.fire({
 				            title: 'Error',
 				            text: data.error[1],
 				            type: 'error',
@@ -404,9 +412,6 @@ export default {
 				            showLoaderOnConfirm: true,
 				            allowOutsideClick: false
 			            })
-	
-
-
 			    }
                         }
                     },

@@ -218,9 +218,6 @@ export default {
             }
         }
     },
-    watch: {
-        
-    },
     components: {
         alert,
         reason,

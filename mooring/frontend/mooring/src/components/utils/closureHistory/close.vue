@@ -8,7 +8,7 @@
 
     <div class="modal-body">
         <form name="closeForm" class="form-horizontal">
-            <alert :show.sync="showError" type="danger">{{errorString}}</alert>
+            <alert v-model:show="showError" type="danger">{{errorString}}</alert>
 
             <div class="row mb-3 align-items-center">
                 <!-- Closure Start Date -->

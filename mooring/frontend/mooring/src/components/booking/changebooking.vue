@@ -3,7 +3,7 @@
         <modal @ok="ok()" @cancel="cancel()" title="Change Booking" large>
             <form class="form-horizontal" name="changebookingForm">
                 <div class="row">
-                    <alert :show.sync="showError" type="danger"><strong>{{errorString}}</strong></alert>
+                    <alert v-model:show="showError" type="danger"><strong>{{errorString}}</strong></alert>
                     <alert :show="success" type="success"><strong>{{successString}}</strong></alert>
                     <div class="col-lg-12">
                         <div class="form-group">
