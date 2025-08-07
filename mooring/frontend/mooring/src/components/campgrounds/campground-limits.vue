@@ -3,10 +3,10 @@
         <div>
             <form id="limitsForm">
                 <div class="col-sm-12">
-                    <alert :show.sync="showUpdate" type="success" :duration="7000">
+                    <alert v-model:show="showUpdate" type="success" :duration="7000">
                         <p>Mooring successfully updated</p>
                     </alert>
-                    <alert :show.sync="showError" type="danger">
+                    <alert v-model:show="showError" type="danger">
                         <p>{{errorString}}</p>
                     </alert>
                     <div class="row">
