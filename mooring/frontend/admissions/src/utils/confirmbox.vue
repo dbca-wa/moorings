@@ -50,14 +50,15 @@
 <script>
 import {$} from '../hooks.js'
 import {bus} from './eventBus.js'
+import { v4 as uuid } from 'uuid';
 
 export default {
     data:function () {
         return {
-            confirmModal: 'confirmModal'+this._uid,
-            icon: 'modalIcon'+this._uid,
-            text: 'modalText'+this._uid,
-            buttons: 'modalButtons'+this._uid,
+            confirmModal: 'confirmModal'+ uuid(),
+            icon: 'modalIcon' + uuid(),
+            text: 'modalText' + uuid(),
+            buttons: 'modalButtons' + uuid(),
             eventHandler: Array(),
         }
     },
