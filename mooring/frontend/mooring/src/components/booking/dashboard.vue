@@ -1238,9 +1238,9 @@ export default {
                 ]
 
                 var bookings = [];
-                $.each(data.results,function (i,booking) {
+                $.each(data.results, function(i, booking) {
                     var bk = {};
-                    $.each(fields,function (j,field) {
+                    $.each(fields,function (j, field) {
                         switch (j) {
                             case 0:
                                 bk[field] = "AD" + booking.id;
@@ -1331,8 +1331,7 @@ export default {
                 var a = document.createElement("a");
 
                 // 5. Create a Blob from the generated CSV string.
-                file = new Blob([csv], { type: 'text/csv' });
-
+                let file = new Blob([csv], { type: 'text/csv' });
                 var filterDates = (vm.filterDateFrom2) ? (vm.filterDateTo2) ? "From "+vm.filterDateFrom2 + " To "+vm.filterDateTo2: "From "+vm.filterDateFrom2 : (vm.filterDateTo2) ? " To "+vm.filterDateTo2 : "" ;
                 var filename =  filterDates + "_admissions" + ".csv";
                 filename.replace(" ", "_");

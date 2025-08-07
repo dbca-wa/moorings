@@ -285,5 +285,4 @@ class ForceDebugInContextMiddleware:
         if hasattr(response, 'context_data') and response.context_data is not None:
             # Add the DEBUG value to the response's context data
             response.context_data['DEBUG'] = settings.DEBUG
-            print(f"--- Middleware injected DEBUG: {response.context_data['DEBUG']} ---")
         return response
