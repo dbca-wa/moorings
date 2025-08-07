@@ -143,7 +143,10 @@
                                         <label for="Email" class="required">Email</label>
                                         <input type="text" name="email" class="form-control" v-model="booking.email" list="matched_emails" @change="autofillUser()" @keyup="fetchUsers()"  >
                                         <datalist id="matched_emails">
-                                            <option v-if="usersEmail" v-for="email in usersEmail" :value="email"></option>
+                                            <!-- <option v-if="usersEmail" v-for="email in usersEmail" :value="email"></option> -->
+                                            <template v-if="usersEmail">
+                                                <option v-for="email in usersEmail" :key="email" :value="email"></option>
+                                            </template>
                                         </datalist>
                                       </div>
                                   </div>
