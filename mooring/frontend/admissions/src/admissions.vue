@@ -230,7 +230,7 @@ export default {
     data: function() {
         let vm = this;
         return {
-        mooringUrl: global.parkstayUrl || process.env.PARKSTAY_URL,
+        mooringUrl: global.parkstayUrl || process.env.VUE_APP_PARKSTAY_URL,
         arrivalDate: moment.utc(getQueryParam('arrival', moment.utc(now).format('YYYY/MM/DD')), 'YYYY/MM/DD'),
         overnightStay: '',
         vesselReg: '',
@@ -539,7 +539,7 @@ export default {
             vm.noPayment = false;
             if(reg){
                 $.ajax({
-                    url: process.env.PARKSTAY_URL + "/api/registeredVessels/",
+                    url: process.env.VUE_APP_PARKSTAY_URL + "/api/registeredVessels/",
                     dataType: 'json',
                     data: data,
                     method: 'GET',
@@ -638,7 +638,7 @@ export default {
                 'location': location,
             }
             $.ajax({
-                url: process.env.PARKSTAY_URL + "/api/admissions/get_price_by_location.json/",
+                url: process.env.VUE_APP_PARKSTAY_URL + "/api/admissions/get_price_by_location.json/",
                 method: 'GET',
                 data: data,
                 dataType: 'json',
