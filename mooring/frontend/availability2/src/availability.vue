@@ -720,7 +720,7 @@ export default {
             }
         },
         bookingExpired: function() {
-                swal({
+                swal.fire({
                   title: 'Booking Expired',
                   text: "Please click start again to begin booking again:",
                   type: 'warning',
@@ -728,15 +728,17 @@ export default {
                   confirmButtonText: 'Start Again',
                   showLoaderOnConfirm: true,
                   allowOutsideClick: false
-                }).then((value) => {
-                        var loc = window.location;
-//                        window.location = loc.protocol + '//' + loc.host + loc.pathname;
-                        window.location = loc.protocol + '//' + loc.host + '/map/';
-		});
+                    }).then((result) => {
+                        if (result.isConfirmed) {
+                        const loc = window.location;
+                        window.location = `${loc.protocol}//${loc.host}/map/`;
+                        }
+                    });
+
 
 	},
         createBookingError: function(message) {
-                swal({
+                swal.fire({
                   title: 'Error',
                   text: message,
                   type: 'error',
@@ -749,7 +751,7 @@ export default {
         },
         deleteBooking: function(booking_item_id, past_booking) {
              if (past_booking == true) { 
-                swal({
+                swal.fire({
                   title: 'Error',
                   text: "Unable to delete past booking",
                   type: 'warning',
@@ -776,7 +778,7 @@ export default {
                   data: submitData,
                   success: function(data, stat, xhr) {
                      if (data.result == 'error') { 
-                         swal({
+                         swal.fire({
                             title: 'Error',
                             text: data.message,
                             type: 'warning',
@@ -791,7 +793,7 @@ export default {
                       vm.update();
                   },
                   error: function(data, stat, err) {
-                     swal({
+                     swal.fire({
 	                  title: 'Error',
         	          text: 'Uknown Error',
                 	  type: 'warning',
@@ -878,7 +880,7 @@ export default {
             var vm = this;
             if (vm.vesselSize > 0 ) { 
             } else {
-                swal({
+                swal.fire({
                   title: 'Missing Vessel Size',
                   text: "Please enter vessel size:",
                   type: 'warning',
@@ -1015,7 +1017,7 @@ export default {
         checkGuests: function(){
             let vm = this;
             if (vm.numAdults < 0 || vm.numChildren < 0 || vm.numInfants < 0){
-                swal({
+                swal.fire({
                     title: 'Invalid Guest Amount',
                     text: "Number of guests cannot be a negative.",
                     type: 'warning',
@@ -1034,7 +1036,7 @@ export default {
         validateVessel: function(){
             let vm = this;
             if (vm.vesselRego.length < 1 || vm.vesselRego == ' '){
-                swal({
+                swal.fire({
                   title: 'Invalid Vessel Registration',
                   text: "Please enter a valid vessel registration",
                   type: 'warning',
@@ -1045,7 +1047,7 @@ export default {
                 });
             }
             if (vm.vesselSize < 0.1){
-                swal({
+                swal.fire({
                   title: 'Invalid Vessel Size',
                   text: "Please enter a valid vessel size",
                   type: 'warning',
@@ -1056,7 +1058,7 @@ export default {
                 });
             }
             if (vm.vesselDraft < 0.1){
-                swal({
+                swal.fire({
                   title: 'Invalid Vessel Draft',
                   text: "Please enter a valid vessel draft",
                   type: 'warning',
@@ -1067,7 +1069,7 @@ export default {
                 });
             }
             if (vm.vesselBeam < 0.1){
-                swal({
+                swal.fire({
                   title: 'Invalid Vessel Beam',
                   text: "Please enter a valid vessel beam",
                   type: 'warning',
@@ -1078,7 +1080,7 @@ export default {
                 });
             }
             if (vm.vesselWeight < 0.1){
-                swal({
+                swal.fire({
                   title: 'Invalid Vessel Weight',
                   text: "Please enter a valid vessel weight",
                   type: 'warning',
@@ -1089,7 +1091,7 @@ export default {
                 });
             }
             if (vm.numAdults < 1){
-                swal({
+                swal.fire({
                   title: 'Invalid Number of Adults',
                   text: "Please choose the correct number of adults",
                   type: 'warning',
@@ -1304,7 +1306,7 @@ export default {
                                     vm.showSecondErrorLine = false;
                                 }
                                 else {
-		                      swal({
+		                      swal.fire({
                 		          title: 'Error',
 		                          text: 'Uknown Error',
                 		          type: 'warning',
