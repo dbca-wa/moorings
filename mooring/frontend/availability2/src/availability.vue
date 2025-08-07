@@ -719,6 +719,15 @@ export default {
                 site.showBreakdown = true;
             }
         },
+        
+        formatDate: function (dateStr) {
+            const date = new Date(dateStr);
+            const day = String(date.getDate()).padStart(2, '0');
+            const month = String(date.getMonth() + 1).padStart(2, '0'); // Months are zero-based
+            const year = date.getFullYear();
+            return `${day}/${month}/${year}`;
+        },
+
         bookingExpired: function() {
                 swal.fire({
                   title: 'Booking Expired',
@@ -832,9 +841,9 @@ export default {
               vm.loadingID = vm.loadingID + 1;
               vm.isLoading =true;
               $('#spinnerLoader').show();
-
-              var booking_start = $('#date-arrival').val();
-              var booking_finish = $('#date-departure').val();
+              
+              var booking_start = vm.formatDate($('#date-arrival').val());
+              var booking_finish = vm.formatDate($('#date-departure').val());
 
               var submitData = {
                   site_id: site_id,
