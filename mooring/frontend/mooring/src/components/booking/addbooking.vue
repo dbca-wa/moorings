@@ -12,11 +12,11 @@
                                   <img v-if="campground.images && campground.images.length>0" :src="campground.images[0].image" width="250" class="img-thumbnail img-responsive">
                                   <img v-else src="https://placeholdit.imgix.net/~text?txtsize=33&txt=Campground&w=250&h=250" alt="campground"  width="250" class="img-thumbnail img-responsive">
                                   <p class="pricing" v-if="priceHistory">
-                                      <strong >${{priceHistory[0].rate.mooring|formatMoney(2)}}</strong>
+                                      <strong >${{formatMoney(priceHistory[0].rate.mooring, 2)}}</strong>
                                       <br> <span class="text-muted">Per adult per night</span>
                                   </p>
                                   <p class="pricing" v-else>
-                                      <strong >${{0|formatMoney(2)}}</strong>
+                                      <strong >${{formatMoney(0, 2)}}</strong>
                                        <span class="text-muted">Per adult per night</span><br>
                                       Select campsite for pricing details
                                   </p>
@@ -205,7 +205,7 @@
                             <div class="col-lg-6" v-if="park.entry_fee_required">
                                 <div class="row">
                                     <div class="col-lg-12" v-if="park.entry_fee_required">
-                                        <h3 class="text-primary">Park Entry Fees <small>(${{parkPrices.vehicle|formatMoney(2)}}/per vehicle)</small></h3>
+                                        <h3 class="text-primary">Park Entry Fees <small>(${{formatMoney(parkPrices.vehicle, 2)}}/per vehicle)</small></h3>
                                     </div>
                                 </div>
                                 <div class="row">
@@ -266,7 +266,7 @@
                                 <label for="Total Price">Total Price <span class="text-muted">(GST inclusive.)</span></label>
                                 <div class="input-group">
                                   <span class="input-group-addon">AUD <i class="fa fa-usd"></i></span>
-                                  <input type="text" class="form-control" :placeholder="0|formatMoney(2)" :value="booking.price|formatMoney(2)" readonly="true">
+                                  <input type="text" class="form-control" :placeholder="formatMoney(0, 2)" :value="formatMoney(booking.price, 2)" readonly="true">
                                 </div>
                               </div>
                           </div>
@@ -472,15 +472,6 @@ export default {
         }
     },
     filters:{
-        formatMoney:function(n,c, d, t){
-            c = isNaN(c = Math.abs(c)) ? 2 : c;
-            d = d == undefined ? "." : d;
-            t = t == undefined ? "," : t;
-            var s = n < 0 ? "-" : "";
-            var i = String(parseInt(n = Math.abs(Number(n) || 0).toFixed(c)));
-            var j = (j = i.length) > 3 ? j % 3 : 0;
-           return s + (j ? i.substr(0, j) + t : "") + i.substr(j).replace(/(\d{3})(?=\d)/g, "$1" + t) + (c ? d + Math.abs(n - i).toFixed(c).slice(2) : "");
-         }
     },
     watch:{
         selected_campsite:function () {
@@ -517,6 +508,15 @@ export default {
         }
     },
     methods:{
+        formatMoney:function(n,c, d, t){
+            c = isNaN(c = Math.abs(c)) ? 2 : c;
+            d = d == undefined ? "." : d;
+            t = t == undefined ? "," : t;
+            var s = n < 0 ? "-" : "";
+            var i = String(parseInt(n = Math.abs(Number(n) || 0).toFixed(c)));
+            var j = (j = i.length) > 3 ? j % 3 : 0;
+           return s + (j ? i.substr(0, j) + t : "") + i.substr(j).replace(/(\d{3})(?=\d)/g, "$1" + t) + (c ? d + Math.abs(n - i).toFixed(c).slice(2) : "");
+        },
         fetchSites:function () {
             let vm =this;
             console.log("fetchSites");

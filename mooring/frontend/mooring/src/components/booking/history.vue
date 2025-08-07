@@ -9,13 +9,13 @@
                             <span><strong>Confirmation #</strong> : PS{{booking.id}}</span>
                         </div>
                         <div class="col-sm-3">
-                            <span><strong>Arrival</strong> : {{booking.arrival | formatDate}}</span>
+                            <span><strong>Arrival</strong> : {{ formatDate(booking.arrival) }}</span>
                         </div>
                         <div class="col-sm-3">
-                            <span><strong>Departure</strong> : {{booking.departure | formatDate}}</span>
+                            <span><strong>Departure</strong> : {{ formatDate(booking.departure) }}</span>
                         </div>
                         <div class="col-sm-3">
-                            <span><strong>Cost</strong> : {{booking.cost_total | formatAmount }}</span>
+                            <span><strong>Cost</strong> : {{ formatAmount(booking.cost_total) }}</span>
                         </div>
                     </div>
                     <div class="row" style="margin-top:10px;">
@@ -207,15 +207,13 @@ export default {
             });
         }
     },
-    filters:{
+    methods:{
         formatDate(_date){
             return Moment(_date).format("DD/MM/YYYY");
         },
         formatAmount(amount){
             return parseFloat(amount).toFixed(2);
-        }
-    },
-    methods:{
+        },
         ok:function () {
             let vm =this;
             if($(vm.form).valid()){
