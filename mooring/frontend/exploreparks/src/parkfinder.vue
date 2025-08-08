@@ -264,7 +264,7 @@
 
                 <div style='width: 100%; height: 1px;' align='right'>
                     <div v-show='mapLoading == true' class='map-loading' style='border: 1px solid #00000'>
-                        <img style='width:20px; height: 20px;' src='/static/common/img/ajax-loader-spinner.gif'>&nbsp;&nbsp;Please Wait
+                        <img style='width:20px; height: 20px;' src='@/assets/ajax-loader-spinner.gif'>&nbsp;&nbsp;Please Wait
                     </div>
                 </div>
 
@@ -316,7 +316,7 @@
                         </div>
                         <div class="small-12 medium-12 large-12 columns" >
                             <img v-if="f.images[0]" class="thumbnail" v-bind:src="f.images[0].image" style='width: 230px; height: 230px;' />
-                            <img v-else class="thumbnail" src="/static/exploreparks/mooring_photo_scaled.png" style='width: 230px; height: 230px;'/>
+                            <img v-else class="thumbnail" src="@/assets/mooring_photo_scaled.png" style='width: 230px; height: 230px;'/>
                         </div>
                         <div class="small-12 medium-9 large-9 columns">
                             <div v-html="f.description"/>
@@ -2437,7 +2437,7 @@ export default {
     @font-face {
         font-family: "DPaWSymbols";
         // src: url('/static/exploreparks/fonts/boating.woff') format("woff"); 
-        src: url('~@/assets/fonts/boating.woff') format("woff");
+        src: url('@/assets/fonts/boating.woff') format("woff");
     }
 
     .symb {
