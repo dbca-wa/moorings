@@ -228,7 +228,7 @@ def mooring_url_group(tg):
         'DAILY_TERMS_URL': DAILY_TERMS_URL,
         'DAILY_FEES_URL': DAILY_FEES_URL,
         'PARKSTAY_EXTERNAL_URL': settings.PARKSTAY_EXTERNAL_URL,
-        'DEV_STATIC_URL': settings.DEV_STATIC_URL,
+        # 'DEV_STATIC_URL': settings.DEV_STATIC_URL,
         'TEMPLATE_GROUP' : template_group,
         'GIT_COMMIT_DATE' : settings.GIT_COMMIT_DATE,
         'GIT_COMMIT_HASH' : settings.GIT_COMMIT_HASH,
