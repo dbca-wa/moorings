@@ -34,6 +34,7 @@ INSTALLED_APPS += [
     'appmonitor_client',
     'crispy_forms',
     'crispy_bootstrap5',
+    'django_vite',
 ]
 
 MIDDLEWARE_CLASSES += [
@@ -92,7 +93,9 @@ CACHES = {
     }
 }
 STATICFILES_DIRS.append(os.path.join(os.path.join(BASE_DIR, 'mooring', 'static')))
-
+STATICFILES_DIRS.append(os.path.join(os.path.join(BASE_DIR, "mooring", "static", "moorings_vue")))
+STATICFILES_DIRS.append(os.path.join(os.path.join(BASE_DIR, "mooring", "static", "exploreparks_vue")))
+STATICFILES_DIRS.append(os.path.join(os.path.join(BASE_DIR, "mooring", "static", "admissions_vue")))
 
 BPAY_ALLOWED = decouple.config('BPAY_ALLOWED', default=False)
 OSCAR_BASKET_COOKIE_OPEN = 'mooring_basket'
@@ -146,10 +149,6 @@ ROTTNEST_EMAIL = decouple.config('ROTTNEST_EMAIL', default='mooringbookings@dbca
 DEFAULT_FROM_EMAIL = decouple.config('EMAIL_FROM', default='no-reply@dbca.wa.gov.au')
 EXPLORE_PARKS_URL = decouple.config('EXPLORE_PARKS_URL', default='https://mooring.dbca.wa.gov.au/')
 PARKSTAY_EXTERNAL_URL = decouple.config('PARKSTAY_EXTERNAL_URL', default='https://mooring.dbca.wa.gov.au/')
-DEV_STATIC = decouple.config('DEV_STATIC', default=False)
-DEV_STATIC_URL = decouple.config('DEV_STATIC_URL', default='')
-if DEV_STATIC and not DEV_STATIC_URL:
-    raise ImproperlyConfigured('If running in DEV_STATIC, DEV_STATIC_URL has to be set')
 ROTTNEST_ISLAND_URL = decouple.config('ROTTNEST_URL', default=[])
 DEPT_DOMAINS = decouple.config('DEPT_DOMAINS', default=['dpaw.wa.gov.au', 'dbca.wa.gov.au'])
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
@@ -192,3 +191,25 @@ GROUP_NAME_CHOICES = [
     GROUP_NAME_MOORING_INVENTORY,
     GROUP_NAME_PAYMENTS_OFFICERS,
 ]
+
+RUNNING_DEVSERVER = len(sys.argv) > 1 and sys.argv[1] == "runserver"
+
+# Make sure this returns true when in local development
+# so you can use the vite dev server with hot module reloading
+USE_VITE_DEV_SERVER = RUNNING_DEVSERVER and EMAIL_INSTANCE == "DEV" and DEBUG is True
+
+STATIC_URL_PREFIX = "/static/<project_name>_vue/" if USE_VITE_DEV_SERVER else "<project_name>_vue/"
+
+DJANGO_VITE = {
+  "default": {
+    "dev_mode": USE_VITE_DEV_SERVER,
+    "dev_server_host": "localhost", # Default host for vite (can change if needed)
+    "dev_server_port": 5173, # Default port for vite (can change if needed)
+    "static_url_prefix": STATIC_URL_PREFIX,
+  }
+}
+
+VUE3_ENTRY_SCRIPT = decouple.config(
+  "VUE3_ENTRY_SCRIPT",
+  default="src/main.js", # This path will be auto prefixed with the       static_url_prefix from DJANGO_VITE above
+) # Path of the vue3 entry point script served by vite
