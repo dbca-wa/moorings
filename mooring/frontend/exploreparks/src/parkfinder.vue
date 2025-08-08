@@ -420,6 +420,12 @@ import moment from 'moment';
 import swal from 'sweetalert2';
 import 'sweetalert2/dist/sweetalert2.css';
 
+import sitesOnlineIcon from './assets/pin.svg';
+import sitesInPersonIcon from './assets/pin_offline.svg';
+import sitesAltIcon from './assets/pin_alt.svg';
+import locationIcon from './assets/location.svg';
+import boatingFont from './assets/fonts/boating.woff';
+
 var nowTemp = new Date();
 var now = moment.utc({year: nowTemp.getFullYear(), month: nowTemp.getMonth(), day: nowTemp.getDate(), hour: 0, minute: 0, second: 0}).toDate();
 var fivedays = new Date();
@@ -431,7 +437,8 @@ export default {
     el: '#parkfinder',
     data: function () {
         return {
-            parkstayUrl: process.env.VUE_APP_PARKSTAY_URL || global.parkstayUrl,
+            // parkstayUrl: process.env.VUE_APP_PARKSTAY_URL || global.parkstayUrl,
+            parkstayUrl: process.env.VUE_APP_PARKSTAY_URL,
             defaultCenter: [13775786.985667605, -2871569.067879858], // [123.75, -24.966],
             defaultLayers: [
                 ['dpaw:mapbox_outdoors', {}],
@@ -476,11 +483,11 @@ export default {
             sitesOnline: true,
             sitesInPerson: true,
             sitesAlt: true,
-            sitesOnlineIcon: require('./assets/pin.svg'),
-            sitesInPersonIcon: require('./assets/pin_offline.svg'),
-            sitesAltIcon: require('./assets/pin_alt.svg'),
-            locationIcon: require('./assets/location.svg'),
-            boatingFont: require('./assets/fonts/boating.woff'),
+            sitesOnlineIcon: sitesOnlineIcon,
+            sitesInPersonIcon: sitesInPersonIcon,
+            sitesAltIcon: sitesAltIcon,
+            locationIcon: locationIcon,
+            boatingFont: boatingFont,
             paginate: ['filterResults'],
             selectedFeature: null,
             current_map_scale: 1950001,
