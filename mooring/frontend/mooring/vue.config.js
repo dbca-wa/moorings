@@ -10,13 +10,13 @@ module.exports = defineConfig({
     publicPath: '/static/moorings_vue/',
     filenameHashing: false,
     chainWebpack: (config) => {
-        config.resolve.alias.set("vue", "@vue/compat");
-        config.module
-            .rule("vue")
-            .use("vue-loader")
-            .tap((options) => {
-                return { ...options, compilerOptions: { compatConfig: { MODE: 2, }, }, };
-            });
+        // config.resolve.alias.set("vue", "@vue/compat");
+        // config.module
+        //     .rule("vue")
+        //     .use("vue-loader")
+        //     .tap((options) => {
+        //         return { ...options, compilerOptions: { compatConfig: { MODE: 2, }, }, };
+        //     });
         config.resolve.alias.set('@vue-utils', path.resolve(__dirname, 'src/utils/vue'));
         config.resolve.alias.set('@common-utils', path.resolve(__dirname, 'src/components/common/'));
         config.resolve.alias.set('@static-root', path.resolve(__dirname, '../../../staticfiles/'));
