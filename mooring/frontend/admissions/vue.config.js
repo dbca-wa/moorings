@@ -6,8 +6,8 @@ let port = process.env.PORT ? parseInt(process.env.PORT) : 8081;
 
 module.exports = defineConfig({
     runtimeCompiler: true,
-    outputDir: path.resolve(__dirname, '../../static/admissions'),
-    publicPath: '/static/admissions/',
+    outputDir: path.resolve(__dirname, '../../static/admissions_vue'),
+    publicPath: '/static/admissions_vue/',
     filenameHashing: false,
     chainWebpack: (config) => {
         // config.resolve.alias.set("vue", "@vue/compat");
