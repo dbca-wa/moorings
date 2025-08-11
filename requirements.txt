@@ -63,4 +63,4 @@ django-phonenumber-field==8.0.0
 babel~=2.15.0
 pytz==2025.1
 gevent==25.5.1
-django-vite~=3.0.6
+django-vite~=3.1.0
