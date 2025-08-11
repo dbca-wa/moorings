@@ -195,16 +195,11 @@ GROUP_NAME_CHOICES = [
 ]
 
 RUNNING_DEVSERVER = len(sys.argv) > 1 and sys.argv[1] == "runserver"
-print('RUNNING_DEVSERVER: ' + str(RUNNING_DEVSERVER))
 
 EMAIL_INSTANCE = decouple.config("EMAIL_INSTANCE", default="DEV")
 # Make sure this returns true when in local development
 # so you can use the vite dev server with hot module reloading
-# print('EMAIL_INSTANCE: ' + EMAIL_INSTANCE)
-print(f"EMAIL_INSTANCE: {repr(EMAIL_INSTANCE)} (type: {type(EMAIL_INSTANCE)})")
-print('DEBUG: ' + str(DEBUG))
 use_vite_dev_server = RUNNING_DEVSERVER and EMAIL_INSTANCE == "DEV" and DEBUG is True
-print('use_vite_dev_server: ' + str(use_vite_dev_server))
 
 DJANGO_VITE = {
   "default": {
@@ -215,8 +210,6 @@ DJANGO_VITE = {
     # The directory prefix for static files built by ViteJS.
   }
 }
-
-print(DJANGO_VITE)
 
 VUE3_ENTRY_SCRIPT = decouple.config(
   "VUE3_ENTRY_SCRIPT",
