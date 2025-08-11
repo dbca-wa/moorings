@@ -6,6 +6,12 @@
     Mooring Map - Department of Parks and Wildlife
 {% endblock %}
 
+{% block extra_js %}
+    {% if use_vite_dev_server %}
+        {% vite_hmr_client %}
+    {% endif %}
+{% endblock %}
+
 {% block content %}
     <div id="parkfinder"></div>
     <script type="text/javascript">
@@ -13,7 +19,4 @@
     </script>
 
     <script type="module" src="{% vite_asset_url vue3_entry_script %}?v={{ build_tag }}"></script>
-    {% vite_asset 'src/main.js' %}
-    <script type="module" src="http://localhost:8083/src/main.js"></script>
-
 {% endblock %}
