@@ -242,7 +242,10 @@ def mooring_url_group(tg):
 #        'IS_PAYMENT_OFFICER' : is_payment_officer,
 #        'IS_CUSTOMER' : is_customer,
         'PUBLIC_URL' : PUBLIC_URL,
-        'MOORING_GROUP': mooring_group
+        'MOORING_GROUP': mooring_group,
+        'build_tag': settings.BUILD_TAG,
+        "vue3_entry_script": settings.VUE3_ENTRY_SCRIPT,
+        "use_vite_dev_server": settings.USE_VITE_DEV_SERVER,
         }
 
 

@@ -1,5 +1,6 @@
 import os
 import sys
+import hashlib
 # from confy import env
 import decouple
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
@@ -200,8 +201,8 @@ RUNNING_DEVSERVER = len(sys.argv) > 1 and sys.argv[1] == "runserver"
 # USE_VITE_DEV_SERVER = RUNNING_DEVSERVER and EMAIL_INSTANCE == "DEV" and DEBUG is True
 USE_VITE_DEV_SERVER = DEBUG
 
-# STATIC_URL_PREFIX = "/static/exploreparks_vue/" if USE_VITE_DEV_SERVER else "exploreparks_vue/"
-STATIC_URL_PREFIX = "" if USE_VITE_DEV_SERVER else "exploreparks_vue/"
+STATIC_URL_PREFIX = "/static/exploreparks_vue/" if USE_VITE_DEV_SERVER else "exploreparks_vue/"
+# STATIC_URL_PREFIX = "" if USE_VITE_DEV_SERVER else "exploreparks_vue/"
 
 DJANGO_VITE = {
   "default": {
@@ -216,3 +217,7 @@ VUE3_ENTRY_SCRIPT = decouple.config(
   "VUE3_ENTRY_SCRIPT",
   default="src/main.js", # This path will be auto prefixed with the       static_url_prefix from DJANGO_VITE above
 ) # Path of the vue3 entry point script served by vite
+
+BUILD_TAG = decouple.config(
+    "BUILD_TAG", hashlib.md5(os.urandom(32)).hexdigest()
+)
