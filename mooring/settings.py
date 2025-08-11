@@ -9,7 +9,7 @@ os.environ.setdefault("BASE_DIR", BASE_DIR)
 from ledger_api_client.settings_base import *
 from decimal import Decimal
 
-DEBUG = decouple.config('DEBUG', default=True)
+DEBUG = decouple.config('DEBUG', default=True, cast=bool)
 BASE_DIR = None
 BASE_DIR_ENV = decouple.config('BASE_DIR', default=None)
 if BASE_DIR_ENV is None:
@@ -99,10 +99,10 @@ STATICFILES_DIRS.append(os.path.join(os.path.join(BASE_DIR, "mooring", "static",
 STATICFILES_DIRS.append(os.path.join(os.path.join(BASE_DIR, "mooring", "static", "exploreparks_vue")))
 STATICFILES_DIRS.append(os.path.join(os.path.join(BASE_DIR, "mooring", "static", "admissions_vue")))
 
-BPAY_ALLOWED = decouple.config('BPAY_ALLOWED', default=False)
+BPAY_ALLOWED = decouple.config('BPAY_ALLOWED', default=False, cast=bool)
 OSCAR_BASKET_COOKIE_OPEN = 'mooring_basket'
 OSCAR_BASKET_COOKIE_LIFETIME = decouple.config('OSCAR_BASKET_COOKIE_LIFETIME',  default=(7 * 24 * 60 * 60))
-OSCAR_BASKET_COOKIE_SECURE = decouple.config('OSCAR_BASKET_COOKIE_SECURE', default=False)
+OSCAR_BASKET_COOKIE_SECURE = decouple.config('OSCAR_BASKET_COOKIE_SECURE', default=False, cast=bool)
 
 CRON_CLASSES = [
     #'mooring.cron.SendBookingsConfirmationCronJob',
@@ -171,7 +171,7 @@ UNALLOCATED_ORACLE_CODE = 'NNP449 GST'
 
 DATA_UPLOAD_MAX_NUMBER_FIELDS = 10240 
 BOOKING_PROPERTY_CACHE_VERSION = '2.00'
-ML_ADMISSION_PAID_CHECK=decouple.config('ML_ADMISSION_PAID_CHECK', default=False)
+ML_ADMISSION_PAID_CHECK=decouple.config('ML_ADMISSION_PAID_CHECK', default=False, cast=bool)
 #os.environ.setdefault("UPDATE_PAYMENT_ALLOCATION", True)
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 X_FRAME_OPTIONS = 'SAMEORIGIN'
