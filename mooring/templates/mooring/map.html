@@ -11,12 +11,9 @@
     <script type="text/javascript">
         var parkstayUrl = window.location.protocol + '//' + window.location.host;
     </script>
-    {% comment %}
-    <script type="text/javascript" src="{% static 'exploreparks/js/chunk-vendors.js' %}?ver={{ GIT_COMMIT_HASH }}"></script>
-    <script type="text/javascript" src="{% static 'exploreparks/js/main.js' %}?ver={{ GIT_COMMIT_HASH }}"></script>
-    {% vite_asset 'src/main.js' %}
+
     <script type="module" src="{% vite_asset_url vue3_entry_script %}?v={{ build_tag }}"></script>
     {% vite_asset 'src/main.js' %}
-    {% endcomment %}
     <script type="module" src="http://localhost:8083/src/main.js"></script>
+
 {% endblock %}
