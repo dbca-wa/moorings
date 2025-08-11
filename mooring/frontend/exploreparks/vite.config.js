@@ -12,7 +12,7 @@ export default defineConfig(({ mode }) => {
     const isProduction = mode === 'production';
 
     return {
-        base: ``,
+        base: '',
         server: {
             host: host,
             port: port,
@@ -27,6 +27,7 @@ export default defineConfig(({ mode }) => {
                 protocol: 'ws',
                 host: 'localhost',
                 port: port,
+                // clientPort: port
             },
         },
         plugins: [
@@ -51,6 +52,9 @@ export default defineConfig(({ mode }) => {
                 '@daterangepicker':
                     'bootstrap-daterangepicker/daterangepicker.js',
             },
+        },
+        define: {
+            'process.env': {}
         },
         build: {
             manifest: 'manifest.json',

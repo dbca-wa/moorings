@@ -1,4 +1,5 @@
 import os
+import sys
 # from confy import env
 import decouple
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
@@ -196,15 +197,17 @@ RUNNING_DEVSERVER = len(sys.argv) > 1 and sys.argv[1] == "runserver"
 
 # Make sure this returns true when in local development
 # so you can use the vite dev server with hot module reloading
-USE_VITE_DEV_SERVER = RUNNING_DEVSERVER and EMAIL_INSTANCE == "DEV" and DEBUG is True
+# USE_VITE_DEV_SERVER = RUNNING_DEVSERVER and EMAIL_INSTANCE == "DEV" and DEBUG is True
+USE_VITE_DEV_SERVER = DEBUG
 
-STATIC_URL_PREFIX = "/static/<project_name>_vue/" if USE_VITE_DEV_SERVER else "<project_name>_vue/"
+# STATIC_URL_PREFIX = "/static/exploreparks_vue/" if USE_VITE_DEV_SERVER else "exploreparks_vue/"
+STATIC_URL_PREFIX = "" if USE_VITE_DEV_SERVER else "exploreparks_vue/"
 
 DJANGO_VITE = {
   "default": {
     "dev_mode": USE_VITE_DEV_SERVER,
     "dev_server_host": "localhost", # Default host for vite (can change if needed)
-    "dev_server_port": 5173, # Default port for vite (can change if needed)
+    "dev_server_port": 8083, # Default port for vite (can change if needed)
     "static_url_prefix": STATIC_URL_PREFIX,
   }
 }
