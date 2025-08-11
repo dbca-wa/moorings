@@ -12,7 +12,7 @@ export default defineConfig(({ mode }) => {
     const isProduction = mode === 'production';
 
     return {
-        base: '',
+        base: `/static/${applicationNameShort}_vue/`,  //Base public path when served in development or production.
         server: {
             host: host,
             port: port,
