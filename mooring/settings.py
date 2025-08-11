@@ -195,23 +195,28 @@ GROUP_NAME_CHOICES = [
 ]
 
 RUNNING_DEVSERVER = len(sys.argv) > 1 and sys.argv[1] == "runserver"
+print('RUNNING_DEVSERVER: ' + str(RUNNING_DEVSERVER))
 
+EMAIL_INSTANCE = decouple.config("EMAIL_INSTANCE", default="DEV")
 # Make sure this returns true when in local development
 # so you can use the vite dev server with hot module reloading
-# USE_VITE_DEV_SERVER = RUNNING_DEVSERVER and EMAIL_INSTANCE == "DEV" and DEBUG is True
-USE_VITE_DEV_SERVER = DEBUG
-
-STATIC_URL_PREFIX = "/static/exploreparks_vue/" if USE_VITE_DEV_SERVER else "exploreparks_vue/"
-# STATIC_URL_PREFIX = "" if USE_VITE_DEV_SERVER else "exploreparks_vue/"
+# print('EMAIL_INSTANCE: ' + EMAIL_INSTANCE)
+print(f"EMAIL_INSTANCE: {repr(EMAIL_INSTANCE)} (type: {type(EMAIL_INSTANCE)})")
+print('DEBUG: ' + str(DEBUG))
+use_vite_dev_server = RUNNING_DEVSERVER and EMAIL_INSTANCE == "DEV" and DEBUG is True
+print('use_vite_dev_server: ' + str(use_vite_dev_server))
 
 DJANGO_VITE = {
   "default": {
-    "dev_mode": USE_VITE_DEV_SERVER,
+    "dev_mode": use_vite_dev_server,  # Indicates whether to serve assets via the ViteJS development server or from compiled production assets.
     "dev_server_host": "localhost", # Default host for vite (can change if needed)
     "dev_server_port": 8083, # Default port for vite (can change if needed)
-    "static_url_prefix": STATIC_URL_PREFIX,
+    "static_url_prefix": "/static/exploreparks_vue/" if use_vite_dev_server else "exploreparks_vue/"
+    # The directory prefix for static files built by ViteJS.
   }
 }
+
+print(DJANGO_VITE)
 
 VUE3_ENTRY_SCRIPT = decouple.config(
   "VUE3_ENTRY_SCRIPT",
