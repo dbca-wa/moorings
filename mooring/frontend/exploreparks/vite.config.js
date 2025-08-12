@@ -1,0 +1,75 @@
+import { defineConfig } from 'vite';
+import vue from '@vitejs/plugin-vue';
+import path from 'path';
+import vueDevTools from 'vite-plugin-vue-devtools';
+import svgLoader from 'vite-svg-loader';
+
+const applicationNameShort = 'exploreparks';
+const port = process.env.PORT ? parseInt(process.env.PORT) : 8083;
+const host = process.env.HOST || '0.0.0.0';
+
+export default defineConfig(({ mode }) => {
+    const isProduction = mode === 'production';
+
+    return {
+        base: `/static/${applicationNameShort}_vue/`,  //Base public path when served in development or production.
+        server: {
+            host: host,
+            port: port,
+            strictPort: true,
+            open: false,
+            headers: {
+                'Access-Control-Allow-Origin': '*',
+                'Access-Control-Allow-Headers':
+                    'Origin, X-Requested-With, Content-Type, Accept',
+            },
+            origin: `http://localhost:${port}`,
+            hmr: {
+                protocol: 'ws',
+                host: 'localhost',
+                port: port,
+                // clientPort: port
+            },
+        },
+        plugins: [
+            vueDevTools(),
+            vue(),
+            svgLoader({
+                defaultImport: 'url',
+            }),
+        ],
+        resolve: {
+            alias: {
+                vue: 'vue/dist/vue.esm-bundler.js',
+                '@': path.resolve(__dirname, './src'),
+            },
+        },
+        define: {
+            'process.env': {}
+        },
+        build: {
+            manifest: 'manifest.json',
+            filenameHashing: false,
+            commonjsOptions: { transformMixedEsModules: true },
+            root: path.resolve(__dirname, './src'),
+            outDir: path.resolve(
+                __dirname,
+                `../../static/${applicationNameShort}_vue`
+            ),
+            // publicPath: `/static/${applicationNameShort}_vue`,
+            sourcemap: true,
+            rollupOptions: {
+                input: {
+                    main: path.resolve(__dirname, 'src/main.js'),
+                },
+                output: {
+                    entryFileNames: 'js/[name].js',
+                    chunkFileNames: 'js/[name].js',
+                    assetFileNames: '[ext]/[name].[ext]',
+                },
+            },
+            exclude: ['jquery', 'bootstrap'],
+            emptyOutDir: true,
+        },
+    };
+});

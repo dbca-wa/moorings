@@ -103,8 +103,11 @@ uwsgi*.ini
 mooring/static/moorings_vue/*
 mooring/static/moorings_vue.back/*
 mooring/static/admissions/*
+mooring/static/admissions_vue/*
 mooring/static/availability2/*
+mooring/static/availability2_vue/*
 mooring/static/exploreparks/*
+mooring/static/exploreparks_vue/*
 
 # Temp back folders
 mooring/frontend/*.back/*
