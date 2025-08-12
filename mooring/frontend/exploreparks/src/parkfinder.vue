@@ -1330,29 +1330,26 @@ export default {
                                         if (mooring_type == 'all') {
                                             if (response[x][m]['geometry'] != null ) {
                                                 if (response[x][m]['geometry'].hasOwnProperty('coordinates')) {
-                                                        if (vm.pinsCache[response[x][m]['id']+'-'+vm.markerAvail[response[x][m]['id']]] == null) {
-						                      map.addLayer(vm.buildMarkerBookable(response[x][m]['geometry']['coordinates'][0],response[x][m]['geometry']['coordinates'][1],response[x][m]['properties'],response[x][m]['properties']['name'],response[x][m]['id']));
-                                                        } else {
-                                                            var layer2 = vm.pinsCache[response[x][m]['id']+'-'+vm.markerAvail[response[x][m]['id']]];
-                                                            layer2.setVisible(true);
-
-                                                     }
-
+                                                    if (vm.pinsCache[response[x][m]['id']+'-'+vm.markerAvail[response[x][m]['id']]] == null) {
+                                                        map.addLayer(vm.buildMarkerBookable(response[x][m]['geometry']['coordinates'][0],response[x][m]['geometry']['coordinates'][1],response[x][m]['properties'],response[x][m]['properties']['name'],response[x][m]['id']));
+                                                    } else {
+                                                        var layer2 = vm.pinsCache[response[x][m]['id']+'-'+vm.markerAvail[response[x][m]['id']]];
+                                                        layer2.setVisible(true);
+                                                    }
                                                 }
                                             }
-							            }
-						            }
+                                        }
+                                    }
                                     if (response[x][m]['properties']['mooring_type'] == 2) {
                                         if (mooring_type == 'all' || mooring_type == 'public-notbookable') {
                                             if (response[x][m]['geometry'] != null ) {
                                                 if (response[x][m]['geometry'].hasOwnProperty('coordinates')) {
-                                                     if (vm.pinsCache[response[x][m]['id']+'-'+vm.markerAvail[response[x][m]['id']]] == null) {
-                                                     map.addLayer(vm.buildMarkerNotBookable(response[x][m]['geometry']['coordinates'][0],response[x][m]['geometry']['coordinates'][1],response[x][m]['properties'],response[x][m]['properties']['name'],response[x][m]['id']));
-                                                     } else {
-                                                            var layer2 = vm.pinsCache[response[x][m]['id']+'-'+vm.markerAvail[response[x][m]['id']]];
-                                                            layer2.setVisible(true);
-                                                            
-						     }
+                                                    if (vm.pinsCache[response[x][m]['id']+'-'+vm.markerAvail[response[x][m]['id']]] == null) {
+                                                    map.addLayer(vm.buildMarkerNotBookable(response[x][m]['geometry']['coordinates'][0],response[x][m]['geometry']['coordinates'][1],response[x][m]['properties'],response[x][m]['properties']['name'],response[x][m]['id']));
+                                                    } else {
+                                                        var layer2 = vm.pinsCache[response[x][m]['id']+'-'+vm.markerAvail[response[x][m]['id']]];
+                                                        layer2.setVisible(true);
+                                                    }
                                                 }
                                             }
                                         }
@@ -1422,7 +1419,7 @@ export default {
         },
         buildMarkerBookable: function(lat,lon,props,name,marker_id) {
             var vm = this;
-            var mooring_type =  $("input:radio[name=gear_type]:checked").val();
+            // var mooring_type =  $("input:radio[name=gear_type]:checked").val();
             var pin_type = vm.pin_red
             var bookable = false;
             var vectorLayer;
@@ -1457,7 +1454,7 @@ export default {
                         anchorXUnits: 'fraction',
                         anchorYUnits: 'fraction',
                         opacity: 0.95,
-                        src: vm.pin_type 
+                        src: pin_type 
                     })),
                 });
                 iconFeature.setStyle(iconStyle);
