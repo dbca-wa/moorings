@@ -23,6 +23,7 @@ export default defineConfig(({ mode }) => {
                 'Access-Control-Allow-Headers':
                     'Origin, X-Requested-With, Content-Type, Accept',
             },
+            origin: `http://localhost:${port}`,
             hmr: {
                 protocol: 'ws',
                 host: 'localhost',
@@ -55,7 +56,7 @@ export default defineConfig(({ mode }) => {
                 __dirname,
                 `../../static/${applicationNameShort}_vue`
             ),
-            publicPath: ``,
+            // publicPath: `/static/${applicationNameShort}_vue`,
             sourcemap: true,
             rollupOptions: {
                 input: {
