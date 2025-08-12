@@ -176,9 +176,7 @@
                     </div>
                 </div>
 
-                <!-- <div class="row"><div class="small-12 columns"> -->
-                    <hr class="search"/>
-                <!-- </div>  -->
+                <hr class="search"/>
 
                 <div class="row" id="legend" style="margin-bottom:10px;">
                     <div class="small-12 medium-12 large-12 columns">
@@ -186,22 +184,22 @@
                     </div>
                     <div class="small-12 medium-12 large-3 columns">
                         <label>Public:
-                            <img class="publicPin" src="./assets/map_pins/pin_gray.png" />
+                            <img class="publicPin" :src="pin_gray" />
                         </label>
                     </div>
                     <div class="small-12 medium-12 large-3 columns">
                         <label>Available:
-                            <img class="availablePin" src="./assets/map_pins/pin_orange.png" />
+                            <img class="availablePin" :src="pin_orange" />
                         </label>
                     </div>
                     <div class="small-12 medium-12 large-3 columns">
                         <label>Partial Dates:
-                            <img class="partialPin" src="./assets/map_pins/pin_orange_red.png" />
+                            <img class="partialPin" :src="pin_orange_red" />
                         </label>
                     </div>
                     <div class="small-12 medium-12 large-3 columns">
                         <label>Unavailable:
-                            <img class="unavailablePin" src="./assets/map_pins/pin_red.png" />
+                            <img class="unavailablePin" :src="pin_red" />
                         </label>
                     </div>
                 </div>
@@ -264,7 +262,7 @@
 
                 <div style='width: 100%; height: 1px;' align='right'>
                     <div v-show='mapLoading == true' class='map-loading' style='border: 1px solid #00000'>
-                        <img style='width:20px; height: 20px;' src='/static/common/img/ajax-loader-spinner.gif'>&nbsp;&nbsp;Please Wait
+                        <img style='width:20px; height: 20px;' src='@/assets/ajax-loader-spinner.gif'>&nbsp;&nbsp;Please Wait
                     </div>
                 </div>
 
@@ -316,7 +314,7 @@
                         </div>
                         <div class="small-12 medium-12 large-12 columns" >
                             <img v-if="f.images[0]" class="thumbnail" v-bind:src="f.images[0].image" style='width: 230px; height: 230px;' />
-                            <img v-else class="thumbnail" src="/static/exploreparks/mooring_photo_scaled.png" style='width: 230px; height: 230px;'/>
+                            <img v-else class="thumbnail" src="@/assets/mooring_photo_scaled.png" style='width: 230px; height: 230px;'/>
                         </div>
                         <div class="small-12 medium-9 large-9 columns">
                             <div v-html="f.description"/>
@@ -414,11 +412,25 @@ import Geolocation from 'ol/Geolocation';
 import { transform, METERS_PER_UNIT, fromLonLat, toLonLat } from 'ol/proj';
 import Point from 'ol/geom/Point';
 
-//var ol = require('openlayers/dist/ol-debug');
 import debounce from 'debounce';
 import moment from 'moment';
 import swal from 'sweetalert2';
 import 'sweetalert2/dist/sweetalert2.css';
+
+import sitesOnlineIcon from '@/assets/pin.svg';
+import sitesInPersonIcon from '@/assets/pin_offline.svg';
+import sitesAltIcon from '@/assets/pin_alt.svg';
+import locationIcon from '@/assets/location.svg';
+import boatingFont from '@/assets/fonts/boating.woff';
+
+import iconDefault from '@/assets/map_pins/geo_group_red.png';
+import icon30Plus from '@/assets/map_pins/geo_group2.png';
+import icon10Plus from '@/assets/map_pins/geo_group_orange.png';
+
+import pin_orange from '@/assets/map_pins/pin_orange.png';
+import pin_orange_red from '@/assets/map_pins/pin_orange_red.png';
+import pin_red from '@/assets/map_pins/pin_red.png';
+import pin_gray from '@/assets/map_pins/pin_gray.png';
 
 var nowTemp = new Date();
 var now = moment.utc({year: nowTemp.getFullYear(), month: nowTemp.getMonth(), day: nowTemp.getDate(), hour: 0, minute: 0, second: 0}).toDate();
@@ -431,29 +443,16 @@ export default {
     el: '#parkfinder',
     data: function () {
         return {
-            parkstayUrl: process.env.VUE_APP_PARKSTAY_URL || global.parkstayUrl,
+            // parkstayUrl: process.env.VUE_APP_PARKSTAY_URL || global.parkstayUrl,
+            parkstayUrl: import.meta.env.VITE_PARKSTAY_URL,
             defaultCenter: [13775786.985667605, -2871569.067879858], // [123.75, -24.966],
             defaultLayers: [
                 ['dpaw:mapbox_outdoors', {}],
                 ['cddp:dpaw_tenure', {}],
             ],
             filterList: [
-                // {name: '2WD accessible', symb: 'RV2', key: 'twowheel', 'remoteKey': ['2WD/SUV ACCESS']},
-                // {name: 'Campfires allowed', symb: 'RF10', key: 'campfire', 'remoteKey': ['FIREPIT']},
-                // {name: 'Dogs allowed', symb: 'RG2', key: 'dogs', 'remoteKey': ['DOGS']}
             ],
             extraFilterList: [
-                // {name: 'BBQ', symb: 'RF8G', key: 'bbq', 'remoteKey': ['BBQ']},
-                // {name: 'Dish washing', symb: 'RF17', key: 'dishwashing', 'remoteKey': ['DISHWASHING']},
-                // {name: 'Dump station', symb: 'RF19', key: 'sullage', 'remoteKey': ['DUMP STATION']},
-                // {name: 'Generators allowed', symb: 'RG15', key: 'generators', 'remoteKey': ['GENERATORS PERMITTED']},
-                // {name: 'Mains water', symb: 'RF13', key: 'water', 'remoteKey': ['MAINS WATER']},
-                // {name: 'Picnic tables', symb: 'RF6', key: 'picnic', 'remoteKey': ['PICNIC TABLE']},
-                // {name: 'Sheltered picnic tables', symb: 'RF7', key: 'picnicsheltered', 'remoteKey': ['TABLE - SHELTERED']},
-                // {name: 'Showers', symb: 'RF15', key: 'showers', 'remoteKey': ['SHOWER']},
-                // {name: 'Toilets', symb: 'RF1', key: 'toilets', 'remoteKey': ['TOILETS']},
-                // {name: 'Walk trail', symb: 'RW3', key: 'walktrail', 'remoteKey': ['WALK TRAIL']},
-                // {name: 'Powered sites', symb: 'MAINS', key: 'walktrail', 'remoteKey': ['POWERED SITES']},
                 {name: 'Bookable Mooring', symb: 'MAINS', key: 'jettpenn', 'remoteKey': ['POWERED SITES']},
                 {name: 'Non Bookable Mooring', symb: 'MAINS', key: 'mooring', 'remoteKey': ['POWERED SITES']},
             ],
@@ -476,11 +475,11 @@ export default {
             sitesOnline: true,
             sitesInPerson: true,
             sitesAlt: true,
-            sitesOnlineIcon: require('./assets/pin.svg'),
-            sitesInPersonIcon: require('./assets/pin_offline.svg'),
-            sitesAltIcon: require('./assets/pin_alt.svg'),
-            locationIcon: require('./assets/location.svg'),
-            boatingFont: require('./assets/fonts/boating.woff'),
+            sitesOnlineIcon: sitesOnlineIcon,
+            sitesInPersonIcon: sitesInPersonIcon,
+            sitesAltIcon: sitesAltIcon,
+            locationIcon: locationIcon,
+            boatingFont: boatingFont,
             paginate: ['filterResults'],
             selectedFeature: null,
             current_map_scale: 1950001,
@@ -510,6 +509,11 @@ export default {
             // For custom pagination.  vue-paginate cannot be used with Vue3
             currentPage: 1,
             itemsPerPage: 9,
+
+            pin_orange: pin_orange,
+            pin_orange_red: pin_orange_red,
+            pin_red: pin_red,
+            pin_gray: pin_gray, 
         }
     },
     computed: {
@@ -775,7 +779,8 @@ export default {
             if(reg){
                 $.ajax({
                     //url: process.env.VUE_APP_PARKSTAY_URL + "/api/registeredVessels/",
-                    url: process.env.VUE_APP_PARKSTAY_URL + "/api/get_vessel_info/",
+                    // url: import.meta.env.VITE_PARKSTAY_URL + "/api/get_vessel_info/",
+                    url: process.env.VITE_PARKSTAY_URL + "/api/get_vessel_info/",
                     dataType: 'json',
                     data: data,
                     method: 'GET',
@@ -1038,7 +1043,6 @@ export default {
             }
         },
         removePinAnchors: function() {
-            console.log('in removePinAnchors')
             // return false;
             // this.pinsCache = {};
             var layerRemoved = false;
@@ -1094,8 +1098,6 @@ export default {
             var filterCb = function (el) {
                 if (vm.filterParams[el.key] === true) {
                     for (var i = 0; i < el.remoteKey.length; i++) {
-                         console.log(i);
-                         console.log(el.remoteKey[i]);
                          legit.add(el.remoteKey[i]);
                     }                  
                 }
@@ -1328,29 +1330,26 @@ export default {
                                         if (mooring_type == 'all') {
                                             if (response[x][m]['geometry'] != null ) {
                                                 if (response[x][m]['geometry'].hasOwnProperty('coordinates')) {
-                                                        if (vm.pinsCache[response[x][m]['id']+'-'+vm.markerAvail[response[x][m]['id']]] == null) {
-						                      map.addLayer(vm.buildMarkerBookable(response[x][m]['geometry']['coordinates'][0],response[x][m]['geometry']['coordinates'][1],response[x][m]['properties'],response[x][m]['properties']['name'],response[x][m]['id']));
-                                                        } else {
-                                                            var layer2 = vm.pinsCache[response[x][m]['id']+'-'+vm.markerAvail[response[x][m]['id']]];
-                                                            layer2.setVisible(true);
-
-                                                     }
-
+                                                    if (vm.pinsCache[response[x][m]['id']+'-'+vm.markerAvail[response[x][m]['id']]] == null) {
+                                                        map.addLayer(vm.buildMarkerBookable(response[x][m]['geometry']['coordinates'][0],response[x][m]['geometry']['coordinates'][1],response[x][m]['properties'],response[x][m]['properties']['name'],response[x][m]['id']));
+                                                    } else {
+                                                        var layer2 = vm.pinsCache[response[x][m]['id']+'-'+vm.markerAvail[response[x][m]['id']]];
+                                                        layer2.setVisible(true);
+                                                    }
                                                 }
                                             }
-							            }
-						            }
+                                        }
+                                    }
                                     if (response[x][m]['properties']['mooring_type'] == 2) {
                                         if (mooring_type == 'all' || mooring_type == 'public-notbookable') {
                                             if (response[x][m]['geometry'] != null ) {
                                                 if (response[x][m]['geometry'].hasOwnProperty('coordinates')) {
-                                                     if (vm.pinsCache[response[x][m]['id']+'-'+vm.markerAvail[response[x][m]['id']]] == null) {
-                                                     map.addLayer(vm.buildMarkerNotBookable(response[x][m]['geometry']['coordinates'][0],response[x][m]['geometry']['coordinates'][1],response[x][m]['properties'],response[x][m]['properties']['name'],response[x][m]['id']));
-                                                     } else {
-                                                            var layer2 = vm.pinsCache[response[x][m]['id']+'-'+vm.markerAvail[response[x][m]['id']]];
-                                                            layer2.setVisible(true);
-                                                            
-						     }
+                                                    if (vm.pinsCache[response[x][m]['id']+'-'+vm.markerAvail[response[x][m]['id']]] == null) {
+                                                    map.addLayer(vm.buildMarkerNotBookable(response[x][m]['geometry']['coordinates'][0],response[x][m]['geometry']['coordinates'][1],response[x][m]['properties'],response[x][m]['properties']['name'],response[x][m]['id']));
+                                                    } else {
+                                                        var layer2 = vm.pinsCache[response[x][m]['id']+'-'+vm.markerAvail[response[x][m]['id']]];
+                                                        layer2.setVisible(true);
+                                                    }
                                                 }
                                             }
                                         }
@@ -1419,21 +1418,21 @@ export default {
 //        document.getElementById('scale').innerHTML = "Scale = 1 : " + scale;
         },
         buildMarkerBookable: function(lat,lon,props,name,marker_id) {
-            var mooring_type =  $("input:radio[name=gear_type]:checked").val();
-            var pin_type=require('./assets/map_pins/pin_red.png'); 
+            var vm = this;
+            // var mooring_type =  $("input:radio[name=gear_type]:checked").val();
+            var pin_type = vm.pin_red
             var bookable = false;
             var vectorLayer;
-            var vm = this;
             if (vm.pinsCache[marker_id] == null) { 
                 if (this.groundsIds.has(marker_id)) {
                     if (vm.markerAvail[marker_id] == 'free') { 
-                        pin_type=require('./assets/map_pins/pin_orange.png');
+                        pin_type = vm.pin_orange
                         bookable = true;
                     } else if (vm.markerAvail[marker_id] == 'partial') {
-                        pin_type=require('./assets/map_pins/pin_orange_red.png');
+                        pin_type = vm.pin_orange_red
                         bookable = true;
                     } else {
-                        pin_type=require('./assets/map_pins/pin_red.png');
+                        pin_type = vm.pin_red
                         bookable = false;
                     }	
                 }
@@ -1458,7 +1457,6 @@ export default {
                         src: pin_type 
                     })),
                 });
-                // console.log("SET buildMarkerBookable");
                 iconFeature.setStyle(iconStyle);
 
                 var vectorSource = new VectorSource({
@@ -1476,105 +1474,94 @@ export default {
             return vectorLayer;
         },
         buildMarkerNotBookable: function(lat,lon,props,name,marker_id) {
-                    var vm = this; 
-                    if (vm.pinsCache[marker_id+'-'+vm.markerAvail[marker_id]] == null) {
-            var iconFeature = new Feature({
+            var vm = this; 
+            if (vm.pinsCache[marker_id+'-'+vm.markerAvail[marker_id]] == null) {
+                var iconFeature = new Feature({
                     marker_group: 'mooring_marker',
-            geometry: new Point(transform([lat, lon], 'EPSG:4326', 'EPSG:3857')),
-            name: name,
-            population: 4000,
-            rainfall: 500,
+                    geometry: new Point(transform([lat, lon], 'EPSG:4326', 'EPSG:3857')),
+                    name: name,
+                    population: 4000,
+                    rainfall: 500,
                     marker_id: marker_id,
                     props: props
-            });
+                });
 
-            var iconStyle = new Style({
-            image: new Icon(/** @type {olx.style.IconOptions} */ ({
+                var iconStyle = new Style({
+                    image: new Icon(/** @type {olx.style.IconOptions} */ ({
                         imgSize: [32, 32],
                         size: [32,32], 
                         snapToPixel: true,
                         anchor: [0.5, 1.0],
-                //    anchor: [115.864627, -32.007385],
-                anchorXUnits: 'fraction',
+                        anchorXUnits: 'fraction',
                         anchorYUnits: 'fraction',
-                opacity: 0.95,
-                src: require('./assets/map_pins/pin_gray.png')
-
-                }))
-            });
-                // console.log("SET buildMarkerNotBookable");
-            iconFeature.setStyle(iconStyle);
-        
-            var vectorSource = new VectorSource({
-                features: [iconFeature]
-            });
-
-            var vectorLayer = new VectorLayer({
-            canDelete: "yes",
-                markerGroup: "anchor",
-            source: vectorSource
-            });
-                vm.pinsCache[marker_id+'-'+vm.markerAvail[marker_id]] = vectorLayer;
-                } else {
-                    vectorLayer = vm.pinsCache[marker_id+'-'+vm.markerAvail[marker_id]];
-                }
-            return vectorLayer;
-        },
-        buildMarkerGroup:function(lat,lon,text, name, zoom_level) {
-
-                var iconFeature = new Feature({
-                    marker_group: 'group_marker',
-                    geometry: new Point(transform([lat, lon], 'EPSG:4326', 'EPSG:3857')),
-                    name: name,
-                    zoom_level: zoom_level
+                        opacity: 0.95,
+                        src: vm.pin_gray
+                    }))
                 });
-                
-                var icon = require('./assets/map_pins/geo_group_red.png');
-                if (text > 30) {
-                        icon = require('./assets/map_pins/geo_group2.png');
-                } else if (text > 10) {
-                        icon = require('./assets/map_pins/geo_group_orange.png');
-                } else {
-                        icon = require('./assets/map_pins/geo_group_red.png');
-                }
-
-                var iconStyle = new Style({
-                            image: new Icon(/** @type {olx.style.IconOptions} */ ({
-                            imgSize: [48, 46],
-                            size: [48,46],
-                            anchor: [0.5, 24],
-                            anchorXUnits: 'fraction',
-                            anchorYUnits: 'pixels',
-                            opacity: 15,
-                            src: icon
-                            })),
-
-                            text: new Text({
-                            text: text.toString(),
-                            scale: 1.2,
-                            fill: new Fill({
-                                color: '#000000'
-                            }),
-                            //          stroke: new ol.style.Stroke({
-                            //            color: '#FFFF99',
-                            //            width: 3.5
-                            //          })
-                            })
-                });
-                // console.log("SET buildMarkerGroup");
                 iconFeature.setStyle(iconStyle);
-
+        
                 var vectorSource = new VectorSource({
                     features: [iconFeature]
                 });
 
                 var vectorLayer = new VectorLayer({
                     canDelete: "yes",
-                    markerGroup: "circle",
+                    markerGroup: "anchor",
                     source: vectorSource
                 });
+                vm.pinsCache[marker_id+'-'+vm.markerAvail[marker_id]] = vectorLayer;
+            } else {
+                vectorLayer = vm.pinsCache[marker_id+'-'+vm.markerAvail[marker_id]];
+            }
+            return vectorLayer;
+        },
+        buildMarkerGroup:function(lat,lon,text, name, zoom_level) {
+            var iconFeature = new Feature({
+                marker_group: 'group_marker',
+                geometry: new Point(transform([lat, lon], 'EPSG:4326', 'EPSG:3857')),
+                name: name,
+                zoom_level: zoom_level
+            });
+            
+            var icon = iconDefault
+            if (text > 30) {
+                icon = icon30Plus
+            } else if (text > 10) {
+                icon = icon10Plus
+            } 
 
-                return vectorLayer;
+            var iconStyle = new Style({
+                image: new Icon(/** @type {olx.style.IconOptions} */ ({
+                    imgSize: [48, 46],
+                    size: [48,46],
+                    anchor: [0.5, 24],
+                    anchorXUnits: 'fraction',
+                    anchorYUnits: 'pixels',
+                    opacity: 15,
+                    src: icon
+                })),
+
+                text: new Text({
+                    text: text.toString(),
+                    scale: 1.2,
+                    fill: new Fill({
+                        color: '#000000'
+                    }),
+                })
+            });
+            iconFeature.setStyle(iconStyle);
+
+            var vectorSource = new VectorSource({
+                features: [iconFeature]
+            });
+
+            var vectorLayer = new VectorLayer({
+                canDelete: "yes",
+                markerGroup: "circle",
+                source: vectorSource
+            });
+
+            return vectorLayer;
         },
         deleteBooking: function(booking_item_id) {
             var vm = this;
@@ -2060,7 +2047,7 @@ export default {
                     vm.removePinAnchors();
                     vm.anchorPinLevelChange = true;
 
-                    var urlBase = vm.parkstayUrl+'/api/mooring_map_filter/?';
+                    var urlBase = vm.parkstayUrl + '/api/mooring_map_filter/?';
                     var params = {format: 'json'};
                     var isCustom = false;
 
@@ -2083,9 +2070,11 @@ export default {
                         params.pen_type = vm.penType;
                     }
                     
+                    let temp = urlBase + $.param(params)
+
                     $.ajax({
                         loadID: vm.loadingID,
-                        url: urlBase+$.param(params),
+                        url: urlBase + $.param(params),
                         success: function (response, stat, xhr) {
                             vm.groundsIds.clear();
                             response.forEach(function(el) {
@@ -2286,7 +2275,6 @@ export default {
                 return feature;
                 });
                 if (result) {
-                    // console.log($('#map').hasClass('click'));
                     if ($('#map').hasClass('click')) { 
                     } else {
                         $('#map').addClass('click', result);
@@ -2437,7 +2425,7 @@ export default {
     @font-face {
         font-family: "DPaWSymbols";
         // src: url('/static/exploreparks/fonts/boating.woff') format("woff"); 
-        src: url('~@/assets/fonts/boating.woff') format("woff");
+        src: url('@/assets/fonts/boating.woff') format("woff");
     }
 
     .symb {
