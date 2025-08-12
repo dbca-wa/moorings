@@ -41,16 +41,6 @@ export default defineConfig(({ mode }) => {
             alias: {
                 vue: 'vue/dist/vue.esm-bundler.js',
                 '@': path.resolve(__dirname, './src'),
-                '@vue-utils': path.resolve(__dirname, 'src/utils/vue'),
-                '@assets': path.resolve(__dirname, 'src/assets/'),
-                '@common-utils': path.resolve(
-                    __dirname,
-                    'src/components/common/'
-                ),
-                '@components': path.resolve(__dirname, 'src/components/'),
-                '@utils': path.resolve(__dirname, 'src/utils/'),
-                '@daterangepicker':
-                    'bootstrap-daterangepicker/daterangepicker.js',
             },
         },
         define: {
