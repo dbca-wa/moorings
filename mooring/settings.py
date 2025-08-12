@@ -195,25 +195,23 @@ GROUP_NAME_CHOICES = [
 ]
 
 RUNNING_DEVSERVER = len(sys.argv) > 1 and sys.argv[1] == "runserver"
-
 EMAIL_INSTANCE = decouple.config("EMAIL_INSTANCE", default="DEV")
-# Make sure this returns true when in local development
+# Make sure this returns True when in local development
 # so you can use the vite dev server with hot module reloading
-use_vite_dev_server = RUNNING_DEVSERVER and EMAIL_INSTANCE == "DEV" and DEBUG is True
+USE_VITE_DEV_SERVER = RUNNING_DEVSERVER and EMAIL_INSTANCE == "DEV" and DEBUG is True  # USE_VITE_DEV_SERVER is not a reserved keyword.
 
 DJANGO_VITE = {
-  "default": {
-    "dev_mode": use_vite_dev_server,  # Indicates whether to serve assets via the ViteJS development server or from compiled production assets.
-    "dev_server_host": "localhost", # Default host for vite (can change if needed)
-    "dev_server_port": 8083, # Default port for vite (can change if needed)
-    "static_url_prefix": "/static/exploreparks_vue/" if use_vite_dev_server else "exploreparks_vue/"
-    # The directory prefix for static files built by ViteJS.
-  }
+    "default": {
+        "dev_mode": USE_VITE_DEV_SERVER,  # Indicates whether to serve assets via the ViteJS development server or from compiled production assets.
+        "dev_server_host": "localhost", # Default host for vite (can change if needed)
+        "dev_server_port": 8083, # Default port for vite (can change if needed)
+        "static_url_prefix": "/static/exploreparks_vue" if USE_VITE_DEV_SERVER else "exploreparks_vue/",  # The directory prefix for static files built by ViteJS.
+    }
 }
 
-VUE3_ENTRY_SCRIPT = decouple.config(
-  "VUE3_ENTRY_SCRIPT",
-  default="src/main.js", # This path will be auto prefixed with the       static_url_prefix from DJANGO_VITE above
+VUE3_ENTRY_SCRIPT = decouple.config(  # VUE3_ENTRY_SCRIPT is not a reserved keyword.
+    "VUE3_ENTRY_SCRIPT",
+    default="src/main.js", # This path will be auto prefixed with the static_url_prefix from DJANGO_VITE above
 ) # Path of the vue3 entry point script served by vite
 
 BUILD_TAG = decouple.config(
