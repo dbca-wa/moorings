@@ -123,9 +123,8 @@ def mooring_url_group(tg):
         'LEDGER_SYSTEM_ID' : settings.PS_PAYMENT_SYSTEM_ID.replace("S","0"),
         'PUBLIC_URL' : PUBLIC_URL,
         'MOORING_GROUP': mooring_group,
-        'build_tag': settings.BUILD_TAG,
-        "vue3_entry_script": settings.VUE3_ENTRY_SCRIPT,
-        "use_vite_dev_server": settings.USE_VITE_DEV_SERVER,
+        "vue3_entry_script_exploreparks": settings.VUE3_ENTRY_SCRIPT_EXPLOREPARKS,
+        "vue3_entry_script_admissions": settings.VUE3_ENTRY_SCRIPT_ADMISSIONS,
     }
 
 
