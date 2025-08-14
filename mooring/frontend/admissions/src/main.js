@@ -1,88 +1,49 @@
+import 'vite/modulepreload-polyfill';
 // The Vue build version to load with the `import` command
 // (runtime-only or standalone) has been set in webpack.base.conf with an alias.
-// import 'foundation-sites';
-// import 'foundation-datepicker/js/foundation-datepicker';
-// import './foundation-min.scss';
-// import 'foundation-datepicker/css/foundation-datepicker.css';
-// import Vue from 'vue';
-// import resource from 'vue-resource'
-// import VueRouter from 'vue-router'
+
+import $ from 'jquery';
+import moment from 'moment';
+import swal from 'sweetalert2';
+
+window.$ = $;
+window.jQuery = $;
+window.moment = moment;
+window.swal = swal;
+
 import { createApp } from "vue";
 import { createRouter, createWebHistory } from "vue-router";
-// import VModal from 'vue-js-modal';
-import admissions from './admissions';
-import costs from './costs';
-import App from './App';
+import admissions from './admissions.vue';
+import costs from './costs.vue';
+import App from './App.vue';
 import alert from './utils/alert.vue';
 import store from './utils/store';
 import { mapGetters } from 'vuex';
-// var css = require('./hooks-css.js');
 import './hooks-css.js';
-// Vue.use(VueRouter);
-// Vue.use(resource);
-// Vue.use(VModal);
 console.log('main loaded');
-// require('custom-event-polyfill');
 console.log(costs);
 const routes = [
     {
         path: '/admissions/:loc/',
         component: admissions, 
-//        name: 'admissions'
     },
     {
         path: '/admissions-cost/',
         component: costs,
-//        name: 'cost'
     }
 ];
 
-// const router = new VueRouter({
-//   routes,
-//   mode: 'history',
-// });
 const router = createRouter({
   history: createWebHistory(),
   routes: routes,
 });
 
 
-// new Vue({
-//     router,
-// }).$mount('#menu');
 if (document.getElementById("menu")) {
   const menuApp = createApp({});
   menuApp.use(router);
   menuApp.mount("#menu");
 }
-
-// const app = new Vue({
-//     router,
-//     store,
-//     components:{
-//        alert
-//     },
-//     watch:{
-//         $route:function () {
-//             let vm =this;
-//             vm.$store.dispatch("updateAlert",{
-//                 visible:false,
-//                 type:"danger",
-//                 message: ""
-//             });
-//         }
-//     },
-//     computed:{
-//         ...mapGetters([
-//             "showAlert",
-//             "alertType",
-//            "alertMessage"
-//         ])
-//     },
-//     render: h => h(App)
-// }).$mount('#appdiv');
-
-// $(document).foundation();
 
 const app = createApp(App);
 app.use(store);
