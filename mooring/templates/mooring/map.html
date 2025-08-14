@@ -7,9 +7,7 @@
 {% endblock %}
 
 {% block extra_js %}
-    {% if use_vite_dev_server %}
-        {% vite_hmr_client %}
-    {% endif %}
+    {% vite_hmr_client app='admissions_app' %} <!-- This tag will include this script only if DJANGO_VITE_DEV_MODE is true, otherwise this will do nothing. -->
 {% endblock %}
 
 {% block content %}
@@ -18,5 +16,5 @@
         var parkstayUrl = window.location.protocol + '//' + window.location.host;
     </script>
 
-    <script type="module" src="{% vite_asset_url vue3_entry_script %}?v={{ build_tag }}"></script>
+    {% vite_asset vue3_entry_script_exploreparks app='exploreparks_app' %}
 {% endblock %}

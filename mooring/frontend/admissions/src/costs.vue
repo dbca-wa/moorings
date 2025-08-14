@@ -8,7 +8,15 @@
             </div>
             <div class="panel-body">
                 <div class="col-lg-12">
-                    <price-history ref="price_history" :addParkPrice="true" :dt_options="priceHistoryDt" :dt_headers="priceHistoryDtHeaders" :object_id="34" level='park' :showAddBtn="showAddBtn"></price-history>
+                    <price-history
+                        ref="price_history"
+                        :addParkPrice="true"
+                        :dt_options="priceHistoryDt"
+                        :dt_headers="priceHistoryDtHeaders"
+                        :object_id="34"
+                        level='park'
+                        :showAddBtn="showAddBtn">
+                    </price-history>
                 </div>
             </div>
         </div>
@@ -20,9 +28,6 @@ import {
     $,
     api_endpoints,
     helpers,
-    select2,
-    datetimepicker,
-    Moment
 }
 from './hooks.js'
 import alert from './utils/alert.vue'

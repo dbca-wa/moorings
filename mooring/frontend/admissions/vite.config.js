@@ -4,8 +4,8 @@ import path from 'path';
 import vueDevTools from 'vite-plugin-vue-devtools';
 import svgLoader from 'vite-svg-loader';
 
-const applicationNameShort = 'exploreparks';
-const port = process.env.PORT ? parseInt(process.env.PORT) : 8083;
+const applicationNameShort = 'admissions';
+const port = process.env.PORT ? parseInt(process.env.PORT) : 8081;
 const host = process.env.HOST || '0.0.0.0';
 
 export default defineConfig(({ mode }) => {
@@ -28,7 +28,6 @@ export default defineConfig(({ mode }) => {
                 protocol: 'ws',
                 host: 'localhost',
                 port: port,
-                // clientPort: port
             },
         },
         plugins: [
@@ -49,14 +48,12 @@ export default defineConfig(({ mode }) => {
         },
         build: {
             manifest: 'manifest.json',
-            // filenameHashing: false,
             commonjsOptions: { transformMixedEsModules: true },
             root: path.resolve(__dirname, './src'),
             outDir: path.resolve(
                 __dirname,
                 `../../static/${applicationNameShort}_vue`
             ),
-            // publicPath: `/static/${applicationNameShort}_vue`,
             sourcemap: true,
             rollupOptions: {
                 input: {
