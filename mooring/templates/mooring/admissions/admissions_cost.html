@@ -101,6 +101,5 @@
     <script type="text/javascript">
         var parkstayUrl = window.location.protocol + '//' + window.location.host;
     </script>
-    <script type="text/javascript" src="{% static 'admissions/js/chunk-vendors.js' %}?ver={{ GIT_COMMIT_HASH }}" defer></script>
-    <script type="text/javascript" src="{% static 'admissions/js/main.js' %}?ver={{ GIT_COMMIT_HASH }}" defer></script>
+    {% vite_asset vue3_entry_script_admissions app='admissions_app' %}
 {% endblock %}

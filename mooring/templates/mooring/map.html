@@ -18,5 +18,5 @@
         var parkstayUrl = window.location.protocol + '//' + window.location.host;
     </script>
 
-    <script type="module" src="{% vite_asset_url vue3_entry_script %}?v={{ build_tag }}"></script>
+    {% vite_asset vue3_entry_script_exploreparks app='exploreparks_app' %}
 {% endblock %}
