@@ -48,7 +48,6 @@ export default defineConfig(({ mode }) => {
         },
         build: {
             manifest: 'manifest.json',
-            filenameHashing: false,
             commonjsOptions: { transformMixedEsModules: true },
             root: path.resolve(__dirname, './src'),
             outDir: path.resolve(
