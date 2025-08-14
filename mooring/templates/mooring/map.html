@@ -7,9 +7,7 @@
 {% endblock %}
 
 {% block extra_js %}
-    {% if use_vite_dev_server %}
-        {% vite_hmr_client %}
-    {% endif %}
+    {% vite_hmr_client app='admissions_app' %} <!-- This tag will include this script only if DJANGO_VITE_DEV_MODE is true, otherwise this will do nothing. -->
 {% endblock %}
 
 {% block content %}

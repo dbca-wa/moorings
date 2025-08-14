@@ -1,6 +1,7 @@
 {% extends 'mooring/dash/dash_tables.html' %}
 {% load static %}
 {% load users %}
+{% load django_vite %}
 
 {% block extra_css %}
     {{ block.super }}
@@ -94,6 +95,10 @@
         </alert>
         <router-view></router-view>
     </div>
+{% endblock %}
+
+{% block extra_js %}
+    {% vite_hmr_client app='admissions_app' %} <!-- This tag will include this script only if DJANGO_VITE_DEV_MODE is true, otherwise this will do nothing. -->
 {% endblock %}
 
 {% block custom_js %}
