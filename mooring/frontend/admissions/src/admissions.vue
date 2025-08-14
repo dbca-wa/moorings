@@ -230,7 +230,7 @@ export default {
     data: function() {
         let vm = this;
         return {
-        mooringUrl: global.parkstayUrl || process.env.VUE_APP_PARKSTAY_URL,
+        mooringUrl: import.meta.env.VUE_APP_PARKSTAY_URL || window.parkstayUrl,
         arrivalDate: moment.utc(getQueryParam('arrival', moment.utc(now).format('YYYY/MM/DD')), 'YYYY/MM/DD'),
         overnightStay: '',
         vesselReg: '',
