@@ -118,7 +118,7 @@ class MooringsiteAvailabilitySelector(TemplateView):
         return render(request, self.template_name, context)
 
 class MooringAvailability2Selector(TemplateView):
-    template_name = 'mooring/mooring_availablity_booking_selector.html'
+    template_name = 'mooring/mooring_availability_booking_selector.html'
 
     def get(self, request, *args, **kwargs):
         # if page is called with ratis_id, inject the ground_id
