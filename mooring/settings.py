@@ -3,11 +3,15 @@ import sys
 import hashlib
 # from confy import env
 import decouple
+import logging
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 # confy.read_environment_file(BASE_DIR+"/.env")
 os.environ.setdefault("BASE_DIR", BASE_DIR)
 from ledger_api_client.settings_base import *
 from decimal import Decimal
+
+
+logger = logging.getLogger(__name__)
 
 DEBUG = decouple.config('DEBUG', default=True, cast=bool)
 BASE_DIR = None
@@ -196,24 +200,34 @@ GROUP_NAME_CHOICES = [
 
 RUNNING_DEVSERVER = len(sys.argv) > 1 and sys.argv[1] == "runserver"
 EMAIL_INSTANCE = decouple.config("EMAIL_INSTANCE", default="DEV")
+
 # Make sure this returns True when in local development
 # so you can use the vite dev server with hot module reloading
-USE_VITE_DEV_SERVER = RUNNING_DEVSERVER and EMAIL_INSTANCE == "DEV" and DEBUG is True  # USE_VITE_DEV_SERVER is not a reserved keyword.
+DJANGO_VITE_DEV_MODE = RUNNING_DEVSERVER and EMAIL_INSTANCE == "DEV" and DEBUG is True  # DJANGO_VITE_DEV_MODE is preserved word.
+
+logger.debug(f'DJANGO_VITE_DEV_MODE: {DJANGO_VITE_DEV_MODE}')
 
 DJANGO_VITE = {
-    "default": {
-        "dev_mode": USE_VITE_DEV_SERVER,  # Indicates whether to serve assets via the ViteJS development server or from compiled production assets.
+    "exploreparks_app": {
+        "dev_mode": DJANGO_VITE_DEV_MODE,  # Indicates whether to serve assets via the ViteJS development server or from compiled production assets.
         "dev_server_host": "localhost", # Default host for vite (can change if needed)
         "dev_server_port": 8083, # Default port for vite (can change if needed)
-        "static_url_prefix": "/static/exploreparks_vue" if USE_VITE_DEV_SERVER else "exploreparks_vue/",  # The directory prefix for static files built by ViteJS.
-    }
+        "static_url_prefix": "/static/exploreparks_vue" if DJANGO_VITE_DEV_MODE else "exploreparks_vue/",  # The directory prefix for static files built by ViteJS.
+    },
+    "admissions_app": {
+        "dev_mode": DJANGO_VITE_DEV_MODE,
+        "dev_server_host": "localhost",
+        "dev_server_port": 8081,
+        "static_url_prefix": "/static/admissions_vue" if DJANGO_VITE_DEV_MODE else "admissions_vue/",
+    },
 }
 
-VUE3_ENTRY_SCRIPT = decouple.config(  # VUE3_ENTRY_SCRIPT is not a reserved keyword.
-    "VUE3_ENTRY_SCRIPT",
+VUE3_ENTRY_SCRIPT_EXPLOREPARKS = decouple.config(  # This is not a reserved keyword.
+    "VUE3_ENTRY_SCRIPT_EXPLOREPARKS",
     default="src/main.js", # This path will be auto prefixed with the static_url_prefix from DJANGO_VITE above
 ) # Path of the vue3 entry point script served by vite
 
-BUILD_TAG = decouple.config(
-    "BUILD_TAG", hashlib.md5(os.urandom(32)).hexdigest()
+VUE3_ENTRY_SCRIPT_ADMISSIONS = decouple.config(  # This is not a reserved keyword.
+    "VUE3_ENTRY_SCRIPT_ADMISSIONS",
+    default="src/main.js",
 )
