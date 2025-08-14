@@ -487,96 +487,11 @@ export default {
         today.setDate(today.getDate()+1);
         var tomorrow = new Date(today);
 
-        // var datepickerOptions = {
-        //     format: 'DD/MM/YYYY',
-        //     showClear:true,
-        //     useCurrent:false,
-        //     keepInvalid:true,
-        //     allowInputToggle:true
-        // }
-
-        // var picker = $('#period_start').datetimepicker(datepickerOptions);
-        // var picker2 = $('#period_end').datetimepicker(datepickerOptions);
-
-        // picker.on('dp.change',function (e) {
-        //     if (picker.data('DateTimePicker').date()) {
-        //         vm.priceHistory.period_start = e.date.format('DD/MM/YYYY');
-        //     }
-        //     else if (vm.dateFromPicker.data('date') === "") {
-        //         vm.priceHistory.period_start = "";
-        //     }
-
-        // });
-
-        // picker2.on('dp.change',function (e) {
-        //     if (picker2.data('DateTimePicker').date()) {
-        //         vm.priceHistory.period_end = e.date.format('DD/MM/YYYY');
-        //     }
-        //     else if (vm.dateFromPicker.data('date') === "") {
-        //         vm.priceHistory.period_end = "";
-        //     }
-
-        // });
-
         var mg = $('#mooring_groups').val();
         vm.mooring_groups = JSON.parse( mg );
 
-        // $(document).foundation();
         var arrivalEl = $('#period_start');
         var arrivalDate = null;
-
-        // if ($.fn.fdatepicker){
-        //     this.arrivalData = arrivalEl.fdatepicker({
-        //         format: 'dd/mm/yyyy',
-        //         onRender: function (date) {
-        //             return;
-        //         }
-        //     }).on('changeDate', function (ev) {
-        //         ev.target.dispatchEvent(new CustomEvent('change'));
-        //     }).on('change', function (ev) {
-        //         vm.arrivalData.hide();
-        //         // console.log(vm.arrivalData.date);
-        //         // vm.priceHistory.period_start = moment(vm.arrivalData.date, "DD/MM/YYYY");
-        //         console.log(ev.target.value);
-        //         vm.priceHistory.period_start = ev.target.value;
-
-        //         // console.log(vm.priceHistory.period_start);
-        //     }).on('keydown', function (ev) {
-        //         if (ev.keyCode == 13) {
-        //             ev.target.dispatchEvent(new CustomEvent('change'));
-        //         }
-        //     }).data('datepicker');
-
-        //     if (arrivalDate != null){
-        //         this.arrivalData.date = arrivalDate.toDate();
-        //         this.arrivalData.setValue();
-        //         this.arrivalData.fill();
-        //     }
-        // } else {
-        //     console.error('fdatepicker function is not available on jQuery object.')
-        // }
-
-
-        // var picker = $(vm.form.period_start).closest('.date');
-        // picker.datetimepicker({
-        //     format: 'DD/MM/YYYY',
-        //     useCurrent: false,
-        //     minDate: tomorrow
-        // });
-        // picker.on('dp.change', function(e){
-        //     vm.priceHistory.period_start = picker.data('DateTimePicker').date().format('DD/MM/YYYY');
-        // });
-        // var picker2 = $(vm.form.period_end).closest('.date');
-        // picker2.datetimepicker({
-        //     format: 'DD/MM/YYYY',
-        //     useCurrent: false,
-        //     minDate: tomorrow
-        // })
-        // picker2.on('dp.change', function(e){
-        //     vm.priceHistory.period_end = picker2.data('DateTimePicker').date().format('DD/MM/YYYY');
-        // });
-
-
 
         vm.addFormValidations();
         // bus.once('reasons',setReasons => {

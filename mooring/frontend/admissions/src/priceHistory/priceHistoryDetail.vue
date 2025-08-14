@@ -103,7 +103,13 @@
 <script>
 import bootstrapModal from '../utils/bootstrap-modal.vue'
 import reason from '../utils/reasons.vue'
-import { $, datetimepicker, api_endpoints, helpers, bus } from '../hooks'
+import {
+    $,
+    // datetimepicker,
+    api_endpoints,
+    helpers,
+    bus
+} from '../hooks'
 import alert from '../utils/alert.vue'
 
 export default {
@@ -255,14 +261,14 @@ export default {
         var today = new Date();
         today.setDate(today.getDate()+1);
         var tomorrow = new Date(today);
-        picker.datetimepicker({
-            format: 'DD/MM/YYYY',
-            useCurrent: false,
-            minDate: tomorrow
-        });
-        picker.on('dp.change', function(e){
-            vm.priceHistory.period_start = picker.data('DateTimePicker').date().format('DD/MM/YYYY');
-        });
+        // picker.datetimepicker({
+        //     format: 'DD/MM/YYYY',
+        //     useCurrent: false,
+        //     minDate: tomorrow
+        // });
+        // picker.on('dp.change', function(e){
+        //     vm.priceHistory.period_start = picker.data('DateTimePicker').date().format('DD/MM/YYYY');
+        // });
         vm.addFormValidations();
         vm.fetchRates();
         // bus.$once('reasons',setReasons => {
