@@ -83,13 +83,8 @@ import {
     validate
 }
 from '../../hooks.js'
-import {
-    bus,
-    select2
-}
-from '../utils/eventBus.js';
-// import OpenLayers from 'openlayers';
-// import ol from 'openlayers';
+import { bus } from '../utils/eventBus.js';
+import 'select2';
 import TileLayer from 'ol/layer/Tile.js'
 import OSM from 'ol/source/OSM.js'
 import { transform } from 'ol/proj'
@@ -100,7 +95,6 @@ import VectorLayer from 'ol/layer/Vector.js'
 import Map from 'ol/Map.js'
 import View from 'ol/View.js'
 import Draw from 'ol/interaction/Draw.js'
-// import GeometryType from 'ol/geom/geometrytype.js'
 
 import Quill from 'quill';
 import loader from '../utils/loader.vue'

@@ -71,11 +71,8 @@ import {
     validate
 }
 from '../../hooks.js'
-import {
-    bus,
-    select2
-}
-from '../utils/eventBus.js';
+import { bus } from '../utils/eventBus.js';
+import 'select2'
 import loader from '../utils/loader.vue'
 import alert from '../utils/alert.vue'
 export default {
