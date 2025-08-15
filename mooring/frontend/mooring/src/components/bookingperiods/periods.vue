@@ -220,13 +220,7 @@
 
 <script>
 import datatable from '../utils/datatable.vue'
-import {
-    $,
-    api_endpoints,
-    select2,
-    datetimepicker,
-    helpers
-    } from '../../hooks.js'
+import { $, api_endpoints, helpers } from '../../hooks.js'
 import modal from '../utils/bootstrap-modal.vue'
 import { mapGetters } from 'vuex'
 

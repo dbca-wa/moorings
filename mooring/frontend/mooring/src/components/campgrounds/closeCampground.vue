@@ -10,15 +10,23 @@
                         <label for="open_cg_range_start">Closure start: </label>
                     </div>
                     <div class="col-md-3">
-                        <div class='input-group date' id='close_cg_range_start'>
+                        <!-- <div class='input-group date' id='close_cg_range_start'>
                             <input  name="closure_start" v-model="formdata.range_start" type='text' class="form-control" />
                             <span class="input-group-addon">
                                 <span class="glyphicon glyphicon-calendar"></span>
                             </span>
-                        </div>
+                        </div> -->
+                        <input
+                            id="closure_start"
+                            name="closure_start"
+                            type="date"
+                            class="form-control"
+                            v-model="formdata.range_start"
+                            :min="today"
+                        />
                     </div>
 
-                    <div class="col-md-1"/>
+                    <div class="col-md-1"></div>
                     <div class="col-md-2">
                         <label for="open_cg_range_start_time"> Start time: </label>
                     </div>
@@ -38,15 +46,23 @@
                         <label for="open_cg_range_start">Reopen: </label>
                     </div>
                     <div class="col-md-3">
-                        <div class='input-group date' id='close_cg_range_end'>
+                        <!-- <div class='input-group date' id='close_cg_range_end'>
                             <input name="closure_end" v-model="formdata.range_end" type='text' class="form-control" />
                             <span class="input-group-addon">
                                 <span class="glyphicon glyphicon-calendar"></span>
                             </span>
-                        </div>
+                        </div> -->
+                        <input
+                            id="closure_end"
+                            name="closure_end"
+                            type="date"
+                            class="form-control"
+                            v-model="formdata.range_end"
+                            :min="formdata.range_start || today"
+                        />
                     </div>
 
-                    <div class="col-md-1"/>
+                    <div class="col-md-1"></div>
                     <div class="col-md-2">
                         <label for="open_cg_range_end_time"> Reopen time: </label>
                     </div>
@@ -79,7 +95,7 @@
 
 <script>
 import bootstrapModal from '../utils/bootstrap-modal.vue'
-import { $, bus, datetimepicker,api_endpoints, Moment, validate, helpers } from '../../hooks'
+import { $, bus, api_endpoints, helpers } from '../../hooks'
 import alert from '../utils/alert.vue'
 import reason from '../utils/reasons.vue'
 
@@ -109,6 +125,13 @@ export default {
         }
     },
     computed: {
+        // A computed property to get today's date in 'YYYY-MM-DD' format.
+        today() {
+            const d = new Date();
+            // Adjust for timezone to prevent off-by-one day errors.
+            d.setMinutes(d.getMinutes() - d.getTimezoneOffset());
+            return d.toISOString().slice(0, 10);
+        },
         showError: function() {
             var vm = this;
             return vm.errors;
@@ -125,6 +148,15 @@ export default {
                 }
             }
         },
+    },
+    watch: {
+        // Watch for changes in the start date to enforce logic.
+        'formdata.range_start'(newStartDate, oldStartDate) {
+            // If the end date is now before the new start date, reset the end date.
+            if (this.formdata.range_end && newStartDate > this.formdata.range_end) {
+                this.formdata.range_end = null; // or set to newStartDate
+            }
+        }
     },
     components: {
         bootstrapModal,
@@ -210,33 +242,33 @@ export default {
         vm.closeStartTimePicker = $('#close_cg_range_start_time');
         vm.closeEndPicker = $('#close_cg_range_end');
         vm.closeEndTimePicker = $('#close_cg_range_end_time');
-        vm.closeStartPicker.datetimepicker({
-            format: 'DD/MM/YYYY',
-            minDate: new Date()
-        });
-        vm.closeStartTimePicker.datetimepicker({
-            format: 'HH:mm'
-        });
-        vm.closeEndPicker.datetimepicker({
-            format: 'DD/MM/YYYY',
-            useCurrent: false
-        });
-        vm.closeEndTimePicker.datetimepicker({
-            format: 'HH:mm',
-        });
-        vm.closeStartPicker.on('dp.change', function(e){
-            vm.formdata.range_start = vm.closeStartPicker.data('DateTimePicker').date().format('DD/MM/YYYY');
-            vm.closeEndPicker.data("DateTimePicker").minDate(e.date);
-        });
-        vm.closeStartTimePicker.on('dp.change', function(e){
-            vm.formdata.range_start_time = vm.closeStartTimePicker.data('DateTimePicker').date().format('HH:mm');
-        });
-        vm.closeEndPicker.on('dp.change', function(e){
-            vm.formdata.range_end = vm.closeEndPicker.data('DateTimePicker').date().format('DD/MM/YYYY');
-        });
-        vm.closeEndTimePicker.on('dp.change', function(e){
-            vm.formdata.range_end_time = vm.closeEndTimePicker.data('DateTimePicker').date().format('HH:mm');
-        });
+        // vm.closeStartPicker.datetimepicker({
+        //     format: 'DD/MM/YYYY',
+        //     minDate: new Date()
+        // });
+        // vm.closeStartTimePicker.datetimepicker({
+        //     format: 'HH:mm'
+        // });
+        // vm.closeEndPicker.datetimepicker({
+        //     format: 'DD/MM/YYYY',
+        //     useCurrent: false
+        // });
+        // vm.closeEndTimePicker.datetimepicker({
+        //     format: 'HH:mm',
+        // });
+        // vm.closeStartPicker.on('dp.change', function(e){
+        //     vm.formdata.range_start = vm.closeStartPicker.data('DateTimePicker').date().format('DD/MM/YYYY');
+        //     vm.closeEndPicker.data("DateTimePicker").minDate(e.date);
+        // });
+        // vm.closeStartTimePicker.on('dp.change', function(e){
+        //     vm.formdata.range_start_time = vm.closeStartTimePicker.data('DateTimePicker').date().format('HH:mm');
+        // });
+        // vm.closeEndPicker.on('dp.change', function(e){
+        //     vm.formdata.range_end = vm.closeEndPicker.data('DateTimePicker').date().format('DD/MM/YYYY');
+        // });
+        // vm.closeEndTimePicker.on('dp.change', function(e){
+        //     vm.formdata.range_end_time = vm.closeEndTimePicker.data('DateTimePicker').date().format('HH:mm');
+        // });
         vm.formdata.range_start_time = '00:00';
         vm.formdata.range_end_time = '23:59';
         

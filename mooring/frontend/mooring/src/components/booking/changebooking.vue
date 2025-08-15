@@ -56,7 +56,7 @@
 <script>
 import modal from '../utils/bootstrap-modal.vue'
 import alert from '../utils/alert.vue'
-import {$,api_endpoints,helpers,datetimepicker,Moment} from "../../hooks.js"
+import { $, api_endpoints, helpers, Moment } from "../../hooks.js"
 export default {
     name:'change-booking',
     components:{

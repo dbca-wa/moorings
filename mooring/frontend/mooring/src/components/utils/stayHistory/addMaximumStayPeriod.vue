@@ -63,7 +63,7 @@
 import modal from '../../utils/bootstrap-modal.vue'
 import reason from '../../utils/reasons.vue'
 import {bus} from '../../utils/eventBus.js'
-import { $, datetimepicker,api_endpoints, validate, helpers, Moment } from '../../../hooks'
+import { $, helpers, Moment } from '../../../hooks'
 import alert from '../../utils/alert.vue'
 
 export default {

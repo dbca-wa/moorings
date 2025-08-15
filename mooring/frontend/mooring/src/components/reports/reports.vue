@@ -357,7 +357,7 @@
 </template>
 
 <script>
-import {$,swal,bus,datetimepicker,api_endpoints,helpers,Moment,validate} from "../../hooks.js"
+import { $, swal, api_endpoints, helpers } from "../../hooks.js"
 export default {
     name:"reports",
     data:function () {

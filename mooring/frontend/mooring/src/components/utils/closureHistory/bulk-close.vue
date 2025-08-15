@@ -81,8 +81,9 @@ import modal from '../bootstrap-modal.vue'
 import reason from '../reasons.vue'
 import alert from '../alert.vue'
 import { mapGetters } from 'vuex'
-import { $, datetimepicker,api_endpoints, validate, helpers, bus, Moment } from '../../../hooks'
-import { range } from 'lodash'
+import { $, api_endpoints, helpers, bus, Moment } from '../../../hooks'
+// import $ from 'jquery';
+// import 'select2'
 
 export default {
     name:"bulk-close",
@@ -272,16 +273,18 @@ export default {
     },
     mounted:function () {
         let vm = this;
-        vm.form = $(document.forms.closeForm);
-        vm.events();
-        // bus.$once('closeReasons',setReasons => {
-        //     vm.reasons = setReasons;
-        // });
-        const onDataLoadedOnce = (setReasons) => {
-            vm.reasons = setReasons;
-            bus.off('closeReasons', onDataLoadedOnce);
-        };
-        bus.on('closeReasons', onDataLoadedOnce);
+        vm.$nextTick(() => {
+            vm.form = $(document.forms.closeForm);
+            vm.events();
+            // bus.$once('closeReasons',setReasons => {
+            //     vm.reasons = setReasons;
+            // });
+            const onDataLoadedOnce = (setReasons) => {
+                vm.reasons = setReasons;
+                bus.off('closeReasons', onDataLoadedOnce);
+            };
+            bus.on('closeReasons', onDataLoadedOnce);
+        })
     }
 }
 
