@@ -192,7 +192,7 @@ export default {
             let vm = this;
             setTimeout(function () {
                 $('#bp-campgrounds').select2({
-                    theme: 'bootstrap',
+                    theme: 'bootstrap-5',
                     allowClear: true,
                     placeholder: "Select Moorings",
                     tags:false,
@@ -204,7 +204,7 @@ export default {
                     vm.selected_campgrounds = $(e.currentTarget).val();
                 });
                 $('#bp-periods').select2({
-                    theme: 'bootstrap',
+                    theme: 'bootstrap-5',
                     allowClear: true,
                     placeholder: "Select Booking Periods",
                     tags: false,

@@ -129,7 +129,7 @@ export default {
             let vm = this;
             setTimeout(function () {
                 $('#bcs-campsites').select2({
-                    theme: 'bootstrap',
+                    theme: 'bootstrap-5',
                     allowClear: true,
                     placeholder: "Select campsites",
                     tags:false,

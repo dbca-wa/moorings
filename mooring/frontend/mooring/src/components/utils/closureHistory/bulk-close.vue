@@ -177,7 +177,7 @@ export default {
             let vm = this;
             setTimeout(function () {
                 $('#bc-campgrounds').select2({
-                    theme: 'bootstrap',
+                    theme: 'bootstrap-5',
                     allowClear: true,
                     placeholder: "Select Moorings",
                     tags:false,
