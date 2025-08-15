@@ -183,7 +183,7 @@
 </template>
 
 <script>
-import Vue from 'vue'
+// import Vue from 'vue'
 import booking_helpers from './booking_helpers'
 import {
     $,
