@@ -326,7 +326,7 @@ export default {
             else{
                 setTimeout(function (e) {
                     $(vm.form.park).select2({
-                        "theme": "bootstrap",
+                        "theme": "bootstrap-5",
                         allowClear: true,
                         placeholder:"Select Park"
                     }).
@@ -353,7 +353,7 @@ export default {
             if (vm.setPrice == vm.priceOptions[2]){
                 setTimeout(function(){
                     $(vm.form.campsiteType).select2({
-                        theme: 'bootstrap',
+                        theme: 'bootstrap-5',
                         allowClear: true,
                         placeholder: "Select Campsite Type",
                     }).
@@ -475,7 +475,7 @@ export default {
 
                     setTimeout(function (e) {
                         $(vm.form.campground).select2({
-                            "theme": "bootstrap",
+                            "theme": "bootstrap-5",
                             allowClear: true,
                             placeholder: {
                               text:"Select Campground",

@@ -740,7 +740,7 @@ export default {
 
             // Period options on the edit or new period modal.
             $(vm.$refs.periodOptions).select2({
-                "theme": "bootstrap",
+                "theme": "bootstrap-5",
                 dataAdapter: customAdapter,
             }).
             on("select2:select",function (e) {
@@ -775,7 +775,7 @@ export default {
 
             //Period options in the selector modal for editing.
             $(vm.$refs.periodOptionsModal).select2({
-                "theme": "bootstrap",
+                "theme": "bootstrap-5",
                 dataAdapter: customAdapter,
             }).
             on("select2:select",function (e) {
@@ -788,7 +788,7 @@ export default {
             });
             //Period options for the delete modal.
             $(vm.$refs.periodOptionsDelete).select2({
-                "theme": "bootstrap",
+                "theme": "bootstrap-5",
                 dataAdapter: customAdapter,
             }).
             on("select2:select",function (e) {

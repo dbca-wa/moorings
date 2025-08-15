@@ -737,7 +737,7 @@ export default {
 
             /* Campground Selector*/
             $(vm.$refs.campgroundSelector).select2({
-                "theme": "bootstrap",
+                "theme": "bootstrap-5",
             }).
             on("select2:select",function (e) {
                 var selected = $(e.currentTarget);
@@ -751,7 +751,7 @@ export default {
 
             /* Region Selector*/
             $(vm.$refs.regionSelector).select2({
-                "theme": "bootstrap",
+                "theme": "bootstrap-5",
             }).
             on("select2:select",function (e) {
                 var selected = $(e.currentTarget);
