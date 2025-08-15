@@ -3,13 +3,14 @@
   "description": "Admin UI for Parkstay",
   "author": "ASI <asi@dpaw.wa.gov.au>",
   "private": true,
+  "type": "module",
   "scripts": {
-    "build": "dotenv -e ../../../.env -- vue-cli-service build",
-    "serve": "dotenv -e ../../../.env -- vue-cli-service serve"
+    "dev": "dotenv -e ../../../.env -- vite",
+    "build": "dotenv -e ../../../.env -- vite build"
   },
   "dependencies": {
     "@json2csv/plainjs": "^7.0.6",
-    "@vue/compat": "^3.5.18",
+    "@vitejs/plugin-vue": "^6.0.1",
     "awesomplete": "^1.1.7",
     "bootstrap": "^5.3.7",
     "bootstrap-daterangepicker": "^3.1.0",
@@ -31,14 +32,17 @@
     "slick-carousel-browserify": "^1.6.12",
     "sweetalert2": "^11.22.2",
     "util": "^0.12.5",
+    "vite": "^7.1.2",
+    "vite-plugin-eslint2": "^5.0.4",
+    "vite-plugin-static-copy": "^3.1.1",
+    "vite-svg-loader": "^5.1.0",
     "vue": "^3.5.18",
     "vue-router": "^4.5.1",
     "vuex": "^4.1.0"
   },
   "devDependencies": {
-    "@vue/cli-service": "^5.0.8",
-    "@vue/compiler-sfc": "^3.5.18",
-    "dotenv-cli": "^10.0.0"
+    "dotenv-cli": "^10.0.0",
+    "vite-plugin-vue-devtools": "^8.0.0"
   },
   "engines": {
     "node": ">= 20.11.1",
