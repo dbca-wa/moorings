@@ -49,23 +49,16 @@ export default defineConfig(({ mode }) => {
         },
         build: {
             manifest: 'manifest.json',
-            // filenameHashing: false,
             commonjsOptions: { transformMixedEsModules: true },
             root: path.resolve(__dirname, './src'),
             outDir: path.resolve(
                 __dirname,
                 `../../static/${applicationNameShort}_vue`
             ),
-            // publicPath: `/static/${applicationNameShort}_vue`,
             sourcemap: true,
             rollupOptions: {
                 input: {
                     main: path.resolve(__dirname, 'src/main.js'),
-                },
-                output: {
-                    entryFileNames: 'js/[name]-[hash].js',
-                    chunkFileNames: 'js/[name]-[hash].js',
-                    assetFileNames: '[ext]/[name]-[hash].[ext]',
                 },
             },
             exclude: ['jquery', 'bootstrap'],
