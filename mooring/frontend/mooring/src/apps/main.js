@@ -26,8 +26,16 @@ import alert from '../components/utils/alert.vue';
 import store from './store.js';
 import { routes } from './routes.js';
 import filters from "../components/utils/filters.js";
-import { mapGetters } from 'vuex';
-import '../hooks-css.js';
+
+// CSSs
+import "quill/dist/quill.snow.css";
+import "datatables.net-bs/css/dataTables.bootstrap.css";
+import "slick-carousel-browserify/slick/slick.css";
+import "select2/dist/css/select2.min.css";
+import 'select2-bootstrap-5-theme/dist/select2-bootstrap-5-theme.min.css';
+import "bootstrap-daterangepicker/daterangepicker.css";
+import "awesomplete/awesomplete.css";
+import "sweetalert2/dist/sweetalert2.css";
 import 'bootstrap-icons/font/bootstrap-icons.css';
 import App from './App.vue';
 import 'bootstrap/dist/js/bootstrap.bundle.min.js';
