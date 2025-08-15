@@ -307,11 +307,13 @@ export default {
     },
     mounted:function () {
         let vm = this;
-        vm.form = $(document.forms.periodForm);
-        vm.events();
-        // bus.$once('priceReasons',setReasons => {
-        //     vm.reasons = setReasons;
-        // });
+        vm.$nextTick(() => {
+            vm.form = $(document.forms.periodForm);
+            vm.events();
+            // bus.$once('priceReasons',setReasons => {
+            //     vm.reasons = setReasons;
+            // });
+        })
     }
 }
 
