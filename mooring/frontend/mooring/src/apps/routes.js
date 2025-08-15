@@ -17,116 +17,116 @@ import Profile from '../components/user/profile.vue'
 import { RouterView} from 'vue-router';
 
 export const routes = [
+    {
+        path: "/account",
+        name: "profile",
+        component: Profile
+    },
+    {
+        path:'/dashboard',
+        component: RouterView,
+        children: [
             {
-                path: "/account",
-                name: "profile",
-                component: Profile
+                path:'campsite-types',
+                name:'campsite-types',
+                component: Campsite_type_dash
             },
             {
-                path:'/dashboard',
+                path: 'bookingperiods',
+                name: 'booking-periods',
+                component: booking_periods
+            },
+            {
+                path:'campsite-type',
                 component: RouterView,
                 children: [
                     {
-                        path:'campsite-types',
-                        name:'campsite-types',
+                        path: '',
+                        name: 'campsite-type',
                         component: Campsite_type_dash
                     },
                     {
-                        path: 'bookingperiods',
-                        name: 'booking-periods',
-                        component: booking_periods
+                        path:':campsite_type_id',
+                        name:'campsite-type-detail',
+                        component: Campsite_type,
+                    }
+                ]
+            },
+            {
+                path:'campgrounds/addCampground',
+                name:'cg_add',
+                component: AddCampground
+            },
+            {
+                path:'moorings',
+                component: RouterView,
+                children:[
+                    {
+                        path: '',
+                        name: 'cg_main',
+                        component: Campgrounds,
                     },
                     {
-                        path:'campsite-type',
-                        component: RouterView,
-                        children: [
-                            {
-                                path: '',
-                                name: 'campsite-type',
-                                component: Campsite_type_dash
-                            },
-                            {
-                                path:':campsite_type_id',
-                                name:'campsite-type-detail',
-                                component: Campsite_type,
-                            }
-                        ]
+                        path:':id',
+                        name:'cg_detail',
+                        component: Campground,
                     },
                     {
-                        path:'campgrounds/addCampground',
-                        name:'cg_add',
-                        component: AddCampground
+                        path:':id/campsites/add',
+                        name:'add_campsite',
+                        component:Campsite
                     },
                     {
-                        path:'moorings',
-                        component: RouterView,
-                        children:[
-                            {
-                                path: '',
-                                name: 'cg_main',
-                                component: Campgrounds,
-                            },
-                            {
-                                path:':id',
-                                name:'cg_detail',
-                                component: Campground,
-                            },
-                            {
-                                path:':id/campsites/add',
-                                name:'add_campsite',
-                                component:Campsite
-                            },
-                            {
-                                path:':id/campsites/:campsite_id',
-                                name:'view_campsite',
-                                component:Campsite
-                            },
-                        ]
+                        path:':id/campsites/:campsite_id',
+                        name:'view_campsite',
+                        component:Campsite
                     },
-                      {
-                        path:'bookings',
-                        component: BookingIndex,
-                        children:[
-                            {
-                                path: '',
-                                name: 'booking-dashboard',
-                                component: bookingDashboard,
-                            },
-                            {
-                                path: 'add/:cg',
-                                name: 'add-booking',
-                                component: addBooking,
-                            },
-                            {
-                                path: 'edit/:booking_id',
-                                name: 'edit-booking',
-                                component: editBooking
-                            },
-                        ]
+                ]
+            },
+                {
+                path:'bookings',
+                component: BookingIndex,
+                children:[
+                    {
+                        path: '',
+                        name: 'booking-dashboard',
+                        component: bookingDashboard,
                     },
                     {
-                        path:'bulkpricing',
-                        name:'bulkpricing',
-                        component:Bulkpricing
+                        path: 'add/:cg',
+                        name: 'add-booking',
+                        component: addBooking,
                     },
                     {
-                        path:'reports',
-                        name:'reports',
-                        component:Reports
+                        path: 'edit/:booking_id',
+                        name: 'edit-booking',
+                        component: editBooking
                     },
                 ]
             },
             {
-                path:'/booking',
-                component: RouterView,
-                children:[
-                    {
-                        path:'',
-                        name:'fl-search',
-                        component: firstLevelSearch
-                    }
-                ]
+                path:'bulkpricing',
+                name:'bulkpricing',
+                component:Bulkpricing
             },
+            {
+                path:'reports',
+                name:'reports',
+                component:Reports
+            },
+        ]
+    },
+    {
+        path:'/booking',
+        component: RouterView,
+        children:[
+            {
+                path:'',
+                name:'fl-search',
+                component: firstLevelSearch
+            }
+        ]
+    },
     {
         path: '/404',
         name: '404',
