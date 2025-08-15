@@ -1,10 +1,6 @@
 <template lang="html" id="pkCGADD">
     <div class="card" id="applications">
         <div class="card-header" role="tab" id="addmooring-heading">
-            <!-- <div class="row">
-                <h4 class='col-6 card-title'>Add Mooring</h4>
-                <div class='col-6 text-end'><i class="bi bi-chevron-down"></i></div>
-            </div> -->
             <h2 class="mb-0">
                 <button 
                     class="btn d-flex justify-content-between align-items-center w-100 text-start text-decoration-none"
