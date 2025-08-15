@@ -1,3 +1,4 @@
+import 'vite/modulepreload-polyfill';
 // The following line loads the standalone build of Vue instead of the runtime-only build,
 // so you don't have to do: import Vue from 'vue/dist/vue'
 // This is done with the browser options. For the config, see package.json
@@ -5,9 +6,18 @@
 // if (process.env.VUE_APP_NODE_ENV == "development") {
 //     Vue.config.devtools = true;
 // }
+import $ from 'jquery';
+import moment from 'moment';
+import swal from 'sweetalert2';
+
+window.$ = $;
+window.jQuery = $;
+window.moment = moment;
+window.swal = swal;
+
 import { createApp } from "vue";
 import { createRouter, createWebHistory } from "vue-router";
-import { $ } from '../hooks'
+// import { $ } from '../hooks'
 // window.$ = $;
 // window.jquery = $;
 // global.$ = $
