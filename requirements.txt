@@ -1,4 +1,4 @@
-Django==1.11.29
+Django==4.2.20
 git+https://github.com/dbca-wa/ledger#egg=ledger
 git+https://github.com/jieter/django-tables2@v1.16.0
 django-extensions==1.9.8
@@ -67,3 +67,5 @@ pillow==10.3.0
 idna==3.7
 cryptography==42.0.8
 pandas==2.0.3
+certifi>=2024.7.4 # not directly required, pinned by Snyk to avoid a vulnerability
+jinja2>=3.1.6 # not directly required, pinned by Snyk to avoid a vulnerability
