@@ -20,12 +20,19 @@
                         <label for="open_cg_range_start">Open per: </label>
                     </div>
                     <div class="col-md-4">
-                        <div class='input-group date' id='open_cg_range_start'>
+                        <!-- <div class='input-group date' id='open_cg_range_start'>
                             <input name="open_start" v-model="formdata.range_start" type='text' class="form-control" />
                             <span class="input-group-addon">
                                 <span class="glyphicon glyphicon-calendar"></span>
                             </span>
-                        </div>
+                        </div> -->
+                        <input
+                            type="date"
+                            id="open_cg_range_start"
+                            name="open_start"
+                            v-model="formattedRangeStart"
+                            class="form-control"
+                        />
                     </div>
                 </div>
             </div>
@@ -87,6 +94,23 @@ export default {
         },
         requireDetails: function () {
             return (this.formdata.reason === '1')? true: false;
+        },
+        formattedRangeStart: {
+            get() {
+                if (!this.formdata.range_start) {
+                    return null;
+                }
+                const parts = this.formdata.range_start.split('/'); // "DD", "MM", "YYYY" 
+                return `${parts[2]}-${parts[1]}-${parts[0]}`; // "YYYY-MM-DD"
+            },
+            set(newValue) {
+                if (!newValue) {
+                    this.formdata.range_start = '';
+                    return;
+                }
+                const parts = newValue.split('-'); // "YYYY", "MM", "DD"
+                this.formdata.range_start = `${parts[2]}/${parts[1]}/${parts[0]}`; // "DD/MM/YYYY"
+            }
         }
     },
     components: {
@@ -132,13 +156,13 @@ export default {
     },
     mounted: function() {
         var vm = this;
-        vm.picker = $('#open_cg_range_start');
-        vm.picker.datetimepicker({
-            format: 'DD/MM/YYYY'
-        });
-        vm.picker.on('dp.change', function(e){
-            vm.formdata.range_start = vm.picker.data('DateTimePicker').date().format('DD/MM/YYYY');
-        });
+        // vm.picker = $('#open_cg_range_start');
+        // vm.picker.datetimepicker({
+        //     format: 'DD/MM/YYYY'
+        // });
+        // vm.picker.on('dp.change', function(e){
+        //     vm.formdata.range_start = vm.picker.data('DateTimePicker').date().format('DD/MM/YYYY');
+        // });
         vm.form = $('#openCGForm');
         vm.addFormValidations();
     }
