@@ -14,7 +14,7 @@
                                         {{title}}
                                     </slot>
                                 </h4>
-                                <button type="button" class="btn-close" @click="cancel"></button>
+                                <!-- <button type="button" class="btn-close" @click="cancel"></button> -->
                             </div>
                         </slot>
 
