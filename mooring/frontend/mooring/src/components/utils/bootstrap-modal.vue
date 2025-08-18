@@ -1,39 +1,42 @@
 <template id="bootstrap-modal">
-    <div v-show="show" :transition="transition">
-        <div class="modal" @click.self="clickMask">
-            <div class="modal-dialog" :class="modalClass">
-                <div class="modal-content">
+    <!-- <div v-show="show" :transition="transition"> -->
+    <transition name="fade">
+        <div v-if="show">
+            <div class="modal show" @click.self="clickMask">
+                <div class="modal-dialog" :class="modalClass">
+                    <div class="modal-content">
 
-                    <!--Header-->
-                    <slot name="header">
-                        <div class="modal-header">
-                            <a type="button" class="close" @click="cancel">x</a>
-                            <h4 class="modal-title">
-                                <slot name="title">
-                                    {{title}}
-                                </slot>
-                            </h4>
-                        </div>
-                    </slot>
-
-                    <!--Container-->
-                    <div class="modal-body">
-                        <slot></slot>
-                    </div>
-
-                    <!--Footer-->
-                    <div class="modal-footer">
-                        <slot name="footer">
-                            <button v-if="showOK" id="okBtn" type="button" :class="okClass" @click="ok">{{okText}}</button>
-                            <button v-if="showCancel" type="button" :class="cancelClass" @click="cancel">{{cancelText}}</button>
+                        <!--Header-->
+                        <slot name="header">
+                            <div class="modal-header">
+                                <h4 class="modal-title">
+                                    <slot name="title">
+                                        {{title}}
+                                    </slot>
+                                </h4>
+                                <button type="button" class="btn-close" @click="cancel"></button>
+                            </div>
                         </slot>
-                    </div>
 
+                        <!--Container-->
+                        <div class="modal-body">
+                            <slot></slot>
+                        </div>
+
+                        <!--Footer-->
+                        <div class="modal-footer">
+                            <slot name="footer">
+                                <button v-if="showOK" id="okBtn" type="button" :class="okClass" @click="ok">{{okText}}</button>
+                                <button v-if="showCancel" type="button" :class="cancelClass" @click="cancel">{{cancelText}}</button>
+                            </slot>
+                        </div>
+
+                    </div>
                 </div>
             </div>
+            <div class="modal-backdrop in"></div>
         </div>
-        <div class="modal-backdrop in"></div>
-    </div>
+    </transition>
 </template>
 
 <script>
