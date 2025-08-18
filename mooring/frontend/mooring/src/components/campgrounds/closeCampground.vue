@@ -1,90 +1,80 @@
 <template id="pkCgClose">
-<bootstrapModal title="(Temporarily) close" :large=true @ok="addClosure()">
+<bootstrapModal :large=true @ok="addClosure()">
+    <template #header>
+        <div class="modal-header">
+            <h4 class="modal-title">(Temporarily) close</h4>
+        </div>
+    </template>
 
     <div class="modal-body">
+        <alert v-if="showError" type="danger">{{ errorString }}</alert>
+
         <form id="closeCGForm" class="form-horizontal">
-            <div class="row">
-			    <alert v-model:show="showError" type="danger">{{errorString}}</alert>
-                <div class="form-group">
-                    <div class="col-md-2">
-                        <label for="open_cg_range_start">Closure start: </label>
-                    </div>
-                    <div class="col-md-3">
-                        <!-- <div class='input-group date' id='close_cg_range_start'>
-                            <input  name="closure_start" v-model="formdata.range_start" type='text' class="form-control" />
-                            <span class="input-group-addon">
-                                <span class="glyphicon glyphicon-calendar"></span>
-                            </span>
-                        </div> -->
-                        <input
-                            id="closure_start"
-                            name="closure_start"
-                            type="date"
-                            class="form-control"
-                            v-model="formdata.range_start"
-                            :min="today"
-                        />
-                    </div>
+            <div class="row mb-3 align-items-center">
+                <div class="col-md-2">
+                    <label for="closure_start" class="col-form-label">Closure start:</label>
+                </div>
+                <div class="col-md-3">
+                    <input
+                        id="closure_start"
+                        name="closure_start"
+                        type="date"
+                        class="form-control"
+                        v-model="formdata.range_start"
+                        :min="today"
+                    />
+                </div>
 
-                    <div class="col-md-1"></div>
-                    <div class="col-md-2">
-                        <label for="open_cg_range_start_time"> Start time: </label>
-                    </div>
-                    <div class="col-md-3">
-                        <div class='input-group date' id='close_cg_range_start_time'>
-                            <input  name="closure_start_time" v-model="formdata.range_start_time" type='text' value="00:00" class="form-control" />
-                            <span class="input-group-addon">
-                                <span class="glyphicon glyphicon-time"></span>
-                            </span>
-                        </div>
-                    </div>
+                <div class="col-md-2">
+                    <label for="closure_start_time" class="col-form-label"> Start time: </label>
+                </div>
+                <div class="col-md-3">
+                    <input
+                        id="closure_start_time"
+                        name="closure_start_time"
+                        type="time"
+                        class="form-control"
+                        v-model="formdata.range_start_time"
+                    />
                 </div>
             </div>
-            <div class="row">
-                <div class="form-group">
-                    <div class="col-md-2">
-                        <label for="open_cg_range_start">Reopen: </label>
-                    </div>
-                    <div class="col-md-3">
-                        <!-- <div class='input-group date' id='close_cg_range_end'>
-                            <input name="closure_end" v-model="formdata.range_end" type='text' class="form-control" />
-                            <span class="input-group-addon">
-                                <span class="glyphicon glyphicon-calendar"></span>
-                            </span>
-                        </div> -->
-                        <input
-                            id="closure_end"
-                            name="closure_end"
-                            type="date"
-                            class="form-control"
-                            v-model="formdata.range_end"
-                            :min="formdata.range_start || today"
-                        />
-                    </div>
+            <div class="row mb-3 align-items-center">
+                <div class="col-md-2">
+                    <label for="closure_end" class="col-form-label">Reopen:</label>
+                </div>
+                <div class="col-md-3">
+                    <input
+                        id="closure_end"
+                        name="closure_end"
+                        type="date"
+                        class="form-control"
+                        v-model="formdata.range_end"
+                        :min="formdata.range_start || today"
+                    />
+                </div>
 
-                    <div class="col-md-1"></div>
-                    <div class="col-md-2">
-                        <label for="open_cg_range_end_time"> Reopen time: </label>
-                    </div>
-                    <div class="col-md-3">
-                        <div class='input-group date' id='close_cg_range_end_time'>
-                            <input  name="closure_end_time" v-model="formdata.range_end_time" type='text' value="23:59" class="form-control" />
-                            <span class="input-group-addon">
-                                <span class="glyphicon glyphicon-time"></span>
-                            </span>
-                        </div>
-                    </div>
+                <div class="col-md-2">
+                    <label for="open_cg_range_end_time"> Reopen time:</label>
+                </div>
+                <div class="col-md-3">
+                    <input
+                        id="closure_end_time"
+                        name="closure_end_time"
+                        type="time"
+                        class="form-control"
+                        v-model="formdata.range_end_time"
+                    />
                 </div>
             </div>
+
             <reason type="close" v-model="formdata.closure_reason" ref="reason"></reason>
-            <div v-show="requireDetails" class="row">
-                <div class="form-group">
-                    <div class="col-md-2">
-                        <label for="open_cg_details">Details: </label>
-                    </div>
-                    <div class="col-md-5">
-                        <textarea name="closure_details" v-model="formdata.details" class="form-control" id="close_cg_details"></textarea>
-                    </div>
+
+            <div v-if="requireDetails" class="row">
+                <div class="col-md-2">
+                    <label for="open_cg_details">Details:</label>
+                </div>
+                <div class="col-md-8">
+                    <textarea name="closure_details" v-model="formdata.details" class="form-control" id="close_cg_details"></textarea>
                 </div>
             </div>
         </form>
