@@ -812,14 +812,14 @@ export default {
             // vm.stopLoadingSection("all");
         },
         swalMessage: function(value){
-            swal({
-            title: value.title,
-            text: value.text,
-            type: value.type,
-            showCancelButton: false,
-            confirmButtonText: 'OK',
-            showLoaderOnConfirm: true,
-            allowOutsideClick: false
+            swal.fire({
+                title: value.title,
+                text: value.text,
+                type: value.type,
+                showCancelButton: false,
+                confirmButtonText: 'OK',
+                showLoaderOnConfirm: true,
+                allowOutsideClick: false
             });
         },
         addFormValidations: function() {
