@@ -149,12 +149,13 @@
 </template>
 
 <script>
-import modal from '../bootstrap-modal.vue'
-import reason from '../reasons.vue'
-import { $, api_endpoints, helpers, bus, Moment } from '../../../hooks'
-import alert from '../alert.vue'
+import modal from '@/components/utils/bootstrap-modal.vue'
+import reason from '@/components/utils/reasons.vue'
+import { $, api_endpoints, bus, Moment } from '@/hooks.js'
+import alert from '@/components/utils/alert.vue'
 import { mapGetters } from 'vuex'
 import 'bootstrap/dist/js/bootstrap.bundle.min.js';
+import helpers from '@/components/utils/helpers.js'
 
 export default {
     name: 'PriceHistoryDetail',

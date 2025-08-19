@@ -12,18 +12,11 @@
 </template>
 
 <script>
-import datatable from './datatable.vue'
-import confirmbox from './confirmbox.vue'
-import Close from './closureHistory/close.vue'
-import Open from './closureHistory/open.vue'
-import {bus} from './eventBus.js'
-import {
-    $,
-    Moment,
-    api_endpoints,
-    helpers
-}
-from '../../hooks.js'
+import datatable from '@/components/utils/datatable.vue'
+import confirmbox from '@/components/utils/confirmbox.vue'
+import Close from '@/components/utils/closureHistory/close.vue'
+import { bus } from '@/components/utils/eventBus.js'
+import { $, Moment, api_endpoints, helpers } from '@/hooks.js'
 
 export default {
     name: 'closureHistory',
