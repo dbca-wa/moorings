@@ -9,40 +9,46 @@
                     <alert v-model:show="showError" type="danger">
                         <p>{{errorString}}</p>
                     </alert>
-                    <div class="row">
-                        <div class="col-lg-12">
-                            <div class="row">
-                                <div class="col-lg-12">
-                                    <div class="row">
-                                        <div class="form-group">
-                                            <div class="col-md-4">
-                                                <label class="control-label" >Maximum Vessel Size (Meters)</label>
-                                                <input type="number" name="vessel_size_limit" id="vessel_size_limit" style="margin-top:10px;" class="form-control form-control-input" v-model="campground.vessel_size_limit" @blur="validateSize()"required/>
-                                            </div>
-                                            <div class="col-md-4">
-                                                <label class="control-label" >Maximum Vessel Draft (Meters)</label>
-                                                <input type="number" name="vessel_draft_limit" id="vessel_draft_limit" style="margin-top:10px;" class="form-control form-control-input" v-model="campground.vessel_draft_limit" @blur="validateDraft()" required/>
-                                            </div>
-                                            <div class="col-md-4" v-if="campground.mooring_physical_type == 1 || campground.mooring_physical_type == 2">
-                                                <label class="control-label" >Maximum Vessel Beam (Meters)</label>
-                                                <input type="number" name="vessel_beam_limit" id="vessel_beam_limit" style="margin-top:10px;" class="form-control form-control-input" v-model="campground.vessel_beam_limit" @blur="validateBeamWeight()" required/>
-                                            </div>
-                                            <div class="col-md-4" v-else>
-                                                <label class="control-label" >Maximum Vessel Weight (Tonnes)</label>
-                                                <input type="number" name="vessel_weight_limit" id="vessel_weight_limit" style="margin-top:10px;" class="form-control form-control-input" v-model="campground.vessel_weight_limit" @blur="validateBeamWeight()" required/>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
+                    <div class="row align-items-center mb-3">
+                        <div class="col-md-3">
+                            <label class="control-label" >Maximum Vessel Size (Meters)</label>
+                        </div>
+                        <div class="col-md-1">
+                            <input type="number" name="vessel_size_limit" id="vessel_size_limit" class="form-control form-control-input" v-model="campground.vessel_size_limit" @blur="validateSize()"required/>
+                        </div>
+                    </div>
+                    <div class="row align-items-center mb-3">
+                        <div class="col-md-3">
+                            <label class="control-label" >Maximum Vessel Draft (Meters)</label>
+                        </div>
+                        <div class="col-md-1">
+                            <input type="number" name="vessel_draft_limit" id="vessel_draft_limit" class="form-control form-control-input" v-model="campground.vessel_draft_limit" @blur="validateDraft()" required/>
+                        </div>
+                    </div>
+                    <div class="row align-items-center mb-3">
+                        <template v-if="campground.mooring_physical_type == 1 || campground.mooring_physical_type == 2">
+                            <div class="col-md-3">
+                                <label class="control-label" >Maximum Vessel Beam (Meters)</label>
                             </div>
-                            <div class="row" style="display:none;">
-                                <div class="col-md-12" style="margin-top:20px;">
-                                    <div class="form-group pull-right">
-                                        <a href="#" v-if="createCampground" class="btn btn-primary" @click.prevent="create">Create</a>
-                                        <a href="#" v-else class="btn btn-primary" @click.prevent="update">Update</a>
-                                        <a href="#" class="btn btn-primary" @click.prevent="goBack">Cancel</a>
-                                    </div>
-                                </div>
+                            <div class="col-md-1">
+                                <input type="number" name="vessel_beam_limit" id="vessel_beam_limit" class="form-control form-control-input" v-model="campground.vessel_beam_limit" @blur="validateBeamWeight()" required/>
+                            </div>
+                        </template>
+                        <template v-else>
+                            <div class="col-md-3">
+                                <label class="control-label" >Maximum Vessel Weight (Tonnes)</label>
+                            </div>
+                            <div class="col-md-1">
+                                <input type="number" name="vessel_weight_limit" id="vessel_weight_limit" style="margin-top:10px;" class="form-control form-control-input" v-model="campground.vessel_weight_limit" @blur="validateBeamWeight()" required/>
+                            </div>
+                        </template>
+                    </div>
+                    <div class="row" style="display:none;">
+                        <div class="col-md-12" style="margin-top:20px;">
+                            <div class="form-group pull-right">
+                                <a href="#" v-if="createCampground" class="btn btn-primary" @click.prevent="create">Create</a>
+                                <a href="#" v-else class="btn btn-primary" @click.prevent="update">Update</a>
+                                <a href="#" class="btn btn-primary" @click.prevent="goBack">Cancel</a>
                             </div>
                         </div>
                     </div>
