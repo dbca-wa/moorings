@@ -32,10 +32,9 @@
                             </button>
                         </div>
                     </div>
-                    <div class="row">
+                    <div class="row mb-3">
                         <div class="col-md-4">
-                            <div class="form-group">
-                            <label for="">Mooring</label>
+                            <label for="" class="form-label">Mooring</label>
                             <select v-show="isLoading" class="form-control" >
                                 <option value="">Loading...</option>
                             </select>
@@ -43,56 +42,50 @@
                                 <option value="All">All</option>
                                 <option v-for="campground in campgrounds" :value="campground.id">{{campground.name}}</option>
                             </select>
-                            </div>
                         </div>
                         <div class="col-md-4">
-                            <div class="form-group">
-                            <label for="">Region</label>
+                            <label for="" class="form-label">Region</label>
                             <select v-show="isLoading" class="form-control" name="">
-                                    <option value="">Loading...</option>
+                                <option value="">Loading...</option>
                             </select>
                             <select ref="regionSelector" v-if="!isLoading" class="form-control" v-model="filterRegion" id="filterRegion">
-                                    <option value="All">All</option>
-                                    <option v-for="region in regions" :value="region.id">{{region.name}}</option>
+                                <option value="All">All</option>
+                                <option v-for="region in regions" :value="region.id">{{region.name}}</option>
                             </select>
-                            </div>
                         </div>
                         <div class="col-md-4">
-                            <div class="form-group">
-                            <label for="">Cancelled</label>
-                                <select class="form-control" v-model="filterCanceled" id="filterCanceled">
-                                    <option value="True">Yes</option>
-                                    <option value="False">No</option>
-                                </select>
-                            </div>
+                            <label for="" class="form-label">Cancelled</label>
+                            <select class="form-control" v-model="filterCanceled" id="filterCanceled">
+                                <option value="True">Yes</option>
+                                <option value="False">No</option>
+                            </select>
                         </div>
                     </div>
                     <div class="row" style="margin-bottom:10px;">
                         <div class="col-md-4">
-                            <label for="">Date From</label>
-                            <div class="input-group date" id="booking-date-from">
-                            <input type="text" class="form-control"  placeholder="DD/MM/YYYY" v-model="filterDateFrom">
-                            <span class="input-group-addon">
-                                <span class="glyphicon glyphicon-calendar"></span>
-                            </span>
-                            </div>
+                            <label for="booking-date-from" class="form-label">Date From</label>
+                            <input
+                                id="booking-date-from"
+                                type="date"
+                                class="form-control"
+                                v-model="booking_date_from"
+                                :max="booking_date_to"
+                            >
                         </div>
                         <div class="col-md-4">
-                            <label for="">Date To</label>
-                            <div class="input-group date" id="booking-date-to">
-                            <input type="text" class="form-control"  placeholder="DD/MM/YYYY" v-model="filterDateTo">
-                            <span class="input-group-addon">
-                                <span class="glyphicon glyphicon-calendar"></span>
-                            </span>
-                            </div>
+                            <label for="booking-date-to" class="form-label">Date To</label>
+                            <input
+                                id="booking-date-to"
+                                type="date"
+                                class="form-control"
+                                v-model="booking_date_to"
+                                :min="booking_date_from"
+                            >
                         </div>
                         <div class="col-md-4">
-                            <label for="">Keyword</label>
-                            <div class="form-group" id="booking-keyword">
+                            <label for="BookingKeyword" class="form-label">Keyword</label>
                             <input type="text" class="form-control"  placeholder="" v-model="filterBookingKeyword" name='BookingKeyword' id="BookingKeyword">
-                            </div>
                         </div>
-
 
                         <div style='display: none;' class="col-md-4" iv-if="filterCanceled == 'True'">
                             <div class="form-group">
@@ -157,21 +150,25 @@
                     <div class="row">
                         <div class="col-md-3">
                             <label for="">Date From</label>
-                            <div class="input-group date" id="admission-date-from">
-                            <input type="text" class="form-control" placeholder="DD/MM/YYYY" v-model="filterDateFrom2">
-                            <span class="input-group-addon">
-                                <span class="glyphicon glyphicon-calendar"></span>
-                            </span>
-                            </div>
+                            <input
+                                type="date"
+                                id="admission_date_from"
+                                class="form-control"
+                                placeholder="DD/MM/YYYY"
+                                v-model="admission_date_from"
+                                :max="admission_date_to"
+                            >
                         </div>
                         <div class="col-md-3">
                             <label for="">Date To</label>
-                            <div class="input-group date" id="admission-date-to">
-                            <input type="text" class="form-control"  placeholder="DD/MM/YYYY" v-model="filterDateTo2">
-                            <span class="input-group-addon">
-                                <span class="glyphicon glyphicon-calendar"></span>
-                            </span>
-                            </div>
+                            <input
+                                type="date"
+                                id="admission_date_to"
+                                class="form-control"
+                                placeholder="DD/MM/YYYY"
+                                v-model="admission_date_to"
+                                :min="admission_date_from"
+                            >
                         </div>
                         <div class="col-md-3">
                             <div class="form-group">
@@ -184,16 +181,13 @@
                         </div>
                         <div class="col-md-3">
                             <label for="">Keyword</label>
-                            <div class="form-group" id="booking-keyword">
                             <input type="text" class="form-control"  placeholder="" v-model="filterAdmissionKeyword" name='AdmissionKeyword' id="AdmissionKeyword">
-                            </div>
                         </div>
-
 
                     </div>
                     <div class="row">
                         <div class="col-lg-12">
-                            <datatable ref="admissions_bookings_table" id="admissions-bookings-table" :dtOptions="dtOptions2" :dtHeaders="dtHeaders2"></datatable>
+                            <datatable ref="admissions_table" id="admissions-bookings-table" :dtOptions="dtOptions2" :dtHeaders="dtHeaders2"></datatable>
                         </div>
                     </div>
                 </div>
@@ -255,11 +249,11 @@ export default {
                     "dataSrc": 'results',
                     data :function (d) {
                         console.log('start');
-                        if (vm.filterDateFrom) {
-                            d.arrival = vm.filterDateFrom;
+                        if (vm.filterDateFromForBooking) {
+                            d.arrival = vm.filterDateFromForBooking;
                         }
-                        if (vm.filterDateTo) {
-                            d.departure = vm.filterDateTo;
+                        if (vm.filterDateToForBooking) {
+                            d.departure = vm.filterDateToForBooking;
                         }
                         if (vm.filterCampground != "All") {
                             d.campground = vm.filterCampground;
@@ -455,7 +449,7 @@ export default {
                 responsive: true,
                 fnDrawCallback: function(oSettings, json){
                     if(vm.payment_officer){
-                        vm.$refs.admissions_bookings_table.vmDataTable.rows().every(function(){
+                        vm.$refs.admissions_table.vmDataTable.rows().every(function(){
                             var rowdata = this.data();
                             rowdata['payment_visible'] = true;
                             this.data(rowdata);
@@ -470,15 +464,15 @@ export default {
                     "url": api_endpoints.admissionsbookings,
                     "dataSrc": 'results',
                     data :function (d) {
-                        if (vm.filterDateFrom2) {
-                            d.arrival = vm.filterDateFrom2;
+                        if (vm.filterDateFromForAdmission) {
+                            d.arrival = vm.filterDateFromForAdmission;
                         }
-                        if (vm.filterDateTo2) {
-                            d.departure = vm.filterDateTo2;
+                        if (vm.filterDateToForAdmission) {
+                            d.departure = vm.filterDateToForAdmission;
                         }
                         if (vm.filterAdmissionKeyword.length > 0) {
                              d.search_keyword = vm.filterAdmissionKeyword;
-			}
+                        }
                         d.canceled = vm.filterCanceled2;
                     }
                 },
@@ -513,19 +507,16 @@ export default {
                         orderable:false,
                         searchable:false,
                         mRender: function(data, type, full){
-                             if (full.mobile != null) { 
-                                 if (full.mobile.length > 0) {
-                                     return full.mobile;
-                                 } else {
-                                      return full.booking_phone;
-                                 }
-                             } else {
-                                      return full.booking_phone;
-		             }
-  
-
+                            if (full.mobile != null) { 
+                                if (full.mobile.length > 0) {
+                                    return full.mobile;
+                                } else {
+                                    return full.booking_phone;
+                                }
+                            } else {
+                                return full.booking_phone;
+                            }
                         },
-
                     },
                     {
                         data: "vesselRegNo",
@@ -606,28 +597,17 @@ export default {
             },
             dtHeaders:["Confirmation #", "Person", "Vessel Reg #", "Mooring", "Region", "From", "To", "Status", "Action"],
             dtHeaders2:["Confirmation #", "Booking #", "Person","Mobile", "Vessel Reg #", "Total Attendees", "Admission Date", "Warning Ref #", "Action"],
-            dateFromPicker:null,
-            dateToPicker:null,
-            dateFromPicker2:null,
-            dateToPicker2:null,
-            datepickerOptions:{
-                format: 'DD/MM/YYYY',
-                showClear:true,
-                useCurrent:false,
-                keepInvalid:true,
-                allowInputToggle:true
-            },
             loading:[],
             loading2:[],
             selected_booking:-1,
             filterCampground:"All",
             filterRegion:"All",
-            filterDateFrom:"",
-            filterDateTo:"",
+            booking_date_from: '',  // Bind to <input type="date">, so the format is 'YYYY-MM-DD'
+            booking_date_to: '',  // Bind to <input type="date">, so the format is 'YYYY-MM-DD'
             filterCanceled: 'False',
             filterRefundStatus: 'All',
-            filterDateFrom2:"",
-            filterDateTo2:"",
+            admission_date_from: '',  // Bind to <input type="date">, so the format is 'YYYY-MM-DD'
+            admission_date_to: '',  // Bind to <input type="date">, so the format is 'YYYY-MM-DD'
             filterCanceled2: 'False',
             filterBookingKeyword: '',
             filterAdmissionKeyword: '',
@@ -640,24 +620,93 @@ export default {
         }
     },
     watch:{
+        // Watchers to prevent invalid date ranges, especially from manual input.
+        booking_date_from(newStartDate) {
+            if (newStartDate && this.booking_date_to && newStartDate > this.booking_date_to) {
+                this.booking_date_to = '';
+            }
+        },
+        // Watchers to prevent invalid date ranges, especially from manual input.
+        booking_date_to(newEndDate) {
+            if (newEndDate && this.booking_date_from && newEndDate < this.booking_date_from) {
+                this.booking_date_from = '';
+            }
+        },
+        dateRangeIdentifierForReloadBookingTable() {
+            this.reloadBookingTable();
+        },
+        // Watchers to prevent invalid date ranges, especially from manual input.
+        admission_date_from(newStartDate) {
+            if (newStartDate && this.admission_date_to && newStartDate > this.admission_date_to) {
+                this.admission_date_to = '';
+            }
+        },
+        // Watchers to prevent invalid date ranges, especially from manual input.
+        admission_date_to(newEndDate) {
+            if (newEndDate && this.admission_date_from && newEndDate < this.admission_date_from) {
+                this.admission_date_from = '';
+            }
+        },
+        dateRangeIdentifierForReloadAdmissionTable() {
+            this.reloadAdmissionTable();
+        },
         filterCampground: function() {
-            let vm = this;
-            vm.$refs.bookings_table.vmDataTable.ajax.reload();
+            this.reloadBookingTable()
         },
         filterRegion: function() {
-            let vm = this;
-            vm.$refs.bookings_table.vmDataTable.ajax.reload();
+            this.reloadBookingTable()
         },
         filterCanceled: function() {
-            let vm = this;
-            vm.$refs.bookings_table.vmDataTable.ajax.reload();
+            this.reloadBookingTable()
         },
         filterRefundStatus: function() {
-            let vm = this;
-            vm.$refs.bookings_table.vmDataTable.ajax.reload();
+            this.reloadBookingTable()
         },
     },
     computed:{
+        filterDateFromForBooking: {
+            get() {
+                // If our internal date exists, convert it for submission, etc
+                if (this.booking_date_from) {
+                    return Moment(this.booking_date_from, 'YYYY-MM-DD').format('DD/MM/YYYY');
+                }
+                return ''; // Otherwise, return an empty string.
+            }
+        },
+        filterDateToForBooking: {
+            // GET:
+            get() {
+                if (this.booking_date_to) {
+                    return Moment(this.booking_date_to, 'YYYY-MM-DD').format('DD/MM/YYYY');
+                }
+                return '';
+            },
+        },
+        filterDateFromForAdmission: {
+            get() {
+                // If our internal date exists, convert it for submission, etc
+                if (this.admission_date_from) {
+                    return Moment(this.admission_date_from, 'YYYY-MM-DD').format('DD/MM/YYYY');
+                }
+                return ''; // Otherwise, return an empty string.
+            }
+        },
+        filterDateToForAdmission: {
+            // GET:
+            get() {
+                if (this.admission_date_to) {
+                    return Moment(this.admission_date_to, 'YYYY-MM-DD').format('DD/MM/YYYY');
+                }
+                return '';
+            },
+        },
+        // --- This is the NEW computed property for triggering the reload ---
+        dateRangeIdentifierForReloadBookingTable() {
+            return `${this.booking_date_from}|${this.booking_date_to}`;
+        },
+        dateRangeIdentifierForReloadAdmissionTable() {
+            return `${this.admission_date_from}|${this.admission_date_to}`;
+        },
         isLoading:function () {
             return this.loading.length > 0;
         },
@@ -670,6 +719,20 @@ export default {
         ]),
     },
     methods:{
+        reloadBookingTable() {
+            if (this.$refs.bookings_table && this.$refs.bookings_table.vmDataTable) {
+                this.$refs.bookings_table.vmDataTable.ajax.reload();
+            } else {
+                console.warn('Attempted to reload DataTable, but it was not available.');
+            }
+        },
+        reloadAdmissionTable() {
+            if (this.$refs.admissions_table && this.$refs.admissions_table.vmDataTable) {
+                this.$refs.admissions_table.vmDataTable.ajax.reload();
+            } else {
+                console.warn('Attempted to reload DataTable, but it was not available.');
+            }
+        },
         showhidebookings: function() {
             var content = $('#content_booking');
             var span = $('#collapse_bookings_span');
@@ -716,7 +779,7 @@ export default {
                 emulateJSON:true,
                 headers: {'X-CSRFToken': helpers.getCookie('csrftoken')}
             }).then((response)=>{
-                vm.$refs.bookings_table.vmDataTable.ajax.reload();
+                vm.reloadBookingTable()
             },(error) =>{
                 console.log(error);
             });
@@ -778,7 +841,7 @@ export default {
 
             vm.$refs.bookings_table.vmDataTable.on('click','a[data-cancel]',function (e) {
                 vm.selected_booking = JSON.parse($(this).attr('data-cancel'));
-                swal({
+                swal.fire({
                   title: 'Cancel Booking',
                   text: "Provide a cancellation reason",
                   type: 'warning',
@@ -800,8 +863,8 @@ export default {
                   },
                   allowOutsideClick: false
                 }).then(function (reason) {
-                    vm.$refs.bookings_table.vmDataTable.ajax.reload();
-                    swal({
+                    vm.reloadBookingTable()
+                    swal.fire({
                         type: 'success',
                         title: 'Booking Cancelled',
                         html: 'Booking PS' + vm.selected_booking.id + ' has been cancelled'
@@ -810,57 +873,8 @@ export default {
                 //bus.$emit('showAlert', 'cancelBooking');
                 bus.emit('showAlert', 'cancelBooking');
             });
-            vm.dateToPicker.on('dp.change', function(e){
-                if (vm.dateToPicker.data('DateTimePicker').date()) {
-                    vm.filterDateTo =  e.date.format('DD/MM/YYYY');
-                    vm.$refs.bookings_table.vmDataTable.ajax.reload();
-                }
-                else if (vm.dateToPicker.data('date') === "") {
-                    vm.filterDateTo = "";
-                    vm.$refs.bookings_table.vmDataTable.ajax.reload();
-                }
-
-             });
-
-            vm.dateFromPicker.on('dp.change',function (e) {
-                if (vm.dateFromPicker.data('DateTimePicker').date()) {
-                    vm.filterDateFrom = e.date.format('DD/MM/YYYY');
-                    vm.dateToPicker.data("DateTimePicker").minDate(e.date);
-                    vm.$refs.bookings_table.vmDataTable.ajax.reload();
-                }
-                else if (vm.dateFromPicker.data('date') === "") {
-                    vm.filterDateFrom = "";
-                    vm.$refs.bookings_table.vmDataTable.ajax.reload();
-                }
-
-            });
-
-            vm.dateToPicker2.on('dp.change', function(e){
-                if (vm.dateToPicker2.data('DateTimePicker').date()) {
-                    vm.filterDateTo2 =  e.date.format('DD/MM/YYYY');
-                    vm.$refs.admissions_bookings_table.vmDataTable.ajax.reload();
-                }
-                else if (vm.dateToPicker2.data('date') === "") {
-                    vm.filterDateTo2 = "";
-                    vm.$refs.admissions_bookings_table.vmDataTable.ajax.reload();
-                }
-
-             });
-
-            vm.dateFromPicker2.on('dp.change',function (e) {
-                if (vm.dateFromPicker2.data('DateTimePicker').date()) {
-                    vm.filterDateFrom2 = e.date.format('DD/MM/YYYY');
-                    vm.dateToPicker2.data("DateTimePicker").minDate(e.date);
-                    vm.$refs.admissions_bookings_table.vmDataTable.ajax.reload();
-                }
-                else if (vm.dateFromPicker2.data('date') === "") {
-                    vm.filterDateFrom2 = "";
-                    vm.$refs.admissions_bookings_table.vmDataTable.ajax.reload();
-                }
-
-            });
             $('#filterCanceled2').on('change',function (e) {
-                   vm.$refs.admissions_bookings_table.vmDataTable.ajax.reload();
+                   vm.reloadAdmissionTable();
 	    });
             helpers.namePopover($,vm.$refs.bookings_table.vmDataTable);
             $(document).on('keydown', function(e) {
@@ -875,8 +889,8 @@ export default {
             let vm = this;
             var str = [];
             let obj = {
-                arrival : vm.filterDateFrom != null ? vm.filterDateFrom: '',
-                departure : vm.filterDateTo != null ? vm.filterDateTo:'' ,
+                arrival : vm.filterDateFromForBooking != null ? vm.filterDateFromForBooking: '',
+                departure : vm.filterDateToForBooking != null ? vm.filterDateToForBooking:'' ,
                 campground : vm.filterCampground != 'All' ? vm.filterCampground : '',
                 region : vm.filterRegion != 'All' ? vm.filterRegion : '',
                 canceled: vm.filterCanceled,
@@ -893,9 +907,9 @@ export default {
             let vm = this;
             var str = [];
             let obj = {
-                arrival : vm.filterDateFrom2 != null ? vm.filterDateFrom2: '',
-                departure : vm.filterDateTo2 != null ? vm.filterDateTo2:'' ,
-                'search[value]': vm.$refs.admissions_bookings_table.vmDataTable.search(),
+                arrival : vm.filterDateFromForAdmission != null ? vm.filterDateFromForAdmission: '',
+                departure : vm.filterDateToForAdmission != null ? vm.filterDateToForAdmission:'' ,
+                'search[value]': vm.$refs.admissions_table.vmDataTable.search(),
                 canceled: vm.filterCanceled2,
             }
 
@@ -1166,7 +1180,7 @@ export default {
 
                 var filterCampground = (vm.filterCampground == 'All') ? "All Moorings " : $('#filterCampground')[0].selectedOptions[0].text;
                 var filterRegion = (vm.filterCampground == 'All') ? (vm.filterRegion == 'All')? "All Regions" : $('#filterRegion')[0].selectedOptions[0].text : "";
-                var filterDates = (vm.filterDateFrom) ? (vm.filterDateTo) ? "From "+vm.filterDateFrom + " To "+vm.filterDateTo: "From "+vm.filterDateFrom : (vm.filterDateTo) ? " To "+vm.filterDateTo : "" ;
+                var filterDates = (vm.filterDateFromForBooking) ? (vm.filterDateToForBooking) ? "From "+vm.filterDateFromForBooking + " To "+vm.filterDateToForBooking: "From "+vm.filterDateFromForBooking : (vm.filterDateToForBooking) ? " To "+vm.filterDateToForBooking : "" ;
                 var filename =  filterCampground +  "_" + filterRegion + "_" +filterDates+ ".csv";
                 if (window.navigator.msSaveOrOpenBlob){
                     console.log('IE10+ detected');
@@ -1187,7 +1201,7 @@ export default {
                 vm.exportingCSV = false;
             } catch (error) {
                 vm.exportingCSV = false;
-                swal({
+                swal.fire({
                     type: 'error',
                     title: 'Export Error', 
                     text: helpers.apiVueResourceError(error), 
@@ -1324,7 +1338,7 @@ export default {
 
                 // 5. Create a Blob from the generated CSV string.
                 let file = new Blob([csv], { type: 'text/csv' });
-                var filterDates = (vm.filterDateFrom2) ? (vm.filterDateTo2) ? "From "+vm.filterDateFrom2 + " To "+vm.filterDateTo2: "From "+vm.filterDateFrom2 : (vm.filterDateTo2) ? " To "+vm.filterDateTo2 : "" ;
+                var filterDates = (vm.filterDateFromForAdmission) ? (vm.filterDateToForAdmission) ? "From "+vm.filterDateFromForAdmission + " To "+vm.filterDateToForAdmission: "From "+vm.filterDateFromForAdmission : (vm.filterDateToForAdmission) ? " To "+vm.filterDateToForAdmission : "" ;
                 var filename =  filterDates + "_admissions" + ".csv";
                 filename.replace(" ", "_");
                 if (window.navigator.msSaveOrOpenBlob) // IE10+
@@ -1343,7 +1357,7 @@ export default {
                 vm.exportingCSV2 = false;
             } catch (error) {
                 vm.exportingCSV2 = false;
-                swal({
+                swal.fire({
                     type: 'error',
                     title: 'Export Error', 
                     text: helpers.apiVueResourceError(error), 
@@ -1407,10 +1421,6 @@ export default {
             vm.isExpanded2 = false;
         });
 
-        vm.dateFromPicker = $('#booking-date-from').datetimepicker(vm.datepickerOptions);
-        vm.dateToPicker = $('#booking-date-to').datetimepicker(vm.datepickerOptions);
-        vm.dateFromPicker2 = $('#admission-date-from').datetimepicker(vm.datepickerOptions);
-        vm.dateToPicker2 = $('#admission-date-to').datetimepicker(vm.datepickerOptions);
         vm.fetchCampgrounds();
         vm.fetchRegions();
         vm.addEventListeners();
@@ -1436,11 +1446,11 @@ export default {
         });
 
         $('#BookingKeyword').on('change', function() {
-               vm.$refs.bookings_table.vmDataTable.ajax.reload();
+            vm.reloadBookingTable();
         });
 
         $('#AdmissionKeyword').on('change', function() { 
-               vm.$refs.admissions_bookings_table.vmDataTable.ajax.reload(); 
+            vm.reloadAdmissionTable();
         }); 
     }
 }
