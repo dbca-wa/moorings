@@ -215,7 +215,15 @@
                     ref="collapseElementBookingPeriod"
                 >
                     <div class="card-body">
-                        <priceHistory ref="price_dt" level="campground" :dt_options="ph_options" :historyDeleteURL="priceHistoryDeleteURL" :showAddBtn="hasCampsites" v-show="campground.price_level==0" :object_id="ID" />
+                        <priceHistory
+                            ref="price_dt"
+                            level="campground"
+                            :dt_options="ph_options"
+                            :historyDeleteURL="priceHistoryDeleteURL"
+                            :showAddBtn="hasCampsites"
+                            v-show="campground.price_level==0"
+                            :object_id="ID"
+                        />
                     </div>
                 </div>
             </div>
