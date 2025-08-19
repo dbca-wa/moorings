@@ -1,7 +1,7 @@
 <template id="bootstrap-modal">
     <!-- <div v-show="show" :transition="transition"> -->
     <transition name="fade">
-        <div v-if="show">
+        <div v-show="show">
             <div class="modal show" @click.self="clickMask">
                 <div class="modal-dialog" :class="modalClass">
                     <div class="modal-content">
