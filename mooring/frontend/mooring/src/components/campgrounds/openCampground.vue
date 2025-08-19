@@ -81,7 +81,7 @@
 import modal from '../utils/bootstrap-modal.vue'
 import reason from '../utils/reasons.vue'
 import { bus } from '../utils/eventBus.js'
-import { $, api_endpoints, validate, helpers } from '../../hooks'
+import { $, api_endpoints, helpers } from '../../hooks'
 import alert from '../utils/alert.vue'
 import 'bootstrap/dist/js/bootstrap.bundle.min.js';
 

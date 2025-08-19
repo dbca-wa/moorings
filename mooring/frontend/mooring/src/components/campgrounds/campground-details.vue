@@ -143,9 +143,7 @@
 import {
     $,
     api_endpoints,
-    helpers,
-    validate,
-    // select2
+    helpers
 }
 from '../../hooks.js'
 import {

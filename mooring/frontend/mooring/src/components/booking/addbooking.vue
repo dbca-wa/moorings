@@ -303,7 +303,7 @@
 </template>
 
 <script>
-import {$,awesomplete,Moment,api_endpoints,validate,formValidate,helpers} from "../../hooks.js";
+import { $, Moment, api_endpoints, formValidate, helpers } from "../../hooks.js";
 import loader from '../utils/loader.vue';
 import modal from '../utils/bootstrap-modal.vue';
 export default {

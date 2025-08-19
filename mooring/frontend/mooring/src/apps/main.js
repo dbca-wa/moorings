@@ -1,5 +1,9 @@
 import 'vite/modulepreload-polyfill';
 
+import { createApp } from "vue";
+import App from './App.vue';
+import { createRouter, createWebHistory } from "vue-router";
+
 import $ from 'jquery';
 import select2 from 'select2';
 window.$ = $;
@@ -10,15 +14,12 @@ import swal from 'sweetalert2';
 window.swal = swal;
 select2();
 
-import { createApp } from "vue";
-import App from './App.vue';
-import { createRouter, createWebHistory } from "vue-router";
-
 // import 'select2';
 import alert from '../components/utils/alert.vue';
 import store from './store.js';
 import { routes } from './routes.js';
 import filters from "../components/utils/filters.js";
+import 'jquery-validation';
 
 // CSSs
 import "quill/dist/quill.snow.css";

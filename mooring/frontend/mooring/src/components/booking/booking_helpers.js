@@ -5,7 +5,6 @@ import {
     awesomplete,
     Moment,
     api_endpoints,
-    validate,
     formValidate,
     helpers,
     store

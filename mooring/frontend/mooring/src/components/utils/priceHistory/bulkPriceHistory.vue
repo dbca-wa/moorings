@@ -89,7 +89,7 @@ import alert from '../alert.vue'
 import modal from '../bootstrap-modal.vue'
 import reason from '../reasons.vue'
 import { mapGetters } from 'vuex'
-import { $, api_endpoints, validate, helpers, bus } from '../../../hooks'
+import { $, api_endpoints, helpers } from '../../../hooks'
 
 export default {
     name:"bulk-period",

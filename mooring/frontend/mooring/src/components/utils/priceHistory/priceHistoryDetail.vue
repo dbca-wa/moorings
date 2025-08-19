@@ -151,7 +151,7 @@
 <script>
 import modal from '../bootstrap-modal.vue'
 import reason from '../reasons.vue'
-import { $, api_endpoints, validate, helpers, bus, Moment } from '../../../hooks'
+import { $, api_endpoints, helpers, bus, Moment } from '../../../hooks'
 import alert from '../alert.vue'
 import { mapGetters } from 'vuex'
 import 'bootstrap/dist/js/bootstrap.bundle.min.js';
