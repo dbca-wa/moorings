@@ -60,11 +60,11 @@
 </template>
 
 <script>
-import modal from '../../utils/bootstrap-modal.vue'
-import reason from '../../utils/reasons.vue'
-import {bus} from '../../utils/eventBus.js'
-import { $, Moment } from '../../../hooks'
-import alert from '../../utils/alert.vue'
+import modal from '@/components/utils/bootstrap-modal.vue'
+import reason from '@/components/utils/reasons.vue'
+import {bus} from '@/components/utils/eventBus.js'
+import { $, Moment } from '@/hooks'
+import alert from '@/components/utils/alert.vue'
 import helpers from '@/components/utils/helpers.js'
 
 export default {
