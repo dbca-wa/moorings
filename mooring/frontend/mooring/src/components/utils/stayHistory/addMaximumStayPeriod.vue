@@ -63,9 +63,9 @@
 import modal from '../../utils/bootstrap-modal.vue'
 import reason from '../../utils/reasons.vue'
 import {bus} from '../../utils/eventBus.js'
-import { $, helpers, Moment } from '../../../hooks'
+import { $, Moment } from '../../../hooks'
 import alert from '../../utils/alert.vue'
-import { nextTick } from 'vue'
+import helpers from '@/components/utils/helpers.js'
 
 export default {
     name: 'addMaxStayCS',
@@ -98,19 +98,8 @@ export default {
                 // Do nothing if the newStay object is null
                 if (!newStay) return;
 
-                // --- Handle conversion for range_start ---
-                const startDate = newStay.range_start;
-                if (startDate && /^\d{2}\/\d{2}\/\d{4}$/.test(startDate)) {
-                    let s_date = Moment(startDate, 'DD/MM/YYYY');
-                    this.stay.range_start = Moment(s_date).format('YYYY-MM-DD');
-                }
-
-                // --- Handle conversion for range_end ---
-                const endDate = newStay.range_end;
-                if (endDate && /^\d{2}\/\d{2}\/\d{4}$/.test(endDate)) {
-                    let e_date = Moment(endDate, 'DD/MM/YYYY');
-                    this.stay.range_end = Moment(e_date).format('YYYY-MM-DD');
-                }
+                this.stay.range_start = helpers.convertToYYYYMMDD(newStay.range_start)
+                this.stay.range_end = helpers.convertToYYYYMMDD(newStay.range_end)
             },
             immediate: true, // Run the handler immediately when the component is initialized
             deep: true       // Also detect changes to nested properties of the object

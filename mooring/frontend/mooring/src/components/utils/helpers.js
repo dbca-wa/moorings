@@ -1,6 +1,7 @@
 import $ from 'jquery'
 import _ from 'lodash'
 import { Tooltip } from 'bootstrap';
+import { Moment } from '@/hooks'
 
 export default {
     apiError: function(resp){
@@ -167,5 +168,14 @@ export default {
         }
 
         return { showErrors };
+    },
+    convertToYYYYMMDD: function(dateString) {
+        // Check if the input is a valid, non-empty string and matches the flexible date format.
+        if (dateString && /^\d{1,2}\/\d{1,2}\/\d{4}$/.test(dateString)) {
+            // Parse with the flexible format and return in the desired format.
+            return Moment(dateString, 'D/M/YYYY').format('YYYY-MM-DD');
+        }
+
+        return dateString;
     }
 };
