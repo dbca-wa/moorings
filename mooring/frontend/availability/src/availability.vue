@@ -444,14 +444,14 @@ export default {
             var vm = this;
             if (vm.vesselSize > 0 ) { 
             } else {
-                swal({
-                  title: 'Missing Vessel Size',
-                  text: "Please enter vessel size:",
-                  type: 'warning',
-                  showCancelButton: false,
-                  confirmButtonText: 'OK',
-                  showLoaderOnConfirm: true,
-                  allowOutsideClick: false
+                swal.fire({
+                    title: 'Missing Vessel Size',
+                    text: "Please enter vessel size:",
+                    type: 'warning',
+                    showCancelButton: false,
+                    confirmButtonText: 'OK',
+                    showLoaderOnConfirm: true,
+                    allowOutsideClick: false
                 })
                 return;
             }

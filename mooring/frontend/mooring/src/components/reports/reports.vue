@@ -460,13 +460,13 @@ export default {
                 let data = vm.oracleDatePicker.data("DateTimePicker").date().format('DD/MM/YYYY');
                 let override = vm.oracle_override ? 'true': 'false';
                 vm.$http.get('/api/oracle_job?date='+data+'&override='+override).then((response) => {
-                    swal({
+                    swal.fire({
                         type: 'success',
                         title: 'Job Success', 
                         text: 'The oracle job was completed successfully', 
                     })
                 },(error) => {
-                    swal({
+                    swal.fire({
                         type: 'error',
                         title: 'Oracle Job Error', 
                         text: helpers.apiVueResourceError(error), 
@@ -481,14 +481,6 @@ export default {
                 let data = vm.bookingSettlementsDatePicker.data("DateTimePicker").date().format('DD/MM/YYYY');
                 var url = '/api/reports/booking_settlements?date='+data; 
                 window.location.assign(url);
-                /*vm.$http.get(url).then((response) => {
-                },(error) => {
-                    swal({
-                        type: 'error',
-                        title: 'BPOINT Settlement Report Error', 
-                        text: helpers.apiVueResourceError(error), 
-                    })
-                })*/
             }
         },
         getBookingsReport(){
@@ -498,14 +490,6 @@ export default {
                 let data = vm.bookingsDatePicker.data("DateTimePicker").date().format('DD/MM/YYYY');
                 var url = '/api/reports/bookings?date='+data; 
                 window.location.assign(url);
-                /*vm.$http.get(url).then((response) => {
-                },(error) => {
-                    swal({
-                        type: 'error',
-                        title: 'BPOINT Settlement Report Error', 
-                        text: helpers.apiVueResourceError(error), 
-                    })
-                })*/
             }
         },
         fetchRegions:function () {
