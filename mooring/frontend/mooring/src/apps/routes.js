@@ -83,7 +83,7 @@ export const routes = [
                     },
                 ]
             },
-                {
+            {
                 path:'bookings',
                 component: BookingIndex,
                 children:[
