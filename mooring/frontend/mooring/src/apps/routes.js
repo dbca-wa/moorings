@@ -4,7 +4,7 @@ import AddCampground from '../components/campgrounds/addCampground.vue'
 import Campsite from '../components/campsites/campsite.vue'
 import firstLevelSearch from '../components/booking/first-level-search.vue'
 import bookingDashboard from '../components/booking/dashboard.vue'
-import addBooking from '../components/booking/addbooking.vue'
+// import addBooking from '../components/booking/addbooking.vue'
 import BookingIndex from '../components/booking/index.vue'
 import editBooking from '../components/booking/changebooking2.vue'
 import page_404 from '../components/utils/404.vue'
@@ -92,11 +92,11 @@ export const routes = [
                         name: 'booking-dashboard',
                         component: bookingDashboard,
                     },
-                    {
-                        path: 'add/:cg',
-                        name: 'add-booking',
-                        component: addBooking,
-                    },
+                    // {
+                    //     path: 'add/:cg',
+                    //     name: 'add-booking',
+                    //     component: addBooking,
+                    // },
                     {
                         path: 'edit/:booking_id',
                         name: 'edit-booking',
