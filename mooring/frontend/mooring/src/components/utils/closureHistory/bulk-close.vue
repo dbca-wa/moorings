@@ -61,14 +61,10 @@
 
                     <reason type="close" v-model="reason" :wide="true" ></reason>
                     <div v-show="requireDetails" class="row">
-                        <div class="form-group">
-                            <div class="col-md-2">
-                                <label>Details: </label>
-                            </div>
+                            <label class="col-md-2 col-form-label">Details: </label>
                             <div class="col-md-10">
                                 <textarea name="closure_details" v-model="details" class="form-control" id="close_cg_details"></textarea>
                             </div>
-                        </div>
                     </div>
                 </form>
             </div>

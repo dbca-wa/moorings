@@ -1,6 +1,6 @@
 <template lang="html">
     <div id="bulk-period">
-        <modal okText="Set Periods" @ok="setPeriods()" :force="true">
+        <modal okText="Set Periods" @ok="setPeriods()" :force="true" :large="true">
             <template #header>
                 <div class="modal-header">
                     <h4 class="modal-title">Bulk Booking Periods</h4>
@@ -13,7 +13,7 @@
                         <div class="danger-message">&nbsp;{{errorStringPeriods}}</div>
                     </div>
                     <div class="row mb-3">
-                        <label for="bp-campgrounds" class="col-md-2 col-form-label">Moorings</label>
+                        <label for="bp-campgrounds" class="col-md-2 col-form-label">Moorings:</label>
                         <div class="col-md-10">
                             <select
                                 v-model="selected_campgrounds"
@@ -42,7 +42,7 @@
                         </div>
                     </div>
                     <div class="row mb-3">
-                        <label for="set_period_range_start" class="col-md-3 col-form-label">Period start: </label>
+                        <label for="set_period_range_start" class="col-md-2 col-form-label">Period start: </label>
                         <div class="col-md-6">
                             <input
                                 v-model="range_start"
@@ -54,7 +54,7 @@
                         </div>
                     </div>
                     <div class="row mb-3">
-                        <label for="set_period_range_end" class="col-md-3 col-form-label">Period End: </label>
+                        <label for="set_period_range_end" class="col-md-2 col-form-label">Period End: </label>
                         <div class="col-md-6">
                             <input
                                 v-model="range_end"
