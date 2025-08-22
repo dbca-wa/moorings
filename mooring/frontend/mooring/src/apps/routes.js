@@ -9,7 +9,7 @@ import BookingIndex from '../components/booking/index.vue'
 // import editBooking from '../components/booking/changebooking2.vue'
 import page_404 from '../components/utils/404.vue'
 import Reports from '../components/reports/reports.vue'
-import Campsite_type_dash from '../components/campsites-types/campsite-types-dash.vue'
+// import Campsite_type_dash from '../components/campsites-types/campsite-types-dash.vue'
 import Campsite_type from '../components/campsites-types/campsite-type.vue'
 // import Bulkpricing from '../components/bulkpricing/bulkpricing.vue'
 // import booking_periods from '../components/bookingperiods/periods.vue'
@@ -26,11 +26,11 @@ export const routes = [
         path:'/dashboard',
         component: RouterView,
         children: [
-            {
-                path:'campsite-types',
-                name:'campsite-types',
-                component: Campsite_type_dash
-            },
+            // {
+            //     path:'campsite-types',
+            //     name:'campsite-types',
+            //     component: Campsite_type_dash
+            // },
             // {
             //     path: 'bookingperiods',
             //     name: 'booking-periods',
@@ -40,11 +40,11 @@ export const routes = [
                 path:'campsite-type',
                 component: RouterView,
                 children: [
-                    {
-                        path: '',
-                        name: 'campsite-type',
-                        component: Campsite_type_dash
-                    },
+                    // {
+                    //     path: '',
+                    //     name: 'campsite-type',
+                    //     component: Campsite_type_dash
+                    // },
                     {
                         path:':campsite_type_id',
                         name:'campsite-type-detail',
