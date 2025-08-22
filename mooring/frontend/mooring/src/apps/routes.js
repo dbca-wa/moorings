@@ -11,7 +11,7 @@ import page_404 from '../components/utils/404.vue'
 import Reports from '../components/reports/reports.vue'
 import Campsite_type_dash from '../components/campsites-types/campsite-types-dash.vue'
 import Campsite_type from '../components/campsites-types/campsite-type.vue'
-import Bulkpricing from '../components/bulkpricing/bulkpricing.vue'
+// import Bulkpricing from '../components/bulkpricing/bulkpricing.vue'
 // import booking_periods from '../components/bookingperiods/periods.vue'
 import Profile from '../components/user/profile.vue'
 import { RouterView} from 'vue-router';
@@ -104,11 +104,11 @@ export const routes = [
                     // },
                 ]
             },
-            {
-                path:'bulkpricing',
-                name:'bulkpricing',
-                component:Bulkpricing
-            },
+            // {
+            //     path:'bulkpricing',
+            //     name:'bulkpricing',
+            //     component:Bulkpricing
+            // },
             {
                 path:'reports',
                 name:'reports',
