@@ -12,7 +12,7 @@ import Reports from '../components/reports/reports.vue'
 import Campsite_type_dash from '../components/campsites-types/campsite-types-dash.vue'
 import Campsite_type from '../components/campsites-types/campsite-type.vue'
 import Bulkpricing from '../components/bulkpricing/bulkpricing.vue'
-import booking_periods from '../components/bookingperiods/periods.vue'
+// import booking_periods from '../components/bookingperiods/periods.vue'
 import Profile from '../components/user/profile.vue'
 import { RouterView} from 'vue-router';
 
@@ -31,11 +31,11 @@ export const routes = [
                 name:'campsite-types',
                 component: Campsite_type_dash
             },
-            {
-                path: 'bookingperiods',
-                name: 'booking-periods',
-                component: booking_periods
-            },
+            // {
+            //     path: 'bookingperiods',
+            //     name: 'booking-periods',
+            //     component: booking_periods
+            // },
             {
                 path:'campsite-type',
                 component: RouterView,
