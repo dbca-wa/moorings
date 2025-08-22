@@ -256,7 +256,7 @@
                 </div>
             </div>
 
-            <div class="card mt-3" id="applications" style="margin-top:50px; display:none;">
+            <!-- <div class="card mt-3" id="applications" style="margin-top:50px; display:none;">
                 <div class="card-header" role="tab" id="applications-heading">
                     <div class="card-title">
                         <h4 class='col-6 card-title'>Closure History</h4>
@@ -325,8 +325,8 @@ import campgroundLimits from './campground-limits.vue'
 import campgroundImages from './campground-images.vue'
 import campgroundMap from './campground-map.vue'
 import campgroundAdditional from './campground-additional.vue'
-import confirmbox from '../utils/confirmbox.vue'
-import bulkCloseCampsites from '../campsites/closureHistory/bulkClose.vue'
+// import confirmbox from '../utils/confirmbox.vue'
+// import bulkCloseCampsites from '../campsites/closureHistory/bulkClose.vue'
 import pkCsClose from '../campsites/closureHistory/closeCampsite.vue'
 import pkCsOpen from '../campsites/closureHistory/openCampsite.vue'
 import stayHistory from '../utils/stayHistory/stayHistory.vue'
@@ -569,13 +569,13 @@ export default {
         campgroundImages,
         campgroundMap,
         campgroundAdditional,
-        confirmbox,
+        // confirmbox,
         pkCsClose,
         pkCsOpen,
         closureHistory,
         priceHistory,
         "stay-history":stayHistory,
-        "bulk-close-campsites":bulkCloseCampsites,
+        // "bulk-close-campsites":bulkCloseCampsites,
     },
     computed: {
         ...mapGetters([
@@ -763,28 +763,28 @@ export default {
                 }
             });
         },
-        bulkCloseCampsites: function() {
-            let vm = this;
-            var data = vm.$refs.bulkCloseCampsites.formdata;
-            console.log(vm.$refs.bulkCloseCampsites);
-            console.log(data);
-            $.ajax({
-                url: api_endpoints.bulk_close_campsites(),
-                method: 'POST',
-                xhrFields: { withCredentials:true },
-                data: data,
-                headers: {'X-CSRFToken': helpers.getCookie('csrftoken')},
-                dataType: 'json',
-                success: function(data, stat, xhr) {
-                    vm.$refs.bulkCloseCampsites.close();
-                    vm.refreshCampsiteClosures();
-                },
-                error:function (resp){
-                    vm.$refs.bulkCloseCampsites.errors = true;
-                    vm.$refs.bulkCloseCampsites.errorString = helpers.apiError(resp);
-                }
-            });
-        },
+        // bulkCloseCampsites: function() {
+        //     let vm = this;
+        //     var data = vm.$refs.bulkCloseCampsites.formdata;
+        //     console.log(vm.$refs.bulkCloseCampsites);
+        //     console.log(data);
+        //     $.ajax({
+        //         url: api_endpoints.bulk_close_campsites(),
+        //         method: 'POST',
+        //         xhrFields: { withCredentials:true },
+        //         data: data,
+        //         headers: {'X-CSRFToken': helpers.getCookie('csrftoken')},
+        //         dataType: 'json',
+        //         success: function(data, stat, xhr) {
+        //             vm.$refs.bulkCloseCampsites.close();
+        //             vm.refreshCampsiteClosures();
+        //         },
+        //         error:function (resp){
+        //             vm.$refs.bulkCloseCampsites.errors = true;
+        //             vm.$refs.bulkCloseCampsites.errorString = helpers.apiError(resp);
+        //         }
+        //     });
+        // },
         refreshCampsiteClosures: function(dt) {
             this.$refs.cg_campsites_dt.vmDataTable.ajax.reload();
         },
