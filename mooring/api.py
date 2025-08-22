@@ -33,22 +33,19 @@ from rest_framework.permissions import IsAuthenticated, AllowAny, IsAdminUser, B
 from datetime import datetime, timedelta
 from collections import OrderedDict
 from django.core.cache import cache
-# from ledger.accounts.models import EmailUser,Address
 from ledger_api_client.ledger_models import EmailUserRO as EmailUser, Address
-# from ledger.address.models import Country
 from ledger_api_client.country_models import Country
-# from ledger.payments.models import Invoice, OracleAccountCode
 from ledger_api_client.ledger_models import Invoice 
 from ledger_api_client.managed_models import SystemGroup
 from django.db.models import Count
 from mooring import utils
-from mooring.helpers import can_view_campground, is_inventory, is_admin, is_payment_officer
+from mooring.helpers import is_inventory, is_admin, is_payment_officer
 from datetime import datetime,timedelta, date
 from decimal import Decimal
 from django.db.models import Value, ManyToManyField
-# from ledger.payments.utils import systemid_check, update_payments
 from ledger_api_client.utils import update_payments
-from mooring.context_processors import mooring_url, template_context
+from ledger_api_client import utils as ledger_api_client_utils
+from mooring.context_processors import template_context
 from mooring import doctopdf
 from mooring import common_iplookup
 from mooring import models
@@ -154,13 +151,11 @@ from mooring.serialisers import (  MooringsiteBookingSerialiser,
                                     RegisteredVesselsSerializer,
                                     GlobalSettingsSerializer,
                                     )
-from mooring.helpers import is_officer, is_customer
+from mooring.helpers import is_officer
 from mooring import reports 
 from mooring import pdf
 from mooring.perms import PaymentCallbackPermission
 from mooring import emails
-from mooring import exceptions
-from django.contrib.gis.geos import Point
 from django.contrib.gis.measure import Distance  
 from django.contrib.auth import get_user_model
 User = get_user_model()
@@ -926,10 +921,10 @@ class MooringAreaViewSet(viewsets.ModelViewSet):
                 #oracle code not required for private moorings
             else:
                 if "oracle_code" in request.data:
-                      oracle_code = request.data.pop("oracle_code")
-                      if OracleAccountCode.objects.filter(active_receivables_activities=oracle_code).count() == 0:
-                          raise serializers.ValidationError("Oracle Code does not exist")
-
+                    oracle_code = request.data.pop("oracle_code")
+                    api_result = ledger_api_client_utils.check_oracle_code(oracle_code)
+                    if not (api_result.get('status') == 200 and api_result.get('data', {}).get('found')):
+                        raise serializers.ValidationError("Oracle Code does not exist.")
 
             instance =serializer.save()
             instance.mooring_group = None
@@ -957,11 +952,6 @@ class MooringAreaViewSet(viewsets.ModelViewSet):
 
                     for image_serializer in image_serializers:
                         image_serializer.save()
-
-            #if "oracle_code" in request.data:
-            #      oracle_code = request.data.pop("oracle_code")
-            #      if OracleAccountCode.objects.filter(active_receivables_activities=oracle_code).count() == 0:
-            #          raise serializers.ValidationError("Oracle Code does not exist")
 
             if "mooring_group" in request.data:
                 mooring_group = request.data.pop("mooring_group")
@@ -1037,10 +1027,11 @@ class MooringAreaViewSet(viewsets.ModelViewSet):
                  pass
                  #oracle code not required for private moorings          
             else:
-                  if "oracle_code" in request.data:
-                        oracle_code = request.data.pop("oracle_code")
-                        if OracleAccountCode.objects.filter(active_receivables_activities=oracle_code).count() == 0:
-                            raise serializers.ValidationError("Oracle Code does not exist") 
+                if "oracle_code" in request.data:
+                    oracle_code = request.data.pop("oracle_code")
+                    api_result = ledger_api_client_utils.check_oracle_code(oracle_code)
+                    if not (api_result.get('status') == 200 and api_result.get('data', {}).get('found')):
+                        raise serializers.ValidationError("Oracle Code does not exist.")
             if "images" in request.data:
                 images_data = request.data.pop("images")
             serializer = self.get_serializer(instance,data=request.data,partial=True)
@@ -5490,15 +5481,34 @@ class CheckOracleCodeView(views.APIView):
     permission_classes = [IsAuthenticatedOrReadOnly]
 
     def get(self, request, format='json'):
+        oracle_code = request.GET.get('oracle_code', '')
+
+        if not oracle_code:
+            return Response(
+                {'error': 'The oracle_code parameter is required.'},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+
         try:
-           oracle_code = request.GET.get('oracle_code','')
-           if OracleAccountCode.objects.filter(active_receivables_activities=oracle_code).count() > 0:
-                 json_obj = {'found': True, 'code': oracle_code}
-           else:
-                 json_obj = {'found': False, 'code': oracle_code}
-           return Response(json_obj)
+            api_result = ledger_api_client_utils.check_oracle_code(oracle_code)
+
+            if api_result.get('status') == 200:
+                json_obj = api_result.get('data', {})
+                return Response(json_obj)
+            else:
+                error_message = api_result.get('message', 'Unknown error from ledger API.')
+                logger.error(
+                    f"The ledger API failed to check oracle_code '{oracle_code}'. "
+                    f"Status: {api_result.get('status')}, Message: {error_message}"
+                )
+                # Return a generic error to the client, indicating an external service issue.
+                return Response(
+                    {'error': 'An error occurred while validating the code.'},
+                    status=status.HTTP_503_SERVICE_UNAVAILABLE
+                )
+
         except Exception as e:
-            print(traceback.print_exc())
+            logger.error(f"An unexpected error occurred in CheckOracleCodeView for oracle_code '{oracle_code}': {e}", exc_info=True)
             raise
 
 class AnnualAdmissionRefundOracleView(views.APIView):

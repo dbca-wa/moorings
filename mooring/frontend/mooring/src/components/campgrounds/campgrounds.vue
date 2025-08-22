@@ -371,7 +371,6 @@ export default {
             // Use a try...catch block for robust error handling.
             try {
                 const url = api_endpoints.mooring_specification;
-                console.log({url})
                 
                 // Pause the function execution until the fetch promise resolves.
                 // 'response' will be a Response object, not the final data.
@@ -382,8 +381,6 @@ export default {
                     }
                 });
 
-                console.log({response})
-
                 // The 'fetch' API does not reject on HTTP errors (like 404 or 500).
                 // We must manually check if the response was successful.
                 // The 'ok' property is true if the status code is in the 200-299 range.
@@ -392,14 +389,10 @@ export default {
                     throw new Error(`HTTP error! Status: ${response.status}`);
                 }
 
-                console.log('aho')
-
                 // The response.json() method also returns a promise.
                 // We 'await' it to get the parsed JSON data from the response body.
                 const data = await response.json();
 
-                console.log({data})
-                
                 // Finally, assign the fetched data to the component's data property.
                 // 'this' refers to the component instance (like 'vm').
                 this.mooring_specification = data;

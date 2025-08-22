@@ -215,7 +215,15 @@
                     ref="collapseElementBookingPeriod"
                 >
                     <div class="card-body">
-                        <priceHistory ref="price_dt" level="campground" :dt_options="ph_options" :historyDeleteURL="priceHistoryDeleteURL" :showAddBtn="hasCampsites" v-show="campground.price_level==0" :object_id="ID" />
+                        <priceHistory
+                            ref="price_dt"
+                            level="campground"
+                            :dt_options="ph_options"
+                            :historyDeleteURL="priceHistoryDeleteURL"
+                            :showAddBtn="hasCampsites"
+                            v-show="campground.price_level==0"
+                            :object_id="ID"
+                        />
                     </div>
                 </div>
             </div>
@@ -248,7 +256,7 @@
                 </div>
             </div>
 
-            <div class="card mt-3" id="applications" style="margin-top:50px; display:none;">
+            <!-- <div class="card mt-3" id="applications" style="margin-top:50px; display:none;">
                 <div class="card-header" role="tab" id="applications-heading">
                     <div class="card-title">
                         <h4 class='col-6 card-title'>Closure History</h4>
@@ -317,8 +325,8 @@ import campgroundLimits from './campground-limits.vue'
 import campgroundImages from './campground-images.vue'
 import campgroundMap from './campground-map.vue'
 import campgroundAdditional from './campground-additional.vue'
-import confirmbox from '../utils/confirmbox.vue'
-import bulkCloseCampsites from '../campsites/closureHistory/bulkClose.vue'
+// import confirmbox from '../utils/confirmbox.vue'
+// import bulkCloseCampsites from '../campsites/closureHistory/bulkClose.vue'
 import pkCsClose from '../campsites/closureHistory/closeCampsite.vue'
 import pkCsOpen from '../campsites/closureHistory/openCampsite.vue'
 import stayHistory from '../utils/stayHistory/stayHistory.vue'
@@ -561,13 +569,13 @@ export default {
         campgroundImages,
         campgroundMap,
         campgroundAdditional,
-        confirmbox,
+        // confirmbox,
         pkCsClose,
         pkCsOpen,
         closureHistory,
         priceHistory,
         "stay-history":stayHistory,
-        "bulk-close-campsites":bulkCloseCampsites,
+        // "bulk-close-campsites":bulkCloseCampsites,
     },
     computed: {
         ...mapGetters([
@@ -755,28 +763,28 @@ export default {
                 }
             });
         },
-        bulkCloseCampsites: function() {
-            let vm = this;
-            var data = vm.$refs.bulkCloseCampsites.formdata;
-            console.log(vm.$refs.bulkCloseCampsites);
-            console.log(data);
-            $.ajax({
-                url: api_endpoints.bulk_close_campsites(),
-                method: 'POST',
-                xhrFields: { withCredentials:true },
-                data: data,
-                headers: {'X-CSRFToken': helpers.getCookie('csrftoken')},
-                dataType: 'json',
-                success: function(data, stat, xhr) {
-                    vm.$refs.bulkCloseCampsites.close();
-                    vm.refreshCampsiteClosures();
-                },
-                error:function (resp){
-                    vm.$refs.bulkCloseCampsites.errors = true;
-                    vm.$refs.bulkCloseCampsites.errorString = helpers.apiError(resp);
-                }
-            });
-        },
+        // bulkCloseCampsites: function() {
+        //     let vm = this;
+        //     var data = vm.$refs.bulkCloseCampsites.formdata;
+        //     console.log(vm.$refs.bulkCloseCampsites);
+        //     console.log(data);
+        //     $.ajax({
+        //         url: api_endpoints.bulk_close_campsites(),
+        //         method: 'POST',
+        //         xhrFields: { withCredentials:true },
+        //         data: data,
+        //         headers: {'X-CSRFToken': helpers.getCookie('csrftoken')},
+        //         dataType: 'json',
+        //         success: function(data, stat, xhr) {
+        //             vm.$refs.bulkCloseCampsites.close();
+        //             vm.refreshCampsiteClosures();
+        //         },
+        //         error:function (resp){
+        //             vm.$refs.bulkCloseCampsites.errors = true;
+        //             vm.$refs.bulkCloseCampsites.errorString = helpers.apiError(resp);
+        //         }
+        //     });
+        // },
         refreshCampsiteClosures: function(dt) {
             this.$refs.cg_campsites_dt.vmDataTable.ajax.reload();
         },
@@ -812,14 +820,14 @@ export default {
             // vm.stopLoadingSection("all");
         },
         swalMessage: function(value){
-            swal({
-            title: value.title,
-            text: value.text,
-            type: value.type,
-            showCancelButton: false,
-            confirmButtonText: 'OK',
-            showLoaderOnConfirm: true,
-            allowOutsideClick: false
+            swal.fire({
+                title: value.title,
+                text: value.text,
+                type: value.type,
+                showCancelButton: false,
+                confirmButtonText: 'OK',
+                showLoaderOnConfirm: true,
+                allowOutsideClick: false
             });
         },
         addFormValidations: function() {
@@ -1161,39 +1169,41 @@ export default {
         },
         initializeDataTables: function() {
             var vm = this;
-            console.log('initializeDataTables');
-            vm.$refs.cg_campsites_dt.vmDataTable.on('click', '.detailRoute', function(e) {
-                e.preventDefault();
-                var id = $(this).attr('data-campsite');
-                vm.$router.push({
-                    name: 'view_campsite',
-                    params: {
-                        id: vm.campground.id,
-                        campsite_id: id
+            vm.$nextTick(() => {
+                console.log('initializeDataTables');
+                vm.$refs.cg_campsites_dt.vmDataTable.on('click', '.detailRoute', function(e) {
+                    e.preventDefault();
+                    var id = $(this).attr('data-campsite');
+                    vm.$router.push({
+                        name: 'view_campsite',
+                        params: {
+                            id: vm.campground.id,
+                            campsite_id: id
+                        }
+                    });
+                });
+                vm.$refs.cg_campsites_dt.vmDataTable.on('click', '.statusCS', function(e) {
+                    e.preventDefault();
+                    var id = $(this).attr('data-campsite');
+                    var status = $(this).attr('data-status');
+                    var current_closure = $(this).attr('data-current_closure') ? $(this).attr('data-current_closure') : '';
+
+                    if (status === 'open'){
+                        vm.showOpenOpenCS();
+                        // Update open modal attributes
+                        vm.$refs.openCampsite.status = 0;
+                        vm.$refs.openCampsite.id = id;
+                        vm.$refs.openCampsite.current_closure = current_closure;
+                    }else if (status === 'close'){
+                        vm.showCloseCS();
+                        // Update close modal attributes
+                        vm.$refs.closeCampsite.status = 1;
+                        vm.$refs.closeCampsite.id = id;
+                        vm.$refs.closeCampsite.current_closure = current_closure;
                     }
                 });
-            });
-            vm.$refs.cg_campsites_dt.vmDataTable.on('click', '.statusCS', function(e) {
-                e.preventDefault();
-                var id = $(this).attr('data-campsite');
-                var status = $(this).attr('data-status');
-                var current_closure = $(this).attr('data-current_closure') ? $(this).attr('data-current_closure') : '';
-
-                if (status === 'open'){
-                    vm.showOpenOpenCS();
-                    // Update open modal attributes
-                    vm.$refs.openCampsite.status = 0;
-                    vm.$refs.openCampsite.id = id;
-                    vm.$refs.openCampsite.current_closure = current_closure;
-                }else if (status === 'close'){
-                    vm.showCloseCS();
-                    // Update close modal attributes
-                    vm.$refs.closeCampsite.status = 1;
-                    vm.$refs.closeCampsite.id = id;
-                    vm.$refs.closeCampsite.current_closure = current_closure;
-                }
-            });
-            helpers.namePopover($,vm.$refs.cg_campsites_dt.vmDataTable);
+                helpers.namePopover($,vm.$refs.cg_campsites_dt.vmDataTable);
+            })
         }
     },
     watch: {

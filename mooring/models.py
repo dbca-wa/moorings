@@ -208,7 +208,7 @@ class MooringArea(models.Model):
 
 
     name = models.CharField(max_length=255, null=True)
-    park = models.ForeignKey('MarinePark', on_delete=models.PROTECT, related_name='marineparks')
+    park = models.ForeignKey('MarinePark', on_delete=models.PROTECT, related_name='marineparks', verbose_name="marine park")
     ratis_id = models.IntegerField(default=-1)
     contact = models.ForeignKey('Contact', on_delete=models.PROTECT, blank=True, null=True)
     mooring_type = models.SmallIntegerField(choices=MOORING_TYPE_CHOICES, default=3)
@@ -894,7 +894,7 @@ class StayHistory(models.Model):
             raise ValidationError('The maximum days should not be greater than 28.')
 
 class MooringAreaBookingRange(BookingRange):
-    campground = models.ForeignKey('MooringArea', on_delete=models.CASCADE,related_name='booking_ranges')
+    campground = models.ForeignKey('MooringArea', on_delete=models.CASCADE,related_name='booking_ranges', verbose_name="mooring")
     # minimum/maximum number of campsites allowed for a booking
     min_sites = models.SmallIntegerField(default=1)
     max_sites = models.SmallIntegerField(default=12)
@@ -934,7 +934,7 @@ class MooringsiteRateLog(models.Model):
     )
 
     change_type = models.SmallIntegerField(choices=CHANGE_TYPE, default=None, null=True, blank=True)
-    mooringarea= models.ForeignKey('MooringArea', on_delete=models.PROTECT, related_name='marinearea')
+    mooringarea= models.ForeignKey('MooringArea', on_delete=models.PROTECT, related_name='marinearea', verbose_name="mooring")
     booking_period = models.ForeignKey(BookingPeriod, on_delete=models.PROTECT, null=True, blank=True)
     date_start = models.DateField(default=date.today)
     date_end = models.DateField(null=True, blank=True)
@@ -946,7 +946,7 @@ class MooringsiteRateLog(models.Model):
         return self.mooringarea
 
 class Mooringsite(models.Model):
-    mooringarea = models.ForeignKey('MooringArea', db_index=True, on_delete=models.CASCADE, related_name='campsites')
+    mooringarea = models.ForeignKey('MooringArea', db_index=True, on_delete=models.CASCADE, related_name='campsites', verbose_name="mooring")
     name = models.CharField(max_length=255)
     mooringsite_class = models.ForeignKey('MooringsiteClass', on_delete=models.PROTECT, null=True,blank=True, related_name='campsites')
     wkb_geometry = models.PointField(srid=4326, blank=True, null=True)
@@ -1086,7 +1086,7 @@ class Mooringsite(models.Model):
             raise
 
 class MooringsiteBookingRange(BookingRange):
-    campsite = models.ForeignKey('Mooringsite', on_delete=models.CASCADE,related_name='booking_ranges')
+    campsite = models.ForeignKey('Mooringsite', on_delete=models.CASCADE,related_name='booking_ranges', verbose_name="mooring site")
 
     # Properties
     # ====================================
@@ -1117,10 +1117,10 @@ class MooringsiteBookingRange(BookingRange):
         return '{}: {} {} - {}'.format(self.campsite, self.status, self.range_start, self.range_end)
 
 class MooringsiteStayHistory(StayHistory):
-    campsite = models.ForeignKey('Mooringsite', on_delete=models.CASCADE,related_name='stay_history')
+    campsite = models.ForeignKey('Mooringsite', on_delete=models.CASCADE,related_name='stay_history', verbose_name="mooring site")
 
 class MooringAreaStayHistory(StayHistory):
-    mooringarea = models.ForeignKey('MooringArea', on_delete=models.CASCADE,related_name='stay_history')
+    mooringarea = models.ForeignKey('MooringArea', on_delete=models.CASCADE,related_name='stay_history', verbose_name="mooring")
 
 class Feature(models.Model):
     TYPE_CHOICES = (
@@ -1280,11 +1280,11 @@ class MooringsiteBooking(models.Model):
         (5, 'Changed Booking')
     )
 
-    campsite = models.ForeignKey('Mooringsite', db_index=True, on_delete=models.PROTECT)
+    campsite = models.ForeignKey('Mooringsite', db_index=True, on_delete=models.PROTECT, verbose_name="mooring site")
     date = models.DateField(db_index=True)
     # ria multiple booking
-    from_dt = models.DateTimeField(blank=True, null=True)
-    to_dt = models.DateTimeField(blank=True, null=True)
+    from_dt = models.DateTimeField(blank=True, null=True, verbose_name="date_from")
+    to_dt = models.DateTimeField(blank=True, null=True, verbose_name="date_to")
     amount = models.DecimalField(max_digits=8, decimal_places=2, default='0.00', blank=True, null=True, unique=False) 
     booking = models.ForeignKey('Booking', related_name="campsites", on_delete=models.CASCADE, null=True)
     booking_type = models.SmallIntegerField(choices=BOOKING_TYPE_CHOICES, default=0)
@@ -1335,7 +1335,7 @@ class MooringsiteRate(models.Model):
         (1, 'Fixed Price'),
     )
 
-    campsite = models.ForeignKey('Mooringsite', on_delete=models.PROTECT, related_name='rates')
+    campsite = models.ForeignKey('Mooringsite', on_delete=models.PROTECT, related_name='rates', verbose_name="mooring site")
     rate = models.ForeignKey('Rate', on_delete=models.PROTECT)
     booking_period = models.ForeignKey(BookingPeriod, on_delete=models.PROTECT, null=True, blank=True)
     allow_public_holidays = models.BooleanField(default=True)
@@ -1473,7 +1473,7 @@ class Booking(models.Model):
     override_reason = models.ForeignKey('DiscountReason', null=True, blank=True, on_delete=models.SET_NULL)
     override_reason_info = models.TextField(blank=True, null=True)
     overridden_by = models.ForeignKey(settings.AUTH_USER_MODEL,on_delete=models.PROTECT, blank=True, null=True, related_name='overridden_bookings')
-    mooringarea = models.ForeignKey('MooringArea', null=True, on_delete=models.SET_NULL)
+    mooringarea = models.ForeignKey('MooringArea', null=True, on_delete=models.SET_NULL, verbose_name="mooring")
     is_canceled = models.BooleanField(default=False)  # This might not be used...???  Instead, BOOKING_TYPE_CHOICES[4] might be used
     send_invoice = models.BooleanField(default=False)
     cancellation_reason = models.TextField(null=True,blank=True)

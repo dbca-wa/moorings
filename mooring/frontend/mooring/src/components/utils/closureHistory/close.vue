@@ -100,7 +100,7 @@
 
 <script>
 import modal from '../bootstrap-modal.vue'
-import { $, datetimepicker,api_endpoints, validate, helpers, bus, Moment } from '../../../hooks'
+import { $, helpers, bus, Moment } from '../../../hooks'
 import alert from '../alert.vue'
 import reason from '../reasons.vue'
     

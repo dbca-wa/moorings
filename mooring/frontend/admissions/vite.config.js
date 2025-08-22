@@ -59,11 +59,6 @@ export default defineConfig(({ mode }) => {
                 input: {
                     main: path.resolve(__dirname, 'src/main.js'),
                 },
-                output: {
-                    entryFileNames: 'js/[name]-[hash].js',
-                    chunkFileNames: 'js/[name]-[hash].js',
-                    assetFileNames: '[ext]/[name]-[hash].[ext]',
-                },
             },
             exclude: ['jquery', 'bootstrap'],
             emptyOutDir: true,

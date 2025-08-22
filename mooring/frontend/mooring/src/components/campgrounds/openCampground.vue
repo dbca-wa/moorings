@@ -7,18 +7,14 @@
     </template>
 
     <div class="modal-body">
-        <form id="openCGForm" class="form-horizontal">
-            <div class="row" v-if="showError">
-                <div class="col-12">
-                    <alert v-model:show="showError" type="danger"></alert>
-                </div>
-            </div>
+        <alert v-if="showError" type="danger">{{ errorString }}</alert>
 
-            <div class="row mb-3">
-                <label for="open_cg_current_closure" class="col-md-3 col-form-label">
-                    Current Closure:
-                </label>
-                <div class="col-md-8">
+        <form id="openCGForm" class="form-horizontal">
+            <div class="row mb-3 align-items-center">
+                <div class="col-md-3">
+                    <label for="open_cg_current_closure" class="col-form-label">Current Closure:</label>
+                </div>
+                <div class="col-md-9">
                     <input 
                         v-model="current_closure"
                         type="text" 
@@ -31,7 +27,9 @@
 
             <div class="row mb-3 align-items-center">
                 <!-- Date Picker: Period Start -->
-                <label for="open_cg_range_start" class="col-md-3 col-form-label">Open from:</label>
+                <div class="col-md-3">
+                    <label for="open_cg_range_start" class="col-form-label">Open from:</label>
+                </div>
                 <div class="col-md-3">
                     <input 
                         v-model="formdata.range_start"
@@ -43,7 +41,9 @@
                 </div>
 
                 <!-- Time Picker: Period Start Time -->
-                <label for="open_cg_range_start_time" class="col-md-2 col-form-label text-md-end">Time:</label>
+                <div class="col-md-3">
+                    <label for="open_cg_range_start_time" class="col-form-label text-md-end">Time:</label>
+                </div>
                 <div class="col-md-3">
                     <input 
                         v-model="formdata.range_start_time"
@@ -56,9 +56,12 @@
             </div>
 
             <reason type="open" v-model="formdata.reason" :threenine="true"></reason>
-            <div v-if="requireDetails" class="row mb-3">
-                <label for="open_cg_details" class="col-md-2 col-form-label">Details:</label>
-                <div class="col-md-5">
+
+            <div v-if="requireDetails" class="row">
+                <div class="col-md-3">
+                    <label for="open_cg_details" class="col-form-label">Details:</label>
+                </div>
+                <div class="col-md-9">
                     <textarea 
                         v-model="formdata.details"
                         class="form-control" 
@@ -78,7 +81,7 @@
 import modal from '../utils/bootstrap-modal.vue'
 import reason from '../utils/reasons.vue'
 import { bus } from '../utils/eventBus.js'
-import { $, api_endpoints, validate, helpers } from '../../hooks'
+import { $, api_endpoints, helpers } from '../../hooks'
 import alert from '../utils/alert.vue'
 import 'bootstrap/dist/js/bootstrap.bundle.min.js';
 

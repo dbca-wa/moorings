@@ -6,8 +6,9 @@ import DataTableBs from 'datatables.net-bs';
 import DataTableRes from 'datatables.net-responsive-bs';
 import moment from 'moment/moment.js';
 import { extendMoment } from 'moment-range';
-import datetimepicker from 'eonasdan-bootstrap-datetimepicker';
-import validate from 'jquery-validation';
+// import datetimepicker from 'eonasdan-bootstrap-datetimepicker';
+// import validate from 'jquery-validation';
+// import 'jquery-validation';
 import select2 from 'select2';
 import awesomplete from 'awesomplete';
 import slick from 'slick-carousel-browserify';
@@ -29,10 +30,10 @@ export {
     DataTableRes,
     // bootstrap,
     Moment,
-    datetimepicker,
+    // datetimepicker,
     api_endpoints,
     helpers,
-    validate,
+    // validate,
     bus,
     select2,
     daterangepicker,
