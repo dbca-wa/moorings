@@ -10,7 +10,7 @@ import BookingIndex from '../components/booking/index.vue'
 import page_404 from '../components/utils/404.vue'
 import Reports from '../components/reports/reports.vue'
 // import Campsite_type_dash from '../components/campsites-types/campsite-types-dash.vue'
-import Campsite_type from '../components/campsites-types/campsite-type.vue'
+// import Campsite_type from '../components/campsites-types/campsite-type.vue'
 // import Bulkpricing from '../components/bulkpricing/bulkpricing.vue'
 // import booking_periods from '../components/bookingperiods/periods.vue'
 import Profile from '../components/user/profile.vue'
@@ -36,22 +36,22 @@ export const routes = [
             //     name: 'booking-periods',
             //     component: booking_periods
             // },
-            {
-                path:'campsite-type',
-                component: RouterView,
-                children: [
-                    // {
-                    //     path: '',
-                    //     name: 'campsite-type',
-                    //     component: Campsite_type_dash
-                    // },
-                    {
-                        path:':campsite_type_id',
-                        name:'campsite-type-detail',
-                        component: Campsite_type,
-                    }
-                ]
-            },
+            // {
+            //     path:'campsite-type',
+            //     component: RouterView,
+            //     children: [
+            //         // {
+            //         //     path: '',
+            //         //     name: 'campsite-type',
+            //         //     component: Campsite_type_dash
+            //         // },
+            //         // {
+            //         //     path:':campsite_type_id',
+            //         //     name:'campsite-type-detail',
+            //         //     component: Campsite_type,
+            //         // }
+            //     ]
+            // },
             {
                 path:'campgrounds/addCampground',
                 name:'cg_add',
