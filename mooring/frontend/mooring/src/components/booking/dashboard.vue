@@ -104,7 +104,8 @@
                             <datatable ref="bookings_table" id="bookings-table" :dtOptions="dtOptions" :dtHeaders="dtHeaders"></datatable>
                         </div>
                     </div>
-                    <changebooking ref="changebooking" :booking_id="selected_booking" :campgrounds="campgrounds"/>
+                    before
+                    <!-- <changebooking ref="changebooking" :booking_id="selected_booking" :campgrounds="campgrounds"/> -->
                     <bookingHistory ref="bookingHistory" :booking_id="selected_booking" />
                 </div>
             </div>
@@ -205,7 +206,7 @@
 import { $, bus, api_endpoints, helpers, Moment, swal } from "../../hooks.js"
 import loader from "../utils/loader.vue"
 import datatable from '../utils/datatable.vue'
-import changebooking from "./changebooking.vue"
+// import changebooking from "./changebooking.vue"
 import bookingHistory from "./history.vue"
 import modal from '../utils/bootstrap-modal.vue'
 import { mapGetters } from 'vuex'
@@ -216,7 +217,7 @@ export default {
     components:{
         datatable,
         loader,
-        changebooking,
+        // changebooking,
         modal,
         bookingHistory
     },
