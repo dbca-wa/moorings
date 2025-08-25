@@ -143,6 +143,7 @@ export default {
             this.$refs.historyModal.isOpen = false;
         },
         deleteHistoryRecord: function(data) {
+            console.log('in deleteHistoryRecord')
             var vm = this;
             var url = null;
             if (vm.level == 'park') {
