@@ -1,7 +1,7 @@
 import Campgrounds from '../components/campgrounds/campgrounds.vue'
 import Campground from '../components/campgrounds/campground.vue'
 import AddCampground from '../components/campgrounds/addCampground.vue'
-import Campsite from '../components/campsites/campsite.vue'
+// import Campsite from '../components/campsites/campsite.vue'
 import firstLevelSearch from '../components/booking/first-level-search.vue'
 import bookingDashboard from '../components/booking/dashboard.vue'
 // import addBooking from '../components/booking/addbooking.vue'
@@ -71,16 +71,16 @@ export const routes = [
                         name:'cg_detail',
                         component: Campground,
                     },
-                    {
-                        path:':id/campsites/add',
-                        name:'add_campsite',
-                        component:Campsite
-                    },
-                    {
-                        path:':id/campsites/:campsite_id',
-                        name:'view_campsite',
-                        component:Campsite
-                    },
+                    // {
+                    //     path:':id/campsites/add',
+                    //     name:'add_campsite',
+                    //     component:Campsite
+                    // },
+                    // {
+                    //     path:':id/campsites/:campsite_id',
+                    //     name:'view_campsite',
+                    //     component:Campsite
+                    // },
                 ]
             },
             {

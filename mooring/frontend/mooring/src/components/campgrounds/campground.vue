@@ -786,7 +786,7 @@ export default {
         //     });
         // },
         refreshCampsiteClosures: function(dt) {
-            this.$refs.cg_campsites_dt.vmDataTable.ajax.reload();
+            // this.$refs.cg_campsites_dt.vmDataTable.ajax.reload();
         },
         showOpenOpenCS: function() {
             this.$refs.openCampsite.isOpen = true;
@@ -1171,38 +1171,38 @@ export default {
             var vm = this;
             vm.$nextTick(() => {
                 console.log('initializeDataTables');
-                vm.$refs.cg_campsites_dt.vmDataTable.on('click', '.detailRoute', function(e) {
-                    e.preventDefault();
-                    var id = $(this).attr('data-campsite');
-                    vm.$router.push({
-                        name: 'view_campsite',
-                        params: {
-                            id: vm.campground.id,
-                            campsite_id: id
-                        }
-                    });
-                });
-                vm.$refs.cg_campsites_dt.vmDataTable.on('click', '.statusCS', function(e) {
-                    e.preventDefault();
-                    var id = $(this).attr('data-campsite');
-                    var status = $(this).attr('data-status');
-                    var current_closure = $(this).attr('data-current_closure') ? $(this).attr('data-current_closure') : '';
+                // vm.$refs.cg_campsites_dt.vmDataTable.on('click', '.detailRoute', function(e) {
+                //     e.preventDefault();
+                //     var id = $(this).attr('data-campsite');
+                //     vm.$router.push({
+                //         name: 'view_campsite',
+                //         params: {
+                //             id: vm.campground.id,
+                //             campsite_id: id
+                //         }
+                //     });
+                // });
+                // vm.$refs.cg_campsites_dt.vmDataTable.on('click', '.statusCS', function(e) {
+                //     e.preventDefault();
+                //     var id = $(this).attr('data-campsite');
+                //     var status = $(this).attr('data-status');
+                //     var current_closure = $(this).attr('data-current_closure') ? $(this).attr('data-current_closure') : '';
 
-                    if (status === 'open'){
-                        vm.showOpenOpenCS();
-                        // Update open modal attributes
-                        vm.$refs.openCampsite.status = 0;
-                        vm.$refs.openCampsite.id = id;
-                        vm.$refs.openCampsite.current_closure = current_closure;
-                    }else if (status === 'close'){
-                        vm.showCloseCS();
-                        // Update close modal attributes
-                        vm.$refs.closeCampsite.status = 1;
-                        vm.$refs.closeCampsite.id = id;
-                        vm.$refs.closeCampsite.current_closure = current_closure;
-                    }
-                });
-                helpers.namePopover($,vm.$refs.cg_campsites_dt.vmDataTable);
+                //     if (status === 'open'){
+                //         vm.showOpenOpenCS();
+                //         // Update open modal attributes
+                //         vm.$refs.openCampsite.status = 0;
+                //         vm.$refs.openCampsite.id = id;
+                //         vm.$refs.openCampsite.current_closure = current_closure;
+                //     }else if (status === 'close'){
+                //         vm.showCloseCS();
+                //         // Update close modal attributes
+                //         vm.$refs.closeCampsite.status = 1;
+                //         vm.$refs.closeCampsite.id = id;
+                //         vm.$refs.closeCampsite.current_closure = current_closure;
+                //     }
+                // });
+                // helpers.namePopover($,vm.$refs.cg_campsites_dt.vmDataTable);
             })
         }
     },
