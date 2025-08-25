@@ -13,18 +13,16 @@
 </template>
 
 <script>
-import datatable from '../../utils/datatable.vue'
-import alert from '../../utils/alert.vue'
-import confirmbox from '../../utils/confirmbox.vue'
-import StayHistoryDetail from './addMaximumStayPeriod.vue'
-import {bus} from '../../utils/eventBus.js'
+import datatable from '@/components/utils/datatable.vue'
+import alert from '@/components/utils/alert.vue'
+import StayHistoryDetail from '@/components/utils/stayHistory/addMaximumStayPeriod.vue'
+import swal from 'sweetalert2'
 import {
     $,
-    Moment,
     api_endpoints,
     helpers
 }
-from '../../../hooks.js'
+from '@/hooks.js'
 
 $.extend($.fn.dataTableExt.oSort, {
     "extract-date-pre": function(value){

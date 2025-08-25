@@ -310,33 +310,28 @@
 <script>
 import {
     $,
-    Moment,
-    select2,
     api_endpoints,
     helpers
 }
-from '../../hooks.js'
-import datatable from '../utils/datatable.vue'
-import closureHistory from '../utils/closureHistory.vue'
-import priceHistory from '../utils/priceHistory/priceHistory.vue'
-import campgroundAttr from './campground-details.vue'
-import campgroundContact from './campground-contact.vue'
-import campgroundLimits from './campground-limits.vue'
-import campgroundImages from './campground-images.vue'
-import campgroundMap from './campground-map.vue'
-import campgroundAdditional from './campground-additional.vue'
-// import confirmbox from '../utils/confirmbox.vue'
-// import bulkCloseCampsites from '../campsites/closureHistory/bulkClose.vue'
-import pkCsClose from '../campsites/closureHistory/closeCampsite.vue'
-import pkCsOpen from '../campsites/closureHistory/openCampsite.vue'
-import stayHistory from '../utils/stayHistory/stayHistory.vue'
+from '@/hooks.js'
+import datatable from '@/components/utils/datatable.vue'
+import closureHistory from '@/components/utils/closureHistory.vue'
+import priceHistory from '@/components/utils/priceHistory/priceHistory.vue'
+import campgroundAttr from '@/components/campgrounds/campground-details.vue'
+import campgroundContact from '@/components/campgrounds/campground-contact.vue'
+import campgroundLimits from '@/components/campgrounds/campground-limits.vue'
+import campgroundImages from '@/components/campgrounds/campground-images.vue'
+import campgroundMap from '@/components/campgrounds/campground-map.vue'
+import campgroundAdditional from '@/components/campgrounds/campground-additional.vue'
+import pkCsClose from '@/components/campsites/closureHistory/closeCampsite.vue'
+import pkCsOpen from '@/components/campsites/closureHistory/openCampsite.vue'
+import stayHistory from '@/components/utils/stayHistory/stayHistory.vue'
 import swal from 'sweetalert2';
 import {
     bus
 }
 from '../utils/eventBus.js'
 import { mapGetters } from 'vuex'
-import { ref } from 'vue';
 
 $.extend($.fn.dataTableExt.oSort, {
     "extract-date-pre": function(value){
