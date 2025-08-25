@@ -7,8 +7,7 @@
   "type": "module",
   "scripts": {
     "dev": "dotenv -e ../../../.env -- vite",
-    "build": "dotenv -e ../../../.env -- vite build",
-    "preview": "dotenv -e ../../../.env -- vite preview"
+    "build": "dotenv -e ../../../.env -- vite build"
   },
   "dependencies": {
     "@vitejs/plugin-vue": "^6.0.1",

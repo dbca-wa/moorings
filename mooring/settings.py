@@ -102,6 +102,7 @@ STATICFILES_DIRS.append(os.path.join(os.path.join(BASE_DIR, 'mooring', 'static')
 STATICFILES_DIRS.append(os.path.join(os.path.join(BASE_DIR, "mooring", "static", "moorings_vue")))
 STATICFILES_DIRS.append(os.path.join(os.path.join(BASE_DIR, "mooring", "static", "exploreparks_vue")))
 STATICFILES_DIRS.append(os.path.join(os.path.join(BASE_DIR, "mooring", "static", "admissions_vue")))
+STATICFILES_DIRS.append(os.path.join(os.path.join(BASE_DIR, "mooring", "static", "availability2_vue")))
 
 BPAY_ALLOWED = decouple.config('BPAY_ALLOWED', default=False, cast=bool)
 OSCAR_BASKET_COOKIE_OPEN = 'mooring_basket'
@@ -208,11 +209,17 @@ DJANGO_VITE_DEV_MODE = RUNNING_DEVSERVER and EMAIL_INSTANCE == "DEV" and DEBUG i
 logger.debug(f'DJANGO_VITE_DEV_MODE: {DJANGO_VITE_DEV_MODE}')
 
 DJANGO_VITE = {
-    "exploreparks_app": {
+    "moorings_app": {
         "dev_mode": DJANGO_VITE_DEV_MODE,  # Indicates whether to serve assets via the ViteJS development server or from compiled production assets.
         "dev_server_host": "localhost", # Default host for vite (can change if needed)
-        "dev_server_port": 8083, # Default port for vite (can change if needed)
-        "static_url_prefix": "/static/exploreparks_vue" if DJANGO_VITE_DEV_MODE else "exploreparks_vue/",  # The directory prefix for static files built by ViteJS.
+        "dev_server_port": 8080, # Default port for vite (can change if needed)
+        "static_url_prefix": "/static/moorings_vue" if DJANGO_VITE_DEV_MODE else "moorings_vue/",  # The directory prefix for static files built by ViteJS.
+    },
+    "exploreparks_app": {
+        "dev_mode": DJANGO_VITE_DEV_MODE,
+        "dev_server_host": "localhost",
+        "dev_server_port": 8083,
+        "static_url_prefix": "/static/exploreparks_vue" if DJANGO_VITE_DEV_MODE else "exploreparks_vue/",
     },
     "admissions_app": {
         "dev_mode": DJANGO_VITE_DEV_MODE,
@@ -220,14 +227,27 @@ DJANGO_VITE = {
         "dev_server_port": 8081,
         "static_url_prefix": "/static/admissions_vue" if DJANGO_VITE_DEV_MODE else "admissions_vue/",
     },
+    "availability2_app": {
+        "dev_mode": DJANGO_VITE_DEV_MODE,
+        "dev_server_host": "localhost",
+        "dev_server_port": 8082,
+        "static_url_prefix": "/static/availability2_vue" if DJANGO_VITE_DEV_MODE else "availability2_vue/",
+    },
 }
 
-VUE3_ENTRY_SCRIPT_EXPLOREPARKS = decouple.config(  # This is not a reserved keyword.
+VUE3_ENTRY_SCRIPT_MOORINGS = decouple.config(  # This is not a reserved keyword.
+    "VUE3_ENTRY_SCRIPT_MOORINGS",
+    default="src/apps/main.js",  # This path will be auto prefixed with the static_url_prefix from DJANGO_VITE above
+)  # Path of the vue3 entry point script served by vite
+VUE3_ENTRY_SCRIPT_EXPLOREPARKS = decouple.config(
     "VUE3_ENTRY_SCRIPT_EXPLOREPARKS",
-    default="src/main.js", # This path will be auto prefixed with the static_url_prefix from DJANGO_VITE above
-) # Path of the vue3 entry point script served by vite
-
-VUE3_ENTRY_SCRIPT_ADMISSIONS = decouple.config(  # This is not a reserved keyword.
+    default="src/main.js",
+)
+VUE3_ENTRY_SCRIPT_ADMISSIONS = decouple.config(
     "VUE3_ENTRY_SCRIPT_ADMISSIONS",
+    default="src/main.js",
+)
+VUE3_ENTRY_SCRIPT_AVAILABILITY2 = decouple.config(
+    "VUE3_ENTRY_SCRIPT_AVAILABILITY2",
     default="src/main.js",
 )

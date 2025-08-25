@@ -4,8 +4,8 @@ import path from 'path';
 import vueDevTools from 'vite-plugin-vue-devtools';
 import svgLoader from 'vite-svg-loader';
 
-const applicationNameShort = 'admissions';
-const port = process.env.PORT ? parseInt(process.env.PORT) : 8081;
+const applicationNameShort = 'availability2';
+const port = process.env.PORT ? parseInt(process.env.PORT) : 8082;
 const host = process.env.HOST || '0.0.0.0';
 
 export default defineConfig(({ mode }) => {

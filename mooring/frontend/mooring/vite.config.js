@@ -4,8 +4,8 @@ import path from 'path';
 import vueDevTools from 'vite-plugin-vue-devtools';
 import svgLoader from 'vite-svg-loader';
 
-const applicationNameShort = 'admissions';
-const port = process.env.PORT ? parseInt(process.env.PORT) : 8081;
+const applicationNameShort = 'moorings';
+const port = process.env.PORT ? parseInt(process.env.PORT) : 8080;
 const host = process.env.HOST || '0.0.0.0';
 
 export default defineConfig(({ mode }) => {
@@ -57,7 +57,7 @@ export default defineConfig(({ mode }) => {
             sourcemap: true,
             rollupOptions: {
                 input: {
-                    main: path.resolve(__dirname, 'src/main.js'),
+                    main: path.resolve(__dirname, 'src/apps/main.js'),
                 },
             },
             exclude: ['jquery', 'bootstrap'],

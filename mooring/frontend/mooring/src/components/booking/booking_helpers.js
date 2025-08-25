@@ -1,11 +1,10 @@
-import Vue from 'vue'
+// import Vue from 'vue'
 
 import {
     $,
     awesomplete,
     Moment,
     api_endpoints,
-    validate,
     formValidate,
     helpers,
     store

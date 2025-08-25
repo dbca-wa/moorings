@@ -10,12 +10,21 @@
                         <label for="open_cg_range_start">Closure start: </label>
                     </div>
                     <div class="col-md-4">
-                        <div class='input-group date' id='close_cg_range_start'>
-                            <input  name="closure_start" v-model="formdata.range_start" type='text' class="form-control" />
+                        <!-- <div class='input-group date' id='close_cg_range_start'>
+                            <input name="closure_start" v-model="formdata.range_start" type='text' class="form-control" />
                             <span class="input-group-addon">
                                 <span class="glyphicon glyphicon-calendar"></span>
                             </span>
-                        </div>
+                        </div> -->
+                        <input
+                            type="date"
+                            id="close_cg_range_start"
+                            name="closure_start"
+                            v-model="formdata.range_start"
+                            :min="today"
+                            :max="formdata.range_end ? formattedRangeEnd : null"
+                            class="form-control"
+                        />
                     </div>
                 </div>
             </div>
@@ -25,12 +34,20 @@
                         <label for="open_cg_range_start">Closure end: </label>
                     </div>
                     <div class="col-md-4">
-                        <div class='input-group date' id='close_cg_range_end'>
+                        <!-- <div class='input-group date' id='close_cg_range_end'>
                             <input name="closure_end" v-model="formdata.range_end" type='text' class="form-control" />
                             <span class="input-group-addon">
                                 <span class="glyphicon glyphicon-calendar"></span>
                             </span>
-                        </div>
+                        </div> -->
+                        <input
+                            type="date"
+                            id="close_cg_range_end"
+                            name="closure_end"
+                            v-model="formdata.range_end"
+                            :min="formdata.range_start ? formattedRangeStart : today"
+                            class="form-control"
+                        />
                     </div>
                 </div>
             </div>
@@ -54,8 +71,7 @@
 <script>
 import bootstrapModal from '../../utils/bootstrap-modal.vue'
 import reason from '../../utils/reasons.vue'
-import {bus} from '../../utils/eventBus.js'
-import { $, datetimepicker,api_endpoints, validate, helpers } from '../../../hooks'
+import { $, helpers } from '../../../hooks'
 import alert from '../../utils/alert.vue'
 
 export default {
@@ -77,7 +93,8 @@ export default {
             errors: false,
             errorString: '',
             form: '',
-            isOpen: false
+            isOpen: false,
+            today: new Date().toISOString().split('T')[0]
         }
     },
     computed: {
@@ -92,6 +109,36 @@ export default {
             let vm =this;
             return (vm.formdata.closure_reason == 1)? true: false;
         },
+        formattedRangeStart: {
+            get() {
+                if (!this.formdata.range_start) return null;
+                const parts = this.formdata.range_start.split('/');
+                return `${parts[2]}-${parts[1]}-${parts[0]}`; // YYYY-MM-DD
+            },
+            set(newValue) {
+                if (!newValue) {
+                    this.formdata.range_start = '';
+                    return;
+                }
+                const parts = newValue.split('-');
+                this.formdata.range_start = `${parts[2]}/${parts[1]}/${parts[0]}`;
+            }
+        },
+        formattedRangeEnd: {
+            get() {
+                if (!this.formdata.range_end) return null;
+                const parts = this.formdata.range_end.split('/');
+                return `${parts[2]}-${parts[1]}-${parts[0]}`; // YYYY-MM-DD
+            },
+            set(newValue) {
+                if (!newValue) {
+                    this.formdata.range_end = '';
+                    return;
+                }
+                const parts = newValue.split('-');
+                this.formdata.range_end = `${parts[2]}/${parts[1]}/${parts[0]}`; // DD/MM/YYYY
+            }
+        }
     },
     components: {
         bootstrapModal,
@@ -149,23 +196,23 @@ export default {
     },
     mounted: function() {
         var vm = this;
-        vm.closeStartPicker = $('#close_cg_range_start');
-        vm.closeEndPicker = $('#close_cg_range_end');
-        vm.closeStartPicker.datetimepicker({
-            format: 'DD/MM/YYYY',
-            minDate: new Date()
-        });
-        vm.closeEndPicker.datetimepicker({
-            format: 'DD/MM/YYYY',
-            useCurrent: false
-        });
-        vm.closeStartPicker.on('dp.change', function(e){
-            vm.formdata.range_start = vm.closeStartPicker.data('DateTimePicker').date().format('DD/MM/YYYY');
-            vm.closeEndPicker.data("DateTimePicker").minDate(e.date);
-        });
-        vm.closeEndPicker.on('dp.change', function(e){
-            vm.formdata.range_end = vm.closeEndPicker.data('DateTimePicker').date().format('DD/MM/YYYY');
-        });
+        // vm.closeStartPicker = $('#close_cg_range_start');
+        // vm.closeEndPicker = $('#close_cg_range_end');
+        // vm.closeStartPicker.datetimepicker({
+        //     format: 'DD/MM/YYYY',
+        //     minDate: new Date()
+        // });
+        // vm.closeEndPicker.datetimepicker({
+        //     format: 'DD/MM/YYYY',
+        //     useCurrent: false
+        // });
+        // vm.closeStartPicker.on('dp.change', function(e){
+        //     vm.formdata.range_start = vm.closeStartPicker.data('DateTimePicker').date().format('DD/MM/YYYY');
+        //     vm.closeEndPicker.data("DateTimePicker").minDate(e.date);
+        // });
+        // vm.closeEndPicker.on('dp.change', function(e){
+        //     vm.formdata.range_end = vm.closeEndPicker.data('DateTimePicker').date().format('DD/MM/YYYY');
+        // });
         vm.form = $('#closeCGForm');
         vm.addFormValidations();
     }

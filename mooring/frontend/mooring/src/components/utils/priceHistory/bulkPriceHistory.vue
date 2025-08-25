@@ -1,6 +1,6 @@
 <template lang="html">
     <div id="bulk-period">
-        <modal okText="Set Periods" @ok="setPeriods()" :force="true">
+        <modal okText="Set Periods" @ok="setPeriods()" :force="true" :large="true">
             <template #header>
                 <div class="modal-header">
                     <h4 class="modal-title">Bulk Booking Periods</h4>
@@ -13,7 +13,7 @@
                         <div class="danger-message">&nbsp;{{errorStringPeriods}}</div>
                     </div>
                     <div class="row mb-3">
-                        <label for="bp-campgrounds" class="col-md-2 col-form-label">Moorings</label>
+                        <label for="bp-campgrounds" class="col-md-2 col-form-label">Moorings:</label>
                         <div class="col-md-10">
                             <select
                                 v-model="selected_campgrounds"
@@ -42,7 +42,7 @@
                         </div>
                     </div>
                     <div class="row mb-3">
-                        <label for="set_period_range_start" class="col-md-3 col-form-label">Period start: </label>
+                        <label for="set_period_range_start" class="col-md-2 col-form-label">Period start: </label>
                         <div class="col-md-6">
                             <input
                                 v-model="range_start"
@@ -54,7 +54,7 @@
                         </div>
                     </div>
                     <div class="row mb-3">
-                        <label for="set_period_range_end" class="col-md-3 col-form-label">Period End: </label>
+                        <label for="set_period_range_end" class="col-md-2 col-form-label">Period End: </label>
                         <div class="col-md-6">
                             <input
                                 v-model="range_end"
@@ -89,7 +89,7 @@ import alert from '../alert.vue'
 import modal from '../bootstrap-modal.vue'
 import reason from '../reasons.vue'
 import { mapGetters } from 'vuex'
-import { $, api_endpoints, validate, helpers, bus } from '../../../hooks'
+import { $, api_endpoints, helpers } from '../../../hooks'
 
 export default {
     name:"bulk-period",
@@ -192,7 +192,7 @@ export default {
             let vm = this;
             setTimeout(function () {
                 $('#bp-campgrounds').select2({
-                    theme: 'bootstrap',
+                    theme: 'bootstrap-5',
                     allowClear: true,
                     placeholder: "Select Moorings",
                     tags:false,
@@ -204,7 +204,7 @@ export default {
                     vm.selected_campgrounds = $(e.currentTarget).val();
                 });
                 $('#bp-periods').select2({
-                    theme: 'bootstrap',
+                    theme: 'bootstrap-5',
                     allowClear: true,
                     placeholder: "Select Booking Periods",
                     tags: false,
@@ -307,11 +307,13 @@ export default {
     },
     mounted:function () {
         let vm = this;
-        vm.form = $(document.forms.periodForm);
-        vm.events();
-        // bus.$once('priceReasons',setReasons => {
-        //     vm.reasons = setReasons;
-        // });
+        vm.$nextTick(() => {
+            vm.form = $(document.forms.periodForm);
+            vm.events();
+            // bus.$once('priceReasons',setReasons => {
+            //     vm.reasons = setReasons;
+            // });
+        })
     }
 }
 

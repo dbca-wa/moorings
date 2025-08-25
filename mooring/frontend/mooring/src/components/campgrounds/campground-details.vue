@@ -143,9 +143,7 @@
 import {
     $,
     api_endpoints,
-    helpers,
-    validate,
-    // select2
+    helpers
 }
 from '../../hooks.js'
 import {
@@ -360,7 +358,7 @@ export default {
 
         //Park
         $(vm.$refs.park).select2({
-            "theme": "bootstrap",
+            "theme": "bootstrap-5",
         }).
         on("select2:select", function (e){
             var selected = $(e.currentTarget);
@@ -372,7 +370,7 @@ export default {
         });
         //Mooring type selector
         $(vm.$refs.campground_type).select2({
-            "theme": "bootstrap",
+            "theme": "bootstrap-5",
         }).
         on("select2:select", function (e){
             var selected = $(e.currentTarget);
@@ -384,7 +382,7 @@ export default {
         });
         //Group permissions
         $(vm.$refs.group_permissions).select2({
-            "theme": "bootstrap",
+            "theme": "bootstrap-5",
         }).
         on("select2:select", function (e){
             var selected = $(e.currentTarget);
@@ -412,7 +410,7 @@ export default {
         });
         //Physical Type
         $(vm.$refs.type_physical).select2({
-            "theme": "bootstrap",
+            "theme": "bootstrap-5",
         }).
         on("select2:select", function (e){
             var selected = $(e.currentTarget);
@@ -424,7 +422,7 @@ export default {
         });
         //Class
         $(vm.$refs.class).select2({
-            "theme": "bootstrap",
+            "theme": "bootstrap-5",
         }).
         on("select2:select", function (e){
             var selected = $(e.currentTarget);
@@ -436,7 +434,7 @@ export default {
         });
         //Features
         $(vm.$refs.features).select2({
-            "theme": "bootstrap",
+            "theme": "bootstrap-5",
         }).
         on("select2:select", function (e){
             var selected = $(e.currentTarget);

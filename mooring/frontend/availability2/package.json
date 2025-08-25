@@ -4,12 +4,13 @@
   "description": "Availability 2 selector for Selecting Mulitple Mooring Per Booking",
   "author": "ASI <asi@dpaw.wa.gov.au>",
   "private": true,
+  "type": "module",
   "scripts": {
-    "build": "dotenv -e ../../../.env -- vue-cli-service build",
-    "serve": "dotenv -e ../../../.env -- vue-cli-service serve"
+    "dev": "dotenv -e ../../../.env -- vite",
+    "build": "dotenv -e ../../../.env -- vite build"
   },
   "dependencies": {
-    "@vue/compat": "^3.5.18",
+    "@vitejs/plugin-vue": "^6.0.1",
     "awesomplete": "^1.1.7",
     "debounce": "^2.2.0",
     "font-awesome": "^4.7.0",
@@ -19,15 +20,19 @@
     "moment": "^2.30.1",
     "ol": "^10.6.1",
     "sweetalert2": "^11.22.2",
+    "vite": "^7.1.2",
+    "vite-plugin-eslint2": "^5.0.4",
+    "vite-plugin-static-copy": "^3.1.1",
+    "vite-svg-loader": "^5.1.0",
     "vue": "^3.5.18"
   },
   "devDependencies": {
-    "@vue/cli-service": "^5.0.8",
-    "@vue/compiler-sfc": "^3.5.18",
+    "autoprefixer": "^10.4.21",
     "custom-event-polyfill": "^1.0.7",
     "dotenv-cli": "^10.0.0",
     "sass": "^1.90.0",
-    "sass-loader": "^16.0.5"
+    "sass-loader": "^16.0.5",
+    "vite-plugin-vue-devtools": "^8.0.0"
   },
   "engines": {
     "node": ">= 20.11.1",

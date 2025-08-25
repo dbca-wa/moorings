@@ -1,8 +1,13 @@
 {% extends 'mooring/base.html' %}
 {% load static %}
+{% load django_vite %}
 
 {% block title %}
     Mooring booking selector - Department of Biodiversity, Conservation and Attractions
+{% endblock %}
+
+{% block extra_js %}
+    {% vite_hmr_client app='availability2_app' %} <!-- This tag will include this script only if DJANGO_VITE_DEV_MODE is true, otherwise this will do nothing. -->
 {% endblock %}
 
 {% block content %}
@@ -18,9 +23,6 @@
         var parkstayGroundId = '{{ ground_id|escapejs }}';
     {% endif %}
     </script>
-    <!-- <script src="{% static 'availability2/js/manifest.js' %}?ver={{ GIT_COMMIT_HASH }}"></script>
-    <script src="{% static 'availability2/js/vendor.js' %}?ver={{ GIT_COMMIT_HASH }}"></script>
-    <script src="{% static 'availability2/js/app.js' %}?ver={{ GIT_COMMIT_HASH }}"></script> -->
-    <script type="text/javascript" src="{% static 'availability2/js/chunk-vendors.js' %}?ver={{ GIT_COMMIT_HASH }}"></script>
-    <script type="text/javascript" src="{% static 'availability2/js/main.js' %}?ver={{ GIT_COMMIT_HASH }}"></script>
+
+    {% vite_asset vue3_entry_script_availability2 app='availability2_app' %}
 {% endblock %}

@@ -1,4 +1,4 @@
-<template id="addMaxStayCS">
+<template>
 <modal ref="modal" :large=true @ok="addMaxStay()" okText="Add">
     <template #header>
         <div class="modal-header">
@@ -60,11 +60,12 @@
 </template>
 
 <script>
-import modal from '../../utils/bootstrap-modal.vue'
-import reason from '../../utils/reasons.vue'
-import {bus} from '../../utils/eventBus.js'
-import { $, datetimepicker,api_endpoints, validate, helpers, Moment } from '../../../hooks'
-import alert from '../../utils/alert.vue'
+import modal from '@/components/utils/bootstrap-modal.vue'
+import reason from '@/components/utils/reasons.vue'
+import {bus} from '@/components/utils/eventBus.js'
+import { $, Moment } from '@/hooks'
+import alert from '@/components/utils/alert.vue'
+import helpers from '@/components/utils/helpers.js'
 
 export default {
     name: 'addMaxStayCS',
@@ -83,10 +84,10 @@ export default {
             // end_picker: '',
             errors: false,
             errorString: '',
-            form: '',
+            my_form: '',
             reasons: [],
             isOpen: false,
-            create: true
+            create: true,
         }
     },
     watch: {
@@ -97,19 +98,8 @@ export default {
                 // Do nothing if the newStay object is null
                 if (!newStay) return;
 
-                // --- Handle conversion for range_start ---
-                const startDate = newStay.range_start;
-                if (startDate && /^\d{2}\/\d{2}\/\d{4}$/.test(startDate)) {
-                    let s_date = Moment(startDate, 'DD/MM/YYYY');
-                    this.stay.range_start = Moment(s_date).format('YYYY-MM-DD');
-                }
-
-                // --- Handle conversion for range_end ---
-                const endDate = newStay.range_end;
-                if (endDate && /^\d{2}\/\d{2}\/\d{4}$/.test(endDate)) {
-                    let e_date = Moment(endDate, 'DD/MM/YYYY');
-                    this.stay.range_end = Moment(e_date).format('YYYY-MM-DD');
-                }
+                this.stay.range_start = helpers.convertToYYYYMMDD(newStay.range_start)
+                this.stay.range_end = helpers.convertToYYYYMMDD(newStay.range_end)
             },
             immediate: true, // Run the handler immediately when the component is initialized
             deep: true       // Also detect changes to nested properties of the object
@@ -159,19 +149,23 @@ export default {
         },
         addMaxStay: function() {
             let vm = this;
-            if ($(vm.form).valid() && vm.stay.reason) {
-                vm.stay.range_start = Moment(vm.stay.range_start).format('DD/MM/YYYY');
-                vm.stay.range_end = Moment(vm.stay.range_end).format('DD/MM/YYYY');
-                if (!vm.stay.id){
-                    vm.$emit('addCgStayHistory');
-                }else {
-                    vm.$emit('updateStayHistory');
+            try {
+                if ($(vm.my_form).valid() && vm.stay.reason) {
+                    vm.stay.range_start = Moment(vm.stay.range_start).format('DD/MM/YYYY');
+                    vm.stay.range_end = Moment(vm.stay.range_end).format('DD/MM/YYYY');
+                    if (!vm.stay.id){
+                        vm.$emit('addCgStayHistory');
+                    }else {
+                        vm.$emit('updateStayHistory');
+                    }
                 }
+            } catch(e) {
+                console.error(e)
             }
         },
         addFormValidations: function() {
             let vm = this;
-            this.form.validate({
+            $(vm.my_form).validate({
                 rules: {
                     stay_start: "required",
                     stay_end: "required",
@@ -199,38 +193,41 @@ export default {
                     showErrors(errorMap, errorList, this.validElements());
                 }
             });
-       }
+        }
     },
     mounted: function() {
-        var vm = this;
-        if (!vm.create){
-            vm.$refs.modal.title = 'Edit Maximum Stay Period';
-        }
-        // vm.start_picker = $('#stay_start_picker');
-        // vm.end_picker = $('#stay_end_picker');
-        // vm.start_picker.datetimepicker({
-        //     format: 'DD/MM/YYYY'
-        // });
-        // vm.end_picker.datetimepicker({
-        //     format: 'DD/MM/YYYY'
-        // });
-        // vm.start_picker.on('dp.change', function(e){
-        //     vm.stay.range_start = vm.start_picker.data('DateTimePicker').date().format('DD/MM/YYYY');
-        // });
-        // vm.end_picker.on('dp.change', function(e){
-        //     vm.stay.range_end = vm.end_picker.data('DateTimePicker').date().format('DD/MM/YYYY');
-        // });
-        vm.form = $('#addMaxStayForm');
-        vm.addFormValidations();
-        // bus.$once('maxStayReasons',setReasons => {
-        //     vm.reasons = setReasons;
-        // });
-        const onDataLoadedOnce = (setReasons) => {
-            console.log('onDataLoadedOnce called with:', setReasons);
-            vm.reasons = setReasons;
-            bus.off('maxStayReasons', onDataLoadedOnce);
-        };
-        bus.on('maxStayReasons', onDataLoadedOnce);
+        this.$nextTick(() => {
+            var vm = this;
+            if (!vm.create){
+                vm.$refs.modal.title = 'Edit Maximum Stay Period';
+            }
+            // vm.start_picker = $('#stay_start_picker');
+            // vm.end_picker = $('#stay_end_picker');
+            // vm.start_picker.datetimepicker({
+            //     format: 'DD/MM/YYYY'
+            // });
+            // vm.end_picker.datetimepicker({
+            //     format: 'DD/MM/YYYY'
+            // });
+            // vm.start_picker.on('dp.change', function(e){
+            //     vm.stay.range_start = vm.start_picker.data('DateTimePicker').date().format('DD/MM/YYYY');
+            // });
+            // vm.end_picker.on('dp.change', function(e){
+            //     vm.stay.range_end = vm.end_picker.data('DateTimePicker').date().format('DD/MM/YYYY');
+            // });
+            // vm.my_form = document.forms.addMaxStayForm;
+            vm.my_form = $('#addMaxStayForm');
+            vm.addFormValidations();
+            // bus.$once('maxStayReasons',setReasons => {
+            //     vm.reasons = setReasons;
+            // });
+            const onDataLoadedOnce = (setReasons) => {
+                console.log('onDataLoadedOnce called with:', setReasons);
+                vm.reasons = setReasons;
+                bus.off('maxStayReasons', onDataLoadedOnce);
+            };
+            bus.on('maxStayReasons', onDataLoadedOnce);
+        })
     }
 };
 </script>

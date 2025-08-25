@@ -125,6 +125,8 @@ def mooring_url_group(tg):
         'MOORING_GROUP': mooring_group,
         "vue3_entry_script_exploreparks": settings.VUE3_ENTRY_SCRIPT_EXPLOREPARKS,
         "vue3_entry_script_admissions": settings.VUE3_ENTRY_SCRIPT_ADMISSIONS,
+        "vue3_entry_script_availability2": settings.VUE3_ENTRY_SCRIPT_AVAILABILITY2,
+        "vue3_entry_script_moorings": settings.VUE3_ENTRY_SCRIPT_MOORINGS,
     }
 
 

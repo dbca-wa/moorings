@@ -149,12 +149,13 @@
 </template>
 
 <script>
-import modal from '../bootstrap-modal.vue'
-import reason from '../reasons.vue'
-import { $, api_endpoints, validate, helpers, bus, Moment } from '../../../hooks'
-import alert from '../alert.vue'
+import modal from '@/components/utils/bootstrap-modal.vue'
+import reason from '@/components/utils/reasons.vue'
+import { $, api_endpoints, bus, Moment } from '@/hooks.js'
+import alert from '@/components/utils/alert.vue'
 import { mapGetters } from 'vuex'
 import 'bootstrap/dist/js/bootstrap.bundle.min.js';
+import helpers from '@/components/utils/helpers.js'
 
 export default {
     name: 'PriceHistoryDetail',
@@ -241,19 +242,8 @@ export default {
                 // Do nothing if the newPriceHistory object is null
                 if (!newPriceHistory) return;
 
-                // --- Handle conversion for period_start ---
-                const startDate = newPriceHistory.period_start;
-                if (startDate && /^\d{2}\/\d{2}\/\d{4}$/.test(startDate)) {
-                    let s_date = Moment(startDate, 'DD/MM/YYYY');
-                    this.priceHistory.period_start = Moment(s_date).format('YYYY-MM-DD');
-                }
-
-                // --- Handle conversion for period_end ---
-                const endDate = newPriceHistory.period_end;
-                if (endDate && /^\d{2}\/\d{2}\/\d{4}$/.test(endDate)) {
-                    let e_date = Moment(endDate, 'DD/MM/YYYY');
-                    this.priceHistory.period_end = Moment(e_date).format('YYYY-MM-DD');
-                }
+                this.priceHistory.period_start = helpers.convertToYYYYMMDD(newPriceHistory.period_start)
+                this.priceHistory.period_end = helpers.convertToYYYYMMDD(newPriceHistory.period_end)
             },
             immediate: true, // Run the handler immediately when the component is initialized
             deep: true       // Also detect changes to nested properties of the object

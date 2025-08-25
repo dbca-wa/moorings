@@ -555,13 +555,13 @@ export default {
             name: '',
             arrivalDate: moment.utc(getQueryParam('arrival', moment.utc(now).format('YYYY/MM/DD')), 'YYYY/MM/DD'),
             departureDate:  moment.utc(getQueryParam('departure', moment.utc(now).add(5, 'days').format('YYYY/MM/DD')), 'YYYY/MM/DD'),
-            parkstayUrl: global.parkstayUrl || process.env.VUE_APP_PARKSTAY_URL,
-            useAdminApi: global.useAdminApi || false,
+            parkstayUrl: import.meta.env.VITE_PARKSTAY_URL || window.parkstayUrl,
+            useAdminApi: window.useAdminApi || false,
             // order of preference:
             // - GET parameter 'site_id'
             // - global JS var 'parkstayGroundId'
             // - '1'
-            parkstayGroundId: parseInt(getQueryParam('site_id', global.parkstayGroundId || '1')),
+            parkstayGroundId: parseInt(getQueryParam('site_id', window.parkstayGroundId || '1')),
             parkstayGroundRatisId: parseInt(getQueryParam('parkstay_site_id', '0')),
             days: 5,
             numAdults: parseInt(getQueryParam('num_adult', 2)),
@@ -1177,7 +1177,7 @@ export default {
                                 }
 
                                 if (data.sites == null) { 
-                                return;
+                                    return;
                                 }
 
                                 if (data.sites.length == 0) {
@@ -1297,11 +1297,10 @@ export default {
                                     vm.parkstayGroundId = data.id;
                                     vm.updateURL();
                                 }
-	                        if (this.loadID == vm.loadingID) {
-          	                  vm.isLoading =false;
-                	          $('#spinnerLoader').hide();
+	                            if (this.loadID == vm.loadingID) {
+                                    vm.isLoading =false;
+                                    $('#spinnerLoader').hide();
                                 }
-
                             },
                             error: function(xhr, stat, err) {
                                 vm.showSecondErrorLine = true;

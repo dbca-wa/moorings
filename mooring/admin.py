@@ -166,10 +166,10 @@ class MooringAreaGroupAdmin(admin.ModelAdmin):
 
 @admin.register(models.Mooringsite)
 class MooringsiteAdmin(admin.GISModelAdmin):
-    list_display = ('name','mooringarea',)
+    list_display = ('name','mooringarea', 'wkb_geometry')
     ordering = ('name',)
     list_filter = ('mooringarea',)
-    search_fields = ('name',)
+    search_fields = ('name', 'mooringarea__name')
     openlayers_url = 'https://cdnjs.cloudflare.com/ajax/libs/openlayers/2.13.1/OpenLayers.js'
 
 @admin.register(models.Feature)
@@ -240,8 +240,8 @@ class BookingAdmin(admin.ModelAdmin):
         'created'
     )
     ordering = ('-id',)
-    search_fields = ('customer','id','admission_payment','cost_total')
-    list_filter = ('booking_type', 'property_cache_stale',)
+    search_fields = ('mooringarea__name', 'customer','id','admission_payment','cost_total')
+    list_filter = ('mooringarea', 'booking_type', 'property_cache_stale',)
     readonly_fields=('created','property_cache',)
     inlines = [
         BookingInvoiceInline,
@@ -268,9 +268,9 @@ class BookingAnnualAdmissionAdmin(admin.ModelAdmin):
 
 @admin.register(models.MooringsiteBooking)
 class MooringsiteBookingAdmin(admin.ModelAdmin):
-    list_display = ('campsite','date','booking','booking_type')
+    list_display = ('campsite','date', 'from_dt', 'to_dt', 'booking','booking_type', 'booking_period_option')
     ordering = ('-date',)
-    search_fields = ('date',)
+    search_fields = ('campsite__name', 'date',)
     list_filter = ('campsite','booking_type')
 
 @admin.register(models.MooringsiteRate)
@@ -683,7 +683,9 @@ class RegisteredVesselsMooringLicensing(admin.ModelAdmin):
 
 @admin.register(models.MooringAreaBookingRange)
 class MooringAreaBookingRange(admin.ModelAdmin):
-    list_display = ('id', 'range_start', 'range_end', 'campground_id')
+    list_display = ('id', 'range_start', 'range_end', 'closure_reason', 'open_reason', 'campground',)
+    search_fields = ('campground__name',)
+    list_filter = ('campground',)
     ordering = ('id',)
 
 @admin.register(models.GlobalSettings)
