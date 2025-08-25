@@ -9,7 +9,6 @@
         </div>
         <datatable ref="addMaxStayDT" :dtHeaders ="msh_headers" :dtOptions="msh_options" id="stay_history"></datatable>
     </div>
-    <confirmbox id="deleteStay" :options="deleteStayPrompt"></confirmbox>
 </template>
 
 <script>
@@ -56,7 +55,6 @@ export default {
     components: {
         StayHistoryDetail,
         alert,
-        confirmbox,
         datatable
     },
     data: function() {
@@ -66,22 +64,6 @@ export default {
             invent: false,
             stay: {
                 reason:''
-            },
-            deleteStay: null,
-            deleteStayPrompt: {
-                icon: "<i class='fa fa-exclamation-triangle fa-2x text-danger' aria-hidden='true'></i>",
-                message: "Are you sure you want to Delete this stay Period",
-                buttons: [{
-                    text: "Delete",
-                    event: "delete",
-                    bsColor: "btn-danger",
-                    handler: function() {
-                        vm.deleteStayRecord(vm.deleteStay);
-                        vm.deleteStay = null;
-                    },
-                    autoclose: true,
-                }],
-                id: 'deleteStay'
             },
             retrieve_stay: {
                 error: false,
@@ -241,11 +223,22 @@ export default {
                 vm.fetchStay(id);
             });
             vm.$refs.addMaxStayDT.vmDataTable.on('click', '.deleteStay', function(e) {
-                e.preventDefault();
-                var id = $(this).attr('data-stay_period');
-                vm.deleteStay = id;
-                // bus.$emit('showAlert', 'deleteStay');
-                bus.emit('showAlert', 'deleteStay');
+                const stayIdToDelete = e.currentTarget.dataset.stay_period;
+                swal.fire({
+                    title: 'Are you sure?',
+                    text: "You won't be able to revert this!",
+                    icon: 'warning',
+                    heightAuto: false, 
+                    showCancelButton: true,
+                    confirmButtonColor: '#3085d6',
+                    cancelButtonColor: '#d33',
+                    confirmButtonText: 'Yes, delete it!'
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        // If the user clicked "Yes, delete it!", call the delete method
+                        vm.deleteStayRecord(stayIdToDelete);
+                    }
+                });
             });
         },
     },
