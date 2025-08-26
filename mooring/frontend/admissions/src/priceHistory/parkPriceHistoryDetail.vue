@@ -293,9 +293,9 @@
 </template>
 
 <script>
-import JQuery from 'jquery'
-window.jQuery = JQuery
-window.$ = JQuery
+// import JQuery from 'jquery'
+// window.jQuery = JQuery
+// window.$ = JQuery
 // import 'foundation-sites';
 // import 'foundation-datepicker/js/foundation-datepicker';
 
