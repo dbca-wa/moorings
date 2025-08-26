@@ -1,6 +1,7 @@
 <template id="priceHistory">
-    <parkPriceHistory v-if="addParkPrice" ref="historyModal" @addParkPriceHistory="addParkHistory()" @updateParkPriceHistory="updateParkHistory()" :priceHistory="parkPrice" @cancel="closeHistory()"/>
-    <PriceHistoryDetail v-else ref="historyModal" @addPriceHistory="addHistory()" @updatePriceHistory="updateHistory()" :priceHistory="price"></PriceHistoryDetail>
+    <!-- <parkPriceHistory v-if="addParkPrice" ref="historyModal" @addParkPriceHistory="addParkHistory()" @updateParkPriceHistory="updateParkHistory()" :priceHistory="parkPrice" @cancel="closeHistory()"/> -->
+    <!-- <PriceHistoryDetail v-else ref="historyModal" @addPriceHistory="addHistory()" @updatePriceHistory="updateHistory()" :priceHistory="price"></PriceHistoryDetail> -->
+    <PriceHistoryDetail ref="historyModal" @addPriceHistory="addHistory()" @updatePriceHistory="updateHistory()" :priceHistory="price"></PriceHistoryDetail>
     <div class="row">
         <div class="row">
             <div class="col-sm-4" v-if="invent">
@@ -17,7 +18,7 @@
 <script>
 import datatable from '@/components/utils/datatable.vue'
 import PriceHistoryDetail from '@/components/utils/priceHistory/priceHistoryDetail.vue'
-import parkPriceHistory from '@/components/utils/priceHistory/parkPriceHistoryDetail.vue'
+// import parkPriceHistory from '@/components/utils/priceHistory/parkPriceHistoryDetail.vue'
 import { $, Moment, api_endpoints, helpers } from '@/hooks.js'
 
 export default {
@@ -31,12 +32,12 @@ export default {
             type: Boolean,
             default: true
         },
-        addParkPrice:{
-            type: Boolean,
-            default: function () {
-                return false;
-            }
-        },
+        // addParkPrice:{
+        //     type: Boolean,
+        //     default: function () {
+        //         return false;
+        //     }
+        // },
         level: {
             validator: function (value){
                 var levels = ['campground','campsite_class','campsite','park'];
@@ -66,7 +67,7 @@ export default {
     components: {
         datatable,
         PriceHistoryDetail,
-        parkPriceHistory
+        // parkPriceHistory
     },
     computed: {
     },
