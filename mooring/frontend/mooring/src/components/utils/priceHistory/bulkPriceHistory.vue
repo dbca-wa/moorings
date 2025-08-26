@@ -42,26 +42,29 @@
                         </div>
                     </div>
                     <div class="row mb-3">
-                        <label for="set_period_range_start" class="col-md-2 col-form-label">Period start: </label>
+                        <label for="set_period_range_start" class="col-md-2 col-form-label">Period start:</label>
                         <div class="col-md-6">
                             <input
-                                v-model="range_start"
+                                id="set_period_range_start"
                                 type="date"
                                 class="form-control"
+                                v-model="range_start"
                                 name="period_start"
-                                id="set_period_range_start"
+                                :min="tomorrow"
+                                :max="range_end"
                             />
                         </div>
                     </div>
                     <div class="row mb-3">
-                        <label for="set_period_range_end" class="col-md-2 col-form-label">Period End: </label>
+                        <label for="set_period_range_end" class="col-md-2 col-form-label">Period End:</label>
                         <div class="col-md-6">
                             <input
-                                v-model="range_end"
+                                id="set_period_range_end"
                                 type='date'
                                 class="form-control"
+                                v-model="range_end"
                                 name="period_end"
-                                id="set_period_range_end"
+                                :min="minEndDate"
                             />
                         </div>
                     </div>
@@ -113,7 +116,42 @@ export default {
             details: ''
         }
     },
+    watch: {
+        range_start(newStartDate) {
+            if (newStartDate && newStartDate < this.tomorrow) {
+                // If an invalid past date is entered, reset it.
+                this.$nextTick(() => {
+                    this.range_start = this.tomorrow;
+                });
+            }
+
+            // If the new start date is after the current end date, reset the end date.
+            if (newStartDate && this.range_end && newStartDate > this.range_end) {
+                this.range_end = '';
+            }
+        },
+        range_end(newEndDate) {
+            // If a new end date is set that is before the minimum allowed end date,
+            // reset it to prevent an invalid state.
+            if (newEndDate && newEndDate < this.minEndDate) {
+                this.$nextTick(() => {
+                    this.range_end = '';
+                });
+            }
+        }
+    },
     computed:{
+        tomorrow() {
+            const d = new Date();
+            d.setDate(d.getDate() + 1); // Set to tomorrow
+            d.setMinutes(d.getMinutes() - d.getTimezoneOffset()); // Timezone correction
+            return d.toISOString().slice(0, 10);
+        },
+        minEndDate() {
+            // If range_start has a value, use it as the minimum for range_end.
+            // Otherwise, fall back to 'tomorrow' as the absolute minimum.
+            return this.range_start || this.tomorrow;
+        },
         showErrorPeriods: function() {
             var vm = this;
             return vm.errorStringPeriods != null;
