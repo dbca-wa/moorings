@@ -24,7 +24,7 @@
 </template>
 
 <script>
-import { api_endpoints, helpers, } from '@/hooks.js'
+import { $, api_endpoints, helpers, } from '@/hooks.js'
 import alert from '@/utils/alert.vue'
 import reason from '@/utils/reasons.vue'
 import loader from '@/utils/loader.vue'
