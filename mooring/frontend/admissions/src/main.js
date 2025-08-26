@@ -5,6 +5,7 @@ import 'vite/modulepreload-polyfill';
 import $ from 'jquery';
 import moment from 'moment';
 import swal from 'sweetalert2';
+import 'bootstrap/dist/js/bootstrap.bundle.min.js';
 
 window.$ = $;
 window.jQuery = $;
