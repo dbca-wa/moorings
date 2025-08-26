@@ -16,13 +16,8 @@
 import datatable from '@/utils/datatable.vue'
 import PriceHistoryDetail from '@/priceHistory/priceHistoryDetail.vue'
 import parkPriceHistory from '@/priceHistory/parkPriceHistoryDetail.vue'
-import {
-    $,
-    Moment,
-    api_endpoints,
-    helpers,
-}
-from '@/hooks.js'
+import { $, Moment, api_endpoints, helpers, } from '@/hooks.js'
+import swal from 'sweetalert2'
 
 export default {
     name: 'priceHistory',
@@ -69,7 +64,6 @@ export default {
     },
     components: {
         datatable,
-        // confirmbox,
         PriceHistoryDetail,
         parkPriceHistory
     },
@@ -287,7 +281,7 @@ export default {
                     showCancelButton: true,
                     // Instead of hardcoding colors, use Bootstrap's button classes.
                     customClass: {
-                        confirmButton: 'btn btn-danger ml-3', // For a destructive action
+                        confirmButton: 'btn btn-danger', // For a destructive action
                         cancelButton: 'btn btn-secondary'
                     },
                 }).then((result) => {

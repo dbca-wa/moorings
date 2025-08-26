@@ -255,42 +255,6 @@
                     </div>
                 </div>
             </div>
-
-            <!-- <div class="card mt-3" id="applications" style="margin-top:50px; display:none;">
-                <div class="card-header" role="tab" id="applications-heading">
-                    <div class="card-title">
-                        <h4 class='col-6 card-title'>Closure History</h4>
-                        <div class='col-6 text-end'><i class="bi bi-chevron-down"></i></div>
-                    </div>
-                </div>
-                <div class="card-collapse collapse in" role="tabpanel" aria-labelledby="applications-heading" id="campsites">
-                    <div class="panel-body">
-                        <div class="col-lg-12">
-                            <div class="row">
-                                <div class="well">
-                                    <div class="col-sm-offset-8 col-sm-4">
-                                        <button @click="showBulkCloseCampsites = true" class="btn btn-primary pull-right table_btn" >Close Mooring Sites</button> 
-                                        <router-link :to="{name:'add_campsite',params:{id:campground_id}}" class="btn btn-primary pull-right table_btn" style="margin-right: 1em;">Add Mooring site</router-link>
-                                    </div>
-                                    <datatable ref="cg_campsites_dt" :dtHeaders ="cs_headers" :dtOptions="cs_options" id="cs_table"></datatable>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <confirmbox id="deleteRange" :options="deletePrompt"></confirmbox>
-            <bulk-close-campsites v-on:bulkCloseCampsites="bulkCloseCampsites" v-if="showBulkCloseCampsites" v-on:close="showBulkCloseCampsites = false" ref="bulkCloseCampsites" v-bind:campsites="campsites"/>
-            <div class="navbar navbar-default" id="footer" v-if="invent">
-                <div class="container">
-                    <div class="navbar navbar-nav navbar-right" style="margin-top:5px;">
-                        <a href="#" class="btn btn-primary" @click.prevent="sendData">Update</a>
-                        <a href="/dashboard/moorings/" class="btn btn-primary">Cancel</a>
-                    </div>
-                </div>
-            </div>
-        <!-- </div> -->
     </div>
 </template>
 
@@ -564,7 +528,6 @@ export default {
         campgroundImages,
         campgroundMap,
         campgroundAdditional,
-        // confirmbox,
         pkCsClose,
         pkCsOpen,
         closureHistory,
