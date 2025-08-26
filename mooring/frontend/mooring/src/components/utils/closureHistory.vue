@@ -34,7 +34,6 @@ export default {
     },
     components: {
         datatable,
-        // confirmbox,
         Close,
     },
     computed: {
