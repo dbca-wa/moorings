@@ -225,14 +225,16 @@ export default {
             vm.$refs.addMaxStayDT.vmDataTable.on('click', '.deleteStay', function(e) {
                 const stayIdToDelete = e.currentTarget.dataset.stay_period;
                 swal.fire({
-                    title: 'Are you sure?',
+                    title: 'Are you sure you want to delete this stay history record?',
                     text: "You won't be able to revert this!",
                     icon: 'warning',
                     heightAuto: false, 
                     showCancelButton: true,
-                    confirmButtonColor: '#3085d6',
-                    cancelButtonColor: '#d33',
-                    confirmButtonText: 'Yes, delete it!'
+                    // Instead of hardcoding colors, use Bootstrap's button classes.
+                    customClass: {
+                        confirmButton: 'btn btn-danger ml-3', // For a destructive action
+                        cancelButton: 'btn btn-secondary'
+                    },
                 }).then((result) => {
                     if (result.isConfirmed) {
                         // If the user clicked "Yes, delete it!", call the delete method
