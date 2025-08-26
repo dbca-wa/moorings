@@ -299,7 +299,6 @@
 // import 'foundation-sites';
 // import 'foundation-datepicker/js/foundation-datepicker';
 
-import moment from 'moment'
 import bootstrapModal from '../utils/bootstrap-modal.vue'
 import reason from '../utils/reasons.vue'
 import { api_endpoints, validate, helpers, bus } from '../hooks'
@@ -485,13 +484,9 @@ export default {
 
         var today = new Date();
         today.setDate(today.getDate()+1);
-        var tomorrow = new Date(today);
 
         var mg = $('#mooring_groups').val();
         vm.mooring_groups = JSON.parse( mg );
-
-        var arrivalEl = $('#period_start');
-        var arrivalDate = null;
 
         vm.addFormValidations();
         // bus.once('reasons',setReasons => {
