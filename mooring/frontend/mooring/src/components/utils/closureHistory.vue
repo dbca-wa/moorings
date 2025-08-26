@@ -8,15 +8,16 @@
         </div>
         <datatable ref="closure_dt" :dtHeaders ="ch_headers" :dtOptions="ch_options" id="cg_table"></datatable>
     </div>
-    <confirmbox id="deleteClosure" :options="deleteClosurePrompt"></confirmbox>
+    <!-- <confirmbox id="deleteClosure" :options="deleteClosurePrompt"></confirmbox> -->
 </template>
 
 <script>
 import datatable from '@/components/utils/datatable.vue'
-import confirmbox from '@/components/utils/confirmbox.vue'
+// import confirmbox from '@/components/utils/confirmbox.vue'
 import Close from '@/components/utils/closureHistory/close.vue'
-import { bus } from '@/components/utils/eventBus.js'
+// import { bus } from '@/components/utils/eventBus.js'
 import { $, Moment, api_endpoints, helpers } from '@/hooks.js'
+import swal from 'sweetalert2'
 
 export default {
     name: 'closureHistory',
@@ -36,7 +37,7 @@ export default {
     },
     components: {
         datatable,
-        confirmbox,
+        // confirmbox,
         Close,
     },
     computed: {
@@ -60,22 +61,22 @@ export default {
                 reason: '',
                 closure_reason: ''
             },
-            deleteClosure: null,
-            deleteClosurePrompt: {
-                icon: "<i class='fa fa-exclamation-triangle fa-2x text-danger' aria-hidden='true'></i>",
-                message: "Are you sure you want to Delete this closure Period",
-                buttons: [{
-                    text: "Delete",
-                    event: "deleteClosure",
-                    bsColor: "btn-danger",
-                    handler: function() {
-                        vm.deleteClosureRecord(vm.deleteClosure);
-                        vm.deleteClosure = null;
-                    },
-                    autoclose: true,
-                }],
-                id: 'deleteClosure'
-            },
+            // deleteClosure: null,
+            // deleteClosurePrompt: {
+            //     icon: "<i class='fa fa-exclamation-triangle fa-2x text-danger' aria-hidden='true'></i>",
+            //     message: "Are you sure you want to Delete this closure Period",
+            //     buttons: [{
+            //         text: "Delete",
+            //         event: "deleteClosure",
+            //         bsColor: "btn-danger",
+            //         handler: function() {
+            //             vm.deleteClosureRecord(vm.deleteClosure);
+            //             vm.deleteClosure = null;
+            //         },
+            //         autoclose: true,
+            //     }],
+            //     id: 'deleteClosure'
+            // },
             ch_options: {
                 responsive: true,
                 processing: true,
@@ -184,7 +185,6 @@ export default {
                     vm.showClose();
                 },
                 error:function (resp){
-
                 }
             });
         },
@@ -214,7 +214,6 @@ export default {
                     vm.$refs.closeModal.errors = true;
                 }
             });
-
         },
         addTableListeners: function() {
             let vm = this;
@@ -226,10 +225,26 @@ export default {
             });
             table.on('click','.deleteRange', function(e) {
                 e.preventDefault();
-                var id = $(this).data('range');
-                vm.deleteClosure = id;
+                const id = $(this).data('range');
+                // vm.deleteClosure = id;
                 // bus.$emit('showAlert', 'deleteClosure');
-                bus.emit('showAlert', 'deleteClosure');
+                // bus.emit('showAlert', 'deleteClosure');
+                swal.fire({
+                    title: 'Are you sure you want to Delete this closure Period',
+                    text: "You won't be able to revert this!",
+                    icon: 'warning',
+                    heightAuto: false, 
+                    showCancelButton: true,
+                    // Instead of hardcoding colors, use Bootstrap's button classes.
+                    customClass: {
+                        confirmButton: 'btn btn-danger', // For a destructive action
+                        cancelButton: 'btn btn-secondary'
+                    },
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        vm.deleteClosureRecord(id);
+                    }
+                });
             });
         },
     },
@@ -255,7 +270,6 @@ export default {
                 }
             });
         }, 400);
-        
     }
 }
 </script>
