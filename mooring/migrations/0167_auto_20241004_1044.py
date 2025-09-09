@@ -40,6 +40,11 @@ class Migration(migrations.Migration):
                         'managed': False, 
                     },
                 ),
+                migrations.AddField(
+                    model_name='mooringareagroup',
+                    name='members',
+                    field=models.ManyToManyField(blank=True, through='mooring.MooringAreaGroupMember', to=settings.AUTH_USER_MODEL),
+                ),
             ]
         ),
         # migrations.AlterField(
@@ -47,13 +52,13 @@ class Migration(migrations.Migration):
         #     name='members',
         #     field=models.ManyToManyField(blank=True, through='mooring.MooringAreaGroupMember', to=settings.AUTH_USER_MODEL),
         # ),
-        migrations.RemoveField(
-            model_name='mooringareagroup',
-            name='members',
-        ),
-        migrations.AddField(
-            model_name='mooringareagroup',
-            name='members',
-            field=models.ManyToManyField(blank=True, through='mooring.MooringAreaGroupMember', to=settings.AUTH_USER_MODEL),
-        ),
+        # migrations.RemoveField(
+        #     model_name='mooringareagroup',
+        #     name='members',
+        # ),
+        # migrations.AddField(
+        #     model_name='mooringareagroup',
+        #     name='members',
+        #     field=models.ManyToManyField(blank=True, through='mooring.MooringAreaGroupMember', to=settings.AUTH_USER_MODEL),
+        # ),
     ]
