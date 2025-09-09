@@ -136,12 +136,26 @@
             </div>
             <div class="columns small-6 medium-6 large-2">
                 <label>Arrival
-                    <input id="date-arrival" type="date" placeholder="dd/mm/yyyy" v-on:change="update" v-model="arrivalDateFormatted"/>
+                    <input
+                        id="date-arrival"
+                        type="date"
+                        placeholder="dd/mm/yyyy"
+                        @change="update"
+                        v-model="arrivalDateFormatted"
+                        :max="departureDateFormatted"
+                    />
                 </label>
             </div>
             <div class="columns small-6 medium-6 large-2">
                 <label>Departure
-                    <input id="date-departure" type="date" placeholder="dd/mm/yyyy" v-on:change="update" v-model="departureDateFormatted"/>
+                    <input
+                        id="date-departure"
+                        type="date"
+                        placeholder="dd/mm/yyyy"
+                        @change="update"
+                        v-model="departureDateFormatted"
+                        :min="arrivalDateFormatted"
+                    />
                 </label>
             </div>
             <div class="small-6 medium-6 large-2 columns" >
@@ -634,32 +648,48 @@ export default {
                 return this.departureDate ? moment(this.departureDate).format('YYYY/MM/DD') : null;
             }
         },
-
         arrivalDateFormatted: {
             get() {
-            if (!this.arrivalDate) return '';
-            const d = new Date(this.arrivalDate);
-            const year = d.getFullYear();
-            const month = String(d.getMonth() + 1).padStart(2, '0');
-            const day = String(d.getDate()).padStart(2, '0');
-            return `${year}-${month}-${day}`;
+                if (!this.arrivalDate) return '';
+                const d = new Date(this.arrivalDate);
+                const year = d.getFullYear();
+                const month = String(d.getMonth() + 1).padStart(2, '0');
+                const day = String(d.getDate()).padStart(2, '0');
+                return `${year}-${month}-${day}`;
             },
             set(value) {
-            this.arrivalDate = new Date(value); // Converts yyyy-MM-dd back to Date object
+                // user input is converted back to Date object
+                if (!value){
+                    if (this.departureDate){
+                        this.arrivalDate = this.departureDate
+                    } else {
+                        this.arrivalDate = new Date()
+                    }
+                } else {
+                    this.arrivalDate = new Date(value);
+                }
             }
         },
-
         departureDateFormatted: {
             get() {
-            if (!this.departureDate) return '';
-            const d = new Date(this.departureDate);
-            const year = d.getFullYear();
-            const month = String(d.getMonth() + 1).padStart(2, '0');
-            const day = String(d.getDate()).padStart(2, '0');
-            return `${year}-${month}-${day}`;
+                if (!this.departureDate) return '';
+                const d = new Date(this.departureDate);
+                const year = d.getFullYear();
+                const month = String(d.getMonth() + 1).padStart(2, '0');
+                const day = String(d.getDate()).padStart(2, '0');
+                return `${year}-${month}-${day}`;
             },
             set(value) {
-            this.departureDate = new Date(value); // Converts yyyy-MM-dd back to Date object
+                // user input is converted back to Date object
+                if (!value){
+                    if (this.arrivalDate){
+                        this.departureDate = this.arrivalDate
+                    } else {
+                        this.departureDate = new Date()
+                    }
+                } else {
+                    this.departureDate = new Date(value);
+                }
             }
         },
 
@@ -1121,19 +1151,19 @@ export default {
                 $('#spinnerLoader').show();
                 debounce(function() {
                     var params = {
-                            arrival: moment(vm.arrivalDate).format('YYYY/MM/DD'),
-                            departure: moment(vm.departureDate).format('YYYY/MM/DD'),
-                            num_adult: vm.numAdults,
-                            num_child: vm.numChildren,
-                            num_concession: vm.numConcessions,
-                            num_infant: vm.numInfants,
-                            vessel_size: vm.vesselSize,
-                            vessel_draft: vm.vesselDraft,
-                            vessel_beam: vm.vesselBeam,
-                            vessel_weight: vm.vesselWeight,
-                            vessel_rego: vm.vesselRego,
-                            distance_radius: vm.distanceRadius
-                        };
+                        arrival: moment(vm.arrivalDate).format('YYYY/MM/DD'),
+                        departure: moment(vm.departureDate).format('YYYY/MM/DD'),
+                        num_adult: vm.numAdults,
+                        num_child: vm.numChildren,
+                        num_concession: vm.numConcessions,
+                        num_infant: vm.numInfants,
+                        vessel_size: vm.vesselSize,
+                        vessel_draft: vm.vesselDraft,
+                        vessel_beam: vm.vesselBeam,
+                        vessel_weight: vm.vesselWeight,
+                        vessel_rego: vm.vesselRego,
+                        distance_radius: vm.distanceRadius
+                    };
                     if (parseInt(vm.parkstayGroundRatisId) > 0) {
                         var url = vm.parkstayUrl + '/api/availability_ratis/'+ vm.parkstayGroundRatisId +'/?'+$.param(params);
                     } else if (vm.useAdminApi) {
@@ -1142,6 +1172,7 @@ export default {
                         vm.updateURL();
                         var url = vm.parkstayUrl + '/api/availability2/'+ vm.parkstayGroundId +'.json/?'+$.param(params);
                     }
+                    console.log({url})
 
                     // var options = [null, "", " "]
                     var search = true;

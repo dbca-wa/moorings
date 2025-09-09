@@ -20,6 +20,7 @@ import store from './store.js';
 import { routes } from './routes.js';
 import filters from "../components/utils/filters.js";
 import 'jquery-validation';
+import 'bootstrap/dist/js/bootstrap.bundle.min.js';
 
 // CSSs
 import "quill/dist/quill.snow.css";
@@ -31,7 +32,6 @@ import "bootstrap-daterangepicker/daterangepicker.css";
 import "awesomplete/awesomplete.css";
 import "sweetalert2/dist/sweetalert2.css";
 import 'bootstrap-icons/font/bootstrap-icons.css';
-import 'bootstrap/dist/js/bootstrap.bundle.min.js';
 
 // Define global variables
 window.debounce = function (func, wait, immediate) {

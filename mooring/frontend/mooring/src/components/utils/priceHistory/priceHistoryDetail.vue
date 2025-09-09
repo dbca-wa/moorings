@@ -103,6 +103,7 @@
                         type="date"
                         class="form-control"
                         v-model="priceHistory.period_start"
+                        :max="priceHistory.perod_end"
                     />
                 </div>
             </div>
@@ -116,6 +117,7 @@
                         type="date"
                         class="form-control"
                         v-model="priceHistory.period_end"
+                        :min="priceHistory.period_start"
                     />
                 </div>
             </div>

@@ -207,11 +207,11 @@
 import 'foundation-sites';
 import 'foundation-datepicker/js/foundation-datepicker';
 import moment from 'moment';
-import JQuery from 'jquery';
+// import JQuery from 'jquery';
 import swal from 'sweetalert2';
 import { api_endpoints } from './hooks';
 
-let $ = JQuery
+// let $ = JQuery
 var nowTemp = new Date();
 var now = moment.utc({year: nowTemp.getFullYear(), month: nowTemp.getMonth(), day: nowTemp.getDate(), hour: 0, minute: 0, second: 0}).toDate();
 

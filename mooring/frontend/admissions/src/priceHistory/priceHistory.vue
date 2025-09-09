@@ -9,23 +9,15 @@
             <button iiivshow="showAddBtn" @click="showHistory()" class="btn btn-primary pull-right table_btn">Add Price History</button>
         </div>
         <datatable ref="history_dt" :dtHeaders ="dt_headers" :dtOptions="dt_options" id="ph_table"></datatable>
-    <confirmbox id="deleteHistory" :options="deleteHistoryPrompt"></confirmbox>
 </div>
 </template>
 
 <script>
-import datatable from '../utils/datatable.vue'
-import confirmbox from '../utils/confirmbox.vue'
-import PriceHistoryDetail from './priceHistoryDetail.vue'
-import parkPriceHistory from './parkPriceHistoryDetail.vue'
-import {bus} from '../utils/eventBus.js'
-import {
-    $,
-    Moment,
-    api_endpoints,
-    helpers,
-}
-from '../hooks.js'
+import datatable from '@/utils/datatable.vue'
+import PriceHistoryDetail from '@/priceHistory/priceHistoryDetail.vue'
+import parkPriceHistory from '@/priceHistory/parkPriceHistoryDetail.vue'
+import { $, Moment, api_endpoints, helpers, } from '@/hooks.js'
+import swal from 'sweetalert2'
 
 export default {
     name: 'priceHistory',
@@ -72,14 +64,12 @@ export default {
     },
     components: {
         datatable,
-        confirmbox,
         PriceHistoryDetail,
         parkPriceHistory
     },
     computed: {
     },
     data: function() {
-        let vm = this;
         return {
             campground: {},
             campsite:{},
@@ -100,23 +90,6 @@ export default {
                 comments:'',
                 reason:{id:1}
             },
-            deleteHistory: null,
-            deleteHistoryPrompt: {
-                icon: "<i class='fa fa-exclamation-triangle fa-2x text-danger' aria-hidden='true'></i>",
-                message: "Are you sure you want to Delete this Price History Record",
-                buttons: [{
-                    text: "Delete",
-                    event: "delete",
-                    bsColor: "btn-danger",
-                    handler: function() {
-                        vm.deleteHistoryRecord(vm.deleteHistory);
-                        vm.deleteHistory = null;
-                    },
-                    autoclose: true,
-                }],
-                id: 'deleteHistory'
-            },
-
         }
     },
     methods: {
@@ -194,10 +167,7 @@ export default {
         },
         addParkPriceHistory: function() {
             var data = this.validateNewPrice(this.parkPrice)
-            console.log(data)
             var start = this.parkPrice.period_start.split("-");
-            console.log(start)
-            // this.parkPrice.period_start = start[2] + "-" + start[1] + "-" + start[0];
             this.parkPrice.period_start = start[0] + "-" + start[1] + "-" + start[2];
             console.log(this.parkPrice.period_start)
             if (this.parkPrice.period_end){
@@ -263,7 +233,6 @@ export default {
                     vm.$refs.historyModal.errors = true;
                 }
             });
-
         },
         addTableListeners: function() {
             let vm = this;
@@ -293,17 +262,33 @@ export default {
             vm.$refs.history_dt.vmDataTable.on('click','.deletePrice', function(e) {
                 e.preventDefault();
                 let btn = this;
+                let deleteHistory = null;
                 if (vm.level != 'campsite'){
                     var data = {
                         'date_start':$(btn).data('date_start'),
                         'rate_id':$(btn).data('rate'),
                     };
-                    vm.deleteHistory = data;
+                    deleteHistory = data;
                 }
                 else{
-                    vm.deleteHistory = $(btn).data('rate');
+                    deleteHistory = $(btn).data('rate');
                 }
-                bus.emit('showAlert', 'deleteHistory');
+                swal.fire({
+                    title: 'Are you sure you want to Delete this Price History Record',
+                    text: "You won't be able to revert this!",
+                    icon: 'warning',
+                    heightAuto: false, 
+                    showCancelButton: true,
+                    // Instead of hardcoding colors, use Bootstrap's button classes.
+                    customClass: {
+                        confirmButton: 'btn btn-danger', // For a destructive action
+                        cancelButton: 'btn btn-secondary'
+                    },
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        vm.deleteHistoryRecord(deleteHistory);
+                    }
+                });
             });
         },
     },
@@ -311,7 +296,6 @@ export default {
         let vm = this;
         vm.addTableListeners();
         vm.$refs.history_dt.vmDataTable.order(0, "desc");
-        
     }
 }
 </script>

@@ -17,7 +17,7 @@
             <div class="row">
                 <div class="form-group">
                     <div class="col-md-2">
-                        <label for="open_cg_range_start">Open per: </label>
+                        <label for="open_cg_range_start">Open per:</label>
                     </div>
                     <div class="col-md-4">
                         <!-- <div class='input-group date' id='open_cg_range_start'>

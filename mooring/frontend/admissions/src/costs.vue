@@ -24,16 +24,11 @@
 </template>
 
 <script>
-import {
-    $,
-    api_endpoints,
-    helpers,
-}
-from './hooks.js'
-import alert from './utils/alert.vue'
-import reason from './utils/reasons.vue'
-import loader from './utils/loader.vue'
-import priceHistory from './priceHistory/priceHistory.vue'
+import { $, api_endpoints, helpers, } from '@/hooks.js'
+import alert from '@/utils/alert.vue'
+import reason from '@/utils/reasons.vue'
+import loader from '@/utils/loader.vue'
+import priceHistory from '@/priceHistory/priceHistory.vue'
 import { mapGetters } from 'vuex'
 
 $.extend($.fn.dataTableExt.oSort, {

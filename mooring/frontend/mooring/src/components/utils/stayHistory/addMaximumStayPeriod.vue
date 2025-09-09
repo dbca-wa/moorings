@@ -17,7 +17,7 @@
                 </div>
             </div>
             <div class="row mb-3">
-                <label for="stay-start-date" class="col-md-3 col-form-label">Period Start: </label>
+                <label for="stay-start-date" class="col-md-3 col-form-label">Period Start:</label>
                 <div class="col-md-4">
                     <input
                         id="stay-start-date"
@@ -25,11 +25,12 @@
                         type="date"
                         class="form-control"
                         v-model="stay.range_start"
+                        :max="stay.range_end"
                     />
                 </div>
             </div>
             <div class="row mb-3">
-                <label for="stay-end-date" class="col-md-3 col-form-label">Period End: </label>
+                <label for="stay-end-date" class="col-md-3 col-form-label">Period End:</label>
                 <div class="col-md-4">
                     <input
                         id="stay-end-date"
@@ -37,6 +38,7 @@
                         type="date"
                         class="form-control"
                         v-model="stay.range_end"
+                        :min="stay.range_start"
                     />
                 </div>
             </div>

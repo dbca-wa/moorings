@@ -63,9 +63,9 @@ drop table django_cron_cronjoblog;
 ```
 
 
-## Step 11: Run fake mooring migrations
+## Step 11: Run Migrations on mooring
 ```
-./manage_mo.py migrate mooring 0168 --fake
+./manage_mo.py migrate mooring
 ```
 
 ## Step 12: Run remianing migrations

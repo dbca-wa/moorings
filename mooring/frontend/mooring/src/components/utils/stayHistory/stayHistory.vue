@@ -9,22 +9,19 @@
         </div>
         <datatable ref="addMaxStayDT" :dtHeaders ="msh_headers" :dtOptions="msh_options" id="stay_history"></datatable>
     </div>
-    <confirmbox id="deleteStay" :options="deleteStayPrompt"></confirmbox>
 </template>
 
 <script>
-import datatable from '../../utils/datatable.vue'
-import alert from '../../utils/alert.vue'
-import confirmbox from '../../utils/confirmbox.vue'
-import StayHistoryDetail from './addMaximumStayPeriod.vue'
-import {bus} from '../../utils/eventBus.js'
+import datatable from '@/components/utils/datatable.vue'
+import alert from '@/components/utils/alert.vue'
+import StayHistoryDetail from '@/components/utils/stayHistory/addMaximumStayPeriod.vue'
+import swal from 'sweetalert2'
 import {
     $,
-    Moment,
     api_endpoints,
     helpers
 }
-from '../../../hooks.js'
+from '@/hooks.js'
 
 $.extend($.fn.dataTableExt.oSort, {
     "extract-date-pre": function(value){
@@ -58,7 +55,6 @@ export default {
     components: {
         StayHistoryDetail,
         alert,
-        confirmbox,
         datatable
     },
     data: function() {
@@ -68,22 +64,6 @@ export default {
             invent: false,
             stay: {
                 reason:''
-            },
-            deleteStay: null,
-            deleteStayPrompt: {
-                icon: "<i class='fa fa-exclamation-triangle fa-2x text-danger' aria-hidden='true'></i>",
-                message: "Are you sure you want to Delete this stay Period",
-                buttons: [{
-                    text: "Delete",
-                    event: "delete",
-                    bsColor: "btn-danger",
-                    handler: function() {
-                        vm.deleteStayRecord(vm.deleteStay);
-                        vm.deleteStay = null;
-                    },
-                    autoclose: true,
-                }],
-                id: 'deleteStay'
             },
             retrieve_stay: {
                 error: false,
@@ -243,11 +223,24 @@ export default {
                 vm.fetchStay(id);
             });
             vm.$refs.addMaxStayDT.vmDataTable.on('click', '.deleteStay', function(e) {
-                e.preventDefault();
-                var id = $(this).attr('data-stay_period');
-                vm.deleteStay = id;
-                // bus.$emit('showAlert', 'deleteStay');
-                bus.emit('showAlert', 'deleteStay');
+                const stayIdToDelete = e.currentTarget.dataset.stay_period;
+                swal.fire({
+                    title: 'Are you sure you want to delete this stay history record?',
+                    text: "You won't be able to revert this!",
+                    icon: 'warning',
+                    heightAuto: false, 
+                    showCancelButton: true,
+                    // Instead of hardcoding colors, use Bootstrap's button classes.
+                    customClass: {
+                        confirmButton: 'btn btn-danger ml-3', // For a destructive action
+                        cancelButton: 'btn btn-secondary'
+                    },
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        // If the user clicked "Yes, delete it!", call the delete method
+                        vm.deleteStayRecord(stayIdToDelete);
+                    }
+                });
             });
         },
     },
