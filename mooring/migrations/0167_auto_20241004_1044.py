@@ -13,17 +13,6 @@ class Migration(migrations.Migration):
     ]
 
     operations = [
-        # migrations.CreateModel(
-        #     name='MooringAreaGroupMember',
-        #     fields=[
-        #         ('id', models.AutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-        #         ('emailuser', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to=settings.AUTH_USER_MODEL)),
-        #         ('mooringareagroup', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='mooring.mooringareagroup')),
-        #     ],
-        #     options={
-        #         'db_table': 'mooring_mooringareagroup_members',
-        #     },
-        # ),
         migrations.SeparateDatabaseAndState(
             database_operations=[],
 
@@ -37,23 +26,13 @@ class Migration(migrations.Migration):
                     ],
                     options={
                         'db_table': 'mooring_mooringareagroup_members',
-                        'managed': False, 
                     },
                 ),
+                migrations.AlterField(
+                    model_name='mooringareagroup',
+                    name='members',
+                    field=models.ManyToManyField(blank=True, through='mooring.MooringAreaGroupMember', to=settings.AUTH_USER_MODEL),
+                ),
             ]
-        ),
-        # migrations.AlterField(
-        #     model_name='mooringareagroup',
-        #     name='members',
-        #     field=models.ManyToManyField(blank=True, through='mooring.MooringAreaGroupMember', to=settings.AUTH_USER_MODEL),
-        # ),
-        migrations.RemoveField(
-            model_name='mooringareagroup',
-            name='members',
-        ),
-        migrations.AddField(
-            model_name='mooringareagroup',
-            name='members',
-            field=models.ManyToManyField(blank=True, through='mooring.MooringAreaGroupMember', to=settings.AUTH_USER_MODEL),
         ),
     ]
