@@ -40,7 +40,7 @@ class Migration(migrations.Migration):
                         'managed': False, 
                     },
                 ),
-                migrations.AddField(
+                migrations.AlterField(
                     model_name='mooringareagroup',
                     name='members',
                     field=models.ManyToManyField(blank=True, through='mooring.MooringAreaGroupMember', to=settings.AUTH_USER_MODEL),
