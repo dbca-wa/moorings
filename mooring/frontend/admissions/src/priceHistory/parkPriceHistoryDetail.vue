@@ -41,6 +41,7 @@
                         id="period_start" 
                         class="form-control" 
                         v-model="priceHistory.period_start"
+                        :max="priceHistory.period_end"
                     >
                 </div>
                 <!-- Period end (hidden) -->
@@ -52,6 +53,7 @@
                         name="period_end"
                         class="form-control" 
                         v-model="priceHistory.period_end"
+                        :min="priceHistory.period_start"
                     >
                 </div>
             </div>
@@ -293,13 +295,12 @@
 </template>
 
 <script>
-import JQuery from 'jquery'
-window.jQuery = JQuery
-window.$ = JQuery
+// import JQuery from 'jquery'
+// window.jQuery = JQuery
+// window.$ = JQuery
 // import 'foundation-sites';
 // import 'foundation-datepicker/js/foundation-datepicker';
 
-import moment from 'moment'
 import bootstrapModal from '../utils/bootstrap-modal.vue'
 import reason from '../utils/reasons.vue'
 import { api_endpoints, validate, helpers, bus } from '../hooks'
@@ -359,6 +360,22 @@ export default {
         bootstrapModal,
         alert,
         reason
+    },
+    watch: {
+        'priceHistory.period_start'(newStartDate) {
+            // If a new start date is set and it's after the current end date,
+            // reset the end date to prevent an invalid range.
+            if (newStartDate && this.priceHistory.period_end && newStartDate > this.priceHistory.period_end) {
+                this.priceHistory.period_end = '';
+            }
+        },
+        'priceHistory.period_end'(newEndDate) {
+            // If a new end date is set and it's before the current start date,
+            // reset the start date to prevent an invalid range.
+            if (newEndDate && this.priceHistory.period_start && newEndDate < this.priceHistory.period_start) {
+                this.priceHistory.period_start = '';
+            }
+        }
     },
     methods: {
         close: function() {
@@ -485,13 +502,9 @@ export default {
 
         var today = new Date();
         today.setDate(today.getDate()+1);
-        var tomorrow = new Date(today);
 
         var mg = $('#mooring_groups').val();
         vm.mooring_groups = JSON.parse( mg );
-
-        var arrivalEl = $('#period_start');
-        var arrivalDate = null;
 
         vm.addFormValidations();
         // bus.once('reasons',setReasons => {
