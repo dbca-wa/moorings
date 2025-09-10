@@ -67,7 +67,7 @@ COPY --chown=oim:oim mooring ./mooring
 RUN for app in admissions availability2 exploreparks mooring; do \
     echo "--- Building frontend application: $app ---" && \
     cd "/app/mooring/frontend/$app" && \
-    npm ci --omit=dev && \
+    npm ci && \
     npm run build; \
     done
 
