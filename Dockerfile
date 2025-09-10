@@ -62,6 +62,15 @@ COPY gunicorn.ini manage_mo.py ./
 RUN touch /app/.env
 COPY .git ./.git
 COPY --chown=oim:oim mooring ./mooring
+
+# Build frontend: this must be done AFTER copying the source code and BEFORE running collectstatic.
+RUN for app in admissions availability2 exploreparks mooring; do \
+    echo "--- Building frontend application: $app ---" && \
+    cd "/app/mooring/frontend/$app" && \
+    npm ci --omit=dev && \
+    npm run build; \
+    done
+
 RUN python manage_mo.py collectstatic --noinput
 
 RUN mkdir /app/tmp/
