@@ -64,12 +64,22 @@ COPY .git ./.git
 COPY --chown=oim:oim mooring ./mooring
 
 # Build frontend: this must be done AFTER copying the source code and BEFORE running collectstatic.
-RUN for app in admissions availability2 exploreparks mooring; do \
-    echo "--- Building frontend application: $app ---" && \
-    cd "/app/mooring/frontend/$app" && \
+RUN echo "--- Building frontend application: admissions ---" && \
+    cd "/app/mooring/frontend/admissions" && \
     npm ci && \
-    npm run build; \
-    done
+    npm run build
+RUN echo "--- Building frontend application: availability2 ---" && \
+    cd "/app/mooring/frontend/availability2" && \
+    npm ci && \
+    npm run build
+RUN echo "--- Building frontend application: exploreparks ---" && \
+    cd "/app/mooring/frontend/exploreparks" && \
+    npm ci && \
+    npm run build
+RUN echo "--- Building frontend application: mooring ---" && \
+    cd "/app/mooring/frontend/mooring" && \
+    npm ci && \
+    npm run build
 
 RUN python manage_mo.py collectstatic --noinput
 
