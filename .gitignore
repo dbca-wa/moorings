@@ -97,7 +97,7 @@ uwsgi*.ini
 *.djcache
 
 # npm locks
-*-lock.json
+# *-lock.json  # 'npm ci' requires the package-lock.json file
 
 # npm build files
 mooring/static/moorings_vue/*
