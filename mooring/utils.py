@@ -2607,4 +2607,3 @@ def booking_admission_success(basket, booking, context_processor):
                 'overnight': overnight,
                 'admissionsInvoice': [invoice_ref]
              }
-
