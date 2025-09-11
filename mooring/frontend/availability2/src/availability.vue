@@ -569,7 +569,7 @@ export default {
             name: '',
             arrivalDate: moment.utc(getQueryParam('arrival', moment.utc(now).format('YYYY/MM/DD')), 'YYYY/MM/DD'),
             departureDate:  moment.utc(getQueryParam('departure', moment.utc(now).add(5, 'days').format('YYYY/MM/DD')), 'YYYY/MM/DD'),
-            parkstayUrl: ''
+            parkstayUrl: '',
             useAdminApi: window.useAdminApi || false,
             // order of preference:
             // - GET parameter 'site_id'
