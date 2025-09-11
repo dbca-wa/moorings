@@ -443,8 +443,7 @@ export default {
     el: '#parkfinder',
     data: function () {
         return {
-            // parkstayUrl: process.env.VUE_APP_PARKSTAY_URL || global.parkstayUrl,
-            parkstayUrl: import.meta.env.VITE_PARKSTAY_URL,
+            parkstayUrl: '',
             defaultCenter: [13775786.985667605, -2871569.067879858], // [123.75, -24.966],
             defaultLayers: [
                 ['dpaw:mapbox_outdoors', {}],
@@ -779,8 +778,7 @@ export default {
             if(reg){
                 $.ajax({
                     //url: process.env.VUE_APP_PARKSTAY_URL + "/api/registeredVessels/",
-                    // url: import.meta.env.VITE_PARKSTAY_URL + "/api/get_vessel_info/",
-                    url: process.env.VITE_PARKSTAY_URL + "/api/get_vessel_info/",
+                    url: "/api/get_vessel_info/",
                     dataType: 'json',
                     data: data,
                     method: 'GET',
