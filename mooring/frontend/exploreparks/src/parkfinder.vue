@@ -1745,22 +1745,9 @@ export default {
             this.streets = new TileLayer({
                 canDelete: "no",
                 source: new WMTS({
-                    url: 'https://kmi.dpaw.wa.gov.au/geoserver/gwc/service/wmts',
+                    url: 'https://kb.dbca.wa.gov.au/geoserver/gwc/service/wmts',
                     format: 'image/png',
-                    layer: 'public:mapbox-satellite',
-                    matrixSet: this.matrixSet,
-                    projection: this.projection,
-                    tileGrid: tileGrid
-                })
-            });
-
-            this.tenure = new TileLayer({
-                canDelete: "no",
-                opacity: 0.6,
-                source: new WMTS({
-                    url: 'https://kmi.dpaw.wa.gov.au/geoserver/gwc/service/wmts',
-                    format: 'image/png',
-                    layer: 'public:dpaw_lands_and_waters',
+                    layer: 'kaartdijin-boodja-public:mapbox-streets-public',
                     matrixSet: this.matrixSet,
                     projection: this.projection,
                     tileGrid: tileGrid
@@ -1851,8 +1838,6 @@ export default {
                 ]),
                 layers: [
                     this.streets,
-                    this.tenure,
-                    // this.grounds,
                     this.posLayer
                 ],
                 overlays: [this.popup]
@@ -1966,9 +1951,9 @@ export default {
                 canDelete: "no",
                 visible: true,
                 source: new WMTS({
-                    url: 'https://kmi.dpaw.wa.gov.au/geoserver/gwc/service/wmts',
+                    url: 'https://kb.dbca.wa.gov.au/geoserver/gwc/service/wmts',
                     format: 'image/png',
-                    layer: 'public:mapbox-streets',
+                    layer: 'kaartdijin-boodja-public:mapbox-streets-public',
                     matrixSet: this.matrixSet,
                     projection: this.projection,
                     tileGrid: tileGrid
@@ -1980,23 +1965,9 @@ export default {
                 canDelete: "no",
                 visible: false,
                 source: new WMTS({
-                    url: 'https://kmi.dpaw.wa.gov.au/geoserver/gwc/service/wmts',
+                    url: 'https://kb.dbca.wa.gov.au/geoserver/gwc/service/wmts',
                     format: 'image/png',
-                    layer: 'public:mapbox-satellite',
-                    matrixSet: this.matrixSet,
-                    projection: this.projection,
-                    tileGrid: tileGrid
-                })
-            });
-
-            this.tenure = new TileLayer({
-                name: 'tenure',
-                canDelete: "no",
-                opacity: 0.6,
-                source: new WMTS({
-                    url: 'https://kmi.dpaw.wa.gov.au/geoserver/gwc/service/wmts',
-                    format: 'image/png',
-                    layer: 'public:dpaw_lands_and_waters',
+                    layer: 'kaartdijin-boodja-public:mapbox-satellite-public',
                     matrixSet: this.matrixSet,
                     projection: this.projection,
                     tileGrid: tileGrid
@@ -2189,7 +2160,6 @@ export default {
                 layers: [
                     this.streets,
                     this.satellite,
-                    this.tenure,
                     this.grounds,
                     this.posLayer
                 ],
