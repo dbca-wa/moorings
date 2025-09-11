@@ -4,3 +4,4 @@
 */2 * * * * python3 /app/manage_mo.py rebuild_mooring_changed_booking >> /app/logs/rebuild_mooring_changed_booking.log 2>&1
 15 9 * * * python3 /app/manage_mo.py bpoint_ledger_payment_audit_report >> /app/logs/bpoint_ledger_payment_audit_report.log 2>&1
 10 9 * * 0 python3 /app/manage_mo.py appmonitor_check >> /app/logs/appmonitor_check.log 2>&1
+1 0 * * *  /bin/log_rotate.sh  >> /app/logs/log_rotate.log 2>&1
