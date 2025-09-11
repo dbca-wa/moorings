@@ -9,7 +9,7 @@ logger = logging.getLogger(__name__)
 
 @register()
 def system_group_checks(app_configs, **kwargs):
-    # Refer to Django System Check Framework for this file
+    # Refer to the Django System Check Framework for this file
 
     errors = []
 
