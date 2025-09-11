@@ -3262,10 +3262,9 @@ class AdmissionsBookingViewSet(viewsets.ModelViewSet):
                         email = customer_info.get('email', '')
 
                         # Update the original dictionary with the correctly sourced data.
-                        r.update({
-                            'customerName': name.encode('utf-8'),
-                            'email': email
-                        })
+                        r.update({'customerName': name.encode('utf-8'), 'email': email})
+                    else:
+                        r.update({'customerName': 'No customer', 'email': "No customer"})
                 else:
                     r.update({'customerName': 'No customer', 'email': "No customer"})
 
