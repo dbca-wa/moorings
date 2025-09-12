@@ -230,7 +230,6 @@ export default {
     data: function() {
         let vm = this;
         return {
-        mooringUrl: import.meta.env.VUE_APP_PARKSTAY_URL || window.parkstayUrl,
         arrivalDate: moment.utc(getQueryParam('arrival', moment.utc(now).format('YYYY/MM/DD')), 'YYYY/MM/DD'),
         overnightStay: '',
         vesselReg: '',
@@ -383,7 +382,7 @@ export default {
                     // mooring_group: mooring_group
                 }
                 $.ajax({
-                    url: vm.mooringUrl + "/api/create_admissions_booking",
+                    url: "/api/create_admissions_booking",
                     method: 'POST',
                     data: submitData,
                     dataType: 'json',
@@ -395,7 +394,7 @@ export default {
                         console.log(data);
                         if (data.status == 'success') {
                             console.log("success");
-                            window.location.href = vm.mooringUrl + data.redirect;
+                            window.location.href = data.redirect;
                         } else if (data.status == 'failure'){
                             console.log("failure");
                             if (data.error[1].includes("Admissions Oracle Code")){
@@ -774,7 +773,7 @@ export default {
         // this.terms = $('#terms').val(); 
         // $('#terms-link').val(this.terms);
         $.ajax({
-            url: vm.mooringUrl + "/api/profile",
+            url: "/api/profile",
             method: 'GET',
             dataType: 'json',
             success: (function(data) {
