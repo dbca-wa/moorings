@@ -7,14 +7,13 @@
 {% endblock %}
 
 {% block extra_js %}
-    {% vite_hmr_client app='admissions_app' %} <!-- This tag will include this script only if DJANGO_VITE_DEV_MODE is true, otherwise this will do nothing. -->
+    {% vite_hmr_client app='exploreparks_app' %} <!-- This tag will include this script only if DJANGO_VITE_DEV_MODE is true, otherwise this will do nothing. -->
 {% endblock %}
 
 {% block content %}
-    <div id="parkfinder"></div>
+    <div id="parkfinder" data-source-url="{{ data_source_for_map_layers }}"></div>
     <script type="text/javascript">
         var parkstayUrl = window.location.protocol + '//' + window.location.host;
     </script>
-
     {% vite_asset vue3_entry_script_exploreparks app='exploreparks_app' %}
 {% endblock %}

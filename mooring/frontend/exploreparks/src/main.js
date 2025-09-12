@@ -19,5 +19,25 @@ import 'awesomplete/awesomplete.css';
 import { createApp } from 'vue';
 import ParkFinder from './parkfinder.vue';
 
-const app = createApp(ParkFinder)
-app.mount('#parkfinder')
+// 1. Find the element to mount the Vue application on
+const mountElement = document.querySelector('#parkfinder');
+
+// 2. Check if the element actually exists on the page
+if (mountElement) {
+  // 3. Get the data from the element's `data-*` attributes.
+  // The `dataset` property converts kebab-case (data-source-url) to camelCase (sourceUrl).
+  const dataSourceUrl = mountElement.dataset.sourceUrl;
+
+  // 4. Create the Vue app, passing the retrieved data as the second argument (initial props).
+  const app = createApp(ParkFinder, {
+    // This object will be passed as props to the ParkFinder component.
+    // The key here (`dataSourceUrl`) must match the prop name defined in ParkFinder.vue.
+    dataSourceUrl: dataSourceUrl
+  });
+  
+  // 5. Mount the application
+  app.mount('#parkfinder');
+} else {
+  // It's good practice to log an error if the mount point is not found.
+  console.error('Failed to find the mount element #parkfinder for the Vue application.');
+}

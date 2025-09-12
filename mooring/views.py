@@ -3860,6 +3860,16 @@ class InvoicePDFView(InvoiceOwnerMixin,View):
 class MapView(TemplateView):
     template_name = 'mooring/map.html'
 
+    def get_context_data(self, **kwargs):
+        """
+        Add data from settings into the context for the template.
+        """
+        # Call the base implementation first to get a context
+        context = super().get_context_data(**kwargs)
+        context['data_source_for_map_layers'] = settings.DATA_SOURCE_FOR_MAP_LAYERS
+
+        return context
+
 class ProfileView(LoginRequiredMixin, TemplateView):
     template_name = 'mooring/profile.html'
 
