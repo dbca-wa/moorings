@@ -115,6 +115,7 @@ CRON_CLASSES = [
     'mooring.cron.OracleIntegrationCronJob',
     'mooring.cron.CheckMooringsNoBookingPeriod',
     'mooring.cron.RegisteredVesselsImport',
+    'appmonitor_client.cron.CronJobAppMonitorClient',
 ]
 
 # Additional logging for mooring
@@ -251,3 +252,5 @@ VUE3_ENTRY_SCRIPT_AVAILABILITY2 = decouple.config(
     "VUE3_ENTRY_SCRIPT_AVAILABILITY2",
     default="src/main.js",
 )
+
+DATA_SOURCE_FOR_MAP_LAYERS = decouple.config('DATA_SOURCE_FOR_MAP_LAYERS', default='https://kb.dbca.wa.gov.au')

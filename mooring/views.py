@@ -3860,6 +3860,16 @@ class InvoicePDFView(InvoiceOwnerMixin,View):
 class MapView(TemplateView):
     template_name = 'mooring/map.html'
 
+    def get_context_data(self, **kwargs):
+        """
+        Add data from settings into the context for the template.
+        """
+        # Call the base implementation first to get a context
+        context = super().get_context_data(**kwargs)
+        context['data_source_for_map_layers'] = settings.DATA_SOURCE_FOR_MAP_LAYERS
+
+        return context
+
 class ProfileView(LoginRequiredMixin, TemplateView):
     template_name = 'mooring/profile.html'
 
@@ -3881,30 +3891,24 @@ class MooringsiteRateLogView(LoginRequiredMixin, TemplateView):
         return render(request, self.template_name, context)
 
 def getLetterFile(request,file_id,extension):
-  allow_access = False
-  mooring_groups = MooringAreaGroup.objects.filter(members__in=[request.user])
-  abbg = AnnualBookingPeriodGroup.objects.get(id=file_id)
-  if abbg.mooring_group in mooring_groups:
-      allow_access = True
+    allow_access = False
+    mooring_groups = MooringAreaGroup.objects.filter(members__in=[request.user])
+    abbg = AnnualBookingPeriodGroup.objects.get(id=file_id)
+    if abbg.mooring_group in mooring_groups:
+        allow_access = True
 
-
-
-  #if request.user.is_superuser:
-  if allow_access == True:
-      file_record = AnnualBookingPeriodGroup.objects.get(id=file_id)
-      file_name_path = file_record.letter.path
-      if os.path.isfile(file_name_path) is True:
-              the_file = open(file_name_path, 'rb')
-              the_data = the_file.read()
-              the_file.close()
-              if extension == 'msg':
-                  return HttpResponse(the_data, content_type="application/vnd.ms-outlook")
-              if extension == 'eml':
-                  return HttpResponse(the_data, content_type="application/vnd.ms-outlook")
-
-
-              return HttpResponse(the_data, content_type=mimetypes.types_map['.'+str(extension)])
-  else:
-              return
-
-
+    #if request.user.is_superuser:
+    if allow_access == True:
+        file_record = AnnualBookingPeriodGroup.objects.get(id=file_id)
+        file_name_path = file_record.letter.path
+        if os.path.isfile(file_name_path) is True:
+                the_file = open(file_name_path, 'rb')
+                the_data = the_file.read()
+                the_file.close()
+                if extension == 'msg':
+                    return HttpResponse(the_data, content_type="application/vnd.ms-outlook")
+                if extension == 'eml':
+                    return HttpResponse(the_data, content_type="application/vnd.ms-outlook")
+                return HttpResponse(the_data, content_type=mimetypes.types_map['.'+str(extension)])
+    else:
+                return

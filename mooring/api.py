@@ -3262,10 +3262,9 @@ class AdmissionsBookingViewSet(viewsets.ModelViewSet):
                         email = customer_info.get('email', '')
 
                         # Update the original dictionary with the correctly sourced data.
-                        r.update({
-                            'customerName': name.encode('utf-8'),
-                            'email': email
-                        })
+                        r.update({'customerName': name.encode('utf-8'), 'email': email})
+                    else:
+                        r.update({'customerName': 'No customer', 'email': "No customer"})
                 else:
                     r.update({'customerName': 'No customer', 'email': "No customer"})
 
@@ -3791,26 +3790,82 @@ class BookingViewSet(viewsets.ModelViewSet):
             raise serializers.ValidationError(str(e))
 
     def partial_update(self, request, pk):
-        booking = self.get_object()
-        if 'details' in request.data:
-            request.POST._mutable = True
-            detail = {}
-            b = '{}"'
-            for char in b:
-                request.POST['details'] = request.POST['details'].replace(char, "")
-            items = request.POST['details'].split(",")
-            for item in items:
-                itm = item.split(':')
-                key = itm[0]
-                value = itm[1]
-                detail[key] = value
-            request.POST['details'] = detail
+        # booking = self.get_object()
+        # if 'details' in request.data:
+        #     request.POST._mutable = True
+        #     detail = {}
+        #     b = '{}"'
+        #     for char in b:
+        #         request.POST['details'] = request.POST['details'].replace(char, "")
+        #     items = request.POST['details'].split(",")
+        #     for item in items:
+        #         itm = item.split(':')
+        #         key = itm[0]
+        #         value = itm[1]
+        #         detail[key] = value
+        #     request.POST['details'] = detail
  
-        serializer = self.get_serializer(booking, data=request.data, partial=True)
+        # serializer = self.get_serializer(booking, data=request.data, partial=True)
+        # if serializer.is_valid():
+        #     serializer.save()
+        #     return Response(status=201, data=serializer.data)
+        # return Response(status=400, data="wrong params")
+        """
+        Partially updates a specific Booking instance identified by pk.
+
+        This method is designed to handle a specific case where the 'details' field
+        might be sent as a stringified, dictionary-like format (e.g.,
+        '{"key1":"value1","key2":"value2"}'). It parses this string into a
+        proper dictionary before proceeding with validation and saving.
+        """
+        booking = self.get_object()
+
+        # 1. Create a mutable copy of the request data.
+        #    It's crucial to use `request.data` for JSON APIs, not `request.POST`.
+        #    Copying ensures that we don't modify the original request object.
+        data = request.data.copy()
+
+        # 2. Check if the 'details' field exists and is a string that needs parsing.
+        #    This check prevents errors if 'details' is already a valid dictionary or is not provided.
+        if 'details' in data and isinstance(data.get('details'), str):
+
+            # 3. Parse the 'details' string into a proper dictionary.
+            details_string = data['details']
+            parsed_details = {}
+
+            # Remove surrounding curly braces '{}' and whitespace.
+            cleaned_string = details_string.strip().strip('{}')
+
+            # Proceed only if the string is not empty after cleaning.
+            if cleaned_string:
+                items = cleaned_string.split(',')
+                for item in items:
+                    # Ensure the item can be split into a key and a value.
+                    if ':' in item:
+                        # Split only on the first colon to handle values that might contain colons.
+                        key, value = item.split(':', 1)
+
+                        # Clean up the key and value by removing extra whitespace and quote characters.
+                        clean_key = key.strip().strip('"\'')
+                        clean_value = value.strip().strip('"\'')
+
+                        parsed_details[clean_key] = clean_value
+
+            # 4. Replace the original string in 'data' with the newly parsed dictionary.
+            #    The serializer expects this field to be a dictionary, not a string.
+            data['details'] = parsed_details
+
+        # 5. Initialize the serializer with the instance to update and the (potentially modified) data.
+        serializer = self.get_serializer(booking, data=data, partial=True)
+
+        # 6. Validate the data. If validation fails, return detailed error messages.
         if serializer.is_valid():
             serializer.save()
-            return Response(status=201, data=serializer.data)
-        return Reponse(status=400, data="wrong params")
+            return Response(serializer.data, status=200)
+
+        # If validation fails, return the error details provided by the serializer
+        # with a 400 Bad Request status.
+        return Response(serializer.errors, status=400)
 
     def destroy(self, request, *args, **kwargs):
         http_status = status.HTTP_200_OK

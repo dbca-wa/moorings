@@ -441,6 +441,12 @@ fivedays = moment.utc({year: fivedays.getFullYear(), month: fivedays.getMonth(),
 export default {
     name: 'parkfinder',
     el: '#parkfinder',
+    props: {
+        dataSourceUrl: {
+            type: String,
+            required: true,
+        }
+    },
     data: function () {
         return {
             parkstayUrl: '',
@@ -1745,22 +1751,9 @@ export default {
             this.streets = new TileLayer({
                 canDelete: "no",
                 source: new WMTS({
-                    url: 'https://kmi.dpaw.wa.gov.au/geoserver/gwc/service/wmts',
+                    url: vm.dataSourceUrl + '/geoserver/gwc/service/wmts',
                     format: 'image/png',
-                    layer: 'public:mapbox-satellite',
-                    matrixSet: this.matrixSet,
-                    projection: this.projection,
-                    tileGrid: tileGrid
-                })
-            });
-
-            this.tenure = new TileLayer({
-                canDelete: "no",
-                opacity: 0.6,
-                source: new WMTS({
-                    url: 'https://kmi.dpaw.wa.gov.au/geoserver/gwc/service/wmts',
-                    format: 'image/png',
-                    layer: 'public:dpaw_lands_and_waters',
+                    layer: 'kaartdijin-boodja-public:mapbox-streets-public',
                     matrixSet: this.matrixSet,
                     projection: this.projection,
                     tileGrid: tileGrid
@@ -1851,8 +1844,6 @@ export default {
                 ]),
                 layers: [
                     this.streets,
-                    this.tenure,
-                    // this.grounds,
                     this.posLayer
                 ],
                 overlays: [this.popup]
@@ -1890,8 +1881,6 @@ export default {
         this.$nextTick(() => {
             var vm = this;
 
-            // $(document).foundation();
-            console.log('Loading map...');
             var template_group = $('#template_group').val();
             if (template_group == 'rottnest') { 
                 vm.admissions_key = 'ria';
@@ -1966,9 +1955,9 @@ export default {
                 canDelete: "no",
                 visible: true,
                 source: new WMTS({
-                    url: 'https://kmi.dpaw.wa.gov.au/geoserver/gwc/service/wmts',
+                    url: vm.dataSourceUrl + '/geoserver/gwc/service/wmts',
                     format: 'image/png',
-                    layer: 'public:mapbox-streets',
+                    layer: 'kaartdijin-boodja-public:mapbox-streets-public',
                     matrixSet: this.matrixSet,
                     projection: this.projection,
                     tileGrid: tileGrid
@@ -1980,23 +1969,9 @@ export default {
                 canDelete: "no",
                 visible: false,
                 source: new WMTS({
-                    url: 'https://kmi.dpaw.wa.gov.au/geoserver/gwc/service/wmts',
+                    url: vm.dataSourceUrl + '/geoserver/gwc/service/wmts',
                     format: 'image/png',
-                    layer: 'public:mapbox-satellite',
-                    matrixSet: this.matrixSet,
-                    projection: this.projection,
-                    tileGrid: tileGrid
-                })
-            });
-
-            this.tenure = new TileLayer({
-                name: 'tenure',
-                canDelete: "no",
-                opacity: 0.6,
-                source: new WMTS({
-                    url: 'https://kmi.dpaw.wa.gov.au/geoserver/gwc/service/wmts',
-                    format: 'image/png',
-                    layer: 'public:dpaw_lands_and_waters',
+                    layer: 'kaartdijin-boodja-public:mapbox-satellite-public',
                     matrixSet: this.matrixSet,
                     projection: this.projection,
                     tileGrid: tileGrid
@@ -2189,7 +2164,6 @@ export default {
                 layers: [
                     this.streets,
                     this.satellite,
-                    this.tenure,
                     this.grounds,
                     this.posLayer
                 ],
