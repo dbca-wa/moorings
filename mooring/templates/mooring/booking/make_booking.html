@@ -601,7 +601,7 @@
                             <div class="row"> 
                                 <div class="col-md-8 col-md-offset-5">
                                     <div class="checkbox">
-                                        <label><input type="checkbox" id="toc_check" value="" v-model="toc">I agree to the <a target="_blank" href="{{EXPLORE_PARKS_TERMS}}">terms and conditions</a></label>
+                                        <label><input type="checkbox" id="toc_check" value="" v-model="toc"> I agree to the <a target="_blank" href="{{EXPLORE_PARKS_TERMS}}">terms and conditions</a></label>
                                     </div>
                                     <button v-if="total >= 0" :disabled="!toc" type="submit" class="btn btn-primary btn-lg">Proceed to payment</button>
                                     <button v-else="total < 0" :disabled="!toc" type="submit" class="btn btn-primary btn-lg">Proceed to Refund</button>
@@ -885,13 +885,13 @@
                         }
                     },
                     url: "/api/booking/" + vm.booking_id + "/",
+                    contentType: 'application/json',
                     dataType: 'json',
-                    data: data,
+                    data: JSON.stringify(data),
                     async: true,
                     method: "PATCH",
                     success: function(data, stat, xhr){
                         console.log("Updated guests");
-
                     }
                 });
                 vm.calculateTotal();
