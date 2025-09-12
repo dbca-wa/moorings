@@ -115,6 +115,7 @@ CRON_CLASSES = [
     'mooring.cron.OracleIntegrationCronJob',
     'mooring.cron.CheckMooringsNoBookingPeriod',
     'mooring.cron.RegisteredVesselsImport',
+    'appmonitor_client.cron.CronJobAppMonitorClient',
 ]
 
 # Additional logging for mooring
