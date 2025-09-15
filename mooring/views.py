@@ -77,7 +77,7 @@ class BpointTransaction():
     pass
 # from ledger.payments.utils import systemid_check, update_payments
 # from ledger.checkout.utils import place_order_submission 
-from ledger_api_client.utils import update_payments, place_order_submission
+from ledger_api_client.utils import update_payments, place_order_submission, get_or_create
 # from ledger.payments.cash.models import CashTransaction 
 # Ledger
 # from ledger.order.models import Order
@@ -1480,7 +1480,20 @@ class MakeBookingsView(TemplateView):
             adBooking.save()
         # finalise the booking object
         if booking.customer is None:
-            booking.customer = customer
+            # Check if the provided 'customer' object is already saved in the database.
+            # An object is considered unsaved if its primary key (pk) is None.
+            if customer.pk is None:
+                # The customer object is not yet saved.
+                # Use your utility function to either fetch an existing customer
+                # by email or create a new one. This function must return a saved instance.
+                # We assume the necessary email is available as an attribute on the unsaved 'customer' object.
+                resp_json = get_or_create(email=customer.email)
+                customer = EmailUser.objects.get(email=customer.email)
+                booking.customer = customer
+            else:
+                # The customer object is already a saved instance, so we can assign it directly.
+                booking.customer = customer
+
         booking.cost_total = total
         if request.user.__class__.__name__ == 'EmailUser':
            booking.created_by =  request.user
