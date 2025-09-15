@@ -1484,10 +1484,9 @@ class MakeBookingsView(TemplateView):
             # An object is considered unsaved if its primary key (pk) is None.
             if customer.pk is None:
                 # The customer object is not yet saved.
-                # Use your utility function to either fetch an existing customer
-                # by email or create a new one. This function must return a saved instance.
-                # We assume the necessary email is available as an attribute on the unsaved 'customer' object.
+                logger.info(f"Unsaved customer detected (Email: {customer.email}). Running ledger_api_client.utils.get_or_create to prevent ValueError.")
                 resp_json = get_or_create(email=customer.email)
+                logger.info(f"New customer has been created. resp_json: { resp_json }")
                 customer = EmailUser.objects.get(email=customer.email)
                 booking.customer = customer
             else:
