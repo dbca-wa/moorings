@@ -14,6 +14,7 @@
 
 {% block extra_hidden_inputs %}
     <link rel="icon" type="image/svg+xml" href="{% static 'mooring/img/favicon.svg' %}">
+    <input type='hidden' id='template_group' name='template_group' value='{{ TEMPLATE_GROUP }}'>
 {% endblock %}
 
 {% block header %}
