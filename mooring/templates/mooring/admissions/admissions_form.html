@@ -1,6 +1,8 @@
 {% extends 'mooring/dash/dash_tables.html' %}
 {% load static %}
+{% load django_vite %}
 {% load users %}
+
 {% block extra_css %}
     {{ block.super }}
     <style>
@@ -9,6 +11,7 @@
         }
     </style>
 {% endblock %}
+
 {% block menu %}
 <div class="topbar row" id="menu" v-cloak>
     <div class="container-fluid">
@@ -84,8 +87,8 @@
 
 </div>
 {% endblock %}
-{% block vue-component %}
 
+{% block vue-component %}
     <input id="location" name="location" type="hidden" value="{{loc}}"/>
     <input id="terms" name="terms" type="hidden" value="{{ context_processor.DAILY_TERMS_URL }}"/>
     <input id="daily_terms_url" name="terms" type="hidden" value="{{ context_processor.DAILY_FEES_URL}}"/>
@@ -99,10 +102,13 @@
    </div>
 {% endblock %}
 
+{% block extra_js %}
+    {% vite_hmr_client app='admissions_app' %} <!-- This tag will include this script only if DJANGO_VITE_DEV_MODE is true, otherwise this will do nothing. -->
+{% endblock %}
+
 {% block custom_js %}
     <script type="text/javascript">
         var parkstayUrl = window.location.protocol + '//' + window.location.host;
     </script>
-    <script type="text/javascript" src="{% static 'admissions/js/chunk-vendors.js' %}?ver={{ GIT_COMMIT_HASH }}"></script>
-    <script type="text/javascript" src="{% static 'admissions/js/main.js' %}?ver={{ GIT_COMMIT_HASH }}"></script>
+    {% vite_asset vue3_entry_script_exploreparks app='admissions_app' %}
 {% endblock %}
