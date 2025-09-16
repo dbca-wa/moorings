@@ -3288,11 +3288,8 @@ class BookingSuccessView(TemplateView):
             context_processor = template_context(self.request)
             basket = None
             booking = utils.get_session_booking(request.session)
-            if self.request.user.is_authenticated:
-                basket = Basket.objects.filter(status='Submitted', owner=request.user).order_by('-id')[:1]
-            else:
-                basket = Basket.objects.filter(status='Submitted', owner=booking.customer).order_by('-id')[:1]
-            
+            booking_reference = settings.MOORING_BOOKING_REF_PREFIX + str(booking.id)
+            basket = Basket.objects.filter(status='Submitted', system=settings.PAYMENT_SYSTEM_ID, booking_reference=booking_reference).order_by('-id')[:1]
             context = utils.booking_success(basket,booking,context_processor)
 
             request.session['ps_last_booking'] = booking.id
