@@ -473,8 +473,8 @@ class CancelBookingView(TemplateView):
             'vouchers': [],
             'system': settings.PS_PAYMENT_SYSTEM_ID,
             'custom_basket': True,
-            'booking_reference': 'PS-'+str(booking.id),
-            'booking_reference_link': 'PS-'+str(booking.id)
+            'booking_reference': settings.MOORING_BOOKING_REF_PREFIX + str(booking.id),
+            'booking_reference_link': settings.MOORING_BOOKING_REF_PREFIX + str(booking.id)
         }
 
         basket_params = utils.convert_decimal_to_float(basket_params)
@@ -676,7 +676,7 @@ class CancelAdmissionsBookingView(TemplateView):
             'vouchers': [],
             'system': settings.PS_PAYMENT_SYSTEM_ID,
             'custom_basket': True,
-            'booking_reference': 'AD-'+str(booking.id)
+            'booking_reference': settings.DAILY_ADMISSION_REF_PREFIX + str(booking.id)
         }
         basket_params = utils.convert_decimal_to_float(basket_params)
         basket_hash = create_basket_session(request, request.user.id, basket_params)
@@ -3051,8 +3051,8 @@ class AdmissionsBookingSuccessView(TemplateView):
         try:
             context_processor = template_context(self.request)
             booking = utils.get_session_admissions_booking(request.session)
-            booking_reference = "AD-"+str(booking.id)
-            basket = Basket.objects.filter(status='Submitted', booking_reference=booking_reference).order_by('-id')[:1]
+            booking_reference = settings.DAILY_ADMISSION_REF_PREFIX + str(booking.id)
+            basket = Basket.objects.filter(status='Submitted', system=settings.PAYMENT_SYSTEM_ID, booking_reference=booking_reference).order_by('-id')[:1]
             context = utils.booking_admission_success(basket, booking, context_processor)
             request.session['ad_last_booking'] = booking.id
             utils.delete_session_admissions_booking(request.session)

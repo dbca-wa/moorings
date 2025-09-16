@@ -1780,7 +1780,7 @@ def admissionsCheckout(request, admissionsBooking, lines, invoice_text=None, vou
         'vouchers': vouchers,
         'system': settings.PS_PAYMENT_SYSTEM_ID,
         'custom_basket': True,
-        'booking_reference': 'AD-'+str(admissionsBooking.id)
+        'booking_reference': settings.DAILY_ADMISSION_REF_PREFIX + str(admissionsBooking.id)
     }
 
     basket_params = convert_decimal_to_float(basket_params)
@@ -1878,14 +1878,14 @@ def annual_admission_checkout(request, booking, lines, invoice_text=None, vouche
 def checkout(request, booking, lines, invoice_text=None, vouchers=[], internal=False):
     old_booking = '' 
     if booking.old_booking:
-        old_booking = 'PS-'+str(booking.old_booking.id)
+        old_booking = settings.MOORING_BOOKING_REF_PREFIX + str(booking.old_booking.id)
      
     basket_params = {
         'products': lines,
         'vouchers': vouchers,
         'system': settings.PS_PAYMENT_SYSTEM_ID,
         'custom_basket': True,
-        'booking_reference': 'PS-'+str(booking.id),
+        'booking_reference': settings.MOORING_BOOKING_REF_PREFIX + str(booking.id),
         'booking_reference_link': old_booking  # Format: 'PS-<booking_id>'
     }
 
@@ -1945,11 +1945,11 @@ def checkout(request, booking, lines, invoice_text=None, vouchers=[], internal=F
 def allocate_failedrefund_to_unallocated(request, booking, lines, invoice_text=None, internal=False, order_total='0.00',user=None):
         booking_reference = None
         if booking.__class__.__name__ == 'AdmissionsBooking':
-             booking_reference = 'AD-'+str(booking.id)
+             booking_reference = settings.DAILY_ADMISSION_REF_PREFIX + str(booking.id)
         elif booking.__class__.__name__ == 'BookingAnnualAdmission':
              booking_reference = 'AA-'+str(booking.id)
         else:
-             booking_reference = 'PS-'+str(booking.id)
+             booking_reference = settings.MOORING_BOOKING_REF_PREFIX + str(booking.id)
 
         basket_params = {
             'products': lines,
@@ -1982,11 +1982,11 @@ def allocate_failedrefund_to_unallocated(request, booking, lines, invoice_text=N
 def allocate_refund_to_invoice(request, booking, lines, invoice_text=None, internal=False, order_total='0.00',user=None):
         booking_reference = None
         if booking.__class__.__name__ == 'AdmissionsBooking':
-             booking_reference = 'AD-'+str(booking.id)
+             booking_reference = settings.DAILY_ADMISSION_REF_PREFIX + str(booking.id)
         elif booking.__class__.__name__ == 'BookingAnnualAdmission':
              booking_reference = 'AA-'+str(booking.id)
         else:
-             booking_reference = 'PS-'+str(booking.id)
+             booking_reference = settings.MOORING_BOOKING_REF_PREFIX + str(booking.id)
 
         basket_params = {
             'products': lines,
