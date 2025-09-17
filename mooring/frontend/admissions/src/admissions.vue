@@ -590,13 +590,10 @@ export default {
             this.validateVesselReg();
         },
         validateVesselReg: function() {
-            console.log('in validateVesselReg()')
-
             let vm = this;
             vm.vesselReg = vm.vesselReg.toUpperCase();
             vm.vesselReg = vm.vesselReg.replace(/\s/g,"");
             vm.vesselReg = vm.vesselReg.replace(/\W/g,"");
-
 
             var reg = vm.vesselReg;
             var dateArrival = $('#dateArrival').val();
