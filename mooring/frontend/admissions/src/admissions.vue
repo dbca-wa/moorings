@@ -178,28 +178,25 @@
                 </div>
             </div>
         </form>
-        <modal name="messageModal" height="auto"
-            transition="nice-modal-fade"
-            :resizeable="false"
-            :delay="100"
-            :scrollable="true"
-            :draggable="false">
-            <div class="messageModal-content" align="center">
-                <h1 id="ModalTitle">System Message</h1>
-                <div align="left" style="padding:15px;">
-                    <div class = "row">
-                        <div class="col-sm-12">
-                            <div class="alert alert-danger" align="center">
-                                {{ message }}
-                            </div>
-                        </div>
+        <bootstrapModal
+            title="System Message"
+            :show-ok="false"
+            :show-cancel="false"
+        >
+            <!-- Default slot: This content will be placed in the modal's body -->
+            <div class="row">
+                <div class="col-sm-12">
+                    <div class="alert alert-danger" align="center">
+                        {{ message }}
                     </div>
                 </div>
-                <div align="left" style="margin-bottom:20px; margin-left:20px;">
-                    <button type="button" v-on:click="messageModalConfirm()" class="btn btn-primary" style="width:80px;font-weight:bold;">OK</button>
-                </div>
             </div>
-        </modal>
+
+            <!-- Footer slot: We override the default footer to have only one OK button -->
+            <template v-slot:footer>
+                <button type="button" @click="messageModalConfirm()" class="btn btn-primary" style="width:80px;font-weight:bold;">OK</button>
+            </template>
+        </bootstrapModal>
     </div>
 </template>
 
@@ -209,6 +206,7 @@ import 'foundation-datepicker/js/foundation-datepicker';
 import moment from 'moment';
 // import JQuery from 'jquery';
 import swal from 'sweetalert2';
+import bootstrapModal from '@/utils/bootstrap-modal.vue'
 import { api_endpoints } from './hooks';
 
 // let $ = JQuery
@@ -230,52 +228,12 @@ export default {
     data: function() {
         let vm = this;
         return {
-        arrivalDate: moment.utc(getQueryParam('arrival', moment.utc(now).format('YYYY/MM/DD')), 'YYYY/MM/DD'),
-        overnightStay: '',
-        vesselReg: '',
-        noOfAdults: '0',
-        noOfConcessions: '0',
-        noOfChildren: '0',
-        noOfInfants: '0',
-        warningRefNo: '',
-        givenName: '',
-        lastName: '',
-        email: '',
-        emailConfirm: '',
-        mobile: '',
-        currentCostDateStart: '',
-        currentCostDateEnd: '',
-        adultCost: 0,
-        adultOvernightCost: 0,
-        childrenCost: 0,
-        childrenOvernightCost: 0,
-        infantCost: 0,
-        infantOvernightCost: 0,
-        familyCost: 0,
-        familyOvernightCost: 0,
-        total: 0,
-        errorMsg: null,
-        errorMsgPersonal: null,
-        toc: false,
-        message: null,
-        noPayment: false,
-        terms: '',
-        errors: {
-            arrivalDate: false,
-            overnightStay: false,
-            vesselReg: false,
-            noOfAdults: false,
-            noOfConcessions: false,
-            noOfChildren: false,
-            noOfInfants: false,
-            warningRefNo: false,
-            givenName: false,
-            lastName: false,
-            movile: false,
-            email: false,
-            emailConfirm: false,
-            }
+            isModalOpen: false,
+            message: '',
         }
+    },
+    components: {
+        bootstrapModal,
     },
     computed: {
         validToProceed: {
@@ -321,6 +279,9 @@ export default {
 
     },
     methods: {
+        close() {
+            this.isModalOpen = false
+        },
         formatMoney:function(n,c, d, t){
             c = isNaN(c = Math.abs(c)) ? 2 : c;
             d = d == undefined ? "." : d;
@@ -332,7 +293,8 @@ export default {
         },
         messageModalConfirm: function(){
             this.message = null;
-            this.$modal.hide('messageModal');
+            // this.$modal.hide('messageModal');
+            this.close();
         },
         processForm: function(){
             var vm = this;
@@ -400,7 +362,8 @@ export default {
                             if (data.error[1].includes("Admissions Oracle Code")){
                                 var msg = data.error[1].split('.')[0];
                                 vm.message = msg;
-                                vm.$modal.show('messageModal');
+                                // vm.$modal.show('messageModal');
+                                this.isModalOpen = true;
                             } else {
 			            swal.fire({
 				            title: 'Error',
@@ -547,7 +510,8 @@ export default {
                             if(data[0].admissionsPaid) {
                                 vm.message = "Admission Fees for this vessel are already paid.";
                                 vm.noPayment = true;
-                                vm.$modal.show('messageModal');
+                                // vm.$modal.show('messageModal');
+                                vm.isModalOpen = true
                             }
                         } else {
                             console.log("Registration was not found.")
