@@ -501,7 +501,7 @@ export default {
             vm.noPayment = false;
             if(reg){
                 $.ajax({
-                    url: process.env.VUE_APP_PARKSTAY_URL + "/api/registeredVessels/",
+                    url: "/api/registeredVessels/",
                     dataType: 'json',
                     data: data,
                     method: 'GET',
@@ -601,7 +601,7 @@ export default {
                 'location': location,
             }
             $.ajax({
-                url: process.env.VUE_APP_PARKSTAY_URL + "/api/admissions/get_price_by_location.json/",
+                url: "/api/admissions/get_price_by_location.json/",
                 method: 'GET',
                 data: data,
                 dataType: 'json',
