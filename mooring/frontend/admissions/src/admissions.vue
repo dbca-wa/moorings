@@ -64,11 +64,37 @@
                                         <div class="small-12 medium-12 large-4 columns">
                                             <label class="label-plain">Arrival</label>
                                             <div class="col-sm-8">
-                                                <input id="dateArrival" class="form-control" name="arrival" type="text" @blur="validateArrivalDate()" placeholder="DD/MM/YYYY" required/>
+                                                <input
+                                                    id="dateArrival"
+                                                    class="form-control"
+                                                    name="arrival"
+                                                    type="date"
+                                                    v-model="arrivalDateValue"
+                                                    :min="minDate"
+                                                    @change="validateArrivalDate()"
+                                                    required
+                                                />
                                             </div>
                                         </div>
+                                    </div> -->
+
+                                    <div class="row mb-3">
+                                        <label for="dateArrival" class="col-sm-4 col-form-label">Arrival</label>
+                                        <div class="col-sm-8">
+                                            <input
+                                                id="dateArrival"
+                                                class="form-control"
+                                                name="arrival"
+                                                type="date"
+                                                v-model="arrivalDateValue"
+                                                :min="minDate"
+                                                @change="validateArrivalDate()"
+                                                required
+                                            />
+                                        </div>
                                     </div>
-                                    <div class="row">
+
+                                    <!-- <div class="row">
                                         <div class="small-12 medium-12 large-4 columns">
                                             <label class="label-plain">Overnight Stay</label>
                                             <div class="col-sm-8">
@@ -201,8 +227,8 @@
 </template>
 
 <script>
-import 'foundation-sites';
-import 'foundation-datepicker/js/foundation-datepicker';
+// import 'foundation-sites';
+// import 'foundation-datepicker/js/foundation-datepicker';
 import moment from 'moment';
 // import JQuery from 'jquery';
 import swal from 'sweetalert2';
@@ -212,6 +238,9 @@ import { api_endpoints } from './hooks';
 // let $ = JQuery
 var nowTemp = new Date();
 var now = moment.utc({year: nowTemp.getFullYear(), month: nowTemp.getMonth(), day: nowTemp.getDate(), hour: 0, minute: 0, second: 0}).toDate();
+
+const today = new Date();
+today.setHours(0, 0, 0, 0);
 
 function getQueryParam(name, fallback) {
     name = name.replace(/[\[\]]/g, "\\$&");
@@ -228,8 +257,55 @@ export default {
     data: function() {
         let vm = this;
         return {
+            arrivalDate: moment.utc(getQueryParam('arrival', moment.utc(now).format('YYYY/MM/DD')), 'YYYY/MM/DD'),
+            arrivalDateValue: null,
+            overnightStay: '',
+            vesselReg: '',
+            noOfAdults: '0',
+            noOfConcessions: '0',
+            noOfChildren: '0',
+            noOfInfants: '0',
+            warningRefNo: '',
+            givenName: '',
+            lastName: '',
+            email: '',
+            emailConfirm: '',
+            mobile: '',
+            currentCostDateStart: '',
+            currentCostDateEnd: '',
+            adultCost: 0,
+            adultOvernightCost: 0,
+            childrenCost: 0,
+            childrenOvernightCost: 0,
+            infantCost: 0,
+            infantOvernightCost: 0,
+            familyCost: 0,
+            familyOvernightCost: 0,
+            total: 0,
+            errorMsg: null,
+            errorMsgPersonal: null,
+            toc: false,
+            message: null,
+            noPayment: false,
+            terms: '',
+            errors: {
+                arrivalDate: false,
+                overnightStay: false,
+                vesselReg: false,
+                noOfAdults: false,
+                noOfConcessions: false,
+                noOfChildren: false,
+                noOfInfants: false,
+                warningRefNo: false,
+                givenName: false,
+                lastName: false,
+                movile: false,
+                email: false,
+                emailConfirm: false,
+            },
             isModalOpen: false,
             message: '',
+            minDate: null,
         }
     },
     components: {
@@ -246,11 +322,16 @@ export default {
                 } 
             }
         },
-        arrivalDateString: {
-            cache: false,
-            get: function() {
-                return this.arrivalEl[0].value ? moment(this.arrivalData.getDate()).format('YYYY/MM/DD') : null; 
+        arrivalDateString(){
+            // cache: false,
+            // get: function() {
+            //     return this.arrivalEl[0].value ? moment(this.arrivalData.getDate()).format('YYYY/MM/DD') : null; 
+            // }
+            if (!this.arrivalDateValue) {
+                return null;
             }
+            // this.arrivalDateValue is a YYYY-MM-DD string.
+            return moment(this.arrivalDateValue).format('YYYY/MM/DD');
         },
     },
     watch: {
@@ -461,27 +542,52 @@ export default {
         validateArrivalDate: function(){
             var error1 = "If paying for a prior warning, please ensure you enter the reference number.";
             var error2 = "Please select a date from the past if paying for a warning.";
-            var fieldToCheck = this.arrivalDate;
+
+            var fieldToCheck = this.arrivalDateValue;
+
+            // Reset previous errors first for better user experience
+            this.errors.arrivalDate = false;
+            if (this.errorMsg === error1 || this.errorMsg === error2) {
+                this.errorMsg = null;
+            }
+
             if(!fieldToCheck){
                 this.errors.arrivalDate = true;
+                // It's better not to proceed if the date is empty
+                this.validateVesselReg();
+                return; 
+            } 
+                // this.calculateTotal();
+                // var selectedDate = new Date(fieldToCheck);
+                // if(selectedDate < now && !this.warningRefNo){
+                //     this.errors.arrivalDate = true;
+                //     this.errorMsg = error1;
+                // } else if (selectedDate > now && this.warningRefNo){
+                //     this.errors.warningRefNo = true;
+                //     this.errorMsg = error2;
+                // } else {
+                //     this.errors.arrivalDate = false;
+                //     if(this.errorMsg == error1 || this.errorMsg == error2){
+                //         this.errorMsg = null;
+                //     }
+                // }
+            const parts = fieldToCheck.split('-');
+            // Note: The month is 0-indexed in JavaScript (0=January, 11=December)
+            const selectedDate = new Date(parts[0], parts[1] - 1, parts[2]);
 
+            // Now, perform the validation logic
+            if (selectedDate < today && !this.warningRefNo) {
+                this.errors.arrivalDate = true;
+                this.errorMsg = error1;
+            } else if (selectedDate >= today && this.warningRefNo) { // Use >= to include today
+                this.errors.warningRefNo = true; // This seems to be the intended logic from the original code
+                this.errorMsg = error2;
             } else {
+                // If validation passes, then calculate the total
                 this.calculateTotal();
-                var selectedDate = new Date(fieldToCheck);
-                if(selectedDate < now && !this.warningRefNo){
-                    this.errors.arrivalDate = true;
-                    this.errorMsg = error1;
-                } else if (selectedDate > now && this.warningRefNo){
-                    this.errors.warningRefNo = true;
-                    this.errorMsg = error2;
-                } else {
-                    this.errors.arrivalDate = false;
-                    if(this.errorMsg == error1 || this.errorMsg == error2){
-                        this.errorMsg = null;
-                    }
-                }
             }
-	    this.validateVesselReg();
+
+            this.validateVesselReg();
         },
         validateVesselReg: function() {
             console.log('in validateVesselReg()')
@@ -493,10 +599,10 @@ export default {
 
 
             var reg = vm.vesselReg;
-	    var dateArrival = $('#dateArrival').val();
+            var dateArrival = $('#dateArrival').val();
             var data = {
                 'rego': reg,
-		'dateArrival': dateArrival
+                'dateArrival': dateArrival
             }
             vm.noPayment = false;
             if(reg){
@@ -709,29 +815,28 @@ export default {
     },
     mounted: function(){
         let vm = this;
-        $(document).foundation();
-        this.arrivalEl = $('#dateArrival');
+        // $(document).foundation();
+        // this.arrivalEl = $('#dateArrival');
+        // this.arrivalData = this.arrivalEl.fdatepicker({
+        //     format: 'dd/mm/yyyy',
+        //     onRender: function (date) {
+        //         return;
+        //     }
+        // }).on('changeDate', function (ev) {
+        //     ev.target.dispatchEvent(new CustomEvent('change'));
+        // }).on('change', function (ev) {
+        //     vm.arrivalData.hide();
+        //     vm.arrivalDate = moment(vm.arrivalData.date);
+        //     vm.validateArrivalDate();
+        // }).on('keydown', function (ev) {
+        //     if (ev.keyCode == 13) {
+        //         ev.target.dispatchEvent(new CustomEvent('change'));
+        //     }
+        // }).data('datepicker');
 
-        this.arrivalData = this.arrivalEl.fdatepicker({
-            format: 'dd/mm/yyyy',
-            onRender: function (date) {
-                return;
-            }
-        }).on('changeDate', function (ev) {
-            ev.target.dispatchEvent(new CustomEvent('change'));
-        }).on('change', function (ev) {
-            vm.arrivalData.hide();
-            vm.arrivalDate = moment(vm.arrivalData.date);
-            vm.validateArrivalDate();
-        }).on('keydown', function (ev) {
-            if (ev.keyCode == 13) {
-                ev.target.dispatchEvent(new CustomEvent('change'));
-            }
-        }).data('datepicker');
-
-        this.arrivalData.date = this.arrivalDate.toDate();
-        this.arrivalData.setValue();
-        this.arrivalData.fill();
+        // this.arrivalData.date = this.arrivalDate.toDate();
+        // this.arrivalData.setValue();
+        // this.arrivalData.fill();
 
         //Get the user to autofill the boxes.
         // this.terms = $('#terms').val(); 
@@ -761,6 +866,9 @@ export default {
                 console.log((xhr.responseJSON && xhr.responseJSON.msg) ? xhr.responseJSON.msg : '"'+err+'" response when communicating with Mooring.');
             }
         });
+    },
+    created: function(){
+        this.minDate = moment().format('YYYY-MM-DD');
     }
 };
 
