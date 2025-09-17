@@ -4,63 +4,108 @@
             <div class="container">
                 <div class="row">
                     <div class="col-lg-12">
-                        <div class="well" style="text-align:center;">
+                        <!-- <div class="well" style="text-align:center;">
+                            <h3>Paying Admission Fees</h3>
+                        </div> -->
+                        <div class="bg-light p-3 rounded text-center mb-4">
                             <h3>Paying Admission Fees</h3>
                         </div>
                         <div class="row" style="margin-top:2%;">
                             <div class="col-lg-6">
-                                <div class="well">
-                                    <h3 class="text-primary" style="text-align:center;">Personal Details</h3>
-                                    <div class="row">
+                                <div class="p-4">
+                                    <h3 class="text-primary text-center mb-4">Personal Details</h3>
+
+                                    <!-- <div class="row">
                                         <div class="small-12 medium-12 large-4 columns">
                                             <label class="label-plain2">Given Name(s)</label>
                                             <div class="col-sm-8">
                                                 <input id="givenName" v-model="givenName" class="form-control" name="givenName" type="text" @blur="validateGivenName()" required/>
                                             </div>
                                         </div>
+                                    </div> -->
+
+                                    <div class="row mb-3">
+                                        <label for="givenName" class="col-sm-4 col-form-label">Given Name(s)</label>
+                                        <div class="col-sm-8">
+                                            <input id="givenName" v-model="givenName" class="form-control" name="givenName" type="text" @blur="validateGivenName()" required/>
+                                        </div>
                                     </div>
-                                    <div class="row">
+
+                                    <!-- <div class="row">
                                         <div class="small-12 medium-12 large-4 columns">
                                             <label class="label-plain2">Last Name</label>
                                             <div class="col-sm-8">
                                                 <input id="lastName" v-model="lastName" class="form-control" name="lastName" type="text" @blur="validateLastName()" required/>
                                             </div>
                                         </div>
+                                    </div> -->
+
+                                    <div class="row mb-3">
+                                        <label for="lastName" class="col-sm-4 col-form-label">Last Name</label>
+                                        <div class="col-sm-8">
+                                            <input id="lastName" v-model="lastName" class="form-control" name="lastName" type="text" @blur="validateLastName()" required/>
+                                        </div>
                                     </div>
-                                    <div class="row">
+
+                                    <!-- <div class="row">
                                         <div class="small-12 medium-12 large-4 columns">
                                             <label class="label-plain2">Email</label>
                                             <div class="col-sm-8">
                                                 <input  id="email" v-model="email" class="form-control" name="email" @blur="validateEmailFormat()" type="email" required/>
                                             </div>
                                         </div>
+                                    </div> -->
+
+                                    <div class="row mb-3">
+                                        <label for="email" class="col-sm-4 col-form-label">Email</label>
+                                        <div class="col-sm-8">
+                                            <input id="email" v-model="email" class="form-control" name="email" @blur="validateEmailFormat()" type="email" required/>
+                                        </div>
                                     </div>
-                                    <div class="row">
+
+                                    <!-- <div class="row">
                                         <div class="small-12 medium-12 large-4 columns">
                                             <label class="label-plain2">Confirm Email</label>
                                             <div class="col-sm-8">
                                                 <input  id="emailConfirm" v-model="emailConfirm" class="form-control" name="emailConfirm" @blur="validateEmail()" type="email" required/>
                                             </div>
                                         </div>
+                                    </div> -->
+
+                                    <div class="row mb-3">
+                                        <label for="emailConfirm" class="col-sm-4 col-form-label">Confirm Email</label>
+                                        <div class="col-sm-8">
+                                            <input id="emailConfirm" v-model="emailConfirm" class="form-control" name="emailConfirm" @blur="validateEmail()" type="email" required/>
+                                        </div>
                                     </div>
-                                    <div class="row">
+
+                                    <!-- <div class="row">
                                         <div class="small-12 medium-12 large-4 columns">
                                             <label class="label-plain2">Mobile</label>
                                             <div class="col-sm-8">
                                                 <input  id="id_mobile" v-model="mobile" class="form-control" name="mobile" type="text" required/>
                                             </div>
                                         </div>
+                                    </div> -->
+
+                                    <div class="row mb-3">
+                                        <label for="id_mobile" class="col-sm-4 col-form-label">Mobile</label>
+                                        <div class="col-sm-8">
+                                            <input id="id_mobile" v-model="mobile" class="form-control" name="mobile" type="text" required/>
+                                        </div>
                                     </div>
-				    
+
                                     <div class="row" v-if="errorMsgPersonal">
                                         <div class="alert alert-danger" id="warning" role="alert">{{ errorMsgPersonal }}</div>
                                     </div>
                                 </div>
                             </div>
+
                             <div class="col-lg-6">
-                                <div class="well">
-                                    <h3 class="text-primary" style="text-align:center;">Booking Details</h3>
-                                    <div class="row">
+                                <div class="p-4">
+                                    <h3 class="text-primary text-center mb-4">Booking Details</h3>
+
+                                    <!-- <div class="row">
                                         <div class="small-12 medium-12 large-4 columns">
                                             <label class="label-plain">Arrival</label>
                                             <div class="col-sm-8">
@@ -101,16 +146,39 @@
                                                 <input id="overnightStayYes" v-model="overnightStay" name="overnightStay" refs="overnightStayYes" @change="validateOvernightStay()" value="yes" type="radio"/><label class="radio-label">Yes </label><input id="overnightStayNo" v-model="overnightStay" @change="validateOvernightStay()" name="overnightStay" type="radio" value="no" style="margin-left:2%"/><label class="radio-label">No</label>
                                             </div>
                                         </div>
+                                    </div> -->
+
+                                    <div class="row mb-3">
+                                        <label class="col-sm-4 col-form-label">Overnight Stay</label>
+                                        <div class="col-sm-8 pt-2">
+                                            <div class="form-check form-check-inline">
+                                                <input id="overnightStayYes" v-model="overnightStay" class="form-check-input" name="overnightStay" @change="validateOvernightStay()" value="yes" type="radio"/>
+                                                <label for="overnightStayYes" class="form-check-label">Yes</label>
+                                            </div>
+                                            <div class="form-check form-check-inline">
+                                                <input id="overnightStayNo" v-model="overnightStay" class="form-check-input" name="overnightStay" @change="validateOvernightStay()" value="no" type="radio"/>
+                                                <label for="overnightStayNo" class="form-check-label">No</label>
+                                            </div>
+                                        </div>
                                     </div>
-                                    <div class="row">
+
+                                    <!-- <div class="row">
                                         <div class="small-12 medium-12 large-4 columns">
                                             <label class="label-plain">Vessel Registration</label>
                                             <div class="col-sm-8">
                                                 <input id="vesselReg" v-model="vesselReg" class="form-control" name="vesselReg" @blur="validateVesselReg()" type="text"/>
                                             </div>
                                         </div>
+                                    </div> -->
+
+                                    <div class="row mb-3">
+                                        <label for="vesselReg" class="col-sm-4 col-form-label">Vessel Registration</label>
+                                        <div class="col-sm-8">
+                                            <input id="vesselReg" v-model="vesselReg" class="form-control" name="vesselReg" @blur="validateVesselReg()" type="text"/>
+                                        </div>
                                     </div>
-                                    <div class="row">
+
+                                    <!-- <div class="row">
                                         <div class="small-12 medium-12 large-4 columns">
                                             <label class="label-plain">Number of Adults</label>
                                             <div class="col-sm-8">
@@ -118,7 +186,15 @@
                                             </div>
                                         </div>
                                         <label class="label-small"></label>
+                                    </div> -->
+
+                                    <div class="row mb-3">
+                                        <label for="noOfAdults" class="col-sm-4 col-form-label">Number of Adults</label>
+                                        <div class="col-sm-8">
+                                            <input id="noOfAdults" v-model="noOfAdults" class="form-control" name="noOfAdults" @blur="validateNoOfPeople()" type="number" placeholder="0"/>
+                                        </div>
                                     </div>
+
                                     <div class="row" style="display:none;">
                                         <div class="small-12 medium-12 large-4 columns">
                                             <label class="label-plain">Number of Concessions</label>
@@ -129,7 +205,8 @@
                                         </div>
                                         <label class="label-small"></label>
                                     </div>
-                                    <div class="row">
+
+                                    <!-- <div class="row">
                                         <div class="small-12 medium-12 large-4 columns">
                                             <label class="label-plain">Number of Children</label>
                                             <div class="col-sm-8">
@@ -137,8 +214,19 @@
                                             </div>
                                         </div>
                                         <label class="label-small">(4 - 16)</label>
+                                    </div> -->
+
+                                    <div class="row mb-3 align-items-center">
+                                        <label for="noOfChildren" class="col-sm-4 col-form-label">Number of Children</label>
+                                        <div class="col-sm-6">
+                                            <input id="noOfChildren" v-model="noOfChildren" class="form-control" name="noOfChildren" @blur="validateNoOfPeople()" type="number" placeholder="0"/>
+                                        </div>
+                                        <div class="col-sm-2">
+                                            <small class="text-muted">(4 - 16)</small>
+                                        </div>
                                     </div>
-                                    <div class="row">
+
+                                    <!-- <div class="row">
                                         <div class="small-12 medium-12 large-4 columns">
                                             <label class="label-plain">Number of Infants</label>
                                             <div class="col-sm-8">
@@ -146,16 +234,34 @@
                                             </div>
                                         </div>
                                         <label class="label-small">(under 4)</label>
+                                    </div> -->
+
+                                    <div class="row mb-3 align-items-center">
+                                        <label for="noOfInfants" class="col-sm-4 col-form-label">Number of Infants</label>
+                                        <div class="col-sm-6">
+                                            <input id="noOfInfants" v-model="noOfInfants" class="form-control" name="noOfInfants" @blur="validateNoOfPeople()" type="number" placeholder="0"/>
+                                        </div>
+                                        <div class="col-sm-2">
+                                            <small class="text-muted">(under 4)</small>
+                                        </div>
                                     </div>
                                     
-                                    <div class="row">
+                                    <!-- <div class="row">
                                         <div class="small-12 medium-12 large-4 columns">
                                             <label class="label-plain">Warning Reference</label>
                                             <div class="col-sm-8">
                                                 <input id="warningRefNo" v-model="warningRefNo" class="form-control" name="warningRefNo" @blur="validateWarningRefNo()" type="text"/>
                                             </div>
                                         </div>
+                                    </div> -->
+
+                                    <div class="row mb-3">
+                                        <label for="warningRefNo" class="col-sm-4 col-form-label">Warning Reference</label>
+                                        <div class="col-sm-8">
+                                            <input id="warningRefNo" v-model="warningRefNo" class="form-control" name="warningRefNo" @blur="validateWarningRefNo()" type="text"/>
+                                        </div>
                                     </div>
+
                                     <div class="row" v-if="errorMsg">
                                         <div class="alert alert-danger" id="warning" role="alert">{{ errorMsg }}</div>
                                     </div>
@@ -164,24 +270,22 @@
                         </div>
                     </div>
                 </div>
-                <div class="row">
+                <!-- <div class="row">
                     <div class="col-lg-12">
-                        <div class="well">
-                            <div class="row">
+                        <div class="well"> -->
+                <div class="row mt-4">
+                    <div class="col-lg-12">
+                        <div class="p-4 bg-light rounded">
+                            <!-- <div class="row">
                                 <div class="col-md-6">
                                     <div class="form-group">
                                         <label for="Total Price">Total Price <span class="text-muted">(GST inclusive.)</span></label>
                                         <div class="input-group">
-                                            <span class="input-group-addon">AUD $</span>
+                                            <span class="input-group-text">AUD $</span>
                                             <input type="text" class="form-control" :value="formatMoney(total, 2)" readonly="true">
                                         </div>
                                     </div>
                                 </div>
-                                <!-- <div class="col-md-6">
-                                    <div class="form-group">
-                                        <p style="margin-top:30px;">Changes not permitted.Cancel up to 29 days before arrival for 50% refund.</p>
-                                    </div>
-                                </div> -->
                             </div>
                             <div class="row">
                                 <div class="col-md-6">
@@ -192,11 +296,43 @@
                                     <div class="row"> 
                                         <div class="col-md-8 col-md-offset-5">
                                             <div class="checkbox">
-                                                <label><input type="checkbox" value="" v-model="toc">I agree to the <a id='terms-link' href="javascript:void(0);" v-on:click="loadTerms();">terms and conditions</a></label>
+                                                <label><input type="checkbox" value="" v-model="toc"> I agree to the <a id='terms-link' href="javascript:void(0);" v-on:click="loadTerms();">terms and conditions</a></label>
+                                            </div>
+                                            <div class="form-check">
+                                                <input id="toc" type="checkbox" class="form-check-input" v-model="toc">
+                                                <label for="toc" class="form-check-label">I agree to the <a id='terms-link' href="javascript:void(0);" @click="loadTerms()">terms and conditions</a></label>
                                             </div>
                                             <button :disabled="!validToProceed" type="submit" class="btn btn-primary" style="width:180px;background-color:#4286f4;font-weight:bold;">Proceed to Payment</button>
                                         </div>
                                     </div>
+                                </div>
+                            </div> -->
+                            <!-- This is the main row that will contain Total Price and the buttons -->
+                            <div class="row align-items-center">
+                                <!-- Left Column: Total Price -->
+                                <div class="col-md-6">
+                                    <label for="totalPrice">Total Price <span class="text-muted">(GST inclusive.)</span></label>
+                                    <div class="input-group">
+                                        <span class="input-group-text">AUD $</span>
+                                        <input id="totalPrice" type="text" class="form-control" :value="formatMoney(total, 2)" readonly>
+                                    </div>
+                                </div>
+                                <!-- Right Column: Checkbox and Button -->
+                                <div class="col-md-6">
+                                    <div class="d-flex justify-content-end align-items-center">
+                                        <div class="form-check me-3">
+                                            <input id="toc" type="checkbox" class="form-check-input" v-model="toc">
+                                            <label for="toc" class="form-check-label">I agree to the <a id='terms-link' href="javascript:void(0);" @click="loadTerms()">terms and conditions</a></label>
+                                        </div>
+                                        <button :disabled="!validToProceed" type="submit" class="btn btn-primary" style="width:180px;font-weight:bold;">Proceed to Payment</button>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Price information link -->
+                            <div class="row mt-2">
+                                <div class="col-12">
+                                    <label>Click <a @click="loadFeeUrl();" id='daily-fees-link' href="javascript:void(0);">here</a> for price information.</label>
                                 </div>
                             </div>
                         </div>
