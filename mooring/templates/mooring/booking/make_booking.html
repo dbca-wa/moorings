@@ -87,7 +87,7 @@
                         </div>
                         <div class="col-md-12">
                             <div id='mooring_pricing_table'>
-                                <div class="row" >
+                                <!-- <div class="row" >
                                     <div class="col-md-12">
                                         <h3 class="text-primary">Mooring Fees</h3>
                                     </div>
@@ -112,10 +112,36 @@
                                     <div class="col-md-2 over_ride_price_mooring_header" style='display:none'>
                                         <strong>Price Override</strong>
                                     </div>
+                                </div> -->
+                                <div class="row pb-2 mb-2 border-bottom fw-bold text-muted">
+                                    <div class="col-md-12 mb-2">
+                                        <h3 class="text-primary">Mooring Fees</h3>
+                                    </div>
+                                    <div class="col-md-3">
+                                        Mooring
+                                    </div>
+                                    <div class="col-md-1">
+                                        Vessel
+                                    </div>
+                                    <div class="col-md-2">
+                                        From
+                                    </div>
+                                    <div class="col-md-1">
+                                        <!-- The empty column for spacing is kept, but &nbsp; is removed -->
+                                    </div>
+                                    <div class="col-md-2">
+                                        To
+                                    </div>
+                                    <div class="col-md-1">
+                                        Price
+                                    </div>
+                                    <div class="col-md-2 over_ride_price_mooring_header d-none">
+                                        Price Override
+                                    </div>
                                 </div>
 
                                 {% for bm in booking_mooring %}
-                                <div class="row" >
+                                <!-- <div class="row" >
                                     <div class="col-md-3">
                                         {{ bm.campsite.mooringarea.name }} 
                                     </div>
@@ -139,6 +165,35 @@
                                     <div class="col-md-2 over_ride_price_mooring_body form-group" style='display:none; margin-bottom: 0px;'>
 						            <span class='money_sign'>$</span>
                                          	<input style='width: 100px;' type='number' id='over_ride_mooring_price{{ bm.id }}' step='0.01' class='form-control input-sm money' value='{{ bm.amount }}' v-on:change="money_update($event)">
+                                    </div>
+                                </div> -->
+                                <div class="row align-items-center py-2">
+                                    <div class="col-md-3">
+                                        {{ bm.campsite.mooringarea.name }} 
+                                    </div>
+                                    <div class="col-md-1">
+                                        {% verbatim %}
+                                            <small v-cloak>{{ rego.toUpperCase() }}</small>
+                                        {% endverbatim %}
+                                    </div>
+                                    <div class="col-md-2">
+                                        {{ bm.from_dt }} 
+                                    </div>
+                                    <div class="col-md-1 text-center text-muted">
+                                        to
+                                    </div>
+                                    <div class="col-md-2">
+                                        {{ bm.to_dt }}
+                                    </div>
+                                    <div class="col-md-1">
+                                        ${{ bm.amount }}
+                                    </div>
+                                    <!-- Use Bootstrap's `input-group` for the price override field -->
+                                    <div class="col-md-2 over_ride_price_mooring_body d-none">
+                                        <div class="input-group input-group-sm">
+                                            <span class="input-group-text">$</span>
+                                            <input type='number' id='over_ride_mooring_price{{ bm.id }}' step='0.01' class='form-control' value='{{ bm.amount }}' @change="money_update($event)">
+                                        </div>
                                     </div>
                                 </div>
                                 {% endfor %}
