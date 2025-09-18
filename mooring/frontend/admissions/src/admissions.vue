@@ -154,8 +154,8 @@
                             <div class="row align-items-center">
                                 <!-- Left Column: Total Price -->
                                 <div class="col-md-6">
-                                    <label for="totalPrice">Total Price <span class="text-muted">(GST inclusive.)</span></label>
-                                    <div class="input-group">
+                                    <label for="totalPrice" class="h5">Total Price <span class="text-muted small">(GST inclusive.)</span></label>
+                                    <div class="input-group input-group-lg">
                                         <span class="input-group-text">AUD $</span>
                                         <input id="totalPrice" type="text" class="form-control" :value="formatMoney(total, 2)" readonly>
                                     </div>
