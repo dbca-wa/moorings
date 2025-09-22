@@ -305,7 +305,7 @@
                             </div>
                         </div>
 
-                        <div class="row">
+                        <!-- <div class="row">
                             <div class="small-12 columns">
                                 <hr/>
                             </div>
@@ -348,6 +348,55 @@
                             </div>
                             <div class="small-12 medium-12 large-4 columns">
                                 <label><input type="radio" name="pen_type" value="2" v-model="penType" class="show-for-sr" v-on:change="reload()"/><i class="symb RC20"></i> Beach Pens</label>
+                            </div>
+                        </div> -->
+                        <hr>
+
+                        <!-- Mooring Filter Section -->
+                        <div class="mb-3">
+                            <label class="form-label fw-bold">Mooring</label>
+                            <div class="d-flex flex-wrap">
+                                <div class="form-check me-3">
+                                    <input type="radio" name="gear_type" id="gear_all" value="all" v-model="gearType" class="form-check-input" @change="reload()">
+                                    <label for="gear_all" class="form-check-label"><i class="symb RC3"></i> All types</label>
+                                </div>
+                                <div class="form-check me-3">
+                                    <input type="radio" name="gear_type" id="gear_rental_available" value="rental-available" v-model="gearType" class="form-check-input" @change="reload()">
+                                    <label for="gear_rental_available" class="form-check-label"><i class="symb RC20"></i> Rental (available)</label>
+                                </div>
+                                <div class="form-check me-3">
+                                    <input type="radio" name="gear_type" id="gear_rental_notavailable" value="rental-notavailable" v-model="gearType" class="form-check-input" @change="reload()">
+                                    <label for="gear_rental_notavailable" class="form-check-label"><i class="symb RC20"></i> Rental (not available)</label>
+                                </div>
+                                <div class="form-check me-3">
+                                    <input type="radio" name="gear_type" id="gear_public_notbookable" value="public-notbookable" v-model="gearType" class="form-check-input" @change="reload()">
+                                    <label for="gear_public_notbookable" class="form-check-label"><i class="symb RC20"></i> Public (not bookable)</label>
+                                </div>
+                            </div>
+                        </div>
+
+                        <hr>
+
+                        <!-- Types Filter Section -->
+                        <div class="mb-3">
+                            <label class="form-label fw-bold">Types</label>
+                            <div class="d-flex flex-wrap">
+                                <div class="form-check me-3">
+                                    <input type="radio" name="pen_type" id="pen_all" value="all" v-model="penType" class="form-check-input" @change="reload()">
+                                    <label for="pen_all" class="form-check-label"><i class="symb RC3"></i> All types</label>
+                                </div>
+                                <div class="form-check me-3">
+                                    <input type="radio" name="pen_type" id="pen_moorings" value="0" v-model="penType" class="form-check-input" @change="reload()">
+                                    <label for="pen_moorings" class="form-check-label"><i class="symb RC20"></i> Moorings</label>
+                                </div>
+                                <div class="form-check me-3">
+                                    <input type="radio" name="pen_type" id="pen_jetty" value="1" v-model="penType" class="form-check-input" @change="reload()">
+                                    <label for="pen_jetty" class="form-check-label"><i class="symb RC20"></i> Jetty Pens</label>
+                                </div>
+                                <div class="form-check me-3">
+                                    <input type="radio" name="pen_type" id="pen_beach" value="2" v-model="penType" class="form-check-input" @change="reload()">
+                                    <label for="pen_beach" class="form-check-label"><i class="symb RC20"></i> Beach Pens</label>
+                                </div>
                             </div>
                         </div>
 
