@@ -533,7 +533,7 @@
                         </div>
                     </div>
 
-                    <div style='width: 100%; height: 1px;' align='right'>
+                    <!-- <div style='width: 100%; height: 1px;' align='right'>
                         <div v-show='mapLoading == true' class='map-loading' style='border: 1px solid #00000'>
                             <img style='width:20px; height: 20px;' src='@/assets/ajax-loader-spinner.gif'>&nbsp;&nbsp;Please Wait
                         </div>
@@ -544,7 +544,27 @@
                     <div style='width: 100%' align='right'>
                         <img id='satellite-toggle' class='map-toggle-white'  type='button'  @click="toggleMap('satellite');" src='./assets/img/satellite_icon.png' />
                         <img id='map-toggle' class='map-toggle-black'  type='button'  @click="toggleMap('map');" src='./assets/img/map_icon.png' />
-                    </div>
+                    </div> -->
+
+<!-- Map Container using Bootstrap's position utilities -->
+<div class="position-relative mb-3">
+    <!-- Loading indicator positioned at the top-right -->
+    <div v-show="mapLoading" class="position-absolute top-0 end-0 p-2 bg-white border rounded shadow-sm" style="z-index: 10;">
+        <div class="d-flex align-items-center">
+            <img style="width:20px; height: 20px;" src="@/assets/ajax-loader-spinner.gif" alt="Loading...">
+            <span class="ms-2">Please Wait</span>
+        </div>
+    </div>
+    
+    <div id="map" style="height: 500px;"></div>
+    
+    <!-- Map toggle buttons positioned at the bottom-right -->
+    <div class="position-absolute bottom-0 end-0 p-2">
+        <img id="satellite-toggle" class="map-toggle-white" type="button" @click="toggleMap('satellite');" src="./assets/img/satellite_icon.png" alt="Satellite view" />
+        <img id="map-toggle" class="map-toggle-black" type="button" @click="toggleMap('map');" src="./assets/img/map_icon.png" alt="Map view" />
+    </div>
+</div>
+
 
                     <div id="mapPopup" class="mapPopup" v-cloak>
                         <a href="#" id="mapPopupClose" class="mapPopupClose"></a>
