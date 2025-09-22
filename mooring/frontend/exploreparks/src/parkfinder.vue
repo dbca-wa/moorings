@@ -237,9 +237,7 @@
                                 <button type="button" class="btn btn-outline-secondary w-100 dropdown-toggle" data-bs-toggle="dropdown" aria-expanded="false">
                                     {{ numPeople }}
                                 </button>
-                                <!-- Foundation's dropdown-pane is replaced with Bootstrap's dropdown-menu -->
-                                <div class="dropdown-menu p-3" id="guests-dropdown" style="width: 300px;">
-                                    <!-- The content of this dropdown will be styled in the next step -->
+                                <!-- <div class="dropdown-menu p-3" id="guests-dropdown" style="width: 300px;">
                                     <div class="row">
                                         <div class="small-6 columns">
                                             <label for="num_adults" class="text-right">Adults</label>
@@ -248,13 +246,68 @@
                                             <input type="number" id="numAdults" name="num_adults" v-model="numAdults" min="0" max="16"/>
                                         </div>
                                     </div>
-                                    <!-- ... more guest inputs (Children, Infants) ... -->
+                                </div> -->
+                                <div class="dropdown-menu p-3" id="guests-dropdown" style="width: 300px;">
+                                    <!-- Adults -->
+                                    <div class="row g-3 align-items-center mb-3">
+                                        <div class="col-6">
+                                            <label for="numAdults" class="col-form-label">Adults</label>
+                                        </div>
+                                        <div class="col-6">
+                                            <input type="number" id="numAdults" name="num_adults" class="form-control" v-model="numAdults" min="0" max="16">
+                                        </div>
+                                    </div>
+
+                                    <!-- Concessions (Hidden) -->
+                                    <!-- Replaced style="display:none;" with "d-none" class -->
+                                    <div class="row g-3 align-items-center mb-3 d-none">
+                                        <div class="col-6">
+                                            <label for="numConcessions" class="col-form-label">
+                                                <span title="Holders of one of the following Australian-issued cards: - Seniors Card - Age Pension - Disability Support - Carer Payment - Carer Allowance - Companion Card - Department of Veterans' Affairs">Concessions</span>
+                                            </label>
+                                        </div>
+                                        <div class="col-6">
+                                            <input type="number" id="numConcessions" name="num_concessions" class="form-control" v-model="numConcessions" min="0" max="16">
+                                        </div>
+                                    </div>
+
+                                    <!-- Children -->
+                                    <div class="row g-3 align-items-center mb-3">
+                                        <div class="col-6">
+                                            <label for="numChildren" class="col-form-label">Children (4-16)</label>
+                                        </div>
+                                        <div class="col-6">
+                                            <input type="number" id="numChildren" name="num_children" class="form-control" v-model="numChildren" min="0" max="16">
+                                        </div>
+                                    </div>
+
+                                    <!-- Infants -->
+                                    <div class="row g-3 align-items-center mb-3">
+                                        <div class="col-6">
+                                            <label for="numInfants" class="col-form-label">Infants (under 4)</label>
+                                        </div>
+                                        <div class="col-6">
+                                            <input type="number" id="numInfants" name="num_infants" class="form-control" v-model="numInfants" min="0" max="16">
+                                        </div>
+                                    </div>
+
+                                    <!-- Moorings (Hidden) -->
+                                    <!-- Replaced style="display:none;" with "d-none" class -->
+                                    <div class="row g-3 align-items-center d-none">
+                                        <div class="col-6">
+                                            <label for="numMooring" class="col-form-label">Moorings</label>
+                                        </div>
+                                        <div class="col-6">
+                                            <input type="number" id="numMooring" name="num_mooring" class="form-control" v-model="numMooring" min="0" max="16">
+                                        </div>
+                                    </div>
                                 </div>
                             </div>
                         </div>
+
                         <div class="row">
                             <div class="small-12 columns">
-                            <hr/>
+                                <hr/>
                             </div>
                         </div>
                         <div class="row">
