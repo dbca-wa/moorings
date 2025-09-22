@@ -722,7 +722,7 @@
                             </div>
                         </div>
 
-                        <div class="row text-center">
+                        <!-- <div class="row text-center">
                             <div class="button-group">
                                 <button class="button" @click="prevPage" :disabled="currentPage === 1">
                                 « Prev
@@ -734,13 +734,35 @@
                                 Next »
                                 </button>
                             </div>
+                        </div> -->
+
+                        <!-- Pagination Buttons -->
+                        <div class="d-flex justify-content-center">
+                            <nav aria-label="Page navigation">
+                                <ul class="pagination">
+                                    <li class="page-item" :class="{ disabled: currentPage === 1 }">
+                                        <a class="page-link" href="#" @click.prevent="prevPage">« Prev</a>
+                                    </li>
+                                    <li class="page-item active" aria-current="page">
+                                        <span class="page-link">Page {{ currentPage }} / {{ totalPages }}</span>
+                                    </li>
+                                    <li class="page-item" :class="{ disabled: currentPage === totalPages }">
+                                        <a class="page-link" href="#" @click.prevent="nextPage">Next »</a>
+                                    </li>
+                                </ul>
+                            </nav>
                         </div>
                     </template>
                     <template v-else>
-                        <div class="row align-center">
+                        <!-- <div class="row align-center">
                             <div class="small-12 medium-12 large-12 columns">
                                 <h2 class="text-center">There are no moorings found matching your search criteria. Please change your search query.</h2>
                             </div>
+                        </div> -->
+                        <!-- "No results" Message -->
+                        <div class="alert alert-info" role="alert">
+                            <h4 class="alert-heading">No Results Found</h4>
+                            <p>There are no moorings found matching your search criteria. Please change your search query.</p>
                         </div>
                     </template>
                 </div>
