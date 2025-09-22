@@ -637,49 +637,50 @@
                 <div class="col-12">
                     <!-- The content of the search results template will go here -->
                     <template v-if="filteredItems.length > 0">
-                        <div class="row">
+                        <div class="row g-4">
                             <!-- <div class="small-12 medium-4 large-4 columns" v-for="f in paginated('filterResults')" v-if="f.vessel_size_limit >= vesselSize && f.vessel_draft_limit >= vesselDraft && weightBeam(f) == true"> -->
-                                <div class="small-12 medium-4 large-4 columns" v-for="f in paginatedItems" :key="f.id">
-                                <div class="row">
-                                    <div class="small-12 columns">
-                                        <span class="searchTitle">{{ f.name }}</span>
-                                    </div>
-                                    <div class="small-12 medium-12 large-12 columns" >
-                                        <img v-if="f.images[0]" class="thumbnail" v-bind:src="f.images[0].image" style='width: 230px; height: 230px;' />
-                                        <img v-else class="thumbnail" src="@/assets/mooring_photo_scaled.png" style='width: 230px; height: 230px;'/>
-                                    </div>
-                                    <div class="small-12 medium-9 large-9 columns">
-                                        <div v-html="f.description"/>
-                                        <p v-if="f.price_hint && Number(f.price_hint)"><i><small>From ${{ f.price_hint }} per night</small></i></p>
-                                        <!-- <p style='display:none'><i><small>Vessel Size Limit: {{ f.vessel_size_limit }} </small></i></p>
-                                        <p ><i><small>Max Stay Period: {{ f.max_advance_booking }} day/s </small></i></p> -->
-                                        <p>Mooring Limits</p>
-                                        <div class="row">
-                                            <div class="col-md-6"  style='display:none'>
-                                                <small>Max Stay: {{ f.max_advance_booking }} day/s</small>
-                                            </div>
-                                            <div class="col-md-6">
-                                                <small>Max Size: {{ f.vessel_size_limit }}</small>
-                                            </div>
-                                        </div>
-                                        <div class="row">
-                                            <div class="col-md-6">
-                                                <small>Max Draft: {{ f.vessel_draft_limit }}</small>
-                                            </div>
-                                            <div class="col-md-6">
-                                                <small v-if="f.mooring_physical_type == 0"> Max Weight: {{ f.vessel_weight_limit }}</small>
-                                                <small v-else> Max Beam: {{ f.vessel_beam_limit }}</small>
-                                            </div>
-                                        </div>
+                            <!-- <div class="small-12 medium-4 large-4 columns" v-for="f in paginatedIt</div>ems" :key="f.id"> -->
+                            <div class="col-md-6 col-lg-4" v-for="f in paginatedItems" :key="f.id">
+                                <div class="card h-100">
+                                    <!-- <div class="row"> -->
+                                    <img v-if="f.images[0]" class="card-img-top" :src="f.images[0].image" alt="Mooring image" style="height: 230px; object-fit: cover;">
+                                    <img v-else class="card-img-top" src="@/assets/mooring_photo_scaled.png" alt="Default mooring image" style="height: 230px; object-fit: cover;">
+                                    <div class="card-body">
+                                        <h5 class="card-title">{{ f.name }}</h5>
 
-                                        <a class="button" v-bind:href="f.info_url" target="_blank">More info</a>
-                                            
-                                        <a v-if="f.mooring_type == 0 && vesselSize > 0 && vesselDraft > 0 && vesselWeight > 0 && vesselRego != '' && vesselRego !== ' '" class="button" v-bind:href="parkstayUrl+'/availability2/?site_id='+f.id+'&'+bookingParam">Book now</a>
-                                        <a v-else-if="f.mooring_type == 1 && vesselSize > 0 && vesselDraft > 0 && vesselBeam > 0 && vesselRego != '' && vesselRego !== ' '" class="button" v-bind:href="parkstayUrl+'/availability2/?site_id='+f.id+'&'+bookingParam">Book now</a>
-                                        <a v-else-if="f.mooring_type == 2 && vesselSize > 0 && vesselDraft > 0 && vesselBeam > 0 && vesselRego != '' && vesselRego !== ' '" class="button" v-bind:href="parkstayUrl+'/availability2/?site_id='+f.id+'&'+bookingParam">Book now</a>
-                                        <a v-else-if="f.mooring_type == 0" class="button" v-on:click="BookNow('mooring')">Book now</a>
-                                        <a v-else-if="f.mooring_type == 1 || f.mooring_type == 2 " class="button" v-on:click="BookNow('jettybeach')">Book now</a>
-                                        <a v-else /> 
+                                        <div class="small-12 medium-9 large-9 columns">
+                                            <div v-html="f.description"/>
+                                            <p v-if="f.price_hint && Number(f.price_hint)"><i><small>From ${{ f.price_hint }} per night</small></i></p>
+                                            <!-- <p style='display:none'><i><small>Vessel Size Limit: {{ f.vessel_size_limit }} </small></i></p>
+                                            <p ><i><small>Max Stay Period: {{ f.max_advance_booking }} day/s </small></i></p> -->
+                                            <p>Mooring Limits</p>
+                                            <div class="row">
+                                                <div class="col-md-6"  style='display:none'>
+                                                    <small>Max Stay: {{ f.max_advance_booking }} day/s</small>
+                                                </div>
+                                                <div class="col-md-6">
+                                                    <small>Max Size: {{ f.vessel_size_limit }}</small>
+                                                </div>
+                                            </div>
+                                            <div class="row">
+                                                <div class="col-md-6">
+                                                    <small>Max Draft: {{ f.vessel_draft_limit }}</small>
+                                                </div>
+                                                <div class="col-md-6">
+                                                    <small v-if="f.mooring_physical_type == 0"> Max Weight: {{ f.vessel_weight_limit }}</small>
+                                                    <small v-else> Max Beam: {{ f.vessel_beam_limit }}</small>
+                                                </div>
+                                            </div>
+
+                                            <a class="button" v-bind:href="f.info_url" target="_blank">More info</a>
+                                                
+                                            <a v-if="f.mooring_type == 0 && vesselSize > 0 && vesselDraft > 0 && vesselWeight > 0 && vesselRego != '' && vesselRego !== ' '" class="button" v-bind:href="parkstayUrl+'/availability2/?site_id='+f.id+'&'+bookingParam">Book now</a>
+                                            <a v-else-if="f.mooring_type == 1 && vesselSize > 0 && vesselDraft > 0 && vesselBeam > 0 && vesselRego != '' && vesselRego !== ' '" class="button" v-bind:href="parkstayUrl+'/availability2/?site_id='+f.id+'&'+bookingParam">Book now</a>
+                                            <a v-else-if="f.mooring_type == 2 && vesselSize > 0 && vesselDraft > 0 && vesselBeam > 0 && vesselRego != '' && vesselRego !== ' '" class="button" v-bind:href="parkstayUrl+'/availability2/?site_id='+f.id+'&'+bookingParam">Book now</a>
+                                            <a v-else-if="f.mooring_type == 0" class="button" v-on:click="BookNow('mooring')">Book now</a>
+                                            <a v-else-if="f.mooring_type == 1 || f.mooring_type == 2 " class="button" v-on:click="BookNow('jettybeach')">Book now</a>
+                                            <a v-else /> 
+                                        </div>
                                     </div>
                                 </div>
                             </div>
