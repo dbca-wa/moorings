@@ -1,7 +1,7 @@
 <template>
     <!-- <div v-cloak class="f6inject"> -->
     <div v-cloak>
-        <div class="container-fluid">
+        <div class="container">
             <!-- First Row: Search Panel and Map -->
             <div class="row">
                 <!-- Left Column (Search Panel) -->
