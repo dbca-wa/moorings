@@ -696,14 +696,26 @@
                                                 </div>
                                             </div>
 
-                                            <a class="button" v-bind:href="f.info_url" target="_blank">More info</a>
+                                            <!-- <a class="button" v-bind:href="f.info_url" target="_blank">More info</a>
                                                 
                                             <a v-if="f.mooring_type == 0 && vesselSize > 0 && vesselDraft > 0 && vesselWeight > 0 && vesselRego != '' && vesselRego !== ' '" class="button" v-bind:href="parkstayUrl+'/availability2/?site_id='+f.id+'&'+bookingParam">Book now</a>
                                             <a v-else-if="f.mooring_type == 1 && vesselSize > 0 && vesselDraft > 0 && vesselBeam > 0 && vesselRego != '' && vesselRego !== ' '" class="button" v-bind:href="parkstayUrl+'/availability2/?site_id='+f.id+'&'+bookingParam">Book now</a>
                                             <a v-else-if="f.mooring_type == 2 && vesselSize > 0 && vesselDraft > 0 && vesselBeam > 0 && vesselRego != '' && vesselRego !== ' '" class="button" v-bind:href="parkstayUrl+'/availability2/?site_id='+f.id+'&'+bookingParam">Book now</a>
                                             <a v-else-if="f.mooring_type == 0" class="button" v-on:click="BookNow('mooring')">Book now</a>
                                             <a v-else-if="f.mooring_type == 1 || f.mooring_type == 2 " class="button" v-on:click="BookNow('jettybeach')">Book now</a>
-                                            <a v-else /> 
+                                            <a v-else />  -->
+
+                                            <!-- Button Group with responsive layout -->
+                                            <div class="d-grid gap-2 d-md-flex mt-3">
+                                                <a class="btn btn-outline-secondary btn-sm" :href="f.info_url" target="_blank">More info</a>
+                                                
+                                                <!-- "Book now" button with your original v-if logic -->
+                                                <a v-if="f.mooring_type == 0 && vesselSize > 0 && vesselDraft > 0 && vesselWeight > 0 && vesselRego != '' && vesselRego !== ' '" class="btn btn-primary btn-sm" :href="parkstayUrl+'/availability2/?site_id='+f.id+'&'+bookingParam">Book now</a>
+                                                <a v-else-if="f.mooring_type == 1 && vesselSize > 0 && vesselDraft > 0 && vesselBeam > 0 && vesselRego != '' && vesselRego !== ' '" class="btn btn-primary btn-sm" :href="parkstayUrl+'/availability2/?site_id='+f.id+'&'+bookingParam">Book now</a>
+                                                <a v-else-if="f.mooring_type == 2 && vesselSize > 0 && vesselDraft > 0 && vesselBeam > 0 && vesselRego != '' && vesselRego !== ' '" class="btn btn-primary btn-sm" :href="parkstayUrl+'/availability2/?site_id='+f.id+'&'+bookingParam">Book now</a>
+                                                <a v-else-if="f.mooring_type == 0" class="btn btn-primary btn-sm" @click="BookNow('mooring')">Book now</a>
+                                                <a v-else-if="f.mooring_type == 1 || f.mooring_type == 2 " class="btn btn-primary btn-sm" @click="BookNow('jettybeach')">Book now</a>
+                                            </div>
                                         </div>
                                     </div>
                                 </div>
