@@ -7,52 +7,50 @@
                 <!-- Left Column (Search Panel) -->
                 <div class="col-lg-3">
                     <!-- The content of the original left column will go here -->
-                    <div class="columns small-12 medium-12 large-12" v-show="current_booking.length > 0">
-                        <div class="row">
-                            <!-- <div class="columns small-12 medium-12 large-12" >
-                                <button  title="Please add items into your trolley." v-show="ongoing_booking" style="color: #FFFFFF; background-color: rgb(255, 0, 0); margin-right:10px;" class="button small-12 medium-12 large-12" >Time Left {{ timeleft }}</button>
-                                <a v-show="current_booking.length > 0" class="button small-12 medium-12 large-12" :href="parkstayUrl+'/booking'" style="border-radius: 4px; border: 1px solid #2e6da4">Proceed to Check Out</a> <a type="button" :href="parkstayUrl+'/booking/abort'" class="button float-right warning continueBooking" style="color: #fff; background-color: #f0ad4e;  border-color: #eea236; border-radius: 4px;">
-                                    Cancel in-progress booking
-                                </a>
-                            </div> -->
-                            <!-- Button group using Flexbox for alignment -->
-                            <div class="d-grid gap-2 d-md-flex justify-content-md-start mb-3">
-                                <button v-show="ongoing_booking" class="btn btn-danger me-md-2" type="button">Time Left {{ timeleft }}</button>
-                                <a v-show="current_booking.length > 0" class="btn btn-primary me-md-2" :href="parkstayUrl+'/booking'">Proceed to Check Out</a>
-                                <a class="btn btn-warning" :href="parkstayUrl+'/booking/abort'">Cancel in-progress booking</a>
-                            </div>
+                    <div v-show="current_booking.length > 0">
+                        <!-- <div class="columns small-12 medium-12 large-12" >
+                            <button  title="Please add items into your trolley." v-show="ongoing_booking" style="color: #FFFFFF; background-color: rgb(255, 0, 0); margin-right:10px;" class="button small-12 medium-12 large-12" >Time Left {{ timeleft }}</button>
+                            <a v-show="current_booking.length > 0" class="button small-12 medium-12 large-12" :href="parkstayUrl+'/booking'" style="border-radius: 4px; border: 1px solid #2e6da4">Proceed to Check Out</a> <a type="button" :href="parkstayUrl+'/booking/abort'" class="button float-right warning continueBooking" style="color: #fff; background-color: #f0ad4e;  border-color: #eea236; border-radius: 4px;">
+                                Cancel in-progress booking
+                            </a>
+                        </div> -->
+                        <!-- Button group using Flexbox for alignment -->
+                        <div class="d-grid gap-2 d-md-flex justify-content-md-start mb-3">
+                            <button v-show="ongoing_booking" class="btn btn-danger me-md-2" type="button">Time Left {{ timeleft }}</button>
+                            <a v-show="current_booking.length > 0" class="btn btn-primary me-md-2" :href="parkstayUrl+'/booking'">Proceed to Check Out</a>
+                            <a class="btn btn-warning" :href="parkstayUrl+'/booking/abort'">Cancel in-progress booking</a>
+                        </div>
 
-                            <div class="small-12 medium-12 large-12">
-                                <!-- <div class="card">
-                                    <div class="card-body"><h3 class="card-title">Trolley: <span id='total_trolley'>${{ total_booking }}</span></h3></div>
-                                </div> -->
-                                <!-- Trolley summary card -->
-                                <div class="card mb-3">
-                                    <div class="card-body">
-                                        <h5 class="card-title mb-0">Trolley: <span id='total_trolley'>${{ total_booking }}</span></h5>
-                                    </div>
+                        <div class="small-12 medium-12 large-12">
+                            <!-- <div class="card">
+                                <div class="card-body"><h3 class="card-title">Trolley: <span id='total_trolley'>${{ total_booking }}</span></h3></div>
+                            </div> -->
+                            <!-- Trolley summary card -->
+                            <div class="card mb-3">
+                                <div class="card-body">
+                                    <h5 class="card-title mb-0">Trolley: <span id='total_trolley'>${{ total_booking }}</span></h5>
                                 </div>
-                                <!-- <div class='columns small-12 medium-12 large-12' style="margin-top:10px; margin-bottom:10px;">
-                                        <div v-for="item in current_booking" class="row small-12 medium-12 large-12">
-                                                <div class="columns small-12 medium-9 large-9">{{ item.item }}</div>
-                                                <div class="columns small-12 medium-2 large-2">${{ item.amount }}</div>
-                                                <div class="columns small-12 medium-1 large-1"><a v-show="item.past_booking == false" style='color: red; opacity: 1;' type="button" class="close" @click="deleteBooking(item.id)">x</a></div>
-                                        </div>
-                                </div> -->
-                                <div v-for="item in current_booking" :key="item.id" class="row gx-2 align-items-center mb-1">
-                                    <!-- gx-2 adds a small horizontal gutter between columns -->
-                                    <!-- align-items-center vertically aligns the content -->
-                                    
-                                    <!-- Item Name column -->
-                                    <div class="col-8">{{ item.item }}</div>
-                                    
-                                    <!-- Amount column -->
-                                    <div class="col-3 text-end">${{ item.amount }}</div>
-                                    
-                                    <!-- Delete button column -->
-                                    <div class="col-1 text-end">
-                                        <button v-show="item.past_booking == false" type="button" class="btn-close" @click="deleteBooking(item.id)" aria-label="Close"></button>
+                            </div>
+                            <!-- <div class='columns small-12 medium-12 large-12' style="margin-top:10px; margin-bottom:10px;">
+                                    <div v-for="item in current_booking" class="row small-12 medium-12 large-12">
+                                            <div class="columns small-12 medium-9 large-9">{{ item.item }}</div>
+                                            <div class="columns small-12 medium-2 large-2">${{ item.amount }}</div>
+                                            <div class="columns small-12 medium-1 large-1"><a v-show="item.past_booking == false" style='color: red; opacity: 1;' type="button" class="close" @click="deleteBooking(item.id)">x</a></div>
                                     </div>
+                            </div> -->
+                            <div v-for="item in current_booking" :key="item.id" class="row gx-2 align-items-center mb-1">
+                                <!-- gx-2 adds a small horizontal gutter between columns -->
+                                <!-- align-items-center vertically aligns the content -->
+                                
+                                <!-- Item Name column -->
+                                <div class="col-8">{{ item.item }}</div>
+                                
+                                <!-- Amount column -->
+                                <div class="col-3 text-end">${{ item.amount }}</div>
+                                
+                                <!-- Delete button column -->
+                                <div class="col-1 text-end">
+                                    <button v-show="item.past_booking == false" type="button" class="btn-close" @click="deleteBooking(item.id)" aria-label="Close"></button>
                                 </div>
                             </div>
                         </div>
@@ -400,7 +398,7 @@
                             </div>
                         </div>
 
-                        <hr class="search"/>
+                        <!-- <hr class="search"/>
 
                         <div class="row" id="legend" style="margin-bottom:10px;">
                             <div class="small-12 medium-12 large-12 columns">
@@ -440,14 +438,69 @@
                                     <label><input type="checkbox" class="show-for-sr" :value="'filt_'+ filt.key" v-model="filterParams[filt.key]" v-on:change="updateFilter()"/> <i class="symb" :class="filt.symb"></i> {{ filt.name }}</label>
                                 </div>
                             </template>
+                        </div> -->
+
+
+                        <hr>
+
+                        <!-- Availability Legend Section -->
+                        <div class="mb-3">
+                            <label class="form-label fw-bold">Availability</label>
+                            <!-- Use a row with columns for the legend items for proper alignment -->
+                            <div class="row">
+                                <div class="col-6 col-md-3 mb-2">
+                                    <div class="d-flex align-items-center">
+                                        <img class="publicPin me-2" :src="pin_gray" />
+                                        <span>Public</span>
+                                    </div>
+                                </div>
+                                <div class="col-6 col-md-3 mb-2">
+                                    <div class="d-flex align-items-center">
+                                        <img class="availablePin me-2" :src="pin_orange" />
+                                        <span>Available</span>
+                                    </div>
+                                </div>
+                                <div class="col-6 col-md-3 mb-2">
+                                    <div class="d-flex align-items-center">
+                                        <img class="partialPin me-2" :src="pin_orange_red" />
+                                        <span>Partial Dates</span>
+                                    </div>
+                                </div>
+                                <div class="col-6 col-md-3 mb-2">
+                                    <div class="d-flex align-items-center">
+                                        <img class="unavailablePin me-2" :src="pin_red" />
+                                        <span>Unavailable</span>
+                                    </div>
+                                </div>
+                            </div>
                         </div>
-                    </div>
+
+                        <hr>
+
+                        <!-- Hidden "Select features" Section -->
+                        <!-- This section is hidden by d-none, but correctly styled with BS5 form-checks -->
+                        <div class="mb-3 d-none">
+                            <label class="form-label fw-bold">Select features</label>
+                            <div class="d-flex flex-wrap">
+                                <div v-for="filt in filterList" :key="filt.key" class="form-check me-3">
+                                    <input type="checkbox" class="form-check-input" :id="'filt_' + filt.key" :value="'filt_'+ filt.key" v-model="filterParams[filt.key]" @change="updateFilter()">
+                                    <label :for="'filt_' + filt.key" class="form-check-label"><i class="symb" :class="filt.symb"></i> {{ filt.name }}</label>
+                                </div>
+                            </div>
+                        </div>
+
+
+
+
+
+
+
                 </div>
 
                 <!-- Right Column (Map) -->
                 <div class="col-lg-9">
                     <!-- The content of the original right column will go here -->
-                    <div class="alert alert-warning" style='text-align: center' role="alert" v-if="admissions_key" id="admissions_link">
+                    <!-- <div class="alert alert-warning" style='text-align: center' role="alert" v-if="admissions_key" id="admissions_link">
                         <strong style='font-size: 16px;'>
                             <a :href='"/annual-admissions/" + admissions_key + "/"'>Click here for paying annual admission fees only</a>
                         </strong><br>
@@ -461,17 +514,38 @@
                         <strong style='font-size: 16px;'>
                             <a href='https://rottnestisland.com/boating/Fees'>Click here for more information on admission fees</a>
                         </strong><br>
+                    </div> -->
+                    <div v-if="admissions_key">
+                        <div class="alert alert-warning text-center" role="alert">
+                            <strong class="fs-6">
+                                <a :href='"/annual-admissions/" + admissions_key + "/"'>Click here for paying annual admission fees only</a>
+                            </strong>
+                        </div>
+                        <div class="alert alert-warning text-center" role="alert">
+                            <strong class="fs-6">
+                                <a :href='"/admissions/" + admissions_key + "/"'>Click here for paying individual admission fees for a single visit</a>
+                            </strong>
+                        </div>
+                        <div class="alert alert-info text-center" role="alert">
+                            <strong class="fs-6">
+                                <a href='https://rottnestisland.com/boating/Fees'>Click here for more information on admission fees</a>
+                            </strong>
+                        </div>
                     </div>
+
                     <div style='width: 100%; height: 1px;' align='right'>
                         <div v-show='mapLoading == true' class='map-loading' style='border: 1px solid #00000'>
                             <img style='width:20px; height: 20px;' src='@/assets/ajax-loader-spinner.gif'>&nbsp;&nbsp;Please Wait
                         </div>
                     </div>
+
                     <div id="map"></div>
+
                     <div style='width: 100%' align='right'>
                         <img id='satellite-toggle' class='map-toggle-white'  type='button'  @click="toggleMap('satellite');" src='./assets/img/satellite_icon.png' />
                         <img id='map-toggle' class='map-toggle-black'  type='button'  @click="toggleMap('map');" src='./assets/img/map_icon.png' />
                     </div>
+
                     <div id="mapPopup" class="mapPopup" v-cloak>
                         <a href="#" id="mapPopupClose" class="mapPopupClose"></a>
                         <div id="mapPopupContent">
