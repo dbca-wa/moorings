@@ -12,6 +12,7 @@
   "dependencies": {
     "@vitejs/plugin-vue": "^6.0.1",
     "awesomplete": "^1.1.7",
+    "bootstrap": "^5.3.7",
     "debounce": "^2.2.0",
     "foundation-datepicker": "^1.5.6",
     "foundation-sites": "^6.9.0",
