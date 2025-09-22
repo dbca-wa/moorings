@@ -5,7 +5,7 @@
             <!-- First Row: Search Panel and Map -->
             <div class="row">
                 <!-- Left Column (Search Panel) -->
-                <div class="col-lg-3">
+                <div class="col-lg-5">
                     <!-- The content of the original left column will go here -->
                     <div v-show="current_booking.length > 0">
                         <!-- <div class="columns small-12 medium-12 large-12" >
@@ -498,7 +498,7 @@
                 </div>
 
                 <!-- Right Column (Map) -->
-                <div class="col-lg-9">
+                <div class="col-lg-7">
                     <!-- The content of the original right column will go here -->
                     <!-- <div class="alert alert-warning" style='text-align: center' role="alert" v-if="admissions_key" id="admissions_link">
                         <strong style='font-size: 16px;'>
@@ -737,7 +737,7 @@
                         </div> -->
 
                         <!-- Pagination Buttons -->
-                        <div class="d-flex justify-content-center">
+                        <div class="d-flex justify-content-center mt-4">
                             <nav aria-label="Page navigation">
                                 <ul class="pagination">
                                     <li class="page-item" :class="{ disabled: currentPage === 1 }">
