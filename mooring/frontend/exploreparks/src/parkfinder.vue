@@ -9,28 +9,55 @@
                     <!-- The content of the original left column will go here -->
                     <div class="columns small-12 medium-12 large-12" v-show="current_booking.length > 0">
                         <div class="row">
-                            <div class="columns small-12 medium-12 large-12" >
+                            <!-- <div class="columns small-12 medium-12 large-12" >
                                 <button  title="Please add items into your trolley." v-show="ongoing_booking" style="color: #FFFFFF; background-color: rgb(255, 0, 0); margin-right:10px;" class="button small-12 medium-12 large-12" >Time Left {{ timeleft }}</button>
                                 <a v-show="current_booking.length > 0" class="button small-12 medium-12 large-12" :href="parkstayUrl+'/booking'" style="border-radius: 4px; border: 1px solid #2e6da4">Proceed to Check Out</a> <a type="button" :href="parkstayUrl+'/booking/abort'" class="button float-right warning continueBooking" style="color: #fff; background-color: #f0ad4e;  border-color: #eea236; border-radius: 4px;">
                                     Cancel in-progress booking
                                 </a>
+                            </div> -->
+                            <!-- Button group using Flexbox for alignment -->
+                            <div class="d-grid gap-2 d-md-flex justify-content-md-start mb-3">
+                                <button v-show="ongoing_booking" class="btn btn-danger me-md-2" type="button">Time Left {{ timeleft }}</button>
+                                <a v-show="current_booking.length > 0" class="btn btn-primary me-md-2" :href="parkstayUrl+'/booking'">Proceed to Check Out</a>
+                                <a class="btn btn-warning" :href="parkstayUrl+'/booking/abort'">Cancel in-progress booking</a>
                             </div>
+
                             <div class="small-12 medium-12 large-12">
-                                <div class="card">
+                                <!-- <div class="card">
                                     <div class="card-body"><h3 class="card-title">Trolley: <span id='total_trolley'>${{ total_booking }}</span></h3></div>
+                                </div> -->
+                                <!-- Trolley summary card -->
+                                <div class="card mb-3">
+                                    <div class="card-body">
+                                        <h5 class="card-title mb-0">Trolley: <span id='total_trolley'>${{ total_booking }}</span></h5>
+                                    </div>
                                 </div>
-                                <div class='columns small-12 medium-12 large-12' style="margin-top:10px; margin-bottom:10px;">
+                                <!-- <div class='columns small-12 medium-12 large-12' style="margin-top:10px; margin-bottom:10px;">
                                         <div v-for="item in current_booking" class="row small-12 medium-12 large-12">
                                                 <div class="columns small-12 medium-9 large-9">{{ item.item }}</div>
                                                 <div class="columns small-12 medium-2 large-2">${{ item.amount }}</div>
                                                 <div class="columns small-12 medium-1 large-1"><a v-show="item.past_booking == false" style='color: red; opacity: 1;' type="button" class="close" @click="deleteBooking(item.id)">x</a></div>
                                         </div>
+                                </div> -->
+                                <div v-for="item in current_booking" :key="item.id" class="row gx-2 align-items-center mb-1">
+                                    <!-- gx-2 adds a small horizontal gutter between columns -->
+                                    <!-- align-items-center vertically aligns the content -->
+                                    
+                                    <!-- Item Name column -->
+                                    <div class="col-8">{{ item.item }}</div>
+                                    
+                                    <!-- Amount column -->
+                                    <div class="col-3 text-end">${{ item.amount }}</div>
+                                    
+                                    <!-- Delete button column -->
+                                    <div class="col-1 text-end">
+                                        <button v-show="item.past_booking == false" type="button" class="btn-close" @click="deleteBooking(item.id)" aria-label="Close"></button>
+                                    </div>
                                 </div>
                             </div>
                         </div>
                     </div>
-
-                        <div class="row">
+                        <!-- <div class="row">
                             <div class="small-12 columns">
                                 <label>Search <input class="input-group-field" id="searchInput" type="text" placeholder="Search for a mooring..."/></label>
                             </div>
@@ -55,11 +82,45 @@
                                     :min="minDepartureDateForInput"
                                 >
                             </div>
-                            
                             <div class="small-12 medium-12 large-12 columns" style="display:none;">
                                 <label><input type="checkbox" v-model="bookableOnly"/> Show bookable moorings only</label>
                             </div>
+                        </div> -->
+
+                        <!-- Search input field -->
+                        <div class="mb-3">
+                            <label for="searchInput" class="form-label">Search</label>
+                            <input id="searchInput" type="text" class="form-control" placeholder="Search for a mooring...">
                         </div>
+                        <!-- Date inputs in a row -->
+                        <div class="row g-3 mb-3">
+                            <div class="col-md-6">
+                                <label for="dateArrival" class="form-label">Arrival</label>
+                                <input
+                                    type="date"
+                                    id="dateArrival"
+                                    class="form-control"
+                                    v-model="arrivalDateForInput"
+                                    :min="minArrivalDateForInput"
+                                    @change="handleArrivalDateChange"
+                                >
+                            </div>
+                            <div class="col-md-6">
+                                <label for="dateDeparture" class="form-label">Departure</label>
+                                <input
+                                    type="date"
+                                    id="dateDeparture"
+                                    class="form-control"
+                                    v-model="departureDateForInput"
+                                    :min="minDepartureDateForInput"
+                                >
+                            </div>
+                        </div>
+                        <div class="form-check d-none">
+                            <input type="checkbox" class="form-check-input" id="bookableOnly" v-model="bookableOnly">
+                            <label for="bookableOnly" class="form-check-label">Show bookable moorings only</label>
+                        </div>
+
                         <div class="row"><div class="small-12 columns">
                             <hr/>
                         </div>
