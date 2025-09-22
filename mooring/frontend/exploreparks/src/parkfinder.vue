@@ -645,14 +645,20 @@
                                     <!-- <div class="row"> -->
                                     <img v-if="f.images[0]" class="card-img-top" :src="f.images[0].image" alt="Mooring image" style="height: 230px; object-fit: cover;">
                                     <img v-else class="card-img-top" src="@/assets/mooring_photo_scaled.png" alt="Default mooring image" style="height: 230px; object-fit: cover;">
-                                    <div class="card-body">
+                                    <div class="card-body d-flex flex-column">
                                         <h5 class="card-title">{{ f.name }}</h5>
+                                        <!-- Description with a standard card-text class -->
+                                        <div class="card-text" v-html="f.description"></div>
 
-                                        <div class="small-12 medium-9 large-9 columns">
-                                            <div v-html="f.description"/>
-                                            <p v-if="f.price_hint && Number(f.price_hint)"><i><small>From ${{ f.price_hint }} per night</small></i></p>
-                                            <!-- <p style='display:none'><i><small>Vessel Size Limit: {{ f.vessel_size_limit }} </small></i></p>
-                                            <p ><i><small>Max Stay Period: {{ f.max_advance_booking }} day/s </small></i></p> -->
+                                        <!-- <p v-if="f.price_hint && Number(f.price_hint)"><i><small>From ${{ f.price_hint }} per night</small></i></p> -->
+                                        <!-- Price hint with standard text classes -->
+                                        <p v-if="f.price_hint && Number(f.price_hint)" class="card-text">
+                                            <small class="text-muted">From ${{ f.price_hint }} per night</small>
+                                        </p>
+
+                                        <!-- <p style='display:none'><i><small>Vessel Size Limit: {{ f.vessel_size_limit }} </small></i></p>
+                                        <p ><i><small>Max Stay Period: {{ f.max_advance_booking }} day/s </small></i></p> -->
+                                        <div class="mt-auto">
                                             <p>Mooring Limits</p>
                                             <div class="row">
                                                 <div class="col-md-6"  style='display:none'>
