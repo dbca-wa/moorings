@@ -566,10 +566,10 @@
 </div>
 
 
-                    <div id="mapPopup" class="mapPopup" v-cloak>
+                    <div id="mapPopup" class="mapPopup bg-white p-3 border rounded shadow" v-cloak>
                         <a href="#" id="mapPopupClose" class="mapPopupClose"></a>
                         <div id="mapPopupContent">
-                            <h4 style="margin: 0"><b id="mapPopupName"></b></h4>
+                            <!-- <h4 style="margin: 0"><b id="mapPopupName"></b></h4>
                             <p><i id="mapPopupPrice"></i></p>
                             <img class="thumbnail" id="mapPopupImage" style='width: 230px; height: 230px;' />
                             <div id="mapPopupDescription" style="font-size: 0.75rem;"/>
@@ -592,7 +592,40 @@
                             </div>
                             <input id='mapPopupMooringType' type='hidden' >
                             <a id="mapPopupInfo" class="button formButton" style="margin-bottom: 0; margin-top: 1em;" target="_blank">More info</a>
-                            <a id="mapPopupBook" class="button formButton" style="margin-bottom: 0;" v-on:click="BookNowCheck()" >Book now</a>
+                            <a id="mapPopupBook" class="button formButton" style="margin-bottom: 0;" v-on:click="BookNowCheck()" >Book now</a> -->
+
+                            <h4 style="margin: 0;"><b id="mapPopupName"></b></h4>
+                            <p><i id="mapPopupPrice"></i></p>
+                            <img class="img-thumbnail" id="mapPopupImage" style="width: 230px; height: 230px;" />
+                            <div id="mapPopupDescription" style="font-size: 0.75rem;"></div>
+                            <p class="mt-3">Mooring Limits</p>
+
+                            <!-- Mooring Limits grid updated to Bootstrap 5 -->
+                            <div class="row">
+                                <div class="col-7 d-none">
+                                    <small>Max Stay: <span id="max_stay_period"></span> day/s</small>
+                                </div>
+                                <div class="col-5">
+                                    <small>Max Size: <span id="vessel_size_popup"></span></small>
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-7">
+                                    <small>Max Draft: <span id="vessel_draft_popup"></span></small>
+                                </div>
+                                <div class="col-5">
+                                    <small><span id="vessel_beam_weight_popup"></span></small>
+                                </div>
+                            </div>
+                            
+                            <input id="mapPopupMooringType" type="hidden">
+                            
+                            <!-- Buttons updated to Bootstrap 5 style -->
+                            <div class="d-grid gap-2 mt-3">
+                                <a id="mapPopupInfo" class="btn btn-outline-secondary btn-sm" target="_blank">More info</a>
+                                <a id="mapPopupBook" class="btn btn-primary btn-sm" @click="BookNowCheck()">Book now</a>
+                            </div>
+
                         </div>
                     </div>
                 </div>
