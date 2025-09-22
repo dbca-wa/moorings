@@ -121,10 +121,9 @@
                             <label for="bookableOnly" class="form-check-label">Show bookable moorings only</label>
                         </div>
 
-                        <div class="row"><div class="small-12 columns">
+                        <!-- <div class="row"><div class="small-12 columns">
                             <hr/>
-                        </div>
-                        </div>
+                        </div></div>
                         <div class="row">
                             <div class="small-12 medium-12 large-6 columns">
                             <label>Vessel Registration  <input v-model="vesselRego" id="vesselRego" name="vessel_rego" type="text" placeholder="REGO134" :disabled="current_booking.length > 0" step='0.01' /></label>
@@ -193,7 +192,64 @@
                                             <input type="number" id="numMooring" name="num_mooring" v-model="numMooring" min="0" max="16"/>
                                         </div>
                                     </div>
+                                </div>
                             </div>
+                        </div> -->
+                        <!-- A simple horizontal rule -->
+                        <hr>
+
+                        <!-- A row for all vessel detail inputs -->
+                        <div class="row g-3 mb-3">
+                            <!-- Vessel Registration -->
+                            <div class="col-md-6">
+                                <label for="vesselRego" class="form-label">Vessel Registration</label>
+                                <input v-model="vesselRego" id="vesselRego" name="vessel_rego" type="text" class="form-control" placeholder="REGO134" :disabled="current_booking.length > 0">
+                            </div>
+
+                            <!-- Vessel Size -->
+                            <div class="col-md-6">
+                                <label for="vesselSize" class="form-label">Vessel Size (Meters)</label>
+                                <input v-model="vesselSize" id="vesselSize" name="vessel_size" type="number" class="form-control" placeholder="35" :disabled="current_booking.length > 0" step="0.01">
+                            </div>
+
+                            <!-- Vessel Draft -->
+                            <div class="col-md-6">
+                                <label for="vesselDraft" class="form-label">Vessel Draft (Meters)</label>
+                                <input v-model="vesselDraft" id="vesselDraft" name="vessel_draft" type="number" class="form-control" placeholder="10" :disabled="current_booking.length > 0" step="0.01">
+                            </div>
+
+                            <!-- Vessel Beam -->
+                            <div class="col-md-6">
+                                <label for="vesselBeam" class="form-label">Vessel Beam (Meters)</label>
+                                <input v-model="vesselBeam" id="vesselBeam" name="vessel_beams" type="number" class="form-control" placeholder="3" :disabled="current_booking.length > 0" step="0.01">
+                            </div>
+
+                            <!-- Vessel Weight -->
+                            <div class="col-md-6">
+                                <label for="vesselWeight" class="form-label">Vessel Weight (Tonnes)</label>
+                                <input v-model="vesselWeight" id="vesselWeight" name="vessel_weight" type="number" class="form-control" placeholder="2" :disabled="current_booking.length > 0" step="0.01">
+                            </div>
+
+                            <!-- Guests Dropdown -->
+                            <!-- We wrap the button and menu in a div with .dropdown for proper positioning -->
+                            <div class="col-md-6 dropdown">
+                                <label class="form-label">Guests</label>
+                                <button type="button" class="btn btn-outline-secondary w-100 dropdown-toggle" data-bs-toggle="dropdown" aria-expanded="false">
+                                    {{ numPeople }}
+                                </button>
+                                <!-- Foundation's dropdown-pane is replaced with Bootstrap's dropdown-menu -->
+                                <div class="dropdown-menu p-3" id="guests-dropdown" style="width: 300px;">
+                                    <!-- The content of this dropdown will be styled in the next step -->
+                                    <div class="row">
+                                        <div class="small-6 columns">
+                                            <label for="num_adults" class="text-right">Adults</label>
+                                        </div>
+                                        <div class="small-6 columns">
+                                            <input type="number" id="numAdults" name="num_adults" v-model="numAdults" min="0" max="16"/>
+                                        </div>
+                                    </div>
+                                    <!-- ... more guest inputs (Children, Infants) ... -->
+                                </div>
                             </div>
                         </div>
                         <div class="row">
