@@ -659,8 +659,10 @@
                                         <!-- <p style='display:none'><i><small>Vessel Size Limit: {{ f.vessel_size_limit }} </small></i></p>
                                         <p ><i><small>Max Stay Period: {{ f.max_advance_booking }} day/s </small></i></p> -->
                                         <div class="mt-auto">
-                                            <p>Mooring Limits</p>
-                                            <div class="row">
+                                            <!-- <p>Mooring Limits</p> -->
+                                            <p class="mb-2"><strong>Mooring Limits</strong></p>
+
+                                            <!-- <div class="row">
                                                 <div class="col-md-6"  style='display:none'>
                                                     <small>Max Stay: {{ f.max_advance_booking }} day/s</small>
                                                 </div>
@@ -675,6 +677,22 @@
                                                 <div class="col-md-6">
                                                     <small v-if="f.mooring_physical_type == 0"> Max Weight: {{ f.vessel_weight_limit }}</small>
                                                     <small v-else> Max Beam: {{ f.vessel_beam_limit }}</small>
+                                                </div>
+                                            </div> -->
+
+                                            <div class="row small">
+                                                <div class="col-6" v-if="f.max_advance_booking">
+                                                    Max Stay: {{ f.max_advance_booking }} day/s
+                                                </div>
+                                                <div class="col-6">
+                                                    Max Size: {{ f.vessel_size_limit }}
+                                                </div>
+                                                <div class="col-6">
+                                                    Max Draft: {{ f.vessel_draft_limit }}
+                                                </div>
+                                                <div class="col-6">
+                                                    <span v-if="f.mooring_physical_type == 0">Max Weight: {{ f.vessel_weight_limit }}</span>
+                                                    <span v-else>Max Beam: {{ f.vessel_beam_limit }}</span>
                                                 </div>
                                             </div>
 
