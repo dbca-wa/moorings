@@ -456,19 +456,29 @@
                     </div>
                 </div>
             </div>
-            <div class="columns small-6 medium-6 large-2">
+
+            <!-- <div class="columns small-6 medium-6 large-2">
                 <label title="Distance to search from the original selected mooring.">Distance (radius KMs)
                     <input id="distanceRadius" type="number" placeholder="0" v-on:change="update" v-model="distanceRadius"/>
                 </label>
+            </div> -->
+            <div class="col-sm-6 col-lg-2">
+                <label for="distanceRadius" class="form-label" title="Distance to search from the original selected mooring.">Distance (KMs)</label>
+                <input id="distanceRadius" type="number" class="form-control" placeholder="0" @change="update" v-model="distanceRadius"/>
             </div>
 
-            <div class="columns small-6 medium-6 large-2">
-            <span class='pull-right'>
-               <a type="button" :href="/map/" class="button float-right warning">
-                  Search Other Mooring
-               </a>
-	    </span>
-	    </div>
+            <!-- <div class="columns small-6 medium-6 large-2">
+                <span class='pull-right'>
+                    <a type="button" :href="/map/" class="button float-right warning">
+                        Search Other Mooring
+                    </a>
+                </span>
+            </div> -->
+            <div class="col-sm-6 col-lg-2">
+                <!-- A spacer label to align the button vertically with the input field -->
+                <label class="form-label">&nbsp;</label>
+                <a :href="'/map/'" class="btn btn-outline-secondary w-100">Search Other Mooring</a>
+            </div>
             
             <div v-if="!useAdminApi" class="columns small-6 medium-6 large-3" style='display:none;'>
                 <label>Equipment
