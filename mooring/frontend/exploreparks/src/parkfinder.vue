@@ -4,6 +4,7 @@
         <div class="container">
             <!-- First Row: Search Panel and Map -->
             <div class="row">
+
                 <!-- Left Column (Search Panel) -->
                 <div class="col-lg-5">
                     <!-- The content of the original left column will go here -->
@@ -325,25 +326,24 @@
                         <img id='map-toggle' class='map-toggle-black'  type='button'  @click="toggleMap('map');" src='./assets/img/map_icon.png' />
                     </div> -->
 
-<!-- Map Container using Bootstrap's position utilities -->
-<div class="position-relative mb-3">
-    <!-- Loading indicator positioned at the top-right -->
-    <div v-show="mapLoading" class="position-absolute top-0 end-0 p-2 bg-white border rounded shadow-sm" style="z-index: 10;">
-        <div class="d-flex align-items-center">
-            <img style="width:20px; height: 20px;" src="@/assets/ajax-loader-spinner.gif" alt="Loading...">
-            <span class="ms-2">Please Wait</span>
-        </div>
-    </div>
-    
-    <div id="map" style="height: 500px;"></div>
-    
-    <!-- Map toggle buttons positioned at the bottom-right -->
-    <div class="position-absolute bottom-0 end-0 p-2">
-        <img id="satellite-toggle" class="map-toggle-white" type="button" @click="toggleMap('satellite');" src="./assets/img/satellite_icon.png" alt="Satellite view" />
-        <img id="map-toggle" class="map-toggle-black" type="button" @click="toggleMap('map');" src="./assets/img/map_icon.png" alt="Map view" />
-    </div>
-</div>
-
+                    <!-- Map Container using Bootstrap's position utilities -->
+                    <div class="position-relative mb-3">
+                        <!-- Loading indicator positioned at the top-right -->
+                        <div v-show="mapLoading" class="position-absolute top-0 end-0 p-2 bg-white border rounded shadow-sm" style="z-index: 10;">
+                            <div class="d-flex align-items-center">
+                                <img style="width:20px; height: 20px;" src="@/assets/ajax-loader-spinner.gif" alt="Loading...">
+                                <span class="ms-2">Please Wait</span>
+                            </div>
+                        </div>
+                        
+                        <div id="map" style="height: 600px;" ref="mapElement"></div>
+                        
+                        <!-- Map toggle buttons positioned at the bottom-right -->
+                        <div class="position-absolute bottom-0 end-0 p-2">
+                            <img id="satellite-toggle" class="map-toggle-white" type="button" @click="toggleMap('satellite');" src="./assets/img/satellite_icon.png" alt="Satellite view" />
+                            <img id="map-toggle" class="map-toggle-black" type="button" @click="toggleMap('map');" src="./assets/img/map_icon.png" alt="Map view" />
+                        </div>
+                    </div>
 
                     <div id="mapPopup" class="mapPopup bg-white p-3 border rounded shadow" v-cloak>
                         <a href="#" id="mapPopupClose" class="mapPopupClose"></a>
