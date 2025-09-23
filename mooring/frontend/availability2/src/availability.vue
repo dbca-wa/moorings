@@ -144,185 +144,181 @@
                 </div>
             </div>
 
-            <div class="row" v-show="status == 'online'">
-                <!-- This section is hidden, but styled with BS5 -->
-                <div v-if="long_description" class="col-12 d-none">
-                    <div class="mb-3">
-                        <button type="button" class="btn btn-outline-secondary" @click="toggleMoreInfo">
-                            More Information
-                            <i v-if="!showMoreInfo" class="fa fa-caret-down ms-2"></i>
-                            <i v-else class="fa fa-caret-up ms-2"></i>
-                        </button>
-                    </div>
-                    <div class="mb-3" v-if="showMoreInfo">
-                        <div v-html="long_description"></div>
-                    </div>
-                </div>
+            <div class="row mb-4" v-show="status == 'online'">
+                <div class="col-12">
+                    <div class="card">
+                        <div class="card-body">
+                            <!-- A new row for the form controls INSIDE the card -->
+                            <div class="row g-3">
+                                <!-- This section is hidden, but styled with BS5 -->
+                                <div v-if="long_description" class="col-12 d-none">
+                                    <div class="mb-3">
+                                        <button type="button" class="btn btn-outline-secondary" @click="toggleMoreInfo">
+                                            More Information
+                                            <i v-if="!showMoreInfo" class="fa fa-caret-down ms-2"></i>
+                                            <i v-else class="fa fa-caret-up ms-2"></i>
+                                        </button>
+                                    </div>
+                                    <div class="mb-3" v-if="showMoreInfo">
+                                        <div v-html="long_description"></div>
+                                    </div>
+                                </div>
+                                <div class="col-sm-6 col-lg-2">
+                                    <label for="date-arrival" class="form-label">Arrival</label>
+                                    <input
+                                        id="date-arrival"
+                                        type="date"
+                                        class="form-control"
+                                        placeholder="dd/mm/yyyy"
+                                        @change="update"
+                                        v-model="arrivalDateFormatted"
+                                        :max="departureDateFormatted"
+                                    />
+                                </div>
+                                <div class="col-sm-6 col-lg-2">
+                                    <label for="date-departure" class="form-label">Departure</label>
+                                    <input
+                                        id="date-departure"
+                                        type="date"
+                                        class="form-control"
+                                        placeholder="dd/mm/yyyy"
+                                        @change="update"
+                                        v-model="departureDateFormatted"
+                                        :min="arrivalDateFormatted"
+                                    />
+                                </div>
+                                <!-- Vessel Details Dropdown -->
+                                <div class="col-sm-6 col-lg-2">
+                                    <label for="vesselDetailsDropdown" class="form-label">Vessel Details</label>
+                                    <div class="dropdown">
+                                        <button class="btn btn-outline-secondary dropdown-toggle w-100" type="button" id="vesselDetailsDropdown" data-bs-toggle="dropdown" aria-expanded="false">
+                                            Details
+                                        </button>
+                                        <div class="dropdown-menu p-3" aria-labelledby="vesselDetailsDropdown" style="width: 300px;">
+                                            <!-- Vessel Rego -->
+                                            <div class="row g-3 align-items-center mb-2">
+                                                <div class="col-6">
+                                                    <label for="vesselRego" class="col-form-label">Vessel Rego</label>
+                                                </div>
+                                                <div class="col-6">
+                                                    <input type="text" id="vesselRego" ref="vesselRego" name="vessel_rego" class="form-control form-control-sm" @blur="searchRego()" v-model="vesselRego" :disabled="current_booking.length > 0">
+                                                </div>
+                                            </div>
+                                            <!-- Vessel Size -->
+                                            <div class="row g-3 align-items-center mb-2">
+                                                <div class="col-6">
+                                                    <label for="vesselSize" class="col-form-label">Vessel Size (Meters)</label>
+                                                </div>
+                                                <div class="col-6">
+                                                    <input type="number" id="vesselSize" ref="vesselSize" name="vessel_size" class="form-control form-control-sm" @change="checkDetails(false)" @blur="checkDetails(false)" v-model="vesselSize" step="0.01" :disabled="current_booking.length > 0">
+                                                </div>
+                                            </div>
+                                            <!-- Vessel Draft -->
+                                            <div class="row g-3 align-items-center mb-2">
+                                                <div class="col-6">
+                                                    <label for="vesselDraft" class="col-form-label">Vessel Draft (Meters)</label>
+                                                </div>
+                                                <div class="col-6">
+                                                    <input type="number" id="vesselDraft" ref="vesselDraft" name="vessel_draft" class="form-control form-control-sm" @change="checkDetails(false)" @blur="checkDetails(false)" v-model="vesselDraft" step="0.01" :disabled="current_booking.length > 0">
+                                                </div>
+                                            </div>
+                                            <!-- Vessel Beam -->
+                                            <div class="row g-3 align-items-center mb-2">
+                                                <div class="col-6">
+                                                    <label for="vesselBeam" class="col-form-label">Vessel Beam (Meters)</label>
+                                                </div>
+                                                <div class="col-6">
+                                                    <input type="number" id="vesselBeam" ref="vesselBeam" name="vessel_beam" class="form-control form-control-sm" @change="checkDetails(false)" @blur="checkDetails(false)" v-model="vesselBeam" step="0.01" :disabled="current_booking.length > 0">
+                                                </div>
+                                            </div>
+                                            <!-- Vessel Weight -->
+                                            <div class="row g-3 align-items-center">
+                                                <div class="col-6">
+                                                    <label for="vesselWeight" class="col-form-label">Vessel Weight (Tonnes)</label>
+                                                </div>
+                                                <div class="col-6">
+                                                    <input type="number" id="vesselWeight" ref="vesselWeight" name="vessel_weight" class="form-control form-control-sm" @change="checkDetails(false)" @blur="checkDetails(false)" v-model="vesselWeight" step="0.01" :disabled="current_booking.length > 0">
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <!-- Guests Dropdown -->
+                                <div class="col-sm-6 col-lg-2">
+                                    <label for="guestsDropdown" class="form-label">Guests</label>
+                                    <div class="dropdown">
+                                        <button class="btn btn-outline-secondary dropdown-toggle w-100" type="button" id="guestsDropdown" data-bs-toggle="dropdown" aria-expanded="false">
+                                            {{ numPeople }}
+                                        </button>
+                                        <div class="dropdown-menu p-3" aria-labelledby="guestsDropdown" style="width: 300px;">
+                                            <!-- Adults -->
+                                            <div class="row g-3 align-items-center mb-2">
+                                                <div class="col-6">
+                                                    <label for="numAdults" class="col-form-label">Adults</label>
+                                                </div>
+                                                <div class="col-6">
+                                                    <input type="number" id="numAdults" name="num_adults" class="form-control form-control-sm" @change="checkGuests()" v-model="numAdults" min="0" max="16">
+                                                </div>
+                                            </div>
 
-                <div class="col-sm-6 col-lg-2">
-                    <label for="date-arrival" class="form-label">Arrival</label>
-                    <input
-                        id="date-arrival"
-                        type="date"
-                        class="form-control"
-                        placeholder="dd/mm/yyyy"
-                        @change="update"
-                        v-model="arrivalDateFormatted"
-                        :max="departureDateFormatted"
-                    />
-                </div>
-                <div class="col-sm-6 col-lg-2">
-                    <label for="date-departure" class="form-label">Departure</label>
-                    <input
-                        id="date-departure"
-                        type="date"
-                        class="form-control"
-                        placeholder="dd/mm/yyyy"
-                        @change="update"
-                        v-model="departureDateFormatted"
-                        :min="arrivalDateFormatted"
-                    />
-                </div>
-                <!-- Vessel Details Dropdown -->
-                <div class="col-sm-6 col-lg-2">
-                    <label for="vesselDetailsDropdown" class="form-label">Vessel Details</label>
-                    <div class="dropdown">
-                        <button class="btn btn-outline-secondary dropdown-toggle w-100" type="button" id="vesselDetailsDropdown" data-bs-toggle="dropdown" aria-expanded="false">
-                            Details
-                        </button>
-                        <div class="dropdown-menu p-3" aria-labelledby="vesselDetailsDropdown" style="width: 300px;">
-                            <!-- Vessel Rego -->
-                            <div class="row g-3 align-items-center mb-2">
-                                <div class="col-6">
-                                    <label for="vesselRego" class="col-form-label">Vessel Rego</label>
+                                            <!-- Concessions (Hidden) -->
+                                            <div class="row g-3 align-items-center mb-2 d-none">
+                                                <div class="col-6">
+                                                    <label for="numConcessions" class="col-form-label">
+                                                        <span title="Holders of one of the following Australian-issued cards: - Seniors Card - Age Pension - Disability Support - Carer Payment - Carer Allowance - Companion Card - Department of Veterans' Affairs">Concessions</span>
+                                                    </label>
+                                                </div>
+                                                <div class="col-6">
+                                                    <input type="number" id="numConcessions" name="num_concessions" class="form-control form-control-sm" @change="checkGuests()" v-model="numConcessions" min="0" max="16">
+                                                </div>
+                                            </div>
+
+                                            <!-- Children -->
+                                            <div class="row g-3 align-items-center mb-2">
+                                                <div class="col-6">
+                                                    <label for="numChildren" class="col-form-label">Children (4-16)</label>
+                                                </div>
+                                                <div class="col-6">
+                                                    <input type="number" id="numChildren" name="num_children" class="form-control form-control-sm" @change="checkGuests()" v-model="numChildren" min="0" max="16">
+                                                </div>
+                                            </div>
+
+                                            <!-- Infants -->
+                                            <div class="row g-3 align-items-center">
+                                                <div class="col-6">
+                                                    <label for="numInfants" class="col-form-label">Infants (under 4)</label>
+                                                </div>
+                                                <div class="col-6">
+                                                    <input type="number" id="numInfants" name="num_infants" class="form-control form-control-sm" @change="checkGuests()" v-model="numInfants" min="0" max="16">
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
                                 </div>
-                                <div class="col-6">
-                                    <input type="text" id="vesselRego" ref="vesselRego" name="vessel_rego" class="form-control form-control-sm" @blur="searchRego()" v-model="vesselRego" :disabled="current_booking.length > 0">
+                                <div class="col-sm-6 col-lg-2">
+                                    <label for="distanceRadius" class="form-label" title="Distance to search from the original selected mooring.">Distance (KMs)</label>
+                                    <input id="distanceRadius" type="number" class="form-control" placeholder="0" @change="update" v-model="distanceRadius"/>
                                 </div>
-                            </div>
-                            <!-- Vessel Size -->
-                            <div class="row g-3 align-items-center mb-2">
-                                <div class="col-6">
-                                    <label for="vesselSize" class="col-form-label">Vessel Size (Meters)</label>
+                                <div class="col-sm-6 col-lg-2">
+                                    <!-- A spacer label to align the button vertically with the input field -->
+                                    <label class="form-label">&nbsp;</label>
+                                    <a :href="'/map/'" class="btn btn-outline-secondary w-100">Search Other Mooring</a>
                                 </div>
-                                <div class="col-6">
-                                    <input type="number" id="vesselSize" ref="vesselSize" name="vessel_size" class="form-control form-control-sm" @change="checkDetails(false)" @blur="checkDetails(false)" v-model="vesselSize" step="0.01" :disabled="current_booking.length > 0">
-                                </div>
-                            </div>
-                            <!-- Vessel Draft -->
-                            <div class="row g-3 align-items-center mb-2">
-                                <div class="col-6">
-                                    <label for="vesselDraft" class="col-form-label">Vessel Draft (Meters)</label>
-                                </div>
-                                <div class="col-6">
-                                    <input type="number" id="vesselDraft" ref="vesselDraft" name="vessel_draft" class="form-control form-control-sm" @change="checkDetails(false)" @blur="checkDetails(false)" v-model="vesselDraft" step="0.01" :disabled="current_booking.length > 0">
-                                </div>
-                            </div>
-                            <!-- Vessel Beam -->
-                            <div class="row g-3 align-items-center mb-2">
-                                <div class="col-6">
-                                    <label for="vesselBeam" class="col-form-label">Vessel Beam (Meters)</label>
-                                </div>
-                                <div class="col-6">
-                                    <input type="number" id="vesselBeam" ref="vesselBeam" name="vessel_beam" class="form-control form-control-sm" @change="checkDetails(false)" @blur="checkDetails(false)" v-model="vesselBeam" step="0.01" :disabled="current_booking.length > 0">
-                                </div>
-                            </div>
-                            <!-- Vessel Weight -->
-                            <div class="row g-3 align-items-center">
-                                <div class="col-6">
-                                    <label for="vesselWeight" class="col-form-label">Vessel Weight (Tonnes)</label>
-                                </div>
-                                <div class="col-6">
-                                    <input type="number" id="vesselWeight" ref="vesselWeight" name="vessel_weight" class="form-control form-control-sm" @change="checkDetails(false)" @blur="checkDetails(false)" v-model="vesselWeight" step="0.01" :disabled="current_booking.length > 0">
+                                <div v-if="!useAdminApi" class="col-sm-6 col-lg-3 d-none">
+                                    <label for="gear_type_select" class="form-label">Equipment</label>
+                                    <select id="gear_type_select" name="gear_type" class="form-select" v-model="gearType" @change="update()">
+                                        <option value="tent" v-if="gearTotals.tent">Tent</option>
+                                        <option value="campervan" v-if="gearTotals.campervan">Campervan</option>
+                                        <option value="caravan" v-if="gearTotals.caravan">Caravan / Camper trailer</option>
+                                    </select>
                                 </div>
                             </div>
                         </div>
                     </div>
-                </div>
-                <!-- Guests Dropdown -->
-                <div class="col-sm-6 col-lg-2">
-                    <label for="guestsDropdown" class="form-label">Guests</label>
-                    <div class="dropdown">
-                        <button class="btn btn-outline-secondary dropdown-toggle w-100" type="button" id="guestsDropdown" data-bs-toggle="dropdown" aria-expanded="false">
-                            {{ numPeople }}
-                        </button>
-                        <div class="dropdown-menu p-3" aria-labelledby="guestsDropdown" style="width: 300px;">
-                            <!-- Adults -->
-                            <div class="row g-3 align-items-center mb-2">
-                                <div class="col-6">
-                                    <label for="numAdults" class="col-form-label">Adults</label>
-                                </div>
-                                <div class="col-6">
-                                    <input type="number" id="numAdults" name="num_adults" class="form-control form-control-sm" @change="checkGuests()" v-model="numAdults" min="0" max="16">
-                                </div>
-                            </div>
-
-                            <!-- Concessions (Hidden) -->
-                            <div class="row g-3 align-items-center mb-2 d-none">
-                                <div class="col-6">
-                                    <label for="numConcessions" class="col-form-label">
-                                        <span title="Holders of one of the following Australian-issued cards: - Seniors Card - Age Pension - Disability Support - Carer Payment - Carer Allowance - Companion Card - Department of Veterans' Affairs">Concessions</span>
-                                    </label>
-                                </div>
-                                <div class="col-6">
-                                    <input type="number" id="numConcessions" name="num_concessions" class="form-control form-control-sm" @change="checkGuests()" v-model="numConcessions" min="0" max="16">
-                                </div>
-                            </div>
-
-                            <!-- Children -->
-                            <div class="row g-3 align-items-center mb-2">
-                                <div class="col-6">
-                                    <label for="numChildren" class="col-form-label">Children (4-16)</label>
-                                </div>
-                                <div class="col-6">
-                                    <input type="number" id="numChildren" name="num_children" class="form-control form-control-sm" @change="checkGuests()" v-model="numChildren" min="0" max="16">
-                                </div>
-                            </div>
-
-                            <!-- Infants -->
-                            <div class="row g-3 align-items-center">
-                                <div class="col-6">
-                                    <label for="numInfants" class="col-form-label">Infants (under 4)</label>
-                                </div>
-                                <div class="col-6">
-                                    <input type="number" id="numInfants" name="num_infants" class="form-control form-control-sm" @change="checkGuests()" v-model="numInfants" min="0" max="16">
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="col-sm-6 col-lg-2">
-                    <label for="distanceRadius" class="form-label" title="Distance to search from the original selected mooring.">Distance (KMs)</label>
-                    <input id="distanceRadius" type="number" class="form-control" placeholder="0" @change="update" v-model="distanceRadius"/>
-                </div>
-
-                <div class="col-sm-6 col-lg-2">
-                    <!-- A spacer label to align the button vertically with the input field -->
-                    <label class="form-label">&nbsp;</label>
-                    <a :href="'/map/'" class="btn btn-outline-secondary w-100">Search Other Mooring</a>
-                </div>
-                
-                <!-- <div v-if="!useAdminApi" class="columns small-6 medium-6 large-3" style='display:none;'>
-                    <label>Equipment
-                        <select name="gear_type" v-model="gearType" @change="update()">
-                            <option value="tent" v-if="gearTotals.tent">Tent</option>
-                            <option value="campervan" v-if="gearTotals.campervan">Campervan</option>
-                            <option value="caravan" v-if="gearTotals.caravan">Caravan / Camper trailer</option>
-                        </select>
-                    </label>
-                </div> -->
-                <div v-if="!useAdminApi" class="col-sm-6 col-lg-3 d-none">
-                    <label for="gear_type_select" class="form-label">Equipment</label>
-                    <select id="gear_type_select" name="gear_type" class="form-select" v-model="gearType" @change="update()">
-                        <option value="tent" v-if="gearTotals.tent">Tent</option>
-                        <option value="campervan" v-if="gearTotals.campervan">Campervan</option>
-                        <option value="caravan" v-if="gearTotals.caravan">Caravan / Camper trailer</option>
-                    </select>
                 </div>
             </div>
 
-            <div class="row mt-4" v-show="status == 'online'">
+            <div class="row mt-2" v-show="status == 'online'">
                 <div class="col-12">
                     <div v-if="vesselSize > 0 && vesselDraft > 0">
                         <div v-if="vesselDraft != 0 && vesselWeight != 0">
