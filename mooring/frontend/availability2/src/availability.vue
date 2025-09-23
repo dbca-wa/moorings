@@ -552,7 +552,8 @@
                                                     <button v-else class="btn btn-sm btn-secondary w-100" disabled>Change dates</button>
                                                 </template>
                                             </td>
-                                            <td class="date" v-for="day in site.availability" v-bind:class="{available: day[0]}" align='center'>
+                                            <!-- <td class="date" v-for="day in site.availability" v-bind:class="{available: day[0]}" align='center'> -->
+                                            <td class="date text-center align-middle" v-for="day in site.availability" :class="{ 'table-success': day[0] }">
                                                 <div v-for="bp in day[1].booking_period" style='width:160px; '>
                                                     <div v-if="bp.status == 'open'" class='tooltip2'  align='left'>
                                                         <button class="button" style='width: 160px; margin-bottom: 2px;'  @click="addBooking(site.id,site.mooring_id,bp.id,bp.date)" >
