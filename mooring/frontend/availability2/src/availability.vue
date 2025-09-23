@@ -377,7 +377,7 @@
                     </button>
                     <!-- <div class="dropdown-pane" id="guests-dropdown" data-dropdown data-auto-focus="true"> -->
                     <div class="dropdown-menu p-3" aria-labelledby="guestsDropdown" style="width: 300px;">
-                        <div class="row">
+                        <!-- <div class="row">
                             <div class="small-6 columns">
                                 <label for="num_adults" class="text-right">Adults</label>
                             </div><div class="small-6 columns">
@@ -410,6 +410,47 @@
                                 <label for="num_infants" class="text-right">Infants (under 4)</label>
                             </div><div class="small-6 columns">
                                 <input type="number" id="numInfants" name="num_infants" @change="checkGuests()" v-model="numInfants" min="0" max="16"/>
+                            </div>
+                        </div> -->
+                        <!-- Adults -->
+                        <div class="row g-3 align-items-center mb-2">
+                            <div class="col-6">
+                                <label for="numAdults" class="col-form-label">Adults</label>
+                            </div>
+                            <div class="col-6">
+                                <input type="number" id="numAdults" name="num_adults" class="form-control form-control-sm" @change="checkGuests()" v-model="numAdults" min="0" max="16">
+                            </div>
+                        </div>
+
+                        <!-- Concessions (Hidden) -->
+                        <div class="row g-3 align-items-center mb-2 d-none">
+                            <div class="col-6">
+                                <label for="numConcessions" class="col-form-label">
+                                    <span title="Holders of one of the following Australian-issued cards: - Seniors Card - Age Pension - Disability Support - Carer Payment - Carer Allowance - Companion Card - Department of Veterans' Affairs">Concessions</span>
+                                </label>
+                            </div>
+                            <div class="col-6">
+                                <input type="number" id="numConcessions" name="num_concessions" class="form-control form-control-sm" @change="checkGuests()" v-model="numConcessions" min="0" max="16">
+                            </div>
+                        </div>
+
+                        <!-- Children -->
+                        <div class="row g-3 align-items-center mb-2">
+                            <div class="col-6">
+                                <label for="numChildren" class="col-form-label">Children (4-16)</label>
+                            </div>
+                            <div class="col-6">
+                                <input type="number" id="numChildren" name="num_children" class="form-control form-control-sm" @change="checkGuests()" v-model="numChildren" min="0" max="16">
+                            </div>
+                        </div>
+
+                        <!-- Infants -->
+                        <div class="row g-3 align-items-center">
+                            <div class="col-6">
+                                <label for="numInfants" class="col-form-label">Infants (under 4)</label>
+                            </div>
+                            <div class="col-6">
+                                <input type="number" id="numInfants" name="num_infants" class="form-control form-control-sm" @change="checkGuests()" v-model="numInfants" min="0" max="16">
                             </div>
                         </div>
                     </div>
@@ -791,9 +832,9 @@ export default {
             get: function() {
                 var count = parseInt(this.numAdults) + parseInt(this.numConcessions) + parseInt(this.numChildren) + parseInt(this.numInfants);
                 if (count === 1) {
-                    return count +" person ▼";
+                    return count +" person";
                 } else {
-                    return count + " people ▼";
+                    return count + " people";
                 }
             }
         },
