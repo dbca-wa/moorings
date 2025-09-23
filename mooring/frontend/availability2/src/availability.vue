@@ -94,6 +94,41 @@
                     </div>
                 </div>
             </div>
+            <div class="col-md-4">
+                <!-- <div v-if="vesselRego.length < 0.1 || vesselRego == ' ' || vesselSize < 0.1 || vesselDraft < 0.1 ">
+                    <button title="Please enter vessel details" style="border-radius: 4px; border: 1px solid #2e6da4" class="button small-12 medium-12 large-12" @click="validateVessel()">Proceed to Check Out</button>
+                </div>
+                <div v-else>
+                    <div v-if="vesselWeight == 0 && vesselBeam == 0 ">
+                        <button title="Please enter vessel details" style="border-radius: 4px; border: 1px solid #2e6da4" class="button small-12 medium-12 large-12" @click="validateVessel()">Proceed to Check Out</button>
+                    </div>
+                    <div v-else>
+                        <a  v-show="current_booking.length > 0 && booking_changed == true && numAdults >= 0" class="button small-12 medium-12 large-12" :href="parkstayUrl+'/booking'" style="border-radius: 4px; border: 1px solid #2e6da4">Proceed to Check Out</a>
+                        <button  title="Please add items into your trolley." v-show="current_booking.length > 0 && booking_changed == true && numAdults < 0" style="color: #000000; background-color: rgb(224, 217, 217); border: 1px solid #000; border-radius: 4px;" class="button small-12 medium-12 large-12" disabled >Please select minimum of 1 adult guest</button>
+                        <button  title="Please add items into your trolley." v-show="current_booking.length == 0 && numAdults >= 0 || booking_changed == false" style="color: #000000; background-color: rgb(224, 217, 217); border: 1px solid #000; border-radius: 4px;" class="button small-12 medium-12 large-12" disabled >Add items to Proceed to Check Out</button>                
+                    </div>
+                </div> -->
+                <!-- Use d-grid to make the button inside take up the full width -->
+                <div class="d-grid">
+                    <div v-if="vesselRego.length < 0.1 || vesselRego == ' ' || vesselSize < 0.1 || vesselDraft < 0.1">
+                        <button title="Please enter vessel details" class="btn btn-primary" @click="validateVessel()">Proceed to Check Out</button>
+                    </div>
+                    <div v-else>
+                    <div v-if="vesselWeight == 0 && vesselBeam == 0">
+                        <button title="Please enter vessel details" class="btn btn-primary" @click="validateVessel()">Proceed to Check Out</button>
+                    </div>
+                    <div v-else>
+                        <a v-if="current_booking.length > 0 && booking_changed == true && numAdults >= 0" class="btn btn-primary" :href="parkstayUrl+'/booking'">Proceed to Check Out</a>
+                        <button v-else-if="current_booking.length > 0 && booking_changed == true && numAdults < 0" class="btn btn-secondary" disabled>Please select minimum of 1 adult guest</button>
+                        <button v-else class="btn btn-secondary" disabled>Add items to Proceed to Check Out</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <loader :isLoading.sync="isLoading">&nbsp;</loader>
+
         <div class="row" v-if="name">
             <div class="columns small-12">
                 <h1>Book mooring:</h1>
