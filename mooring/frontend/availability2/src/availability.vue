@@ -64,42 +64,36 @@
             </div>
         </div>
 
-        <div class="columns small-12 medium-12 large-12">
-            <div class="row">
-                <div class="small-8 medium-9 large-10">
-                    <div class="card">
-                        <div class="card-body"><h3 class="card-title">Trolley: <span id='total_trolley'>${{ total_booking }}</span></h3></div>
+        <!-- A new row for the trolley section with a bottom margin -->
+        <div class="row mb-3">
+            <!-- Left Column for Card and Item List -->
+            <div class="col-md-8">
+                <!-- <div class="card">
+                    <div class="card-body"><h3 class="card-title">Trolley: <span id='total_trolley'>${{ total_booking }}</span></h3></div>
+                </div>
+                <div class='columns small-12 medium-12 large-12' style="margin-top:10px; margin-bottom:10px;"> 
+                    <div v-for="item in current_booking" class="row small-12 medium-12 large-12" >
+                        <div class="columns small-12 medium-9 large-9">{{ item.item }}</div>
+                        <div class="columns small-12 medium-2 large-2">${{ item.amount }}</div>
+                        <div class="columns small-12 medium-1 large-1"><a v-show="item.past_booking == false" style='color: red; opacity: 1;' type="button" class="close" @click="deleteBooking(item.id, item.past_booking)">x</a></div>
                     </div>
-                    <div class='columns small-12 medium-12 large-12' style="margin-top:10px; margin-bottom:10px;"> 
-                        <div v-for="item in current_booking" class="row small-12 medium-12 large-12" >
-                            <div class="columns small-12 medium-9 large-9">{{ item.item }}</div>
-                            <div class="columns small-12 medium-2 large-2">${{ item.amount }}</div>
-                            <div class="columns small-12 medium-1 large-1"><a v-show="item.past_booking == false" style='color: red; opacity: 1;' type="button" class="close" @click="deleteBooking(item.id, item.past_booking)">x</a></div>
-                        </div>
+                </div> -->
+                <!-- Trolley summary card -->
+                <div class="card mb-3">
+                    <div class="card-body">
+                        <h5 class="card-title mb-0">Trolley: <span id='total_trolley'>${{ total_booking }}</span></h5>
                     </div>
                 </div>
-                <div class="columns small-4 medium-3 large-2">
-                        <div v-if="vesselRego.length < 0.1 || vesselRego == ' ' || vesselSize < 0.1 || vesselDraft < 0.1 ">
-                            
-                            <button title="Please enter vessel details" style="border-radius: 4px; border: 1px solid #2e6da4" class="button small-12 medium-12 large-12" @click="validateVessel()">Proceed to Check Out</button>
-                        </div>
-                        <div v-else>
-                           <div v-if="vesselWeight == 0 && vesselBeam == 0 ">
 
-                            <button title="Please enter vessel details" style="border-radius: 4px; border: 1px solid #2e6da4" class="button small-12 medium-12 large-12" @click="validateVessel()">Proceed to Check Out</button>
-                           </div>
-                           <div v-else>
-                            <a  v-show="current_booking.length > 0 && booking_changed == true && numAdults >= 0" class="button small-12 medium-12 large-12" :href="parkstayUrl+'/booking'" style="border-radius: 4px; border: 1px solid #2e6da4">Proceed to Check Out</a>
-                            <button  title="Please add items into your trolley." v-show="current_booking.length > 0 && booking_changed == true && numAdults < 0" style="color: #000000; background-color: rgb(224, 217, 217); border: 1px solid #000; border-radius: 4px;" class="button small-12 medium-12 large-12" disabled >Please select minimum of 1 adult guest</button>
-                            <button  title="Please add items into your trolley." v-show="current_booking.length == 0 && numAdults >= 0 || booking_changed == false" style="color: #000000; background-color: rgb(224, 217, 217); border: 1px solid #000; border-radius: 4px;" class="button small-12 medium-12 large-12" disabled >Add items to Proceed to Check Out</button>                
-                            </div>
-
-
-                            </div>
-                        </div>
-        </div>
-        </div>
-	<loader :isLoading.sync="isLoading">&nbsp;</loader>
+                <!-- Trolley item list -->
+                <div v-for="item in current_booking" :key="item.id" class="row gx-2 align-items-center mb-1">
+                    <div class="col-8">{{ item.item }}</div>
+                    <div class="col-3 text-end">${{ item.amount }}</div>
+                    <div class="col-1 text-end">
+                        <button v-show="item.past_booking == false" type="button" class="btn-close" @click="deleteBooking(item.id, item.past_booking)" aria-label="Remove item"></button>
+                    </div>
+                </div>
+            </div>
         <div class="row" v-if="name">
             <div class="columns small-12">
                 <h1>Book mooring:</h1>
