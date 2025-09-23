@@ -501,9 +501,21 @@
                         <div class="table-responsive">
                             <!-- <table class="hover"> -->
                             <table class="table table-bordered table-striped table-hover">
-                                <thead>
+                                <!-- <thead>
                                     <tr>
                                         <th class="site">Mooring &nbsp;<a class="float-right" target="_blank" :href="map" v-if="map" style='display: none;'>View Map</a></th>
+                                        <th class="book">Book</th>
+                                        <th class="date" v-for="i in days">{{ getDateString(arrivalDate, i-1) }}</th>
+                                    </tr>
+                                </thead> -->
+                                <thead>
+                                    <tr>
+                                        <th class="site">
+                                            <div class="d-flex justify-content-between align-items-center">
+                                                <span>Mooring</span>
+                                                <a class="btn btn-sm btn-outline-secondary d-none" target="_blank" :href="map" v-if="map">View Map</a>
+                                            </div>
+                                        </th>
                                         <th class="book">Book</th>
                                         <th class="date" v-for="i in days">{{ getDateString(arrivalDate, i-1) }}</th>
                                     </tr>
