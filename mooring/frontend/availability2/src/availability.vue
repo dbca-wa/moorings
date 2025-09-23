@@ -303,7 +303,7 @@
                 </div>
             </div>
 
-            <div class="row" v-show="status == 'online'">
+            <div class="row mt-4" v-show="status == 'online'">
                 <div class="col-12">
                     <div v-if="vesselSize > 0 && vesselDraft > 0">
                         <div v-if="vesselDraft != 0 && vesselWeight != 0">
