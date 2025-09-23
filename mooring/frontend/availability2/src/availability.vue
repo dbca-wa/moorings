@@ -534,12 +534,22 @@
                                             </td>
                                             <td class="book">
                                                 <template v-if="site.price">
-                                                    <button v-if="mooring_book_row[index] == true" :disabled="mooring_book_row_disabled[index] == true" @click="addBookingRow(index)" class="button"><small>Book now</small><br/> ${{ mooring_book_row_price[index] }}</button>
-                                                    <button style='display:none' v-else disabled class="button has-tip" data-tooltip aria-haspopup="true" title="Please complete your current ongoing booking using the button at the top of the page."><small>Book now</small><br/>{{ site.price }}</button>
+                                                    <!-- <button v-if="mooring_book_row[index] == true" :disabled="mooring_book_row_disabled[index] == true" @click="addBookingRow(index)" class="button"><small>Book now</small><br/> ${{ mooring_book_row_price[index] }}</button>
+                                                    <button style='display:none' v-else disabled class="button has-tip" data-tooltip aria-haspopup="true" title="Please complete your current ongoing booking using the button at the top of the page."><small>Book now</small><br/>{{ site.price }}</button> -->
+                                                    <button v-if="mooring_book_row[index] == true" :disabled="mooring_book_row_disabled[index] == true" @click="addBookingRow(index)" class="btn btn-sm btn-primary w-100">
+                                                        Book now<br/>
+                                                        <span class="fw-bold">${{ mooring_book_row_price[index] }}</span>
+                                                    </button>
+                                                    <button v-else disabled class="btn btn-sm btn-secondary w-100 d-none" title="Please complete your current ongoing booking using the button at the top of the page.">
+                                                        Book now<br/>
+                                                        <span class="fw-bold">${{ site.price }}</span>
+                                                    </button>
                                                 </template>
                                                 <template v-else>
-                                                    <button v-if="site.breakdown" class="button warning" @click="toggleBreakdown(site)"><small>Show availability</small></button>
-                                                    <button v-else class="button secondary disabled" disabled><small>Change dates</small></button>
+                                                    <!-- <button v-if="site.breakdown" class="button warning" @click="toggleBreakdown(site)"><small>Show availability</small></button>
+                                                    <button v-else class="button secondary disabled" disabled><small>Change dates</small></button> -->
+                                                    <button v-if="site.breakdown" class="btn btn-sm btn-warning w-100" @click="toggleBreakdown(site)">Show availability</button>
+                                                    <button v-else class="btn btn-sm btn-secondary w-100" disabled>Change dates</button>
                                                 </template>
                                             </td>
                                             <td class="date" v-for="day in site.availability" v-bind:class="{available: day[0]}" align='center'>
