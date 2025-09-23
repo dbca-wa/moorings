@@ -206,10 +206,7 @@
 </template>
 
 <script>
-// import 'foundation-sites';
-// import 'foundation-datepicker/js/foundation-datepicker';
 import moment from 'moment';
-// import JQuery from 'jquery';
 import swal from 'sweetalert2';
 import bootstrapModal from '@/utils/bootstrap-modal.vue'
 import { api_endpoints } from './hooks';
@@ -791,32 +788,6 @@ export default {
     },
     mounted: function(){
         let vm = this;
-        // $(document).foundation();
-        // this.arrivalEl = $('#dateArrival');
-        // this.arrivalData = this.arrivalEl.fdatepicker({
-        //     format: 'dd/mm/yyyy',
-        //     onRender: function (date) {
-        //         return;
-        //     }
-        // }).on('changeDate', function (ev) {
-        //     ev.target.dispatchEvent(new CustomEvent('change'));
-        // }).on('change', function (ev) {
-        //     vm.arrivalData.hide();
-        //     vm.arrivalDate = moment(vm.arrivalData.date);
-        //     vm.validateArrivalDate();
-        // }).on('keydown', function (ev) {
-        //     if (ev.keyCode == 13) {
-        //         ev.target.dispatchEvent(new CustomEvent('change'));
-        //     }
-        // }).data('datepicker');
-
-        // this.arrivalData.date = this.arrivalDate.toDate();
-        // this.arrivalData.setValue();
-        // this.arrivalData.fill();
-
-        //Get the user to autofill the boxes.
-        // this.terms = $('#terms').val(); 
-        // $('#terms-link').val(this.terms);
         $.ajax({
             url: "/api/profile",
             method: 'GET',
