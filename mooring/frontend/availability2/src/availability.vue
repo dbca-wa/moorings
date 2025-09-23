@@ -586,13 +586,26 @@
                                                             <span v-if="site.mooring_class == 'large'">${{ bp.large_price }}</span>
                                                         </button>
                                                     </div>
-                                                    <div v-else-if="bp.status == 'selected'" >
+                                                    <!-- <div v-else-if="bp.status == 'selected'" >
                                                         <div style="position: relative; text-align: right; margin-right: 25px;">
                                                             <a v-show="bp.past_booking == false" type="button" class="close" style="color: red; opacity: 1; position: absolute; padding-left: 5px;" @click="deleteBooking(bp.booking_row_id, bp.past_booking)" >x</a>
                                                         </div>
                                                         <button class="button" style='width: 160px; margin-bottom: 2px; background-color: #8bc8f1;' @click="deleteBooking(bp.booking_row_id, bp.past_booking)" > 
                                                             <small>Book {{ bp.period_name }} <span v-if="site.mooring_class == 'small'">${{ bp.small_price }}</span> <span v-if="site.mooring_class == 'medium'">${{ bp.medium_price }}</span> <span v-if="site.mooring_class == 'large'">${{ bp.large_price }} </span></small>
                                                         </button>
+                                                    </div> -->
+                                                    <div v-else-if="bp.status == 'selected'">
+                                                        <!-- Wrap button and close icon in a relative position container -->
+                                                        <div class="position-relative">
+                                                            <button class="btn btn-sm btn-info w-100" @click="deleteBooking(bp.booking_row_id, bp.past_booking)"> 
+                                                                Book {{ bp.period_name }}
+                                                                <span v-if="site.mooring_class == 'small'">${{ bp.small_price }}</span>
+                                                                <span v-if="site.mooring_class == 'medium'">${{ bp.medium_price }}</span>
+                                                                <span v-if="site.mooring_class == 'large'">${{ bp.large_price }} </span>
+                                                            </button>
+                                                            <!-- Position the close button on top of the main button -->
+                                                            <button v-show="bp.past_booking == false" type="button" class="btn-close position-absolute top-0 end-0" style="transform: translate(5px, -5px);" @click.stop="deleteBooking(bp.booking_row_id, bp.past_booking)" aria-label="Remove"></button>
+                                                        </div>
                                                     </div>
                                                     <div v-else-if="bp.status == 'perday'" >
                                                         <button class="button"  style='width: 160px; margin-bottom: 2px; background-color: rgb(255, 253, 199); color: #000;' >
