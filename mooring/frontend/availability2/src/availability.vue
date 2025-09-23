@@ -45,7 +45,7 @@
             </div>
         </div>
 
-        <div class="columns small-12 medium-12 large-12" v-show="ongoing_booking">
+        <!-- <div class="columns small-12 medium-12 large-12" v-show="ongoing_booking">
             <div class="row">
                 <div class="small-8 medium-9 large-10">
                     <button v-show="ongoing_booking" style="color: #FFFFFF; background-color: rgb(255, 0, 0);" class="button small-12 medium-12 large-12" >Time Left {{ timeleft }} to complete booking.</button>
@@ -53,6 +53,14 @@
                       Cancel in-progress booking
                     </a>
                 </div>
+            </div>
+        </div> -->
+        <div v-show="ongoing_booking" class="mb-3">
+            <div class="d-flex justify-content-between align-items-center">
+                <!-- Time Left Button -->
+                <button v-show="ongoing_booking" class="btn btn-danger" type="button">Time Left {{ timeleft }} to complete booking.</button>
+                <!-- Cancel Button -->
+                <a :href="parkstayUrl+'/booking/abort'" class="btn btn-warning">Cancel in-progress booking</a>
             </div>
         </div>
 
