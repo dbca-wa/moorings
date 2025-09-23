@@ -129,13 +129,18 @@
 
         <loader :isLoading.sync="isLoading">&nbsp;</loader>
 
-        <div class="row" v-if="name">
+        <!-- <div class="row" v-if="name">
             <div class="columns small-12">
+                <h1>Book mooring:</h1>
+            </div>
+        </div> -->
+        <div class="row" v-if="name">
+            <div class="col-12">
                 <h1>Book mooring:</h1>
             </div>
         </div>
 
-        <div v-if="ongoing_booking" class="row" style='display:none'>
+        <!-- <div v-if="ongoing_booking" class="row" style='display:none'>
             <div class="columns small-12 medium-12 large-12">
                 <div class="clearfix">
                     {{ timeleft }}
@@ -154,9 +159,33 @@
                     </template>
                 </div>
             </div>
+        </div> -->
+        <!-- This section is hidden, but we'll style it with BS5 just in case -->
+        <div v-if="ongoing_booking" class="row d-none">
+            <div class="col-12">
+                <div class="d-flex justify-content-between align-items-center">
+                    <span>{{ timeleft }}</span>
+                    <div>
+                        <a :href="parkstayUrl+'/booking'" class="btn btn-warning">
+                            Complete in-progress booking
+                        </a>
+                        <template v-if="parseInt(parkstayGroundRatisId) > 0">
+                            <a :href="parkstayUrl+'/booking/abort?change=true&change_ratis='+parkstayGroundRatisId" class="btn btn-warning ms-2">
+                                Cancel in-progress booking
+                            </a>
+                        </template>
+                        <template v-else>
+                            <a :href="parkstayUrl+'/booking/abort?change=true&change_id='+parkstayGroundId" class="btn btn-warning ms-2">
+                                Cancel in-progress booking
+                            </a>
+                        </template>
+                    </div>
+                </div>
+            </div>
         </div>
+
         <div class="row" v-show="status == 'online'">
-            <div v-if="long_description" class="columns small-12 medium-12 large-12" style='display:none'>
+            <!-- <div v-if="long_description" class="columns small-12 medium-12 large-12" style='display:none'>
                 <div class="row">
                     <div class="columns small-6 medium-6 large-3">
                         <button type="button" class="button formButton" @click="toggleMoreInfo">
@@ -171,7 +200,21 @@
                         <div v-html="long_description"></div>
                     </div>
                 </div>
+            </div> -->
+            <!-- This section is hidden, but styled with BS5 -->
+            <div v-if="long_description" class="col-12 d-none">
+                <div class="mb-3">
+                    <button type="button" class="btn btn-outline-secondary" @click="toggleMoreInfo">
+                        More Information
+                        <i v-if="!showMoreInfo" class="fa fa-caret-down ms-2"></i>
+                        <i v-else class="fa fa-caret-up ms-2"></i>
+                    </button>
+                </div>
+                <div class="mb-3" v-if="showMoreInfo">
+                    <div v-html="long_description"></div>
+                </div>
             </div>
+
             <!-- <div class="columns small-6 medium-6 large-2">
                 <label>Arrival
                     <input
