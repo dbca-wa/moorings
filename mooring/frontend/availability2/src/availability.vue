@@ -284,7 +284,7 @@
                     <a :href="'/map/'" class="btn btn-outline-secondary w-100">Search Other Mooring</a>
                 </div>
                 
-                <div v-if="!useAdminApi" class="columns small-6 medium-6 large-3" style='display:none;'>
+                <!-- <div v-if="!useAdminApi" class="columns small-6 medium-6 large-3" style='display:none;'>
                     <label>Equipment
                         <select name="gear_type" v-model="gearType" @change="update()">
                             <option value="tent" v-if="gearTotals.tent">Tent</option>
@@ -292,6 +292,14 @@
                             <option value="caravan" v-if="gearTotals.caravan">Caravan / Camper trailer</option>
                         </select>
                     </label>
+                </div> -->
+                <div v-if="!useAdminApi" class="col-sm-6 col-lg-3 d-none">
+                    <label for="gear_type_select" class="form-label">Equipment</label>
+                    <select id="gear_type_select" name="gear_type" class="form-select" v-model="gearType" @change="update()">
+                        <option value="tent" v-if="gearTotals.tent">Tent</option>
+                        <option value="campervan" v-if="gearTotals.campervan">Campervan</option>
+                        <option value="caravan" v-if="gearTotals.caravan">Caravan / Camper trailer</option>
+                    </select>
                 </div>
             </div>
 
@@ -441,7 +449,7 @@ import 'sweetalert2/dist/sweetalert2.css';
 import loader from './loader.vue';
 
 var nowTemp = new Date();
-var now = moment.utc({year: nowTemp.getFullYear(), month: nowTemp.getMonth(), day: nowTemp.getDate(), hour: 0, minute: 0, second: 0}).toDate();
+var now = moment.utc({year: nowTemp.getFullYear(), month: nowTemp.getMonth(), day: nowTemp.getDate(), hour: 1, minute: 0, second: 0}).toDate();
 
 var siteType = {
     NOBOOKINGS: 0,
