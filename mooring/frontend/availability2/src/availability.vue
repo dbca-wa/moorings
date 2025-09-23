@@ -607,20 +607,29 @@
                                                             <button v-show="bp.past_booking == false" type="button" class="btn-close position-absolute top-0 end-0" style="transform: translate(5px, -5px);" @click.stop="deleteBooking(bp.booking_row_id, bp.past_booking)" aria-label="Remove"></button>
                                                         </div>
                                                     </div>
-                                                    <div v-else-if="bp.status == 'perday'" >
+                                                    <!-- <div v-else-if="bp.status == 'perday'" >
                                                         <button class="button"  style='width: 160px; margin-bottom: 2px; background-color: rgb(255, 253, 199); color: #000;' >
                                                             <small>One Mooring Limit</small>
                                                         </button>
+                                                    </div> -->
+                                                    <div v-else-if="bp.status == 'perday'">
+                                                        <button class="btn btn-sm btn-light w-100" disabled>One Mooring Limit</button>
                                                     </div>
-                                                    <div v-else-if="bp.status == 'maxstay'" >
+                                                    <!-- <div v-else-if="bp.status == 'maxstay'" >
                                                         <button class="button"  style='width: 160px; margin-bottom: 2px; background-color: rgb(255, 253, 199); color: #000;' >
                                                             <small>Max Stay Limit Reached</small>
                                                         </button>
+                                                    </div> -->
+                                                    <div v-else-if="bp.status == 'maxstay'">
+                                                        <button class="btn btn-sm btn-light w-100" disabled>Max Stay Limit Reached</button>
                                                     </div>
-                                                    <div v-else >
+                                                    <!-- <div v-else >
                                                         <button class="button"  style='width: 160px; margin-bottom: 2px; background-color: rgb(255, 236, 236); text-decoration: line-through;color: #000;' >
                                                                 <small>{{ bp.period_name }}</small>
                                                         </button>
+                                                    </div> -->
+                                                    <div v-else>
+                                                        <button class="btn btn-sm btn-danger w-100 disabled" style="text-decoration: line-through; opacity: 0.65;">{{ bp.period_name }}</button>
                                                     </div>
                                                 </div>
                                             </td>
