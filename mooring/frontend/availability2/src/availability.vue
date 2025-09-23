@@ -634,10 +634,15 @@
                                                 </td>
                                             </tr>
                                             <template v-if="site.showBreakdown">
-                                                <tr v-for="line in site.breakdown" class="breakdown">
+                                                <!-- <tr v-for="line in site.breakdown" class="breakdown">
                                                     <td class="site">Site: {{ line.name }}</td>
                                                     <td></td>
                                                     <td class="date" v-for="day in line.availability" v-bind:class="{available: day[0]}" >{{ day[1] }}</td>
+                                                </tr> -->
+                                                <tr v-for="line in site.breakdown" :key="line.id" class="breakdown">
+                                                    <td class="site">Site: {{ line.name }}</td>
+                                                    <td></td>
+                                                    <td class="date text-center" v-for="day in line.availability" :class="{ 'table-success': day[0] }">{{ day[1] }}</td>
                                                 </tr>
                                             </template>
                                         </template>
