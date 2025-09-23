@@ -56,24 +56,43 @@
             <!-- A new row for the trolley section with a bottom margin -->
             <div class="row mb-3">
                 <!-- Left Column for Card and Item List -->
-                <div class="col-md-8">
+                <div class="col-md-9">
                     <!-- Trolley summary card -->
-                    <div class="card mb-3">
+                    <!-- <div class="card mb-3">
                         <div class="card-body">
                             <h5 class="card-title mb-0">Trolley: <span id='total_trolley'>${{ total_booking }}</span></h5>
                         </div>
-                    </div>
+                    </div> -->
 
                     <!-- Trolley item list -->
-                    <div v-for="item in current_booking" :key="item.id" class="row gx-2 align-items-center mb-1">
+                    <!-- <div v-for="item in current_booking" :key="item.id" class="row gx-2 align-items-center mb-1">
                         <div class="col-8">{{ item.item }}</div>
                         <div class="col-3 text-end">${{ item.amount }}</div>
                         <div class="col-1 text-end">
                             <button v-show="item.past_booking == false" type="button" class="btn-close" @click="deleteBooking(item.id, item.past_booking)" aria-label="Remove item"></button>
                         </div>
+                    </div> -->
+                    <!-- A single card now contains both the header and the item list -->
+                    <div class="card">
+                        <!-- Card Header for the total amount -->
+                        <div class="card-header">
+                            <h5 class="mb-0">Trolley: <span id='total_trolley'>${{ total_booking }}</span></h5>
+                        </div>
+                        
+                        <!-- List Group for the items -->
+                        <ul class="list-group list-group-flush" v-if="current_booking.length > 0">
+                            <li v-for="item in current_booking" :key="item.id" class="list-group-item d-flex justify-content-between align-items-center">
+                                <span>{{ item.item }}</span>
+                                <div class="d-flex align-items-center">
+                                    <span class="me-3">${{ item.amount }}</span>
+                                    <button v-show="item.past_booking == false" type="button" class="btn-close" @click="deleteBooking(item.id, item.past_booking)" aria-label="Remove item"></button>
+                                </div>
+                            </li>
+                        </ul>
                     </div>
                 </div>
-                <div class="col-md-4">
+                <!-- Right Column for Checkout Buttons -->
+                <div class="col-md-3 text-end">
                     <!-- Use d-grid to make the button inside take up the full width -->
                     <div class="d-grid">
                         <div v-if="vesselRego.length < 0.1 || vesselRego == ' ' || vesselSize < 0.1 || vesselDraft < 0.1">
