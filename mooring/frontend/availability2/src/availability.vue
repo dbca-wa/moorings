@@ -1,31 +1,32 @@
 <template>
-    <div id="sites-cal" class="f6inject">
+    <div id="sites-cal">
+        <div class="container">
 
         <a name="makebooking" />
         <div class="row" v-if="status == 'offline'">
-            <div class="columns small-12 medium-12 large-12">
-                <div class="callout alert">
+            <div class="col-12">
+                <div class="alert alert-danger" role="alert">
                     Sorry, this mooring doesn't yet support online bookings. Please visit the <a href="">Mooring Availability checker</a> for expected availability.
                 </div>
             </div>
         </div>
         <div class="row" v-else-if="status == 'empty'">
-            <div class="columns small-12 medium-12 large-12">
-                <div class="callout alert">
+            <div class="col-12">
+                <div class="alert alert-danger" role="alert">
                     Sorry, this mooring doesn't yet have any mooring assigned to it. Please visit the <a href="">Mooring Availability checker</a> for expected availability.
                 </div>
             </div>
         </div>
         <div class="row" v-else-if="status == 'closed'">
-            <div class="columns small-12 medium-12 large-12">
-                <div class="callout alert">
+            <div class="col-12">
+                <div class="alert alert-danger" role="alert">
                     Sorry, this mooring is closed for the selected period. Please visit the <a href="">Mooring Availability checker</a> for expected availability.
                 </div>
             </div>
         </div>
         <div class="row" v-if="errorMsg">
-            <div class="columns small-12 medium-12 large-12">
-                <div class="callout alert">
+            <div class="col-12">
+                <div class="alert alert-danger" role="alert">
                     Sorry, there was an error placing the booking: {{ errorMsg }} <br/>
                     <template v-if="showSecondErrorLine">
                     Please try again later. If this reoccurs, please contact <a href="">Parks and Visitor Services</a> with this error message, the mooring and the time of the request.
@@ -34,8 +35,8 @@
             </div>
         </div>
         <div class="row" v-if="timeleft < 0">
-            <div class="columns small-12 medium-12 large-12">
-                <div class="callout alert">
+            <div class="col-12">
+                <div class="alert alert-danger" role="alert">
                     Session Expired <br/>
                     <template v-if="showSecondErrorLine">
                     Sorry your Session has expired
@@ -45,29 +46,29 @@
         </div>
 
         <div class="columns small-12 medium-12 large-12" v-show="ongoing_booking">
-        <div class="row">
+            <div class="row">
                 <div class="small-8 medium-9 large-10">
-
-		<button v-show="ongoing_booking" style="color: #FFFFFF; background-color: rgb(255, 0, 0);" class="button small-12 medium-12 large-12" >Time Left {{ timeleft }} to complete booking.</button>
-		<a type="button" :href="parkstayUrl+'/booking/abort'" class="button float-right warning continueBooking" style="color: #fff; background-color: #f0ad4e;  border-color: #eea236; border-radius: 4px; margin-left:4px;">
+                    <button v-show="ongoing_booking" style="color: #FFFFFF; background-color: rgb(255, 0, 0);" class="button small-12 medium-12 large-12" >Time Left {{ timeleft }} to complete booking.</button>
+                    <a type="button" :href="parkstayUrl+'/booking/abort'" class="button float-right warning continueBooking" style="color: #fff; background-color: #f0ad4e;  border-color: #eea236; border-radius: 4px; margin-left:4px;">
                       Cancel in-progress booking
-                </a>
-              </div>
-	   </div>
-	</div>
+                    </a>
+                </div>
+            </div>
+        </div>
+
         <div class="columns small-12 medium-12 large-12">
-        <div class="row">
+            <div class="row">
                 <div class="small-8 medium-9 large-10">
-                        <div class="card">
-                             <div class="card-body"><h3 class="card-title">Trolley: <span id='total_trolley'>${{ total_booking }}</span></h3></div>
+                    <div class="card">
+                        <div class="card-body"><h3 class="card-title">Trolley: <span id='total_trolley'>${{ total_booking }}</span></h3></div>
+                    </div>
+                    <div class='columns small-12 medium-12 large-12' style="margin-top:10px; margin-bottom:10px;"> 
+                        <div v-for="item in current_booking" class="row small-12 medium-12 large-12" >
+                            <div class="columns small-12 medium-9 large-9">{{ item.item }}</div>
+                            <div class="columns small-12 medium-2 large-2">${{ item.amount }}</div>
+                            <div class="columns small-12 medium-1 large-1"><a v-show="item.past_booking == false" style='color: red; opacity: 1;' type="button" class="close" @click="deleteBooking(item.id, item.past_booking)">x</a></div>
                         </div>
-                        <div class='columns small-12 medium-12 large-12' style="margin-top:10px; margin-bottom:10px;"> 
-                                 <div v-for="item in current_booking" class="row small-12 medium-12 large-12" >
-                                         <div class="columns small-12 medium-9 large-9">{{ item.item }}</div>
-                                         <div class="columns small-12 medium-2 large-2">${{ item.amount }}</div>
-                                         <div class="columns small-12 medium-1 large-1"><a v-show="item.past_booking == false" style='color: red; opacity: 1;' type="button" class="close" @click="deleteBooking(item.id, item.past_booking)">x</a></div>
-                                 </div>
-			            </div>
+                    </div>
                 </div>
                 <div class="columns small-4 medium-3 large-2">
                         <div v-if="vesselRego.length < 0.1 || vesselRego == ' ' || vesselSize < 0.1 || vesselDraft < 0.1 ">
@@ -346,42 +347,36 @@
                        </div>
                  </div>
 	    </div>
-            <div class="small-12 medium-12 large-12">
-            <div v-if="vesselSize > 0 && vesselDraft > 0 && vesselWeight == 0 && vesselBeam == 0" class="small-12 medium-12 large-12">
-                <div class="columns small-12 medium-12 large-12" >
-                    <div class="callout alert">
-                      Please enter a beam length or weight depending on your mooring type.   
+                <div class="small-12 medium-12 large-12">
+                    <div v-if="vesselSize > 0 && vesselDraft > 0 && vesselWeight == 0 && vesselBeam == 0" class="small-12 medium-12 large-12">
+                        <div class="columns small-12 medium-12 large-12" >
+                            <div class="callout alert">
+                            Please enter a beam length or weight depending on your mooring type.   
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row" v-if="sites.length == 0 && isLoading == false">
+                        <div class="columns small-12 medium-12 large-12">
+                            <div class="callout alert">
+                                Sorry we couldn't find any mooring matching the query entered.
+                            </div>
+                        </div>
                     </div>
                 </div>
-	    </div>
-
-
-            <div class="row" v-if="sites.length == 0 && isLoading == false">
-                <div class="columns small-12 medium-12 large-12">
-                    <div class="callout alert">
-                        Sorry we couldn't find any mooring matching the query entered.
-                    </div>
+                <div oldvif="max_advance_booking_days > max_advance_booking" class="small-12 medium-12 large-12" style='display:none'>
+                    <table class="hover">
+                            <tbody>
+                            <tr>
+                                <td>
+                        Advanced booking is limited to {{ max_advance_booking }} day/s. 
+                                </td>
+                            </tr>
+                            </tbody>
+                    </table>
                 </div>
             </div>
-
-            </div>
-     <div oldvif="max_advance_booking_days > max_advance_booking" class="small-12 medium-12 large-12" style='display:none'>
-          <table class="hover">
-                <tbody>
-                  <tr>
-                     <td>
-          	Advanced booking is limited to {{ max_advance_booking }} day/s. 
-                     </td>
-                  </tr>
-                </tbody>
-          </table>
-     </div>
-
-
-
         </div>
-       </div>
-
+    </div>
 </template>
 
 <style lang="scss">
