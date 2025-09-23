@@ -1299,8 +1299,13 @@ export default {
 
             const rootElement = this.$refs.availabilityWrapper;
             if (rootElement) {
+                // Dropdown initializer
                 const dropdownElementList = rootElement.querySelectorAll('[data-bs-toggle="dropdown"]');
                 [...dropdownElementList].map(dropdownToggleEl => new Dropdown(dropdownToggleEl));
+
+                // Tooltip initializer
+                const tooltipTriggerList = rootElement.querySelectorAll('[data-bs-toggle="tooltip"]');
+                [...tooltipTriggerList].map(tooltipTriggerEl => new Tooltip(tooltipTriggerEl));
             }
 
             $(document).foundation();
