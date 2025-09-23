@@ -116,7 +116,7 @@
 
             <div class="row" v-if="name">
                 <div class="col-12">
-                    <h2>Book mooring:</h2>
+                    <h3>Book mooring:</h3>
                 </div>
             </div>
 
@@ -144,7 +144,7 @@
                 </div>
             </div>
 
-            <div class="row mb-4" v-show="status == 'online'">
+            <div class="row mb-2" v-show="status == 'online'">
                 <div class="col-12">
                     <div class="card">
                         <div class="card-body">
@@ -318,7 +318,7 @@
                 </div>
             </div>
 
-            <div class="row mt-2" v-show="status == 'online'">
+            <div class="row" v-show="status == 'online'">
                 <div class="col-12">
                     <div v-if="vesselSize > 0 && vesselDraft > 0">
                         <div v-if="vesselDraft != 0 && vesselWeight != 0">
