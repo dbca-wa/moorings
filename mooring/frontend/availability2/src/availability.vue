@@ -1,5 +1,5 @@
 <template>
-    <div id="sites-cal">
+    <div id="sites-cal" ref="availabilityWrapper">
         <div class="container">
             <a name="makebooking" />
             <div class="row" v-if="status == 'offline'">
@@ -832,9 +832,9 @@
 </style>
 
 <script>
-
 import 'foundation-sites';
 import 'foundation-datepicker/js/foundation-datepicker';
+import { Dropdown } from 'bootstrap';
 import debounce from 'debounce';
 import moment from 'moment';
 import swal from 'sweetalert2';
@@ -1687,91 +1687,40 @@ export default {
         }
     },
     mounted: function () {
-        var vm = this;
+        this.$nextTick(() => {
+            var vm = this;
 
-        $(document).foundation();
-        this.arrivalEl = $('#date-arrival');
-        // this.arrivalData = this.arrivalEl.fdatepicker({
-        //     format: 'dd/mm/yyyy',
-        //     onRender: function (date) {
-        //         // disallow start dates before today
-        //         return date.valueOf() < now.valueOf() ? 'disabled': '';
-        //         //return '';
-        //     }
-        // }).on('changeDate', function (ev) {
-        //     ev.target.dispatchEvent(new CustomEvent('change'));
-        // }).on('change', function (ev) {
-        //     if (vm.arrivalData.date.valueOf() >= vm.departureData.date.valueOf()) {
-        //         var newDate = moment(vm.arrivalData.date).add(1, 'days').toDate();
-        //         vm.departureData.date = newDate;
-        //         vm.departureData.setValue();
-        //         vm.departureData.fill();
-        //         vm.departureEl.trigger('changeDate');
-        //     }
-        //     vm.arrivalData.hide();
-        //     vm.arrivalDate = moment(vm.arrivalData.date);
-        //     vm.days = Math.floor(moment.duration(vm.departureDate.diff(vm.arrivalDate)).asDays());
-        //     vm.sites = [];
-        // }).on('keydown', function (ev) {
-        //     if (ev.keyCode == 13) {
-        //         ev.target.dispatchEvent(new CustomEvent('change'));
-        //     }
-        // }).data('datepicker');
+            const rootElement = this.$refs.availabilityWrapper;
+            if (rootElement) {
+                const dropdownElementList = rootElement.querySelectorAll('[data-bs-toggle="dropdown"]');
+                [...dropdownElementList].map(dropdownToggleEl => new Dropdown(dropdownToggleEl));
+            }
 
-        // this.departureEl = $('#date-departure');
-        // this.departureData = this.departureEl.fdatepicker({
-        //     format: 'dd/mm/yyyy',
-        //     onRender: function (date) {
-        //         return (date.valueOf() <= vm.arrivalData.date.valueOf()) ? 'disabled': '';
-        //     }
-        // }).on('changeDate', function (ev) {
-        //     ev.target.dispatchEvent(new CustomEvent('change'));
-        // }).on('change', function (ev) {
-        //     vm.departureData.hide();
-        //     vm.departureDate = moment(vm.departureData.date);
-        //     vm.days = Math.floor(moment.duration(vm.departureDate.diff(vm.arrivalDate)).asDays());
-        //     vm.sites = [];
-        // }).on('keydown', function (ev) {
-        //     if (ev.keyCode == 13) {
-        //         ev.target.dispatchEvent(new CustomEvent('change'));
-        //     }
-        // }).data('datepicker');
+            $(document).foundation();
+            this.arrivalEl = $('#date-arrival');
+            this.update();
 
+                var saneTz = (0 < Math.floor((vm.expiry - moment.now())/1000) < vm.timer);
+                var timer = setInterval(function (ev) {
+                    // fall back to the pre-encoded timer
+                    if (!saneTz) {
+                        vm.timer -= 1;
+                    } else {
+                        // if the timezone is sane, do live updates
+                        // this way unloaded tabs won't cache the wrong time.
+                        var newTimer = Math.floor((vm.expiry - moment.now())/1000);
+                        vm.timer = newTimer;
+                    }
 
-        // this.arrivalData.date = this.arrivalDate.toDate();
-        // this.arrivalData.setValue();
-        // this.arrivalData.fill();
-        // this.departureData.date = this.departureDate.toDate();
-        // this.departureData.setValue();
-        // this.departureData.fill();
-        this.update();
+                    if ((vm.timer <= -1)) {
 
-            var saneTz = (0 < Math.floor((vm.expiry - moment.now())/1000) < vm.timer);
-            var timer = setInterval(function (ev) {
-                // fall back to the pre-encoded timer
-                if (!saneTz) {
-                    vm.timer -= 1;
-                } else {
-                    // if the timezone is sane, do live updates
-                    // this way unloaded tabs won't cache the wrong time.
-                    var newTimer = Math.floor((vm.expiry - moment.now())/1000);
-                    vm.timer = newTimer;
-                }
-
-                if ((vm.timer <= -1)) {
-//                   clearInterval(timer);
-//                    var loc = window.location;
-//                    window.location = loc.protocol + '//' + loc.host + loc.pathname;
-               }
-            }, 1000);
-        // Fix white space which appears on the right of the availablity screen START
-        $('#guests-button').click();
-        $('#guests-button').click();
-        // Fix white space which appears on the right of the availablity screen END
-
-
-
+                    }
+                }, 1000);
+            // Fix white space which appears on the right of the availablity screen START
+            $('#guests-button').click();
+            $('#guests-button').click();
+            // Fix white space which appears on the right of the availablity screen END
+        })
     }
 }
 </script>
-
