@@ -13,7 +13,8 @@ window.swal = swal;
 import './foundation-min.scss';
 import 'foundation-datepicker/css/foundation-datepicker.css';
 import 'font-awesome/css/font-awesome.min.css'
-
+import 'bootstrap/dist/css/bootstrap.min.css';
+import 'bootstrap/dist/js/bootstrap.bundle.min.js';
 
 import { createApp } from 'vue';
 import availability from './availability.vue';
