@@ -1,6 +1,6 @@
 <template>
     <!-- <div v-cloak class="f6inject"> -->
-    <div v-cloak>
+    <div v-cloak ref="parkfinderWrapper">
         <div class="container">
             <!-- First Row: Search Panel and Map -->
             <div class="row">
@@ -8,12 +8,6 @@
                 <div class="col-lg-5">
                     <!-- The content of the original left column will go here -->
                     <div v-show="current_booking.length > 0">
-                        <!-- <div class="columns small-12 medium-12 large-12" >
-                            <button  title="Please add items into your trolley." v-show="ongoing_booking" style="color: #FFFFFF; background-color: rgb(255, 0, 0); margin-right:10px;" class="button small-12 medium-12 large-12" >Time Left {{ timeleft }}</button>
-                            <a v-show="current_booking.length > 0" class="button small-12 medium-12 large-12" :href="parkstayUrl+'/booking'" style="border-radius: 4px; border: 1px solid #2e6da4">Proceed to Check Out</a> <a type="button" :href="parkstayUrl+'/booking/abort'" class="button float-right warning continueBooking" style="color: #fff; background-color: #f0ad4e;  border-color: #eea236; border-radius: 4px;">
-                                Cancel in-progress booking
-                            </a>
-                        </div> -->
                         <!-- Button group using Flexbox for alignment -->
                         <div class="d-grid gap-2 d-md-flex justify-content-md-start mb-3">
                             <button v-show="ongoing_booking" class="btn btn-danger me-md-2" type="button">Time Left {{ timeleft }}</button>
@@ -22,22 +16,12 @@
                         </div>
 
                         <div class="small-12 medium-12 large-12">
-                            <!-- <div class="card">
-                                <div class="card-body"><h3 class="card-title">Trolley: <span id='total_trolley'>${{ total_booking }}</span></h3></div>
-                            </div> -->
                             <!-- Trolley summary card -->
                             <div class="card mb-3">
                                 <div class="card-body">
                                     <h5 class="card-title mb-0">Trolley: <span id='total_trolley'>${{ total_booking }}</span></h5>
                                 </div>
                             </div>
-                            <!-- <div class='columns small-12 medium-12 large-12' style="margin-top:10px; margin-bottom:10px;">
-                                    <div v-for="item in current_booking" class="row small-12 medium-12 large-12">
-                                            <div class="columns small-12 medium-9 large-9">{{ item.item }}</div>
-                                            <div class="columns small-12 medium-2 large-2">${{ item.amount }}</div>
-                                            <div class="columns small-12 medium-1 large-1"><a v-show="item.past_booking == false" style='color: red; opacity: 1;' type="button" class="close" @click="deleteBooking(item.id)">x</a></div>
-                                    </div>
-                            </div> -->
                             <div v-for="item in current_booking" :key="item.id" class="row gx-2 align-items-center mb-1">
                                 <!-- gx-2 adds a small horizontal gutter between columns -->
                                 <!-- align-items-center vertically aligns the content -->
@@ -55,197 +39,85 @@
                             </div>
                         </div>
                     </div>
-                        <!-- <div class="row">
-                            <div class="small-12 columns">
-                                <label>Search <input class="input-group-field" id="searchInput" type="text" placeholder="Search for a mooring..."/></label>
-                            </div>
-                        </div>
-                        <div class="row">
-                            <div class="small-12 medium-12 large-6 columns">
-                                <label for="dateArrival">Arrival</label>
-                                <input
-                                    type="date"
-                                    id="dateArrival"
-                                    v-model="arrivalDateForInput"
-                                    :min="minArrivalDateForInput"
-                                    @change="handleArrivalDateChange"
-                                >
-                            </div>
-                            <div class="small-12 medium-12 large-6 columns">
-                                <label for="dateDeparture">Departure</label>
-                                <input
-                                    type="date"
-                                    id="dateDeparture"
-                                    v-model="departureDateForInput"
-                                    :min="minDepartureDateForInput"
-                                >
-                            </div>
-                            <div class="small-12 medium-12 large-12 columns" style="display:none;">
-                                <label><input type="checkbox" v-model="bookableOnly"/> Show bookable moorings only</label>
-                            </div>
-                        </div> -->
 
-                        <!-- Search input field -->
-                        <div class="mb-3">
-                            <label for="searchInput" class="form-label">Search</label>
-                            <input id="searchInput" type="text" class="form-control" placeholder="Search for a mooring...">
+                    <!-- Search input field -->
+                    <div class="mb-3">
+                        <label for="searchInput" class="form-label">Search</label>
+                        <input id="searchInput" type="text" class="form-control" placeholder="Search for a mooring...">
+                    </div>
+                    <!-- Date inputs in a row -->
+                    <div class="row g-3 mb-3">
+                        <div class="col-md-6">
+                            <label for="dateArrival" class="form-label">Arrival</label>
+                            <input
+                                type="date"
+                                id="dateArrival"
+                                class="form-control"
+                                v-model="arrivalDateForInput"
+                                :min="minArrivalDateForInput"
+                                @change="handleArrivalDateChange"
+                            >
                         </div>
-                        <!-- Date inputs in a row -->
-                        <div class="row g-3 mb-3">
-                            <div class="col-md-6">
-                                <label for="dateArrival" class="form-label">Arrival</label>
-                                <input
-                                    type="date"
-                                    id="dateArrival"
-                                    class="form-control"
-                                    v-model="arrivalDateForInput"
-                                    :min="minArrivalDateForInput"
-                                    @change="handleArrivalDateChange"
-                                >
-                            </div>
-                            <div class="col-md-6">
-                                <label for="dateDeparture" class="form-label">Departure</label>
-                                <input
-                                    type="date"
-                                    id="dateDeparture"
-                                    class="form-control"
-                                    v-model="departureDateForInput"
-                                    :min="minDepartureDateForInput"
-                                >
-                            </div>
+                        <div class="col-md-6">
+                            <label for="dateDeparture" class="form-label">Departure</label>
+                            <input
+                                type="date"
+                                id="dateDeparture"
+                                class="form-control"
+                                v-model="departureDateForInput"
+                                :min="minDepartureDateForInput"
+                            >
                         </div>
-                        <div class="form-check d-none">
-                            <input type="checkbox" class="form-check-input" id="bookableOnly" v-model="bookableOnly">
-                            <label for="bookableOnly" class="form-check-label">Show bookable moorings only</label>
+                    </div>
+                    <div class="form-check d-none">
+                        <input type="checkbox" class="form-check-input" id="bookableOnly" v-model="bookableOnly">
+                        <label for="bookableOnly" class="form-check-label">Show bookable moorings only</label>
+                    </div>
+
+                    <!-- A simple horizontal rule -->
+                    <hr>
+
+                    <!-- A row for all vessel detail inputs -->
+                    <div class="row g-3 mb-3">
+                        <!-- Vessel Registration -->
+                        <div class="col-md-6">
+                            <label for="vesselRego" class="form-label">Vessel Registration</label>
+                            <input v-model="vesselRego" id="vesselRego" name="vessel_rego" type="text" class="form-control" placeholder="REGO134" :disabled="current_booking.length > 0">
                         </div>
 
-                        <!-- <div class="row"><div class="small-12 columns">
-                            <hr/>
-                        </div></div>
-                        <div class="row">
-                            <div class="small-12 medium-12 large-6 columns">
-                            <label>Vessel Registration  <input v-model="vesselRego" id="vesselRego" name="vessel_rego" type="text" placeholder="REGO134" :disabled="current_booking.length > 0" step='0.01' /></label>
-                            </div>
-                            <div class="small-12 medium-12 large-6 columns">
-                            <label>Vessel Size (Meters) <input v-model="vesselSize" id="vesselSize" name="vessel_size" type="number" placeholder="35" :disabled="current_booking.length > 0" step='0.01' /></label>
-                            </div>
-                            <div class="small-12 medium-12 large-6 columns">
-                            <label>Vessel Draft (Meters) <input v-model="vesselDraft" id="vesselDraft" name="vessel_draft" type="number" placeholder="10" :disabled="current_booking.length > 0" step='0.01' /></label>
-                            </div>
-                            <div class="small-12 medium-12 large-6 columns">
-                            <label>Vessel Beams (Meters)  <input v-model="vesselBeam" id="vesselBeam" name="vessel_beams" type="number" placeholder="3" :disabled="current_booking.length > 0" step='0.01' /></label>
-                            </div>
-                            <div class="small-12 medium-12 large-6 columns">
-                            <label>Vessel Weight (Tonnes)  <input v-model="vesselWeight" id="vesselWeight" name="vessel_weight" type="number" placeholder="2" :disabled="current_booking.length > 0" step='0.01' /></label>
-                            </div>
-                            <div class="small-12 medium-12 large-6 columns" >
-                                <label>
-                                    Guests <input type="button" class="button formButton" v-bind:value="numPeople" data-toggle="guests-dropdown"/>
-                                </label>
-                                <div class="dropdown-pane" id="guests-dropdown" data-dropdown data-auto-focus="true">
-                                    <div class="row">
-                                        <div class="small-6 columns">
-                                            <label for="num_adults" class="text-right">Adults</label>
-                                        </div>
-                                        <div class="small-6 columns">
-                                            <input type="number" id="numAdults" name="num_adults" v-model="numAdults" min="0" max="16"/>
-                                        </div>
-                                    </div>
-                                    <div class="row" style="display:none;">
-                                        <div class="small-6 columns">
-                                            <label for="num_concessions" class="text-right"><span class="has-tip" title="Holders of one of the following Australian-issued cards:
-                                                - Seniors Card
-                                                - Age Pension
-                                                - Disability Support
-                                                - Carer Payment
-                                                - Carer Allowance
-                                                - Companion Card
-                                                - Department of Veterans' Affairs">Concessions</span>
-                                            </label>
-                                        </div><div class="small-6 columns">
-                                            <input type="number" id="numConcessions" name="num_concessions" v-model="numConcessions" min="0" max="16"/>
-                                        </div>
-                                    </div>
-                                    <div class="row">
-                                        <div class="small-6 columns">
-                                            <label for="num_children" class="text-right">Children (4-16)</label>
-                                        </div>
-                                        <div class="small-6 columns">
-                                            <input type="number" id="numChildren" name="num_children" v-model="numChildren" min="0" max="16"/>
-                                        </div>
-                                    </div>
-                                    <div class="row">
-                                        <div class="small-6 columns">
-                                            <label for="num_children" class="text-right">Infants (under 4)</label>
-                                        </div>
-                                        <div class="small-6 columns">
-                                            <input type="number" id="numInfants" name="num_infants" v-model="numInfants" min="0" max="16"/>
-                                        </div>
-                                    </div>
-                                    <div class="row" style="display:none;">
-                                        <div class="small-6 columns">
-                                            <label for="num_children" class="text-right">Moorings</label>
-                                        </div>
-                                        <div class="small-6 columns">
-                                            <input type="number" id="numMooring" name="num_mooring" v-model="numMooring" min="0" max="16"/>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div> -->
-                        <!-- A simple horizontal rule -->
-                        <hr>
+                        <!-- Vessel Size -->
+                        <div class="col-md-6">
+                            <label for="vesselSize" class="form-label">Vessel Size (Meters)</label>
+                            <input v-model="vesselSize" id="vesselSize" name="vessel_size" type="number" class="form-control" placeholder="35" :disabled="current_booking.length > 0" step="0.01">
+                        </div>
 
-                        <!-- A row for all vessel detail inputs -->
-                        <div class="row g-3 mb-3">
-                            <!-- Vessel Registration -->
-                            <div class="col-md-6">
-                                <label for="vesselRego" class="form-label">Vessel Registration</label>
-                                <input v-model="vesselRego" id="vesselRego" name="vessel_rego" type="text" class="form-control" placeholder="REGO134" :disabled="current_booking.length > 0">
-                            </div>
+                        <!-- Vessel Draft -->
+                        <div class="col-md-6">
+                            <label for="vesselDraft" class="form-label">Vessel Draft (Meters)</label>
+                            <input v-model="vesselDraft" id="vesselDraft" name="vessel_draft" type="number" class="form-control" placeholder="10" :disabled="current_booking.length > 0" step="0.01">
+                        </div>
 
-                            <!-- Vessel Size -->
-                            <div class="col-md-6">
-                                <label for="vesselSize" class="form-label">Vessel Size (Meters)</label>
-                                <input v-model="vesselSize" id="vesselSize" name="vessel_size" type="number" class="form-control" placeholder="35" :disabled="current_booking.length > 0" step="0.01">
-                            </div>
+                        <!-- Vessel Beam -->
+                        <div class="col-md-6">
+                            <label for="vesselBeam" class="form-label">Vessel Beam (Meters)</label>
+                            <input v-model="vesselBeam" id="vesselBeam" name="vessel_beams" type="number" class="form-control" placeholder="3" :disabled="current_booking.length > 0" step="0.01">
+                        </div>
 
-                            <!-- Vessel Draft -->
-                            <div class="col-md-6">
-                                <label for="vesselDraft" class="form-label">Vessel Draft (Meters)</label>
-                                <input v-model="vesselDraft" id="vesselDraft" name="vessel_draft" type="number" class="form-control" placeholder="10" :disabled="current_booking.length > 0" step="0.01">
-                            </div>
+                        <!-- Vessel Weight -->
+                        <div class="col-md-6">
+                            <label for="vesselWeight" class="form-label">Vessel Weight (Tonnes)</label>
+                            <input v-model="vesselWeight" id="vesselWeight" name="vessel_weight" type="number" class="form-control" placeholder="2" :disabled="current_booking.length > 0" step="0.01">
+                        </div>
 
-                            <!-- Vessel Beam -->
-                            <div class="col-md-6">
-                                <label for="vesselBeam" class="form-label">Vessel Beam (Meters)</label>
-                                <input v-model="vesselBeam" id="vesselBeam" name="vessel_beams" type="number" class="form-control" placeholder="3" :disabled="current_booking.length > 0" step="0.01">
-                            </div>
-
-                            <!-- Vessel Weight -->
-                            <div class="col-md-6">
-                                <label for="vesselWeight" class="form-label">Vessel Weight (Tonnes)</label>
-                                <input v-model="vesselWeight" id="vesselWeight" name="vessel_weight" type="number" class="form-control" placeholder="2" :disabled="current_booking.length > 0" step="0.01">
-                            </div>
-
-                            <!-- Guests Dropdown -->
-                            <!-- We wrap the button and menu in a div with .dropdown for proper positioning -->
-                            <div class="col-md-6 dropdown">
-                                <label class="form-label">Guests</label>
-                                <button type="button" class="btn btn-outline-secondary w-100 dropdown-toggle" data-bs-toggle="dropdown" aria-expanded="false">
+                        <!-- Guests Dropdown -->
+                        <!-- We wrap the button and menu in a div with .dropdown for proper positioning -->
+                        <div class="col-md-6">
+                            <label class="form-label">Guests</label>
+                            <div class="dropdown">
+                                <button type="button" class="btn btn-outline-secondary w-100 dropdown-toggle" id="guestsDropdownButton" data-bs-toggle="dropdown" aria-expanded="false">
                                     {{ numPeople }}
                                 </button>
-                                <!-- <div class="dropdown-menu p-3" id="guests-dropdown" style="width: 300px;">
-                                    <div class="row">
-                                        <div class="small-6 columns">
-                                            <label for="num_adults" class="text-right">Adults</label>
-                                        </div>
-                                        <div class="small-6 columns">
-                                            <input type="number" id="numAdults" name="num_adults" v-model="numAdults" min="0" max="16"/>
-                                        </div>
-                                    </div>
-                                </div> -->
-                                <div class="dropdown-menu p-3" id="guests-dropdown" style="width: 300px;">
+                                <div class="dropdown-menu p-3" aria-labelledby="guestsDropdownButton" style="width: 300px;">
                                     <!-- Adults -->
                                     <div class="row g-3 align-items-center mb-3">
                                         <div class="col-6">
@@ -302,198 +174,105 @@
                                 </div>
                             </div>
                         </div>
+                    </div>
 
-                        <!-- <div class="row">
-                            <div class="small-12 columns">
-                                <hr/>
+                    <hr>
+
+                    <!-- Mooring Filter Section -->
+                    <div class="mb-3">
+                        <label class="form-label fw-bold">Mooring</label>
+                        <div class="d-flex flex-wrap">
+                            <div class="form-check me-3">
+                                <input type="radio" name="gear_type" id="gear_all" value="all" v-model="gearType" class="form-check-input" @change="reload()">
+                                <label for="gear_all" class="form-check-label"><i class="symb RC3"></i> All types</label>
+                            </div>
+                            <div class="form-check me-3">
+                                <input type="radio" name="gear_type" id="gear_rental_available" value="rental-available" v-model="gearType" class="form-check-input" @change="reload()">
+                                <label for="gear_rental_available" class="form-check-label"><i class="symb RC20"></i> Rental (available)</label>
+                            </div>
+                            <div class="form-check me-3">
+                                <input type="radio" name="gear_type" id="gear_rental_notavailable" value="rental-notavailable" v-model="gearType" class="form-check-input" @change="reload()">
+                                <label for="gear_rental_notavailable" class="form-check-label"><i class="symb RC20"></i> Rental (not available)</label>
+                            </div>
+                            <div class="form-check me-3">
+                                <input type="radio" name="gear_type" id="gear_public_notbookable" value="public-notbookable" v-model="gearType" class="form-check-input" @change="reload()">
+                                <label for="gear_public_notbookable" class="form-check-label"><i class="symb RC20"></i> Public (not bookable)</label>
                             </div>
                         </div>
+                    </div>
+
+                    <hr>
+
+                    <!-- Types Filter Section -->
+                    <div class="mb-3">
+                        <label class="form-label fw-bold">Types</label>
+                        <div class="d-flex flex-wrap">
+                            <div class="form-check me-3">
+                                <input type="radio" name="pen_type" id="pen_all" value="all" v-model="penType" class="form-check-input" @change="reload()">
+                                <label for="pen_all" class="form-check-label"><i class="symb RC3"></i> All types</label>
+                            </div>
+                            <div class="form-check me-3">
+                                <input type="radio" name="pen_type" id="pen_moorings" value="0" v-model="penType" class="form-check-input" @change="reload()">
+                                <label for="pen_moorings" class="form-check-label"><i class="symb RC20"></i> Moorings</label>
+                            </div>
+                            <div class="form-check me-3">
+                                <input type="radio" name="pen_type" id="pen_jetty" value="1" v-model="penType" class="form-check-input" @change="reload()">
+                                <label for="pen_jetty" class="form-check-label"><i class="symb RC20"></i> Jetty Pens</label>
+                            </div>
+                            <div class="form-check me-3">
+                                <input type="radio" name="pen_type" id="pen_beach" value="2" v-model="penType" class="form-check-input" @change="reload()">
+                                <label for="pen_beach" class="form-check-label"><i class="symb RC20"></i> Beach Pens</label>
+                            </div>
+                        </div>
+                    </div>
+
+                    <hr>
+
+                    <!-- Availability Legend Section -->
+                    <div class="mb-3">
+                        <label class="form-label fw-bold">Availability</label>
+                        <!-- Use a row with columns for the legend items for proper alignment -->
                         <div class="row">
-                            <div class="small-12 medium-12 large-12 columns">
-                                <label>Mooring</label>
-                            </div>
-                            <div class="small-12 medium-12 large-4 columns">
-                                <label><input type="radio" name="gear_type" value="all" v-model="gearType" class="show-for-sr" v-on:change="reload()"/><i class="symb RC3"></i> All types</label>
-                            </div>
-                            <div class="small-12 medium-12 large-4 columns">
-                                <label><input type="radio" name="gear_type" value="rental-available" v-model="gearType" class="show-for-sr" v-on:change="reload()"/><i class="symb RC20"></i> Rental (available)</label>
-                            </div>
-                            <div class="small-12 medium-12 large-4 columns">
-                                <label><input type="radio" name="gear_type" value="rental-notavailable" v-model="gearType" class="show-for-sr" v-on:change="reload()"/><i class="symb RC20"></i> Rental (not available)</label>
-                            </div>
-                            <div class="small-12 medium-12 large-4 columns">
-                                <label><input type="radio" name="gear_type" value="public-notbookable" v-model="gearType" class="show-for-sr" v-on:change="reload()"/><i class="symb RC20"></i> Public (not bookable)</label>
-                            </div>
-                        </div>
-
-                        <div class="row">
-                            <div class="small-12 columns">
-                                <hr/>
-                            </div>
-                        </div>
-                        <div class="row">
-                            <div class="small-12 medium-12 large-12 columns">
-                                <label>Types</label>
-                            </div>
-                            <div class="small-12 medium-12 large-4 columns">
-                                <label><input type="radio" name="pen_type" value="all" v-model="penType" class="show-for-sr" v-on:change="reload()"/><i class="symb RC3"></i> All types</label>
-                            </div>
-                            <div class="small-12 medium-12 large-4 columns">
-                                <label><input type="radio" name="pen_type" value="0" v-model="penType" class="show-for-sr" v-on:change="reload()"/><i class="symb RC20"></i> Moorings</label>
-                            </div>
-                            <div class="small-12 medium-12 large-4 columns">
-                                <label><input type="radio" name="pen_type" value="1" v-model="penType" class="show-for-sr" v-on:change="reload()"/><i class="symb RC20"></i> Jetty Pens</label>
-                            </div>
-                            <div class="small-12 medium-12 large-4 columns">
-                                <label><input type="radio" name="pen_type" value="2" v-model="penType" class="show-for-sr" v-on:change="reload()"/><i class="symb RC20"></i> Beach Pens</label>
-                            </div>
-                        </div> -->
-                        <hr>
-
-                        <!-- Mooring Filter Section -->
-                        <div class="mb-3">
-                            <label class="form-label fw-bold">Mooring</label>
-                            <div class="d-flex flex-wrap">
-                                <div class="form-check me-3">
-                                    <input type="radio" name="gear_type" id="gear_all" value="all" v-model="gearType" class="form-check-input" @change="reload()">
-                                    <label for="gear_all" class="form-check-label"><i class="symb RC3"></i> All types</label>
+                            <div class="col-6 col-md-3 mb-2">
+                                <div class="d-flex align-items-center">
+                                    <img class="publicPin me-2" :src="pin_gray" />
+                                    <span>Public</span>
                                 </div>
-                                <div class="form-check me-3">
-                                    <input type="radio" name="gear_type" id="gear_rental_available" value="rental-available" v-model="gearType" class="form-check-input" @change="reload()">
-                                    <label for="gear_rental_available" class="form-check-label"><i class="symb RC20"></i> Rental (available)</label>
+                            </div>
+                            <div class="col-6 col-md-3 mb-2">
+                                <div class="d-flex align-items-center">
+                                    <img class="availablePin me-2" :src="pin_orange" />
+                                    <span>Available</span>
                                 </div>
-                                <div class="form-check me-3">
-                                    <input type="radio" name="gear_type" id="gear_rental_notavailable" value="rental-notavailable" v-model="gearType" class="form-check-input" @change="reload()">
-                                    <label for="gear_rental_notavailable" class="form-check-label"><i class="symb RC20"></i> Rental (not available)</label>
+                            </div>
+                            <div class="col-6 col-md-3 mb-2">
+                                <div class="d-flex align-items-center">
+                                    <img class="partialPin me-2" :src="pin_orange_red" />
+                                    <span>Partial Dates</span>
                                 </div>
-                                <div class="form-check me-3">
-                                    <input type="radio" name="gear_type" id="gear_public_notbookable" value="public-notbookable" v-model="gearType" class="form-check-input" @change="reload()">
-                                    <label for="gear_public_notbookable" class="form-check-label"><i class="symb RC20"></i> Public (not bookable)</label>
+                            </div>
+                            <div class="col-6 col-md-3 mb-2">
+                                <div class="d-flex align-items-center">
+                                    <img class="unavailablePin me-2" :src="pin_red" />
+                                    <span>Unavailable</span>
                                 </div>
                             </div>
                         </div>
+                    </div>
 
-                        <hr>
+                    <hr>
 
-                        <!-- Types Filter Section -->
-                        <div class="mb-3">
-                            <label class="form-label fw-bold">Types</label>
-                            <div class="d-flex flex-wrap">
-                                <div class="form-check me-3">
-                                    <input type="radio" name="pen_type" id="pen_all" value="all" v-model="penType" class="form-check-input" @change="reload()">
-                                    <label for="pen_all" class="form-check-label"><i class="symb RC3"></i> All types</label>
-                                </div>
-                                <div class="form-check me-3">
-                                    <input type="radio" name="pen_type" id="pen_moorings" value="0" v-model="penType" class="form-check-input" @change="reload()">
-                                    <label for="pen_moorings" class="form-check-label"><i class="symb RC20"></i> Moorings</label>
-                                </div>
-                                <div class="form-check me-3">
-                                    <input type="radio" name="pen_type" id="pen_jetty" value="1" v-model="penType" class="form-check-input" @change="reload()">
-                                    <label for="pen_jetty" class="form-check-label"><i class="symb RC20"></i> Jetty Pens</label>
-                                </div>
-                                <div class="form-check me-3">
-                                    <input type="radio" name="pen_type" id="pen_beach" value="2" v-model="penType" class="form-check-input" @change="reload()">
-                                    <label for="pen_beach" class="form-check-label"><i class="symb RC20"></i> Beach Pens</label>
-                                </div>
+                    <!-- Hidden "Select features" Section -->
+                    <!-- This section is hidden by d-none, but correctly styled with BS5 form-checks -->
+                    <div class="mb-3 d-none">
+                        <label class="form-label fw-bold">Select features</label>
+                        <div class="d-flex flex-wrap">
+                            <div v-for="filt in filterList" :key="filt.key" class="form-check me-3">
+                                <input type="checkbox" class="form-check-input" :id="'filt_' + filt.key" :value="'filt_'+ filt.key" v-model="filterParams[filt.key]" @change="updateFilter()">
+                                <label :for="'filt_' + filt.key" class="form-check-label"><i class="symb" :class="filt.symb"></i> {{ filt.name }}</label>
                             </div>
                         </div>
-
-                        <!-- <hr class="search"/>
-
-                        <div class="row" id="legend" style="margin-bottom:10px;">
-                            <div class="small-12 medium-12 large-12 columns">
-                                <label>Availability</label>
-                            </div>
-                            <div class="small-12 medium-12 large-3 columns">
-                                <label>Public:
-                                    <img class="publicPin" :src="pin_gray" />
-                                </label>
-                            </div>
-                            <div class="small-12 medium-12 large-3 columns">
-                                <label>Available:
-                                    <img class="availablePin" :src="pin_orange" />
-                                </label>
-                            </div>
-                            <div class="small-12 medium-12 large-3 columns">
-                                <label>Partial Dates:
-                                    <img class="partialPin" :src="pin_orange_red" />
-                                </label>
-                            </div>
-                            <div class="small-12 medium-12 large-3 columns">
-                                <label>Unavailable:
-                                    <img class="unavailablePin" :src="pin_red" />
-                                </label>
-                            </div>
-                        </div>
-
-                        <div class="row"><div class="small-12 columns">
-                            <hr class="search"/>
-                        </div>
-                        <div class="row" style='display:none'>
-                            <div class="small-12 medium-12 large-12 columns">
-                                <label>Select features</label>
-                            </div>
-                            <template v-for="filt in filterList">
-                                <div class="small-12 medium-12 large-4 columns">
-                                    <label><input type="checkbox" class="show-for-sr" :value="'filt_'+ filt.key" v-model="filterParams[filt.key]" v-on:change="updateFilter()"/> <i class="symb" :class="filt.symb"></i> {{ filt.name }}</label>
-                                </div>
-                            </template>
-                        </div> -->
-
-
-                        <hr>
-
-                        <!-- Availability Legend Section -->
-                        <div class="mb-3">
-                            <label class="form-label fw-bold">Availability</label>
-                            <!-- Use a row with columns for the legend items for proper alignment -->
-                            <div class="row">
-                                <div class="col-6 col-md-3 mb-2">
-                                    <div class="d-flex align-items-center">
-                                        <img class="publicPin me-2" :src="pin_gray" />
-                                        <span>Public</span>
-                                    </div>
-                                </div>
-                                <div class="col-6 col-md-3 mb-2">
-                                    <div class="d-flex align-items-center">
-                                        <img class="availablePin me-2" :src="pin_orange" />
-                                        <span>Available</span>
-                                    </div>
-                                </div>
-                                <div class="col-6 col-md-3 mb-2">
-                                    <div class="d-flex align-items-center">
-                                        <img class="partialPin me-2" :src="pin_orange_red" />
-                                        <span>Partial Dates</span>
-                                    </div>
-                                </div>
-                                <div class="col-6 col-md-3 mb-2">
-                                    <div class="d-flex align-items-center">
-                                        <img class="unavailablePin me-2" :src="pin_red" />
-                                        <span>Unavailable</span>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-
-                        <hr>
-
-                        <!-- Hidden "Select features" Section -->
-                        <!-- This section is hidden by d-none, but correctly styled with BS5 form-checks -->
-                        <div class="mb-3 d-none">
-                            <label class="form-label fw-bold">Select features</label>
-                            <div class="d-flex flex-wrap">
-                                <div v-for="filt in filterList" :key="filt.key" class="form-check me-3">
-                                    <input type="checkbox" class="form-check-input" :id="'filt_' + filt.key" :value="'filt_'+ filt.key" v-model="filterParams[filt.key]" @change="updateFilter()">
-                                    <label :for="'filt_' + filt.key" class="form-check-label"><i class="symb" :class="filt.symb"></i> {{ filt.name }}</label>
-                                </div>
-                            </div>
-                        </div>
-
-
-
-
-
-
+                    </div>
 
                 </div>
 
@@ -782,7 +561,7 @@
 // import 'foundation-datepicker/js/foundation-datepicker'; // Adjust path if needed
 
 import Awesomplete from 'awesomplete';
-
+import { Dropdown } from 'bootstrap';
 
 // import ol from 'openlayers';
 import Map from 'ol/Map'
@@ -1007,9 +786,11 @@ export default {
                 // var count = this.numAdults + this.numConcessions + this.numChildren + this.numInfants + this.numMooring;
                 var count = this.numAdults + this.numConcessions + this.numChildren + this.numInfants;
                 if (count === 1) {
-                    return count +" person ▼";
+                    // return count +" person ▼";
+                    return count +" person";
                 } else {
-                    return count + " people ▼";
+                    // return count + " people ▼";
+                    return count + " people";
                 }
             }
         },
@@ -2273,6 +2054,11 @@ export default {
     mounted: function() {
         this.$nextTick(() => {
             var vm = this;
+
+            // Find all elements with `data-bs-toggle="dropdown"` inside this component
+            const dropdownElementList = this.$refs.parkfinderWrapper.querySelectorAll('[data-bs-toggle="dropdown"]');
+            // Initialize a new Dropdown instance for each one
+            [...dropdownElementList].map(dropdownToggleEl => new Dropdown(dropdownToggleEl));
 
             var template_group = $('#template_group').val();
             if (template_group == 'rottnest') { 
