@@ -278,7 +278,7 @@
                     </button>
                     <!-- <div class="dropdown-pane" id="measurements-dropdown" data-dropdown data-auto-focus="true"> -->
                     <div class="dropdown-menu p-3" aria-labelledby="vesselDetailsDropdown" style="width: 300px;">
-                        <div class="row">
+                        <!-- <div class="row">
                             <div class="small-6 columns">
                                 <label for="vesselRego" class="text-left">Vessel Rego</label>
                             </div><div class="small-6 columns">
@@ -311,6 +311,52 @@
                                 <label for="vesselWeight" class="text-left">Vessel Weight (Tonnes)</label>
                             </div><div class="small-6 columns">
                                 <input type="number" id="vesselWeight" ref="vesselWeight" name="vessel_weight" @change="checkDetails(false)" @blur="checkDetails(false)" v-model="vesselWeight" step='0.01' :disabled="current_booking.length > 0"/>
+                            </div>
+                        </div> -->
+
+                        <!-- Vessel Rego -->
+                        <div class="row g-3 align-items-center mb-2">
+                            <div class="col-6">
+                                <label for="vesselRego" class="col-form-label">Vessel Rego</label>
+                            </div>
+                            <div class="col-6">
+                                <input type="text" id="vesselRego" ref="vesselRego" name="vessel_rego" class="form-control form-control-sm" @blur="searchRego()" v-model="vesselRego" :disabled="current_booking.length > 0">
+                            </div>
+                        </div>
+                        <!-- Vessel Size -->
+                        <div class="row g-3 align-items-center mb-2">
+                            <div class="col-6">
+                                <label for="vesselSize" class="col-form-label">Vessel Size (Meters)</label>
+                            </div>
+                            <div class="col-6">
+                                <input type="number" id="vesselSize" ref="vesselSize" name="vessel_size" class="form-control form-control-sm" @change="checkDetails(false)" @blur="checkDetails(false)" v-model="vesselSize" step="0.01" :disabled="current_booking.length > 0">
+                            </div>
+                        </div>
+                        <!-- Vessel Draft -->
+                        <div class="row g-3 align-items-center mb-2">
+                            <div class="col-6">
+                                <label for="vesselDraft" class="col-form-label">Vessel Draft (Meters)</label>
+                            </div>
+                            <div class="col-6">
+                                <input type="number" id="vesselDraft" ref="vesselDraft" name="vessel_draft" class="form-control form-control-sm" @change="checkDetails(false)" @blur="checkDetails(false)" v-model="vesselDraft" step="0.01" :disabled="current_booking.length > 0">
+                            </div>
+                        </div>
+                        <!-- Vessel Beam -->
+                        <div class="row g-3 align-items-center mb-2">
+                            <div class="col-6">
+                                <label for="vesselBeam" class="col-form-label">Vessel Beam (Meters)</label>
+                            </div>
+                            <div class="col-6">
+                                <input type="number" id="vesselBeam" ref="vesselBeam" name="vessel_beam" class="form-control form-control-sm" @change="checkDetails(false)" @blur="checkDetails(false)" v-model="vesselBeam" step="0.01" :disabled="current_booking.length > 0">
+                            </div>
+                        </div>
+                        <!-- Vessel Weight -->
+                        <div class="row g-3 align-items-center">
+                            <div class="col-6">
+                                <label for="vesselWeight" class="col-form-label">Vessel Weight (Tonnes)</label>
+                            </div>
+                            <div class="col-6">
+                                <input type="number" id="vesselWeight" ref="vesselWeight" name="vessel_weight" class="form-control form-control-sm" @change="checkDetails(false)" @blur="checkDetails(false)" v-model="vesselWeight" step="0.01" :disabled="current_booking.length > 0">
                             </div>
                         </div>
                     </div>
