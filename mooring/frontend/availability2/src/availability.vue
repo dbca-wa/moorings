@@ -172,7 +172,7 @@
                     </div>
                 </div>
             </div>
-            <div class="columns small-6 medium-6 large-2">
+            <!-- <div class="columns small-6 medium-6 large-2">
                 <label>Arrival
                     <input
                         id="date-arrival"
@@ -195,6 +195,30 @@
                         :min="arrivalDateFormatted"
                     />
                 </label>
+            </div> -->
+            <div class="col-sm-6 col-lg-2">
+                <label for="date-arrival" class="form-label">Arrival</label>
+                <input
+                    id="date-arrival"
+                    type="date"
+                    class="form-control"
+                    placeholder="dd/mm/yyyy"
+                    @change="update"
+                    v-model="arrivalDateFormatted"
+                    :max="departureDateFormatted"
+                />
+            </div>
+            <div class="col-sm-6 col-lg-2">
+                <label for="date-departure" class="form-label">Departure</label>
+                <input
+                    id="date-departure"
+                    type="date"
+                    class="form-control"
+                    placeholder="dd/mm/yyyy"
+                    @change="update"
+                    v-model="departureDateFormatted"
+                    :min="arrivalDateFormatted"
+                />
             </div>
             <div class="small-6 medium-6 large-2 columns" >
                 <label>
