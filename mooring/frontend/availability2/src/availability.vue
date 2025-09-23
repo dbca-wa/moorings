@@ -439,9 +439,7 @@
 </template>
 
 <script>
-import 'foundation-sites';
-import 'foundation-datepicker/js/foundation-datepicker';
-import { Dropdown } from 'bootstrap';
+import { Dropdown, Tooltip } from 'bootstrap';
 import debounce from 'debounce';
 import moment from 'moment';
 import swal from 'sweetalert2';
@@ -1308,7 +1306,6 @@ export default {
                 [...tooltipTriggerList].map(tooltipTriggerEl => new Tooltip(tooltipTriggerEl));
             }
 
-            $(document).foundation();
             this.arrivalEl = $('#date-arrival');
             this.update();
 
