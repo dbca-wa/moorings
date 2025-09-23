@@ -97,7 +97,7 @@
 
             <div class="row" v-if="name">
                 <div class="col-12">
-                    <h1>Book mooring:</h1>
+                    <h2>Book mooring:</h2>
                 </div>
             </div>
 
