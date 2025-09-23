@@ -554,12 +554,37 @@
                                             </td>
                                             <!-- <td class="date" v-for="day in site.availability" v-bind:class="{available: day[0]}" align='center'> -->
                                             <td class="date text-center align-middle" v-for="day in site.availability" :class="{ 'table-success': day[0] }">
-                                                <div v-for="bp in day[1].booking_period" style='width:160px; '>
-                                                    <div v-if="bp.status == 'open'" class='tooltip2'  align='left'>
+                                                <!-- <div v-for="bp in day[1].booking_period" style='width:160px; '> -->
+                                                 <div v-for="bp in day[1].booking_period" class="mb-1">
+                                                    <!-- <div v-if="bp.status == 'open'" class='tooltip2'  align='left'>
                                                         <button class="button" style='width: 160px; margin-bottom: 2px;'  @click="addBooking(site.id,site.mooring_id,bp.id,bp.date)" >
                                                             <small>Book {{ bp.period_name }} <span v-if="site.mooring_class == 'small'">${{ bp.small_price }}</span> <span v-if="site.mooring_class == 'medium'">${{ bp.medium_price }}</span> <span v-if="site.mooring_class == 'large'">${{ bp.large_price }}</span></small>
                                                         </button><br>
                                                         <span v-show="bp.caption.length > 1" class="tooltiptext">{{ bp.caption }}</span>
+                                                    </div> -->
+                                                    <div v-if="bp.status == 'open'">
+                                                        <button
+                                                            class="btn btn-sm btn-success w-100"
+                                                            @click="addBooking(site.id,site.mooring_id,bp.id,bp.date)"
+                                                            v-if="bp.caption.length > 1"
+                                                            data-bs-toggle="tooltip"
+                                                            :title="bp.caption"
+                                                        >
+                                                            Book {{ bp.period_name }}
+                                                            <span v-if="site.mooring_class == 'small'">${{ bp.small_price }}</span>
+                                                            <span v-if="site.mooring_class == 'medium'">${{ bp.medium_price }}</span>
+                                                            <span v-if="site.mooring_class == 'large'">${{ bp.large_price }}</span>
+                                                        </button>
+                                                        <button
+                                                            v-else
+                                                            class="btn btn-sm btn-success w-100"
+                                                            @click="addBooking(site.id,site.mooring_id,bp.id,bp.date)"
+                                                        >
+                                                            Book {{ bp.period_name }}
+                                                            <span v-if="site.mooring_class == 'small'">${{ bp.small_price }}</span>
+                                                            <span v-if="site.mooring_class == 'medium'">${{ bp.medium_price }}</span>
+                                                            <span v-if="site.mooring_class == 'large'">${{ bp.large_price }}</span>
+                                                        </button>
                                                     </div>
                                                     <div v-else-if="bp.status == 'selected'" >
                                                         <div style="position: relative; text-align: right; margin-right: 25px;">
