@@ -1,523 +1,460 @@
 <template>
-    <div id="sites-cal" class="f6inject">
+    <div id="sites-cal" ref="availabilityWrapper">
+        <div class="container">
+            <a name="makebooking" />
+            <div class="row" v-if="status == 'offline'">
+                <div class="col-12">
+                    <div class="alert alert-danger" role="alert">
+                        Sorry, this mooring doesn't yet support online bookings. Please visit the <a href="">Mooring Availability checker</a> for expected availability.
+                    </div>
+                </div>
+            </div>
+            <div class="row" v-else-if="status == 'empty'">
+                <div class="col-12">
+                    <div class="alert alert-danger" role="alert">
+                        Sorry, this mooring doesn't yet have any mooring assigned to it. Please visit the <a href="">Mooring Availability checker</a> for expected availability.
+                    </div>
+                </div>
+            </div>
+            <div class="row" v-else-if="status == 'closed'">
+                <div class="col-12">
+                    <div class="alert alert-danger" role="alert">
+                        Sorry, this mooring is closed for the selected period. Please visit the <a href="">Mooring Availability checker</a> for expected availability.
+                    </div>
+                </div>
+            </div>
+            <div class="row" v-if="errorMsg">
+                <div class="col-12">
+                    <div class="alert alert-danger" role="alert">
+                        Sorry, there was an error placing the booking: {{ errorMsg }} <br/>
+                        <template v-if="showSecondErrorLine">
+                        Please try again later. If this reoccurs, please contact <a href="">Parks and Visitor Services</a> with this error message, the mooring and the time of the request.
+                        </template>
+                    </div>
+                </div>
+            </div>
+            <div class="row" v-if="timeleft < 0">
+                <div class="col-12">
+                    <div class="alert alert-danger" role="alert">
+                        Session Expired <br/>
+                        <template v-if="showSecondErrorLine">
+                        Sorry your Session has expired
+                        </template>
+                    </div>
+                </div>
+            </div>
 
-        <a name="makebooking" />
-        <div class="row" v-if="status == 'offline'">
-            <div class="columns small-12 medium-12 large-12">
-                <div class="callout alert">
-                    Sorry, this mooring doesn't yet support online bookings. Please visit the <a href="">Mooring Availability checker</a> for expected availability.
+            <div v-show="ongoing_booking" class="mb-3">
+                <div class="d-flex align-items-center">
+                    <!-- Time Left Button -->
+                    <button v-show="ongoing_booking" class="btn btn-danger" type="button">Time Left {{ timeleft }} to complete booking.</button>
+                    <!-- Cancel Button -->
+                    <a :href="parkstayUrl+'/booking/abort'" class="btn btn-warning ms-2">Cancel in-progress booking</a>
                 </div>
             </div>
-        </div>
-        <div class="row" v-else-if="status == 'empty'">
-            <div class="columns small-12 medium-12 large-12">
-                <div class="callout alert">
-                    Sorry, this mooring doesn't yet have any mooring assigned to it. Please visit the <a href="">Mooring Availability checker</a> for expected availability.
-                </div>
-            </div>
-        </div>
-        <div class="row" v-else-if="status == 'closed'">
-            <div class="columns small-12 medium-12 large-12">
-                <div class="callout alert">
-                    Sorry, this mooring is closed for the selected period. Please visit the <a href="">Mooring Availability checker</a> for expected availability.
-                </div>
-            </div>
-        </div>
-        <div class="row" v-if="errorMsg">
-            <div class="columns small-12 medium-12 large-12">
-                <div class="callout alert">
-                    Sorry, there was an error placing the booking: {{ errorMsg }} <br/>
-                    <template v-if="showSecondErrorLine">
-                    Please try again later. If this reoccurs, please contact <a href="">Parks and Visitor Services</a> with this error message, the mooring and the time of the request.
-                    </template>
-                </div>
-            </div>
-        </div>
-        <div class="row" v-if="timeleft < 0">
-            <div class="columns small-12 medium-12 large-12">
-                <div class="callout alert">
-                    Session Expired <br/>
-                    <template v-if="showSecondErrorLine">
-                    Sorry your Session has expired
-                    </template>
-                </div>
-            </div>
-        </div>
 
-        <div class="columns small-12 medium-12 large-12" v-show="ongoing_booking">
-        <div class="row">
-                <div class="small-8 medium-9 large-10">
-
-		<button v-show="ongoing_booking" style="color: #FFFFFF; background-color: rgb(255, 0, 0);" class="button small-12 medium-12 large-12" >Time Left {{ timeleft }} to complete booking.</button>
-		<a type="button" :href="parkstayUrl+'/booking/abort'" class="button float-right warning continueBooking" style="color: #fff; background-color: #f0ad4e;  border-color: #eea236; border-radius: 4px; margin-left:4px;">
-                      Cancel in-progress booking
-                </a>
-              </div>
-	   </div>
-	</div>
-        <div class="columns small-12 medium-12 large-12">
-        <div class="row">
-                <div class="small-8 medium-9 large-10">
-                        <div class="card">
-                             <div class="card-body"><h3 class="card-title">Trolley: <span id='total_trolley'>${{ total_booking }}</span></h3></div>
+            <!-- A new row for the trolley section with a bottom margin -->
+            <div class="row mb-3">
+                <!-- Left Column for Card and Item List -->
+                <div class="col-md-9">
+                    <!-- Trolley summary card -->
+                    <!-- <div class="card mb-3">
+                        <div class="card-body">
+                            <h5 class="card-title mb-0">Trolley: <span id='total_trolley'>${{ total_booking }}</span></h5>
                         </div>
-                        <div class='columns small-12 medium-12 large-12' style="margin-top:10px; margin-bottom:10px;"> 
-                                 <div v-for="item in current_booking" class="row small-12 medium-12 large-12" >
-                                         <div class="columns small-12 medium-9 large-9">{{ item.item }}</div>
-                                         <div class="columns small-12 medium-2 large-2">${{ item.amount }}</div>
-                                         <div class="columns small-12 medium-1 large-1"><a v-show="item.past_booking == false" style='color: red; opacity: 1;' type="button" class="close" @click="deleteBooking(item.id, item.past_booking)">x</a></div>
-                                 </div>
-			            </div>
+                    </div> -->
+
+                    <!-- Trolley item list -->
+                    <!-- <div v-for="item in current_booking" :key="item.id" class="row gx-2 align-items-center mb-1">
+                        <div class="col-8">{{ item.item }}</div>
+                        <div class="col-3 text-end">${{ item.amount }}</div>
+                        <div class="col-1 text-end">
+                            <button v-show="item.past_booking == false" type="button" class="btn-close" @click="deleteBooking(item.id, item.past_booking)" aria-label="Remove item"></button>
+                        </div>
+                    </div> -->
+                    <!-- A single card now contains both the header and the item list -->
+                    <div class="card">
+                        <!-- Card Header for the total amount -->
+                        <div class="card-header">
+                            <h5 class="mb-0">Trolley: <span id='total_trolley'>${{ total_booking }}</span></h5>
+                        </div>
+                        
+                        <!-- List Group for the items -->
+                        <ul class="list-group list-group-flush" v-if="current_booking.length > 0">
+                            <li v-for="item in current_booking" :key="item.id" class="list-group-item d-flex justify-content-between align-items-center">
+                                <span>{{ item.item }}</span>
+                                <div class="d-flex align-items-center">
+                                    <span class="me-3">${{ item.amount }}</span>
+                                    <button v-show="item.past_booking == false" type="button" class="btn-close" @click="deleteBooking(item.id, item.past_booking)" aria-label="Remove item"></button>
+                                </div>
+                            </li>
+                        </ul>
+                    </div>
                 </div>
-                <div class="columns small-4 medium-3 large-2">
-                        <div v-if="vesselRego.length < 0.1 || vesselRego == ' ' || vesselSize < 0.1 || vesselDraft < 0.1 ">
-                            
-                            <button title="Please enter vessel details" style="border-radius: 4px; border: 1px solid #2e6da4" class="button small-12 medium-12 large-12" @click="validateVessel()">Proceed to Check Out</button>
+                <!-- Right Column for Checkout Buttons -->
+                <div class="col-md-3 text-end">
+                    <!-- Use d-grid to make the button inside take up the full width -->
+                    <div class="d-grid">
+                        <div v-if="vesselRego.length < 0.1 || vesselRego == ' ' || vesselSize < 0.1 || vesselDraft < 0.1">
+                            <button title="Please enter vessel details" class="btn btn-primary" @click="validateVessel()">Proceed to Check Out</button>
                         </div>
                         <div v-else>
-                           <div v-if="vesselWeight == 0 && vesselBeam == 0 ">
-
-                            <button title="Please enter vessel details" style="border-radius: 4px; border: 1px solid #2e6da4" class="button small-12 medium-12 large-12" @click="validateVessel()">Proceed to Check Out</button>
-                           </div>
-                           <div v-else>
-                            <a  v-show="current_booking.length > 0 && booking_changed == true && numAdults >= 0" class="button small-12 medium-12 large-12" :href="parkstayUrl+'/booking'" style="border-radius: 4px; border: 1px solid #2e6da4">Proceed to Check Out</a>
-                            <button  title="Please add items into your trolley." v-show="current_booking.length > 0 && booking_changed == true && numAdults < 0" style="color: #000000; background-color: rgb(224, 217, 217); border: 1px solid #000; border-radius: 4px;" class="button small-12 medium-12 large-12" disabled >Please select minimum of 1 adult guest</button>
-                            <button  title="Please add items into your trolley." v-show="current_booking.length == 0 && numAdults >= 0 || booking_changed == false" style="color: #000000; background-color: rgb(224, 217, 217); border: 1px solid #000; border-radius: 4px;" class="button small-12 medium-12 large-12" disabled >Add items to Proceed to Check Out</button>                
-                            </div>
-
-
+                        <div v-if="vesselWeight == 0 && vesselBeam == 0">
+                            <button title="Please enter vessel details" class="btn btn-primary" @click="validateVessel()">Proceed to Check Out</button>
+                        </div>
+                        <div v-else>
+                            <a v-if="current_booking.length > 0 && booking_changed == true && numAdults >= 0" class="btn btn-primary" :href="parkstayUrl+'/booking'">Proceed to Check Out</a>
+                            <button v-else-if="current_booking.length > 0 && booking_changed == true && numAdults < 0" class="btn btn-secondary" disabled>Please select minimum of 1 adult guest</button>
+                            <button v-else class="btn btn-secondary" disabled>Add items to Proceed to Check Out</button>
                             </div>
                         </div>
-        </div>
-        </div>
-	<loader :isLoading.sync="isLoading">&nbsp;</loader>
-        <div class="row" v-if="name">
-            <div class="columns small-12">
-                <h1>Book mooring:</h1>
-            </div>
-        </div>
-
-        <div v-if="ongoing_booking" class="row" style='display:none'>
-            <div class="columns small-12 medium-12 large-12">
-                <div class="clearfix">
-                    {{ timeleft }}
-                    <a type="button" :href="parkstayUrl+'/booking'" class="button float-right warning continueBooking">
-                        Complete in-progress booking
-                    </a>
-                    <template v-if="parseInt(parkstayGroundRatisId) > 0">
-                        <a type="button" :href="parkstayUrl+'/booking/abort?change=true&change_ratis='+parkstayGroundRatisId" class="button float-right warning continueBooking">
-                            Cancel in-progress booking
-                        </a>
-                    </template>
-                    <template v-else>
-                        <a type="button" :href="parkstayUrl+'/booking/abort?change=true&change_id='+parkstayGroundId" class="button float-right warning continueBooking">
-                            Cancel in-progress booking
-                        </a>
-                    </template>
-                </div>
-            </div>
-        </div>
-        <div class="row" v-show="status == 'online'">
-            <div v-if="long_description" class="columns small-12 medium-12 large-12" style='display:none'>
-                <div class="row">
-                    <div class="columns small-6 medium-6 large-3">
-                        <button type="button" class="button formButton" @click="toggleMoreInfo">
-                            More Information &nbsp;&nbsp;
-                            <i style="font-size:large;" v-if="!showMoreInfo" class="fa fa-caret-down"></i>
-                            <i style="font-size:large;" v-else class="fa fa-caret-up"></i>
-                        </button>
                     </div>
                 </div>
-                <div class="row" style="margin-bottom:15px;" v-if="showMoreInfo">
-                    <div class="columns small-12 medium-12 large-12">
-                        <div v-html="long_description"></div>
-                    </div>
-                </div>
-            </div>
-            <div class="columns small-6 medium-6 large-2">
-                <label>Arrival
-                    <input
-                        id="date-arrival"
-                        type="date"
-                        placeholder="dd/mm/yyyy"
-                        @change="update"
-                        v-model="arrivalDateFormatted"
-                        :max="departureDateFormatted"
-                    />
-                </label>
-            </div>
-            <div class="columns small-6 medium-6 large-2">
-                <label>Departure
-                    <input
-                        id="date-departure"
-                        type="date"
-                        placeholder="dd/mm/yyyy"
-                        @change="update"
-                        v-model="departureDateFormatted"
-                        :min="arrivalDateFormatted"
-                    />
-                </label>
-            </div>
-            <div class="small-6 medium-6 large-2 columns" >
-                <label>
-                    Vessel Details
-                    <input type="button" class="button formButton" value="Details ▼" data-toggle="measurements-dropdown"/>
-                </label>
-                <div style='position: relative;'>
-                <div class="dropdown-pane" id="measurements-dropdown" data-dropdown data-auto-focus="true">
-                    <div class="row">
-                        <div class="small-6 columns">
-                            <label for="vesselRego" class="text-left">Vessel Rego</label>
-                        </div><div class="small-6 columns">
-                            <input type="text" id="vesselRego" ref="vesselRego" name="vessel_rego" @blur="searchRego()" v-model="vesselRego" :disabled="current_booking.length > 0" />
-                        </div>
-                    </div>
-                    <div class="row">
-                        <div class="small-6 columns">
-                            <label for="vesselSize" class="text-left">Vessel Size (Meters)</label>
-                        </div><div class="small-6 columns">
-                            <input type="number" id="vesselSize" ref="vesselSize" name="vessel_size" @change="checkDetails(false)" @blur="checkDetails(false)" v-model="vesselSize" step='0.01' :disabled="current_booking.length > 0"/>
-                        </div>
-                    </div>
-                    <div class="row">
-                        <div class="small-6 columns">
-                            <label for="vesselDraft" class="text-left">Vessel Draft (Meters)</label>
-                        </div><div class="small-6 columns">
-                            <input type="number" id="vesselDraft" ref="vesselDraft" name="vessel_draft" @change="checkDetails(false)" @blur="checkDetails(false)" v-model="vesselDraft" step='0.01' :disabled="current_booking.length > 0"/>
-                        </div>
-                    </div>
-                    <div class="row">
-                        <div class="small-6 columns">
-                            <label for="vesselBeam" class="text-left">Vessel Beams (Meters)</label>
-                        </div><div class="small-6 columns">
-                            <input type="number" id="vesselBeam" ref="vesselBeam" name="vessel_beam" @change="checkDetails(false)" @blur="checkDetails(false)" v-model="vesselBeam" step='0.01' :disabled="current_booking.length > 0" />
-                        </div>
-                    </div>
-                    <div class="row">
-                        <div class="small-6 columns">
-                            <label for="vesselWeight" class="text-left">Vessel Weight (Tonnes)</label>
-                        </div><div class="small-6 columns">
-                            <input type="number" id="vesselWeight" ref="vesselWeight" name="vessel_weight" @change="checkDetails(false)" @blur="checkDetails(false)" v-model="vesselWeight" step='0.01' :disabled="current_booking.length > 0"/>
-                        </div>
-                    </div>
-                </div>
-                </div>
-            </div>
-            <div class="small-6 medium-6 large-2 columns" >
-                <label>
-                    Guests 
-                    <input type="button" class="button formButton" v-bind:value="numPeople" data-toggle="guests-dropdown" id='guests-button' />
-                </label>
-                <div style='iiiiposition: relative;'>
-                <div class="dropdown-pane" id="guests-dropdown" data-dropdown data-auto-focus="true">
-                    <div class="row">
-                        <div class="small-6 columns">
-                            <label for="num_adults" class="text-right">Adults</label>
-                        </div><div class="small-6 columns">
-                            <input type="number" id="numAdults" name="num_adults" @change="checkGuests()" v-model="numAdults" min="0" max="16"/>
-                        </div>
-                    </div>
-                    <div class="row" style="display:none;">
-                        <div class="small-6 columns" >
-                            <label for="num_concessions" class="text-right"><span class="has-tip" title="Holders of one of the following Australian-issued cards:
-- Seniors Card
-- Age Pension
-- Disability Support
-- Carer Payment
-- Carer Allowance
-- Companion Card
-- Department of Veterans' Affairs">Concessions</span></label>
-                        </div><div class="small-6 columns">
-                            <input type="number" id="numConcessions" name="num_concessions" @change="checkGuests()" v-model="numConcessions" min="0" max="16"/>
-                        </div>
-                    </div>
-                    <div class="row">
-                        <div class="small-6 columns">
-                            <label for="num_children" class="text-right">Children (4-16)</label>
-                        </div><div class="small-6 columns">
-                            <input type="number" id="numChildren" name="num_children" @change="checkGuests()" v-model="numChildren" min="0" max="16"/>
-                        </div>
-                    </div>
-                    <div class="row">
-                        <div class="small-6 columns">
-                            <label for="num_infants" class="text-right">Infants (under 4)</label>
-                        </div><div class="small-6 columns">
-                            <input type="number" id="numInfants" name="num_infants" @change="checkGuests()" v-model="numInfants" min="0" max="16"/>
-                        </div>
-                    </div>
-                </div>
-                </div>
-            </div>
-            <div class="columns small-6 medium-6 large-2">
-                <label title="Distance to search from the original selected mooring.">Distance (radius KMs)
-                    <input id="distanceRadius" type="number" placeholder="0" v-on:change="update" v-model="distanceRadius"/>
-                </label>
             </div>
 
-            <div class="columns small-6 medium-6 large-2">
-            <span class='pull-right'>
-               <a type="button" :href="/map/" class="button float-right warning">
-                  Search Other Mooring
-               </a>
-	    </span>
-	    </div>
-            
-            <div v-if="!useAdminApi" class="columns small-6 medium-6 large-3" style='display:none;'>
-                <label>Equipment
-                    <select name="gear_type" v-model="gearType" @change="update()">
-                        <option value="tent" v-if="gearTotals.tent">Tent</option>
-                        <option value="campervan" v-if="gearTotals.campervan">Campervan</option>
-                        <option value="caravan" v-if="gearTotals.caravan">Caravan / Camper trailer</option>
-                    </select>
-                </label>
-            </div>           
-        </div>
-        <div class="row" v-show="status == 'online'">
-            <div class="columns table-scroll">
-                 <div v-if="vesselSize > 0 && vesselDraft > 0" class="small-12 medium-12 large-12">
-                      <div v-if="vesselDraft != 0 && vesselWeight != 0" class="small-12 medium-12 large-12">
-                           <table class="hover">
-                               <thead>
-                                   <tr>
-                                       <th class="site">Mooring &nbsp;<a class="float-right" target="_blank" :href="map" v-if="map" style='display: none;'>View Map</a></th>
-                                       <th class="book">Book</th>
-                                       <th class="date" v-for="i in days">{{ getDateString(arrivalDate, i-1) }}</th>
-                                   </tr>
-                               </thead>
-                               <tbody><template v-for="(site, index) in sites" >
-                                   <tr v-show="mooring_book_row_display[index] == 'show'" >
-                                       <td class="site">{{ site.name }} - <i>{{ site.mooring_park }}</i><br>
-	                       		<i v-if="site.distance_from_selection > 1" >Distance: {{ site.distance_from_selection }}km</i>
-	                       		<i v-else >Distance: {{ site.distance_from_selection_meters }}m</i>
-                                       </td>
-                                       <td class="book">
-                                           <template v-if="site.price">
-                                               <button v-if="mooring_book_row[index] == true" :disabled="mooring_book_row_disabled[index] == true" @click="addBookingRow(index)" class="button"><small>Book now</small><br/> ${{ mooring_book_row_price[index] }}</button>
-                                               <button style='display:none' v-else disabled class="button has-tip" data-tooltip aria-haspopup="true" title="Please complete your current ongoing booking using the button at the top of the page."><small>Book now</small><br/>{{ site.price }}</button>
-                                           </template>
-                                           <template v-else>
-                                               <button v-if="site.breakdown" class="button warning" @click="toggleBreakdown(site)"><small>Show availability</small></button>
-                                               <button v-else class="button secondary disabled" disabled><small>Change dates</small></button>
-                                           </template>
-                                       </td>
-                                       <td class="date" v-for="day in site.availability" v-bind:class="{available: day[0]}" align='center'>
-                                                    <div v-for="bp in day[1].booking_period" style='width:160px; '>
+            <loader :isLoading.sync="isLoading">&nbsp;</loader>
 
-                                                       <div v-if="bp.status == 'open'" class='tooltip2'  align='left'>
-                                                       <button class="button" style='width: 160px; margin-bottom: 2px;'  @click="addBooking(site.id,site.mooring_id,bp.id,bp.date)" >
-                                                           <small>Book {{ bp.period_name }} <span v-if="site.mooring_class == 'small'">${{ bp.small_price }}</span> <span v-if="site.mooring_class == 'medium'">${{ bp.medium_price }}</span> <span v-if="site.mooring_class == 'large'">${{ bp.large_price }}</span></small>
-                                                       </button><br>
-                                                          
-                                                          <span v-show="bp.caption.length > 1" class="tooltiptext">{{ bp.caption }}</span>
-                                                       </div>
-	                       			<div v-else-if="bp.status == 'selected'" >
-                                                            <div style="position: relative; text-align: right; margin-right: 25px;"><a v-show="bp.past_booking == false" type="button" class="close" style="color: red; opacity: 1; position: absolute; padding-left: 5px;" @click="deleteBooking(bp.booking_row_id, bp.past_booking)" >x</a></div>
-                                                       <button class="button" style='width: 160px; margin-bottom: 2px; background-color: #8bc8f1;' @click="deleteBooking(bp.booking_row_id, bp.past_booking)" > 
-                                                           <small>Book {{ bp.period_name }} <span v-if="site.mooring_class == 'small'">${{ bp.small_price }}</span> <span v-if="site.mooring_class == 'medium'">${{ bp.medium_price }}</span> <span v-if="site.mooring_class == 'large'">${{ bp.large_price }} </span></small>
-                                                       </button>
-	                       			</div>
-                                                       <div v-else-if="bp.status == 'perday'" >
-                                                       <button class="button"  style='width: 160px; margin-bottom: 2px; background-color: rgb(255, 253, 199); color: #000;' >
-                                                            <small>One Mooring Limit</small>
-                                                       </button>
-                                                       </div>
+            <div class="row" v-if="name">
+                <div class="col-12">
+                    <h3>Book mooring:</h3>
+                </div>
+            </div>
 
-                                                       <div v-else-if="bp.status == 'maxstay'" >
-                                                       <button class="button"  style='width: 160px; margin-bottom: 2px; background-color: rgb(255, 253, 199); color: #000;' >
-                                                            <small>Max Stay Limit Reached</small>
-                                                       </button>
-                                                       </div>
+            <!-- This section is hidden, but we'll style it with BS5 just in case -->
+            <div v-if="ongoing_booking" class="row d-none">
+                <div class="col-12">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <span>{{ timeleft }}</span>
+                        <div>
+                            <a :href="parkstayUrl+'/booking'" class="btn btn-warning">
+                                Complete in-progress booking
+                            </a>
+                            <template v-if="parseInt(parkstayGroundRatisId) > 0">
+                                <a :href="parkstayUrl+'/booking/abort?change=true&change_ratis='+parkstayGroundRatisId" class="btn btn-warning ms-2">
+                                    Cancel in-progress booking
+                                </a>
+                            </template>
+                            <template v-else>
+                                <a :href="parkstayUrl+'/booking/abort?change=true&change_id='+parkstayGroundId" class="btn btn-warning ms-2">
+                                    Cancel in-progress booking
+                                </a>
+                            </template>
+                        </div>
+                    </div>
+                </div>
+            </div>
 
-	                       			<div v-else >
-                                                       <button class="button"  style='width: 160px; margin-bottom: 2px; background-color: rgb(255, 236, 236); text-decoration: line-through;color: #000;' >
-                                                            <small>{{ bp.period_name }}</small>
-                                                       </button>
-	                       			</div>
+            <div class="row mb-2" v-show="status == 'online'">
+                <div class="col-12">
+                    <div class="card">
+                        <div class="card-body">
+                            <!-- A new row for the form controls INSIDE the card -->
+                            <div class="row g-3">
+                                <!-- This section is hidden, but styled with BS5 -->
+                                <div v-if="long_description" class="col-12 d-none">
+                                    <div class="mb-3">
+                                        <button type="button" class="btn btn-outline-secondary" @click="toggleMoreInfo">
+                                            More Information
+                                            <i v-if="!showMoreInfo" class="fa fa-caret-down ms-2"></i>
+                                            <i v-else class="fa fa-caret-up ms-2"></i>
+                                        </button>
+                                    </div>
+                                    <div class="mb-3" v-if="showMoreInfo">
+                                        <div v-html="long_description"></div>
+                                    </div>
+                                </div>
+                                <div class="col-sm-6 col-lg-2">
+                                    <label for="date-arrival" class="form-label">Arrival</label>
+                                    <input
+                                        id="date-arrival"
+                                        type="date"
+                                        class="form-control"
+                                        placeholder="dd/mm/yyyy"
+                                        @change="update"
+                                        v-model="arrivalDateFormatted"
+                                        :max="departureDateFormatted"
+                                    />
+                                </div>
+                                <div class="col-sm-6 col-lg-2">
+                                    <label for="date-departure" class="form-label">Departure</label>
+                                    <input
+                                        id="date-departure"
+                                        type="date"
+                                        class="form-control"
+                                        placeholder="dd/mm/yyyy"
+                                        @change="update"
+                                        v-model="departureDateFormatted"
+                                        :min="arrivalDateFormatted"
+                                    />
+                                </div>
+                                <!-- Vessel Details Dropdown -->
+                                <div class="col-sm-6 col-lg-2">
+                                    <label for="vesselDetailsDropdown" class="form-label">Vessel Details</label>
+                                    <div class="dropdown">
+                                        <button class="btn btn-outline-secondary dropdown-toggle w-100" type="button" id="vesselDetailsDropdown" data-bs-toggle="dropdown" aria-expanded="false">
+                                            Details
+                                        </button>
+                                        <div class="dropdown-menu p-3" aria-labelledby="vesselDetailsDropdown" style="width: 300px;">
+                                            <!-- Vessel Rego -->
+                                            <div class="row g-3 align-items-center mb-2">
+                                                <div class="col-6">
+                                                    <label for="vesselRego" class="col-form-label">Vessel Rego</label>
+                                                </div>
+                                                <div class="col-6">
+                                                    <input type="text" id="vesselRego" ref="vesselRego" name="vessel_rego" class="form-control form-control-sm" @blur="searchRego()" v-model="vesselRego" :disabled="current_booking.length > 0">
+                                                </div>
+                                            </div>
+                                            <!-- Vessel Size -->
+                                            <div class="row g-3 align-items-center mb-2">
+                                                <div class="col-6">
+                                                    <label for="vesselSize" class="col-form-label">Vessel Size (Meters)</label>
+                                                </div>
+                                                <div class="col-6">
+                                                    <input type="number" id="vesselSize" ref="vesselSize" name="vessel_size" class="form-control form-control-sm" @change="checkDetails(false)" @blur="checkDetails(false)" v-model="vesselSize" step="0.01" :disabled="current_booking.length > 0">
+                                                </div>
+                                            </div>
+                                            <!-- Vessel Draft -->
+                                            <div class="row g-3 align-items-center mb-2">
+                                                <div class="col-6">
+                                                    <label for="vesselDraft" class="col-form-label">Vessel Draft (Meters)</label>
+                                                </div>
+                                                <div class="col-6">
+                                                    <input type="number" id="vesselDraft" ref="vesselDraft" name="vessel_draft" class="form-control form-control-sm" @change="checkDetails(false)" @blur="checkDetails(false)" v-model="vesselDraft" step="0.01" :disabled="current_booking.length > 0">
+                                                </div>
+                                            </div>
+                                            <!-- Vessel Beam -->
+                                            <div class="row g-3 align-items-center mb-2">
+                                                <div class="col-6">
+                                                    <label for="vesselBeam" class="col-form-label">Vessel Beam (Meters)</label>
+                                                </div>
+                                                <div class="col-6">
+                                                    <input type="number" id="vesselBeam" ref="vesselBeam" name="vessel_beam" class="form-control form-control-sm" @change="checkDetails(false)" @blur="checkDetails(false)" v-model="vesselBeam" step="0.01" :disabled="current_booking.length > 0">
+                                                </div>
+                                            </div>
+                                            <!-- Vessel Weight -->
+                                            <div class="row g-3 align-items-center">
+                                                <div class="col-6">
+                                                    <label for="vesselWeight" class="col-form-label">Vessel Weight (Tonnes)</label>
+                                                </div>
+                                                <div class="col-6">
+                                                    <input type="number" id="vesselWeight" ref="vesselWeight" name="vessel_weight" class="form-control form-control-sm" @change="checkDetails(false)" @blur="checkDetails(false)" v-model="vesselWeight" step="0.01" :disabled="current_booking.length > 0">
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <!-- Guests Dropdown -->
+                                <div class="col-sm-6 col-lg-2">
+                                    <label for="guestsDropdown" class="form-label">Guests</label>
+                                    <div class="dropdown">
+                                        <button class="btn btn-outline-secondary dropdown-toggle w-100" type="button" id="guestsDropdown" data-bs-toggle="dropdown" aria-expanded="false">
+                                            {{ numPeople }}
+                                        </button>
+                                        <div class="dropdown-menu p-3" aria-labelledby="guestsDropdown" style="width: 300px;">
+                                            <!-- Adults -->
+                                            <div class="row g-3 align-items-center mb-2">
+                                                <div class="col-6">
+                                                    <label for="numAdults" class="col-form-label">Adults</label>
+                                                </div>
+                                                <div class="col-6">
+                                                    <input type="number" id="numAdults" name="num_adults" class="form-control form-control-sm" @change="checkGuests()" v-model="numAdults" min="0" max="16">
+                                                </div>
+                                            </div>
+
+                                            <!-- Concessions (Hidden) -->
+                                            <div class="row g-3 align-items-center mb-2 d-none">
+                                                <div class="col-6">
+                                                    <label for="numConcessions" class="col-form-label">
+                                                        <span title="Holders of one of the following Australian-issued cards: - Seniors Card - Age Pension - Disability Support - Carer Payment - Carer Allowance - Companion Card - Department of Veterans' Affairs">Concessions</span>
+                                                    </label>
+                                                </div>
+                                                <div class="col-6">
+                                                    <input type="number" id="numConcessions" name="num_concessions" class="form-control form-control-sm" @change="checkGuests()" v-model="numConcessions" min="0" max="16">
+                                                </div>
+                                            </div>
+
+                                            <!-- Children -->
+                                            <div class="row g-3 align-items-center mb-2">
+                                                <div class="col-6">
+                                                    <label for="numChildren" class="col-form-label">Children (4-16)</label>
+                                                </div>
+                                                <div class="col-6">
+                                                    <input type="number" id="numChildren" name="num_children" class="form-control form-control-sm" @change="checkGuests()" v-model="numChildren" min="0" max="16">
+                                                </div>
+                                            </div>
+
+                                            <!-- Infants -->
+                                            <div class="row g-3 align-items-center">
+                                                <div class="col-6">
+                                                    <label for="numInfants" class="col-form-label">Infants (under 4)</label>
+                                                </div>
+                                                <div class="col-6">
+                                                    <input type="number" id="numInfants" name="num_infants" class="form-control form-control-sm" @change="checkGuests()" v-model="numInfants" min="0" max="16">
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-sm-6 col-lg-2">
+                                    <label for="distanceRadius" class="form-label" title="Distance to search from the original selected mooring.">Distance (KMs)</label>
+                                    <input id="distanceRadius" type="number" class="form-control" placeholder="0" @change="update" v-model="distanceRadius"/>
+                                </div>
+                                <div class="col-sm-6 col-lg-2">
+                                    <!-- A spacer label to align the button vertically with the input field -->
+                                    <label class="form-label">&nbsp;</label>
+                                    <a :href="'/map/'" class="btn btn-outline-secondary w-100">Search Other Mooring</a>
+                                </div>
+                                <div v-if="!useAdminApi" class="col-sm-6 col-lg-3 d-none">
+                                    <label for="gear_type_select" class="form-label">Equipment</label>
+                                    <select id="gear_type_select" name="gear_type" class="form-select" v-model="gearType" @change="update()">
+                                        <option value="tent" v-if="gearTotals.tent">Tent</option>
+                                        <option value="campervan" v-if="gearTotals.campervan">Campervan</option>
+                                        <option value="caravan" v-if="gearTotals.caravan">Caravan / Camper trailer</option>
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="row" v-show="status == 'online'">
+                <div class="col-12">
+                    <div v-if="vesselSize > 0 && vesselDraft > 0">
+                        <div v-if="vesselDraft != 0 && vesselWeight != 0">
+                            <div class="table-responsive">
+                                <table class="table table-bordered table-striped table-hover">
+                                    <thead>
+                                        <tr>
+                                            <th class="site">
+                                                <div class="d-flex justify-content-between align-items-center">
+                                                    <span>Mooring</span>
+                                                    <a class="btn btn-sm btn-outline-secondary d-none" target="_blank" :href="map" v-if="map">View Map</a>
+                                                </div>
+                                            </th>
+                                            <th class="book">Book</th>
+                                            <th class="date" v-for="i in days">{{ getDateString(arrivalDate, i-1) }}</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <template v-for="(site, index) in sites" >
+                                            <tr v-show="mooring_book_row_display[index] == 'show'" >
+                                                <td class="site">
+                                                    <div>{{ site.name }} - <span class="text-muted">{{ site.mooring_park }}</span></div>
+                                                    <small class="text-muted" v-if="site.distance_from_selection > 1">Distance: {{ site.distance_from_selection }}km</small>
+                                                    <small class="text-muted" v-else>Distance: {{ site.distance_from_selection_meters }}m</small>
+                                                </td>
+                                                <td class="book">
+                                                    <template v-if="site.price">
+                                                        <button v-if="mooring_book_row[index] == true" :disabled="mooring_book_row_disabled[index] == true" @click="addBookingRow(index)" class="btn btn-sm btn-primary w-100">
+                                                            Book now<br/>
+                                                            <span class="fw-bold">${{ mooring_book_row_price[index] }}</span>
+                                                        </button>
+                                                        <button v-else disabled class="btn btn-sm btn-secondary w-100 d-none" title="Please complete your current ongoing booking using the button at the top of the page.">
+                                                            Book now<br/>
+                                                            <span class="fw-bold">${{ site.price }}</span>
+                                                        </button>
+                                                    </template>
+                                                    <template v-else>
+                                                        <button v-if="site.breakdown" class="btn btn-sm btn-warning w-100" @click="toggleBreakdown(site)">Show availability</button>
+                                                        <button v-else class="btn btn-sm btn-secondary w-100" disabled>Change dates</button>
+                                                    </template>
+                                                </td>
+                                                <td class="date text-center align-middle" v-for="day in site.availability" :class="{ 'table-success': day[0] }">
+                                                    <div v-for="bp in day[1].booking_period" class="mb-1">
+                                                        <div v-if="bp.status == 'open'">
+                                                            <button
+                                                                class="btn btn-sm btn-success w-100"
+                                                                @click="addBooking(site.id,site.mooring_id,bp.id,bp.date)"
+                                                                v-if="bp.caption.length > 1"
+                                                                data-bs-toggle="tooltip"
+                                                                :title="bp.caption"
+                                                            >
+                                                                Book {{ bp.period_name }}
+                                                                <span v-if="site.mooring_class == 'small'">${{ bp.small_price }}</span>
+                                                                <span v-if="site.mooring_class == 'medium'">${{ bp.medium_price }}</span>
+                                                                <span v-if="site.mooring_class == 'large'">${{ bp.large_price }}</span>
+                                                            </button>
+                                                            <button
+                                                                v-else
+                                                                class="btn btn-sm btn-success w-100"
+                                                                @click="addBooking(site.id,site.mooring_id,bp.id,bp.date)"
+                                                            >
+                                                                Book {{ bp.period_name }}
+                                                                <span v-if="site.mooring_class == 'small'">${{ bp.small_price }}</span>
+                                                                <span v-if="site.mooring_class == 'medium'">${{ bp.medium_price }}</span>
+                                                                <span v-if="site.mooring_class == 'large'">${{ bp.large_price }}</span>
+                                                            </button>
+                                                        </div>
+                                                        <div v-else-if="bp.status == 'selected'">
+                                                            <!-- Wrap button and close icon in a relative position container -->
+                                                            <div class="position-relative">
+                                                                <button class="btn btn-sm btn-info w-100" @click="deleteBooking(bp.booking_row_id, bp.past_booking)"> 
+                                                                    Book {{ bp.period_name }}
+                                                                    <span v-if="site.mooring_class == 'small'">${{ bp.small_price }}</span>
+                                                                    <span v-if="site.mooring_class == 'medium'">${{ bp.medium_price }}</span>
+                                                                    <span v-if="site.mooring_class == 'large'">${{ bp.large_price }} </span>
+                                                                </button>
+                                                                <!-- Position the close button on top of the main button -->
+                                                                <button v-show="bp.past_booking == false" type="button" class="btn-close position-absolute top-0 end-0" style="transform: translate(5px, -5px);" @click.stop="deleteBooking(bp.booking_row_id, bp.past_booking)" aria-label="Remove"></button>
+                                                            </div>
+                                                        </div>
+                                                        <div v-else-if="bp.status == 'perday'">
+                                                            <button class="btn btn-sm btn-light w-100" disabled>One Mooring Limit</button>
+                                                        </div>
+                                                        <div v-else-if="bp.status == 'maxstay'">
+                                                            <button class="btn btn-sm btn-light w-100" disabled>Max Stay Limit Reached</button>
+                                                        </div>
+                                                        <div v-else>
+                                                            <button class="btn btn-sm btn-danger w-100 disabled" style="text-decoration: line-through; opacity: 0.65;">{{ bp.period_name }}</button>
+                                                        </div>
                                                     </div>
-                                       </td>
-                                   </tr>
-                                   <template v-if="site.showBreakdown"><tr v-for="line in site.breakdown" class="breakdown">
-                                       <td class="site">Site: {{ line.name }}</td>
-                                       <td></td>
-                                       <td class="date" v-for="day in line.availability" v-bind:class="{available: day[0]}" >{{ day[1] }}</td>
-                                   </tr></template>
-                               </template></tbody>
-                           </table>
-                       </div>
-                 </div>
-	    </div>
-            <div class="small-12 medium-12 large-12">
-            <div v-if="vesselSize > 0 && vesselDraft > 0 && vesselWeight == 0 && vesselBeam == 0" class="small-12 medium-12 large-12">
-                <div class="columns small-12 medium-12 large-12" >
-                    <div class="callout alert">
-                      Please enter a beam length or weight depending on your mooring type.   
+                                                </td>
+                                            </tr>
+                                            <template v-if="site.showBreakdown">
+                                                <tr v-for="line in site.breakdown" :key="line.id" class="breakdown">
+                                                    <td class="site">Site: {{ line.name }}</td>
+                                                    <td></td>
+                                                    <td class="date text-center" v-for="day in line.availability" :class="{ 'table-success': day[0] }">{{ day[1] }}</td>
+                                                </tr>
+                                            </template>
+                                        </template>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
                     </div>
                 </div>
-	    </div>
 
+                <div class="col-12">
+                    <!-- Message for missing beam/weight -->
+                    <div v-if="vesselSize > 0 && vesselDraft > 0 && vesselWeight == 0 && vesselBeam == 0">
+                        <div class="alert alert-warning" role="alert">
+                        Please enter a beam length or weight depending on your mooring type.   
+                        </div>
+                    </div>
 
-            <div class="row" v-if="sites.length == 0 && isLoading == false">
-                <div class="columns small-12 medium-12 large-12">
-                    <div class="callout alert">
-                        Sorry we couldn't find any mooring matching the query entered.
+                    <!-- Message for no search results -->
+                    <div v-if="sites.length == 0 && isLoading == false">
+                        <div class="alert alert-info" role="alert">
+                            Sorry we couldn't find any mooring matching the query entered.
+                        </div>
+                    </div>
+
+                    <!-- Message for max advance booking (hidden) -->
+                    <div v-if="max_advance_booking_days > max_advance_booking" class="d-none">
+                        <div class="alert alert-warning" role="alert">
+                            Advanced booking is limited to {{ max_advance_booking }} day/s.
+                        </div>
                     </div>
                 </div>
             </div>
-
-            </div>
-     <div oldvif="max_advance_booking_days > max_advance_booking" class="small-12 medium-12 large-12" style='display:none'>
-          <table class="hover">
-                <tbody>
-                  <tr>
-                     <td>
-          	Advanced booking is limited to {{ max_advance_booking }} day/s. 
-                     </td>
-                  </tr>
-                </tbody>
-          </table>
-     </div>
-
-
-
         </div>
-       </div>
-
+    </div>
 </template>
 
-<style lang="scss">
-
-.f6inject {
-    th.site {
-        width: 30%;
-        min-width: 200px;
-    }
-    th.book {
-        min-width: 100px;
-    }
-    th.date {
-        min-width: 60px;
-    }
-    td.site {
-        font-size: 0.8em;
-    }
-    .date, .book {
-        text-align: center;
-    }
-    td .button {
-        margin: 0;
-    }
-    .table-scroll table {
-        width: 100%;
-    }
-
-    /* table font colour override */
-    table thead tr {
-        background: unset;
-        color: unset;
-    }
-
-    td.available {
-        color: #082d15;
-    }
-    table tbody tr > td.available {
-        background-color: #edfbf3;
-    }
-    table tbody tr:hover > td.available {
-        background-color: #ddf8e8;
-    }
-    table tbody tr:nth-child(2n) > td.available {
-        background-color: #cef5dd;
-    }
-    table tbody tr:nth-child(2n):hover > td.available {
-        background-color: #b8f0cd;
-    }
-
-    table tbody tr.breakdown, table tbody tr.breakdown:hover  {
-        background-color: #656869;
-        color: white;
-    }
-    table tbody tr.breakdown:nth-child(2n), 
-    table tbody tr.breakdown:nth-child(2n):hover, 
-    table.hover:not(.unstriped) tr.breakdown:nth-of-type(2n):hover {
-        background-color: #454d50;
-        color: white;
-    }
-    table tbody tr.breakdown > td.available {
-        background-color: #468a05;
-        color: white;
-    }
-    table tbody tr.breakdown:nth-child(2n) > td.available {
-        background-color: #305e04;
-        color: white;
-    }
-
-    .button.formButton {
-        display: block;
-        width: 100%;
-    }
-
-    .siteWarning {
-        font-weight: bold;
-        font-style: italic;
-    }
-    .continueBooking {
-        text-decoration: none;
-    }
-
-    /* Tooltip */
-    .tooltip2 {
-      position: relative;
-      display: inline-block;
-    }
-    
-    /* Tooltip text */
-    .tooltip2 .tooltiptext {
-      visibility: hidden;
-      width: 165px;
-      background-color: black;
-      color: #fff;
-      text-align: center;
-      padding: 8px;
-      border-radius: 6px;
-      text-align: left;
-    
-      /* Position the tooltip text - see examples below! */
-      position: absolute;
-      z-index: 1;
-    }
-    
-    /* Show the tooltip text when you mouse over the tooltip container */
-    .tooltip2:hover .tooltiptext {
-      visibility: visible;
-    }
-    
-    .tooltip2 .tooltiptext::after {
-      content: " ";
-      position: absolute;
-      bottom: 100%;  /* At the top of the tooltip */
-      left: 50%;
-      margin-left: -5px;
-      border-width: 5px;
-      border-style: solid;
-      border-color: transparent transparent black transparent;
-    }
-    .card{
-        background-color: #f5f5f5;
-        height:40px;
-    }
-    .card-title{
-        margin-top:-7px;
-        font-size: 16px;
-    }
-
-}
-
-</style>
-
 <script>
-
-import 'foundation-sites';
-import 'foundation-datepicker/js/foundation-datepicker';
+import { Dropdown, Tooltip } from 'bootstrap';
 import debounce from 'debounce';
 import moment from 'moment';
 import swal from 'sweetalert2';
@@ -525,7 +462,7 @@ import 'sweetalert2/dist/sweetalert2.css';
 import loader from './loader.vue';
 
 var nowTemp = new Date();
-var now = moment.utc({year: nowTemp.getFullYear(), month: nowTemp.getMonth(), day: nowTemp.getDate(), hour: 0, minute: 0, second: 0}).toDate();
+var now = moment.utc({year: nowTemp.getFullYear(), month: nowTemp.getMonth(), day: nowTemp.getDate(), hour: 1, minute: 0, second: 0}).toDate();
 
 var siteType = {
     NOBOOKINGS: 0,
@@ -630,9 +567,9 @@ export default {
             get: function() {
                 var count = parseInt(this.numAdults) + parseInt(this.numConcessions) + parseInt(this.numChildren) + parseInt(this.numInfants);
                 if (count === 1) {
-                    return count +" person ▼";
+                    return count +" person";
                 } else {
-                    return count + " people ▼";
+                    return count + " people";
                 }
             }
         },
@@ -1370,91 +1307,44 @@ export default {
         }
     },
     mounted: function () {
-        var vm = this;
+        this.$nextTick(() => {
+            var vm = this;
 
-        $(document).foundation();
-        this.arrivalEl = $('#date-arrival');
-        // this.arrivalData = this.arrivalEl.fdatepicker({
-        //     format: 'dd/mm/yyyy',
-        //     onRender: function (date) {
-        //         // disallow start dates before today
-        //         return date.valueOf() < now.valueOf() ? 'disabled': '';
-        //         //return '';
-        //     }
-        // }).on('changeDate', function (ev) {
-        //     ev.target.dispatchEvent(new CustomEvent('change'));
-        // }).on('change', function (ev) {
-        //     if (vm.arrivalData.date.valueOf() >= vm.departureData.date.valueOf()) {
-        //         var newDate = moment(vm.arrivalData.date).add(1, 'days').toDate();
-        //         vm.departureData.date = newDate;
-        //         vm.departureData.setValue();
-        //         vm.departureData.fill();
-        //         vm.departureEl.trigger('changeDate');
-        //     }
-        //     vm.arrivalData.hide();
-        //     vm.arrivalDate = moment(vm.arrivalData.date);
-        //     vm.days = Math.floor(moment.duration(vm.departureDate.diff(vm.arrivalDate)).asDays());
-        //     vm.sites = [];
-        // }).on('keydown', function (ev) {
-        //     if (ev.keyCode == 13) {
-        //         ev.target.dispatchEvent(new CustomEvent('change'));
-        //     }
-        // }).data('datepicker');
+            const rootElement = this.$refs.availabilityWrapper;
+            if (rootElement) {
+                // Dropdown initializer
+                const dropdownElementList = rootElement.querySelectorAll('[data-bs-toggle="dropdown"]');
+                [...dropdownElementList].map(dropdownToggleEl => new Dropdown(dropdownToggleEl));
 
-        // this.departureEl = $('#date-departure');
-        // this.departureData = this.departureEl.fdatepicker({
-        //     format: 'dd/mm/yyyy',
-        //     onRender: function (date) {
-        //         return (date.valueOf() <= vm.arrivalData.date.valueOf()) ? 'disabled': '';
-        //     }
-        // }).on('changeDate', function (ev) {
-        //     ev.target.dispatchEvent(new CustomEvent('change'));
-        // }).on('change', function (ev) {
-        //     vm.departureData.hide();
-        //     vm.departureDate = moment(vm.departureData.date);
-        //     vm.days = Math.floor(moment.duration(vm.departureDate.diff(vm.arrivalDate)).asDays());
-        //     vm.sites = [];
-        // }).on('keydown', function (ev) {
-        //     if (ev.keyCode == 13) {
-        //         ev.target.dispatchEvent(new CustomEvent('change'));
-        //     }
-        // }).data('datepicker');
+                // Tooltip initializer
+                const tooltipTriggerList = rootElement.querySelectorAll('[data-bs-toggle="tooltip"]');
+                [...tooltipTriggerList].map(tooltipTriggerEl => new Tooltip(tooltipTriggerEl));
+            }
 
+            this.arrivalEl = $('#date-arrival');
+            this.update();
 
-        // this.arrivalData.date = this.arrivalDate.toDate();
-        // this.arrivalData.setValue();
-        // this.arrivalData.fill();
-        // this.departureData.date = this.departureDate.toDate();
-        // this.departureData.setValue();
-        // this.departureData.fill();
-        this.update();
+                var saneTz = (0 < Math.floor((vm.expiry - moment.now())/1000) < vm.timer);
+                var timer = setInterval(function (ev) {
+                    // fall back to the pre-encoded timer
+                    if (!saneTz) {
+                        vm.timer -= 1;
+                    } else {
+                        // if the timezone is sane, do live updates
+                        // this way unloaded tabs won't cache the wrong time.
+                        var newTimer = Math.floor((vm.expiry - moment.now())/1000);
+                        vm.timer = newTimer;
+                    }
 
-            var saneTz = (0 < Math.floor((vm.expiry - moment.now())/1000) < vm.timer);
-            var timer = setInterval(function (ev) {
-                // fall back to the pre-encoded timer
-                if (!saneTz) {
-                    vm.timer -= 1;
-                } else {
-                    // if the timezone is sane, do live updates
-                    // this way unloaded tabs won't cache the wrong time.
-                    var newTimer = Math.floor((vm.expiry - moment.now())/1000);
-                    vm.timer = newTimer;
-                }
+                    if ((vm.timer <= -1)) {
 
-                if ((vm.timer <= -1)) {
-//                   clearInterval(timer);
-//                    var loc = window.location;
-//                    window.location = loc.protocol + '//' + loc.host + loc.pathname;
-               }
-            }, 1000);
-        // Fix white space which appears on the right of the availablity screen START
-        $('#guests-button').click();
-        $('#guests-button').click();
-        // Fix white space which appears on the right of the availablity screen END
-
-
-
+                    }
+                }, 1000);
+            // Fix white space which appears on the right of the availablity screen START
+            $('#guests-button').click();
+            $('#guests-button').click();
+            // Fix white space which appears on the right of the availablity screen END
+        })
     }
 }
 </script>
-
