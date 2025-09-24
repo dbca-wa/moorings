@@ -2187,6 +2187,7 @@ export default {
                     vm.groundsData.clear();
                     vm.groundsData.extend(features);
                     // vm.groundsSource.loadSource();
+                    vm.updateFilter(); // Ensure groundsFilter is populated
                     vm.buildmarkers();
                 }
             });
