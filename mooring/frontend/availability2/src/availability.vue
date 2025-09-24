@@ -44,39 +44,28 @@
                 </div>
             </div>
 
-            <div v-show="ongoing_booking" class="mb-3">
-                <div class="d-flex align-items-center">
-                    <!-- Time Left Button -->
-                    <button v-show="ongoing_booking" class="btn btn-danger" type="button">Time Left {{ timeleft }} to complete booking.</button>
-                    <!-- Cancel Button -->
-                    <a :href="parkstayUrl+'/booking/abort'" class="btn btn-warning ms-2">Cancel in-progress booking</a>
-                </div>
-            </div>
-
-            <!-- A new row for the trolley section with a bottom margin -->
+            <!-- A single row for the entire trolley section -->
             <div class="row mb-3">
-                <!-- Left Column for Card and Item List -->
-                <div class="col-md-9">
-                    <!-- Trolley summary card -->
-                    <!-- <div class="card mb-3">
-                        <div class="card-body">
-                            <h5 class="card-title mb-0">Trolley: <span id='total_trolley'>${{ total_booking }}</span></h5>
-                        </div>
-                    </div> -->
-
-                    <!-- Trolley item list -->
-                    <!-- <div v-for="item in current_booking" :key="item.id" class="row gx-2 align-items-center mb-1">
-                        <div class="col-8">{{ item.item }}</div>
-                        <div class="col-3 text-end">${{ item.amount }}</div>
-                        <div class="col-1 text-end">
-                            <button v-show="item.past_booking == false" type="button" class="btn-close" @click="deleteBooking(item.id, item.past_booking)" aria-label="Remove item"></button>
-                        </div>
-                    </div> -->
-                    <!-- A single card now contains both the header and the item list -->
+                <div class="col-12">
                     <div class="card">
-                        <!-- Card Header for the total amount -->
-                        <div class="card-header">
+                        <!-- Card Header now contains Title, Timer, and Cancel button -->
+                        <div class="card-header d-flex justify-content-between align-items-center">
                             <h5 class="mb-0">Trolley: <span id='total_trolley'>${{ total_booking }}</span></h5>
+                            
+                            <div v-show="ongoing_booking" class="d-flex align-items-center">
+                                <!-- Timer Text (using Badge for styling) -->
+                                <!-- <span class="badge bg-warning text-dark me-3">
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-clock me-1" viewBox="0 0 16 16"><path d="M8 3.5a.5.5 0 0 0-1 0V9a.5.5 0 0 0 .252.434l3.5 2a.5.5 0 0 0 .496-.868L8 8.71z"/><path d="M8 16A8 8 0 1 0 8 0a8 8 0 0 0 0 16m7-8A7 7 0 1 1 1 8a7 7 0 0 1 14 0"/></svg>
+                                    Time Left: {{ timeleft }}
+                                </span> -->
+                                <span class="text-warning-emphasis d-flex align-items-center me-3">
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-clock-fill me-1" viewBox="0 0 16 16"><path d="M16 8A8 8 0 1 1 0 8a8 8 0 0 1 16 0zM8 3.5a.5.5 0 0 0-1 0V9a.5.5 0 0 0 .252.434l3.5 2a.5.5 0 0 0 .496-.868L8 8.71V3.5z"/></svg>
+                                    Time Left: <strong class="ms-1">{{ timeleft }}</strong>
+                                </span>
+                                
+                                <!-- Cancel Button -->
+                                <a v-if="current_booking.length > 0" :href="parkstayUrl+'/booking/abort'" class="btn btn-sm btn-danger">Cancel in-progress booking</a>
+                            </div>
                         </div>
                         
                         <!-- List Group for the items -->
@@ -85,27 +74,30 @@
                                 <span>{{ item.item }}</span>
                                 <div class="d-flex align-items-center">
                                     <span class="me-3">${{ item.amount }}</span>
-                                    <button v-show="item.past_booking == false" type="button" class="btn-close" @click="deleteBooking(item.id, item.past_booking)" aria-label="Remove item"></button>
+                                    <!-- <button v-show="item.past_booking == false" type="button" class="btn-close" @click="deleteBooking(item.id, item.past_booking)" aria-label="Remove item"></button> -->
+                                     <a href="#" v-show="item.past_booking == false" @click.prevent="deleteBooking(item.id, item.past_booking)" class="text-danger" title="Remove item">
+    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-x-circle-fill" viewBox="0 0 16 16">
+        <path d="M16 8A8 8 0 1 1 0 8a8 8 0 0 1 16 0M5.354 4.646a.5.5 0 1 0-.708.708L7.293 8l-2.647 2.646a.5.5 0 0 0 .708.708L8 8.707l2.646 2.647a.5.5 0 0 0 .708-.708L8.707 8l2.647-2.646a.5.5 0 0 0-.708-.708L8 7.293z"/>
+    </svg>
+</a>
                                 </div>
                             </li>
                         </ul>
-                    </div>
-                </div>
-                <!-- Right Column for Checkout Buttons -->
-                <div class="col-md-3 text-end">
-                    <!-- Use d-grid to make the button inside take up the full width -->
-                    <div class="d-grid">
-                        <div v-if="vesselRego.length < 0.1 || vesselRego == ' ' || vesselSize < 0.1 || vesselDraft < 0.1">
-                            <button title="Please enter vessel details" class="btn btn-primary" @click="validateVessel()">Proceed to Check Out</button>
-                        </div>
-                        <div v-else>
-                        <div v-if="vesselWeight == 0 && vesselBeam == 0">
-                            <button title="Please enter vessel details" class="btn btn-primary" @click="validateVessel()">Proceed to Check Out</button>
-                        </div>
-                        <div v-else>
-                            <a v-if="current_booking.length > 0 && booking_changed == true && numAdults >= 0" class="btn btn-primary" :href="parkstayUrl+'/booking'">Proceed to Check Out</a>
-                            <button v-else-if="current_booking.length > 0 && booking_changed == true && numAdults < 0" class="btn btn-secondary" disabled>Please select minimum of 1 adult guest</button>
-                            <button v-else class="btn btn-secondary" disabled>Add items to Proceed to Check Out</button>
+
+                        <!-- Card Body (or Footer) for the Checkout Button -->
+                        <div class="card-body text-end">
+                            <div v-if="vesselRego.length < 0.1 || vesselRego == ' ' || vesselSize < 0.1 || vesselDraft < 0.1">
+                                <button title="Please enter vessel details" class="btn btn-primary" @click="validateVessel()">Proceed to Check Out</button>
+                            </div>
+                            <div v-else>
+                               <div v-if="vesselWeight == 0 && vesselBeam == 0">
+                                <button title="Please enter vessel details" class="btn btn-primary" @click="validateVessel()">Proceed to Check Out</button>
+                               </div>
+                               <div v-else>
+                                <a v-if="current_booking.length > 0 && booking_changed == true && numAdults >= 0" class="btn btn-primary" :href="parkstayUrl+'/booking'">Proceed to Check Out</a>
+                                <button v-else-if="current_booking.length > 0 && booking_changed == true && numAdults < 0" class="btn btn-secondary" disabled>Please select minimum of 1 adult guest</button>
+                                <button v-else class="btn btn-secondary" disabled>Add items to Proceed to Check Out</button>
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -114,9 +106,9 @@
 
             <loader :isLoading.sync="isLoading">&nbsp;</loader>
 
-            <div class="row" v-if="name">
+            <div class="row mt-4" v-if="name">
                 <div class="col-12">
-                    <h3>Book mooring:</h3>
+                    <h4>Book mooring:</h4>
                 </div>
             </div>
 
@@ -396,7 +388,12 @@
                                                                     <span v-if="site.mooring_class == 'large'">${{ bp.large_price }} </span>
                                                                 </button>
                                                                 <!-- Position the close button on top of the main button -->
-                                                                <button v-show="bp.past_booking == false" type="button" class="btn-close position-absolute top-0 end-0" style="transform: translate(5px, -5px);" @click.stop="deleteBooking(bp.booking_row_id, bp.past_booking)" aria-label="Remove"></button>
+                                                                <a href="#" v-show="bp.past_booking == false" class="text-danger position-absolute top-0 end-0" style="transform: translate(6px, -6px); z-index: 5;" @click.prevent.stop="deleteBooking(bp.booking_row_id, bp.past_booking)" title="Remove">
+                                                                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-x-circle-fill" viewBox="0 0 16 16">
+                                                                        <circle cx="8" cy="8" r="8" fill="white"/>
+                                                                        <path d="M16 8A8 8 0 1 1 0 8a8 8 0 0 1 16 0M5.354 4.646a.5.5 0 1 0-.708.708L7.293 8l-2.647 2.646a.5.5 0 0 0 .708.708L8 8.707l2.646 2.647a.5.5 0 0 0 .708-.708L8.707 8l2.647-2.646a.5.5 0 0 0-.708-.708L8 7.293z"/>
+                                                                    </svg>
+                                                                </a>
                                                             </div>
                                                         </div>
                                                         <div v-else-if="bp.status == 'perday'">
