@@ -516,14 +516,23 @@
                         </div> -->
 
                         <!-- Pagination Buttons -->
-                        <div class="d-flex justify-content-center mt-4">
+                        <div class="d-flex justify-content-center mt-4" v-if="totalPages > 1">
                             <nav aria-label="Page navigation">
                                 <ul class="pagination">
                                     <li class="page-item" :class="{ disabled: currentPage === 1 }">
                                         <a class="page-link" href="#" @click.prevent="prevPage">« Prev</a>
                                     </li>
-                                    <li class="page-item active" aria-current="page">
+                                    <!-- <li class="page-item active" aria-current="page">
                                         <span class="page-link">Page {{ currentPage }} / {{ totalPages }}</span>
+                                    </li> -->
+                                    <!-- Page Number Links -->
+                                    <li
+                                        v-for="page in pageNumbers"
+                                        :key="page"
+                                        class="page-item"
+                                        :class="{ active: currentPage === page }"
+                                    >
+                                        <a class="page-link" href="#" @click.prevent="goToPage(page)">{{ page }}</a>
                                     </li>
                                     <li class="page-item" :class="{ disabled: currentPage === totalPages }">
                                         <a class="page-link" href="#" @click.prevent="nextPage">Next »</a>
@@ -551,15 +560,6 @@
 </template>
 
 <script>
-// CSS files for Foundation and its plugins
-// import 'foundation-sites/dist/css/foundation.min.css';
-// import 'foundation-datepicker/css/foundation-datepicker.min.css';
-
-// JS files for Foundation and its plugins
-// Thanks to ProvidePlugin, we don't need to import jQuery here.
-// import 'foundation-sites';
-// import 'foundation-datepicker/js/foundation-datepicker'; // Adjust path if needed
-
 import Awesomplete from 'awesomplete';
 import { Dropdown } from 'bootstrap';
 
@@ -915,7 +915,14 @@ export default {
         totalPages() {
             // Calculates total pages, ensuring it's at least 1.
             return Math.ceil(this.filteredItems.length / this.itemsPerPage) || 1;
-        }
+        },
+        pageNumbers() {
+            const pages = [];
+            for (let i = 1; i <= this.totalPages; i++) {
+                pages.push(i);
+            }
+            return pages;
+        },
     },
     watch: {
         // Watch for changes in filter criteria and reset to the first page.
