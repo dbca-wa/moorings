@@ -77,7 +77,7 @@ class BpointTransaction():
     pass
 # from ledger.payments.utils import systemid_check, update_payments
 # from ledger.checkout.utils import place_order_submission 
-from ledger_api_client.utils import update_payments, place_order_submission
+from ledger_api_client.utils import update_payments, place_order_submission, get_or_create
 # from ledger.payments.cash.models import CashTransaction 
 # Ledger
 # from ledger.order.models import Order
@@ -473,8 +473,8 @@ class CancelBookingView(TemplateView):
             'vouchers': [],
             'system': settings.PS_PAYMENT_SYSTEM_ID,
             'custom_basket': True,
-            'booking_reference': 'PS-'+str(booking.id),
-            'booking_reference_link': 'PS-'+str(booking.id)
+            'booking_reference': settings.MOORING_BOOKING_REF_PREFIX + str(booking.id),
+            'booking_reference_link': settings.MOORING_BOOKING_REF_PREFIX + str(booking.id)
         }
 
         basket_params = utils.convert_decimal_to_float(basket_params)
@@ -676,7 +676,7 @@ class CancelAdmissionsBookingView(TemplateView):
             'vouchers': [],
             'system': settings.PS_PAYMENT_SYSTEM_ID,
             'custom_basket': True,
-            'booking_reference': 'AD-'+str(booking.id)
+            'booking_reference': settings.DAILY_ADMISSION_REF_PREFIX + str(booking.id)
         }
         basket_params = utils.convert_decimal_to_float(basket_params)
         basket_hash = create_basket_session(request, request.user.id, basket_params)
@@ -1480,7 +1480,19 @@ class MakeBookingsView(TemplateView):
             adBooking.save()
         # finalise the booking object
         if booking.customer is None:
-            booking.customer = customer
+            # Check if the provided 'customer' object is already saved in the database.
+            # An object is considered unsaved if its primary key (pk) is None.
+            if customer.pk is None:
+                # The customer object is not yet saved.
+                logger.info(f"Unsaved customer detected (Email: {customer.email}). Running ledger_api_client.utils.get_or_create to prevent ValueError.")
+                resp_json = get_or_create(email=customer.email)
+                logger.info(f"New customer has been created. resp_json: { resp_json }")
+                customer = EmailUser.objects.get(email=customer.email)
+                booking.customer = customer
+            else:
+                # The customer object is already a saved instance, so we can assign it directly.
+                booking.customer = customer
+
         booking.cost_total = total
         if request.user.__class__.__name__ == 'EmailUser':
            booking.created_by =  request.user
@@ -3039,8 +3051,8 @@ class AdmissionsBookingSuccessView(TemplateView):
         try:
             context_processor = template_context(self.request)
             booking = utils.get_session_admissions_booking(request.session)
-            booking_reference = "AD-"+str(booking.id)
-            basket = Basket.objects.filter(status='Submitted', booking_reference=booking_reference).order_by('-id')[:1]
+            booking_reference = settings.DAILY_ADMISSION_REF_PREFIX + str(booking.id)
+            basket = Basket.objects.filter(status='Submitted', system=settings.PAYMENT_SYSTEM_ID, booking_reference=booking_reference).order_by('-id')[:1]
             context = utils.booking_admission_success(basket, booking, context_processor)
             request.session['ad_last_booking'] = booking.id
             utils.delete_session_admissions_booking(request.session)
@@ -3276,11 +3288,8 @@ class BookingSuccessView(TemplateView):
             context_processor = template_context(self.request)
             basket = None
             booking = utils.get_session_booking(request.session)
-            if self.request.user.is_authenticated:
-                basket = Basket.objects.filter(status='Submitted', owner=request.user).order_by('-id')[:1]
-            else:
-                basket = Basket.objects.filter(status='Submitted', owner=booking.customer).order_by('-id')[:1]
-            
+            booking_reference = settings.MOORING_BOOKING_REF_PREFIX + str(booking.id)
+            basket = Basket.objects.filter(status='Submitted', system=settings.PAYMENT_SYSTEM_ID, booking_reference=booking_reference).order_by('-id')[:1]
             context = utils.booking_success(basket,booking,context_processor)
 
             request.session['ps_last_booking'] = booking.id

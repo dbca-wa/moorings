@@ -4,95 +4,103 @@
             <div class="container">
                 <div class="row">
                     <div class="col-lg-12">
-                        <div class="well" style="text-align:center;">
+                        <div class="bg-light p-3 rounded text-center mb-4">
                             <h3>Paying Admission Fees</h3>
                         </div>
                         <div class="row" style="margin-top:2%;">
                             <div class="col-lg-6">
-                                <div class="well">
-                                    <h3 class="text-primary" style="text-align:center;">Personal Details</h3>
-                                    <div class="row">
-                                        <div class="small-12 medium-12 large-4 columns">
-                                            <label class="label-plain2">Given Name(s)</label>
-                                            <div class="col-sm-8">
-                                                <input id="givenName" v-model="givenName" class="form-control" name="givenName" type="text" @blur="validateGivenName()" required/>
-                                            </div>
+                                <div class="p-4">
+                                    <h3 class="text-primary text-center mb-4">Personal Details</h3>
+
+                                    <div class="row mb-3">
+                                        <label for="givenName" class="col-sm-4 col-form-label">Given Name(s)</label>
+                                        <div class="col-sm-8">
+                                            <input id="givenName" v-model="givenName" class="form-control" name="givenName" type="text" @blur="validateGivenName()" required/>
                                         </div>
                                     </div>
-                                    <div class="row">
-                                        <div class="small-12 medium-12 large-4 columns">
-                                            <label class="label-plain2">Last Name</label>
-                                            <div class="col-sm-8">
-                                                <input id="lastName" v-model="lastName" class="form-control" name="lastName" type="text" @blur="validateLastName()" required/>
-                                            </div>
+
+                                    <div class="row mb-3">
+                                        <label for="lastName" class="col-sm-4 col-form-label">Last Name</label>
+                                        <div class="col-sm-8">
+                                            <input id="lastName" v-model="lastName" class="form-control" name="lastName" type="text" @blur="validateLastName()" required/>
                                         </div>
                                     </div>
-                                    <div class="row">
-                                        <div class="small-12 medium-12 large-4 columns">
-                                            <label class="label-plain2">Email</label>
-                                            <div class="col-sm-8">
-                                                <input  id="email" v-model="email" class="form-control" name="email" @blur="validateEmailFormat()" type="email" required/>
-                                            </div>
+
+                                    <div class="row mb-3">
+                                        <label for="email" class="col-sm-4 col-form-label">Email</label>
+                                        <div class="col-sm-8">
+                                            <input id="email" v-model="email" class="form-control" name="email" @blur="validateEmailFormat()" type="email" required/>
                                         </div>
                                     </div>
-                                    <div class="row">
-                                        <div class="small-12 medium-12 large-4 columns">
-                                            <label class="label-plain2">Confirm Email</label>
-                                            <div class="col-sm-8">
-                                                <input  id="emailConfirm" v-model="emailConfirm" class="form-control" name="emailConfirm" @blur="validateEmail()" type="email" required/>
-                                            </div>
+
+                                    <div class="row mb-3">
+                                        <label for="emailConfirm" class="col-sm-4 col-form-label">Confirm Email</label>
+                                        <div class="col-sm-8">
+                                            <input id="emailConfirm" v-model="emailConfirm" class="form-control" name="emailConfirm" @blur="validateEmail()" type="email" required/>
                                         </div>
                                     </div>
-                                    <div class="row">
-                                        <div class="small-12 medium-12 large-4 columns">
-                                            <label class="label-plain2">Mobile</label>
-                                            <div class="col-sm-8">
-                                                <input  id="id_mobile" v-model="mobile" class="form-control" name="mobile" type="text" required/>
-                                            </div>
+
+                                    <div class="row mb-3">
+                                        <label for="id_mobile" class="col-sm-4 col-form-label">Mobile</label>
+                                        <div class="col-sm-8">
+                                            <input id="id_mobile" v-model="mobile" class="form-control" name="mobile" type="text" required/>
                                         </div>
                                     </div>
-				    
+
                                     <div class="row" v-if="errorMsgPersonal">
                                         <div class="alert alert-danger" id="warning" role="alert">{{ errorMsgPersonal }}</div>
                                     </div>
                                 </div>
                             </div>
+
                             <div class="col-lg-6">
-                                <div class="well">
-                                    <h3 class="text-primary" style="text-align:center;">Booking Details</h3>
-                                    <div class="row">
-                                        <div class="small-12 medium-12 large-4 columns">
-                                            <label class="label-plain">Arrival</label>
-                                            <div class="col-sm-8">
-                                                <input id="dateArrival" class="form-control" name="arrival" type="text" @blur="validateArrivalDate()" placeholder="DD/MM/YYYY" required/>
+                                <div class="p-4">
+                                    <h3 class="text-primary text-center mb-4">Booking Details</h3>
+
+                                    <div class="row mb-3">
+                                        <label for="dateArrival" class="col-sm-4 col-form-label">Arrival</label>
+                                        <div class="col-sm-8">
+                                            <input
+                                                id="dateArrival"
+                                                class="form-control"
+                                                name="arrival"
+                                                type="date"
+                                                v-model="arrivalDateValue"
+                                                :min="minDate"
+                                                @change="validateArrivalDate()"
+                                                required
+                                            />
+                                        </div>
+                                    </div>
+
+                                    <div class="row mb-3">
+                                        <label class="col-sm-4 col-form-label">Overnight Stay</label>
+                                        <div class="col-sm-8 pt-2">
+                                            <div class="form-check form-check-inline">
+                                                <input id="overnightStayYes" v-model="overnightStay" class="form-check-input" name="overnightStay" @change="validateOvernightStay()" value="yes" type="radio"/>
+                                                <label for="overnightStayYes" class="form-check-label">Yes</label>
+                                            </div>
+                                            <div class="form-check form-check-inline">
+                                                <input id="overnightStayNo" v-model="overnightStay" class="form-check-input" name="overnightStay" @change="validateOvernightStay()" value="no" type="radio"/>
+                                                <label for="overnightStayNo" class="form-check-label">No</label>
                                             </div>
                                         </div>
                                     </div>
-                                    <div class="row">
-                                        <div class="small-12 medium-12 large-4 columns">
-                                            <label class="label-plain">Overnight Stay</label>
-                                            <div class="col-sm-8">
-                                                <input id="overnightStayYes" v-model="overnightStay" name="overnightStay" refs="overnightStayYes" @change="validateOvernightStay()" value="yes" type="radio"/><label class="radio-label">Yes </label><input id="overnightStayNo" v-model="overnightStay" @change="validateOvernightStay()" name="overnightStay" type="radio" value="no" style="margin-left:2%"/><label class="radio-label">No</label>
-                                            </div>
+
+                                    <div class="row mb-3">
+                                        <label for="vesselReg" class="col-sm-4 col-form-label">Vessel Registration</label>
+                                        <div class="col-sm-8">
+                                            <input id="vesselReg" v-model="vesselReg" class="form-control" name="vesselReg" @blur="validateVesselReg()" type="text"/>
                                         </div>
                                     </div>
-                                    <div class="row">
-                                        <div class="small-12 medium-12 large-4 columns">
-                                            <label class="label-plain">Vessel Registration</label>
-                                            <div class="col-sm-8">
-                                                <input id="vesselReg" v-model="vesselReg" class="form-control" name="vesselReg" @blur="validateVesselReg()" type="text"/>
-                                            </div>
+
+                                    <div class="row mb-3">
+                                        <label for="noOfAdults" class="col-sm-4 col-form-label">Number of Adults</label>
+                                        <div class="col-sm-8">
+                                            <input id="noOfAdults" v-model="noOfAdults" class="form-control" name="noOfAdults" @blur="validateNoOfPeople()" type="number" placeholder="0"/>
                                         </div>
                                     </div>
-                                    <div class="row">
-                                        <div class="small-12 medium-12 large-4 columns">
-                                            <label class="label-plain">Number of Adults</label>
-                                            <div class="col-sm-8">
-                                                <input id="noOfAdults" v-model="noOfAdults" class="form-control" name="noOfAdults" @blur="validateNoOfPeople()" type="number" palceholder="0"/>
-                                            </div>
-                                        </div>
-                                        <label class="label-small"></label>
-                                    </div>
+
                                     <div class="row" style="display:none;">
                                         <div class="small-12 medium-12 large-4 columns">
                                             <label class="label-plain">Number of Concessions</label>
@@ -103,33 +111,34 @@
                                         </div>
                                         <label class="label-small"></label>
                                     </div>
-                                    <div class="row">
-                                        <div class="small-12 medium-12 large-4 columns">
-                                            <label class="label-plain">Number of Children</label>
-                                            <div class="col-sm-8">
-                                                <input id="noOfChildren" v-model="noOfChildren" class="form-control" name="noOfChildren" @blur="validateNoOfPeople()" type="number" palceholder="0"/>
-                                            </div>
+
+                                    <div class="row mb-3 align-items-center">
+                                        <label for="noOfChildren" class="col-sm-4 col-form-label">Number of Children</label>
+                                        <div class="col-sm-6">
+                                            <input id="noOfChildren" v-model="noOfChildren" class="form-control" name="noOfChildren" @blur="validateNoOfPeople()" type="number" placeholder="0"/>
                                         </div>
-                                        <label class="label-small">(4 - 16)</label>
+                                        <div class="col-sm-2">
+                                            <small class="text-muted">(4 - 16)</small>
+                                        </div>
                                     </div>
-                                    <div class="row">
-                                        <div class="small-12 medium-12 large-4 columns">
-                                            <label class="label-plain">Number of Infants</label>
-                                            <div class="col-sm-8">
-                                                <input id="noOfInfants" v-model="noOfInfants" class="form-control" name="noOfInfants" @blur="validateNoOfPeople()" type="number" palceholder="0"/>
-                                            </div>
+
+                                    <div class="row mb-3 align-items-center">
+                                        <label for="noOfInfants" class="col-sm-4 col-form-label">Number of Infants</label>
+                                        <div class="col-sm-6">
+                                            <input id="noOfInfants" v-model="noOfInfants" class="form-control" name="noOfInfants" @blur="validateNoOfPeople()" type="number" placeholder="0"/>
                                         </div>
-                                        <label class="label-small">(under 4)</label>
+                                        <div class="col-sm-2">
+                                            <small class="text-muted">(under 4)</small>
+                                        </div>
                                     </div>
                                     
-                                    <div class="row">
-                                        <div class="small-12 medium-12 large-4 columns">
-                                            <label class="label-plain">Warning Reference</label>
-                                            <div class="col-sm-8">
-                                                <input id="warningRefNo" v-model="warningRefNo" class="form-control" name="warningRefNo" @blur="validateWarningRefNo()" type="text"/>
-                                            </div>
+                                    <div class="row mb-3">
+                                        <label for="warningRefNo" class="col-sm-4 col-form-label">Warning Reference</label>
+                                        <div class="col-sm-8">
+                                            <input id="warningRefNo" v-model="warningRefNo" class="form-control" name="warningRefNo" @blur="validateWarningRefNo()" type="text"/>
                                         </div>
                                     </div>
+
                                     <div class="row" v-if="errorMsg">
                                         <div class="alert alert-danger" id="warning" role="alert">{{ errorMsg }}</div>
                                     </div>
@@ -138,39 +147,35 @@
                         </div>
                     </div>
                 </div>
-                <div class="row">
+                <div class="row mt-4">
                     <div class="col-lg-12">
-                        <div class="well">
-                            <div class="row">
+                        <div class="p-4 bg-light rounded">
+                            <!-- This is the main row that will contain Total Price and the buttons -->
+                            <div class="row align-items-center">
+                                <!-- Left Column: Total Price -->
                                 <div class="col-md-6">
-                                    <div class="form-group">
-                                        <label for="Total Price">Total Price <span class="text-muted">(GST inclusive.)</span></label>
-                                        <div class="input-group">
-                                            <span class="input-group-addon">AUD $</span>
-                                            <input type="text" class="form-control" :value="formatMoney(total, 2)" readonly="true">
-                                        </div>
+                                    <label for="totalPrice" class="h5">Total Price <span class="text-muted small">(GST inclusive.)</span></label>
+                                    <div class="input-group input-group-lg">
+                                        <span class="input-group-text">AUD $</span>
+                                        <input id="totalPrice" type="text" class="form-control" :value="formatMoney(total, 2)" readonly>
                                     </div>
                                 </div>
-                                <!-- <div class="col-md-6">
-                                    <div class="form-group">
-                                        <p style="margin-top:30px;">Changes not permitted.Cancel up to 29 days before arrival for 50% refund.</p>
-                                    </div>
-                                </div> -->
-                            </div>
-                            <div class="row">
+                                <!-- Right Column: Checkbox and Button -->
                                 <div class="col-md-6">
-                                    <div class="small-12 medium-12 large-4 columns">
-                                        <label class="label-plain" style="width:250px;">Click <a v-on:click="loadFeeUrl();" id='daily-fees-link' href="javascript:void(0);">here</a> for price information.</label>                                        </div>
-                                    </div>
-                                <div class="col-md-6">
-                                    <div class="row"> 
-                                        <div class="col-md-8 col-md-offset-5">
-                                            <div class="checkbox">
-                                                <label><input type="checkbox" value="" v-model="toc">I agree to the <a id='terms-link' href="javascript:void(0);" v-on:click="loadTerms();">terms and conditions</a></label>
-                                            </div>
-                                            <button :disabled="!validToProceed" type="submit" class="btn btn-primary" style="width:180px;background-color:#4286f4;font-weight:bold;">Proceed to Payment</button>
+                                    <div class="d-flex justify-content-end align-items-center">
+                                        <div class="form-check me-3">
+                                            <input id="toc" type="checkbox" class="form-check-input" v-model="toc">
+                                            <label for="toc" class="form-check-label">I agree to the <a id='terms-link' href="javascript:void(0);" @click="loadTerms()">terms and conditions</a></label>
                                         </div>
+                                        <button :disabled="!validToProceed" type="submit" class="btn btn-primary" style="width:180px;font-weight:bold;">Proceed to Payment</button>
                                     </div>
+                                </div>
+                            </div>
+
+                            <!-- Price information link -->
+                            <div class="row mt-2">
+                                <div class="col-12">
+                                    <label>Click <a @click="loadFeeUrl();" id='daily-fees-link' href="javascript:void(0);">here</a> for price information.</label>
                                 </div>
                             </div>
                         </div>
@@ -178,42 +183,40 @@
                 </div>
             </div>
         </form>
-        <modal name="messageModal" height="auto"
-            transition="nice-modal-fade"
-            :resizeable="false"
-            :delay="100"
-            :scrollable="true"
-            :draggable="false">
-            <div class="messageModal-content" align="center">
-                <h1 id="ModalTitle">System Message</h1>
-                <div align="left" style="padding:15px;">
-                    <div class = "row">
-                        <div class="col-sm-12">
-                            <div class="alert alert-danger" align="center">
-                                {{ message }}
-                            </div>
-                        </div>
+        <bootstrapModal
+            title="System Message"
+            :show-ok="false"
+            :show-cancel="false"
+        >
+            <!-- Default slot: This content will be placed in the modal's body -->
+            <div class="row">
+                <div class="col-sm-12">
+                    <div class="alert alert-danger" align="center">
+                        {{ message }}
                     </div>
                 </div>
-                <div align="left" style="margin-bottom:20px; margin-left:20px;">
-                    <button type="button" v-on:click="messageModalConfirm()" class="btn btn-primary" style="width:80px;font-weight:bold;">OK</button>
-                </div>
             </div>
-        </modal>
+
+            <!-- Footer slot: We override the default footer to have only one OK button -->
+            <template v-slot:footer>
+                <button type="button" @click="messageModalConfirm()" class="btn btn-primary" style="width:80px;font-weight:bold;">OK</button>
+            </template>
+        </bootstrapModal>
     </div>
 </template>
 
 <script>
-import 'foundation-sites';
-import 'foundation-datepicker/js/foundation-datepicker';
 import moment from 'moment';
-// import JQuery from 'jquery';
 import swal from 'sweetalert2';
+import bootstrapModal from '@/utils/bootstrap-modal.vue'
 import { api_endpoints } from './hooks';
 
 // let $ = JQuery
 var nowTemp = new Date();
 var now = moment.utc({year: nowTemp.getFullYear(), month: nowTemp.getMonth(), day: nowTemp.getDate(), hour: 0, minute: 0, second: 0}).toDate();
+
+const today = new Date();
+today.setHours(0, 0, 0, 0);
 
 function getQueryParam(name, fallback) {
     name = name.replace(/[\[\]]/g, "\\$&");
@@ -230,52 +233,59 @@ export default {
     data: function() {
         let vm = this;
         return {
-        arrivalDate: moment.utc(getQueryParam('arrival', moment.utc(now).format('YYYY/MM/DD')), 'YYYY/MM/DD'),
-        overnightStay: '',
-        vesselReg: '',
-        noOfAdults: '0',
-        noOfConcessions: '0',
-        noOfChildren: '0',
-        noOfInfants: '0',
-        warningRefNo: '',
-        givenName: '',
-        lastName: '',
-        email: '',
-        emailConfirm: '',
-        mobile: '',
-        currentCostDateStart: '',
-        currentCostDateEnd: '',
-        adultCost: 0,
-        adultOvernightCost: 0,
-        childrenCost: 0,
-        childrenOvernightCost: 0,
-        infantCost: 0,
-        infantOvernightCost: 0,
-        familyCost: 0,
-        familyOvernightCost: 0,
-        total: 0,
-        errorMsg: null,
-        errorMsgPersonal: null,
-        toc: false,
-        message: null,
-        noPayment: false,
-        terms: '',
-        errors: {
-            arrivalDate: false,
-            overnightStay: false,
-            vesselReg: false,
-            noOfAdults: false,
-            noOfConcessions: false,
-            noOfChildren: false,
-            noOfInfants: false,
-            warningRefNo: false,
-            givenName: false,
-            lastName: false,
-            movile: false,
-            email: false,
-            emailConfirm: false,
-            }
+            arrivalDate: moment.utc(getQueryParam('arrival', moment.utc(now).format('YYYY/MM/DD')), 'YYYY/MM/DD'),
+            arrivalDateValue: null,
+            overnightStay: '',
+            vesselReg: '',
+            noOfAdults: '0',
+            noOfConcessions: '0',
+            noOfChildren: '0',
+            noOfInfants: '0',
+            warningRefNo: '',
+            givenName: '',
+            lastName: '',
+            email: '',
+            emailConfirm: '',
+            mobile: '',
+            currentCostDateStart: '',
+            currentCostDateEnd: '',
+            adultCost: 0,
+            adultOvernightCost: 0,
+            childrenCost: 0,
+            childrenOvernightCost: 0,
+            infantCost: 0,
+            infantOvernightCost: 0,
+            familyCost: 0,
+            familyOvernightCost: 0,
+            total: 0,
+            errorMsg: null,
+            errorMsgPersonal: null,
+            toc: false,
+            message: null,
+            noPayment: false,
+            terms: '',
+            errors: {
+                arrivalDate: false,
+                overnightStay: false,
+                vesselReg: false,
+                noOfAdults: false,
+                noOfConcessions: false,
+                noOfChildren: false,
+                noOfInfants: false,
+                warningRefNo: false,
+                givenName: false,
+                lastName: false,
+                movile: false,
+                email: false,
+                emailConfirm: false,
+            },
+            isModalOpen: false,
+            message: '',
+            minDate: null,
         }
+    },
+    components: {
+        bootstrapModal,
     },
     computed: {
         validToProceed: {
@@ -288,11 +298,16 @@ export default {
                 } 
             }
         },
-        arrivalDateString: {
-            cache: false,
-            get: function() {
-                return this.arrivalEl[0].value ? moment(this.arrivalData.getDate()).format('YYYY/MM/DD') : null; 
+        arrivalDateString(){
+            // cache: false,
+            // get: function() {
+            //     return this.arrivalEl[0].value ? moment(this.arrivalData.getDate()).format('YYYY/MM/DD') : null; 
+            // }
+            if (!this.arrivalDateValue) {
+                return null;
             }
+            // this.arrivalDateValue is a YYYY-MM-DD string.
+            return moment(this.arrivalDateValue).format('YYYY/MM/DD');
         },
     },
     watch: {
@@ -321,6 +336,9 @@ export default {
 
     },
     methods: {
+        close() {
+            this.isModalOpen = false
+        },
         formatMoney:function(n,c, d, t){
             c = isNaN(c = Math.abs(c)) ? 2 : c;
             d = d == undefined ? "." : d;
@@ -332,7 +350,8 @@ export default {
         },
         messageModalConfirm: function(){
             this.message = null;
-            this.$modal.hide('messageModal');
+            // this.$modal.hide('messageModal');
+            this.close();
         },
         processForm: function(){
             var vm = this;
@@ -400,7 +419,8 @@ export default {
                             if (data.error[1].includes("Admissions Oracle Code")){
                                 var msg = data.error[1].split('.')[0];
                                 vm.message = msg;
-                                vm.$modal.show('messageModal');
+                                // vm.$modal.show('messageModal');
+                                this.isModalOpen = true;
                             } else {
 			            swal.fire({
 				            title: 'Error',
@@ -498,47 +518,69 @@ export default {
         validateArrivalDate: function(){
             var error1 = "If paying for a prior warning, please ensure you enter the reference number.";
             var error2 = "Please select a date from the past if paying for a warning.";
-            var fieldToCheck = this.arrivalDate;
+
+            var fieldToCheck = this.arrivalDateValue;
+
+            // Reset previous errors first for better user experience
+            this.errors.arrivalDate = false;
+            if (this.errorMsg === error1 || this.errorMsg === error2) {
+                this.errorMsg = null;
+            }
+
             if(!fieldToCheck){
                 this.errors.arrivalDate = true;
+                // It's better not to proceed if the date is empty
+                this.validateVesselReg();
+                return; 
+            } 
+                // this.calculateTotal();
+                // var selectedDate = new Date(fieldToCheck);
+                // if(selectedDate < now && !this.warningRefNo){
+                //     this.errors.arrivalDate = true;
+                //     this.errorMsg = error1;
+                // } else if (selectedDate > now && this.warningRefNo){
+                //     this.errors.warningRefNo = true;
+                //     this.errorMsg = error2;
+                // } else {
+                //     this.errors.arrivalDate = false;
+                //     if(this.errorMsg == error1 || this.errorMsg == error2){
+                //         this.errorMsg = null;
+                //     }
+                // }
+            const parts = fieldToCheck.split('-');
+            // Note: The month is 0-indexed in JavaScript (0=January, 11=December)
+            const selectedDate = new Date(parts[0], parts[1] - 1, parts[2]);
 
+            // Now, perform the validation logic
+            if (selectedDate < today && !this.warningRefNo) {
+                this.errors.arrivalDate = true;
+                this.errorMsg = error1;
+            } else if (selectedDate >= today && this.warningRefNo) { // Use >= to include today
+                this.errors.warningRefNo = true; // This seems to be the intended logic from the original code
+                this.errorMsg = error2;
             } else {
+                // If validation passes, then calculate the total
                 this.calculateTotal();
-                var selectedDate = new Date(fieldToCheck);
-                if(selectedDate < now && !this.warningRefNo){
-                    this.errors.arrivalDate = true;
-                    this.errorMsg = error1;
-                } else if (selectedDate > now && this.warningRefNo){
-                    this.errors.warningRefNo = true;
-                    this.errorMsg = error2;
-                } else {
-                    this.errors.arrivalDate = false;
-                    if(this.errorMsg == error1 || this.errorMsg == error2){
-                        this.errorMsg = null;
-                    }
-                }
             }
-	    this.validateVesselReg();
+
+            this.validateVesselReg();
         },
         validateVesselReg: function() {
-            console.log('in validateVesselReg()')
-
             let vm = this;
             vm.vesselReg = vm.vesselReg.toUpperCase();
             vm.vesselReg = vm.vesselReg.replace(/\s/g,"");
             vm.vesselReg = vm.vesselReg.replace(/\W/g,"");
 
-
             var reg = vm.vesselReg;
-	    var dateArrival = $('#dateArrival').val();
+            var dateArrival = $('#dateArrival').val();
             var data = {
                 'rego': reg,
-		'dateArrival': dateArrival
+                'dateArrival': dateArrival
             }
             vm.noPayment = false;
             if(reg){
                 $.ajax({
-                    url: process.env.VUE_APP_PARKSTAY_URL + "/api/registeredVessels/",
+                    url: "/api/registeredVessels/",
                     dataType: 'json',
                     data: data,
                     method: 'GET',
@@ -547,7 +589,8 @@ export default {
                             if(data[0].admissionsPaid) {
                                 vm.message = "Admission Fees for this vessel are already paid.";
                                 vm.noPayment = true;
-                                vm.$modal.show('messageModal');
+                                // vm.$modal.show('messageModal');
+                                vm.isModalOpen = true
                             }
                         } else {
                             console.log("Registration was not found.")
@@ -637,7 +680,7 @@ export default {
                 'location': location,
             }
             $.ajax({
-                url: process.env.VUE_APP_PARKSTAY_URL + "/api/admissions/get_price_by_location.json/",
+                url: "/api/admissions/get_price_by_location.json/",
                 method: 'GET',
                 data: data,
                 dataType: 'json',
@@ -745,33 +788,6 @@ export default {
     },
     mounted: function(){
         let vm = this;
-        $(document).foundation();
-        this.arrivalEl = $('#dateArrival');
-
-        this.arrivalData = this.arrivalEl.fdatepicker({
-            format: 'dd/mm/yyyy',
-            onRender: function (date) {
-                return;
-            }
-        }).on('changeDate', function (ev) {
-            ev.target.dispatchEvent(new CustomEvent('change'));
-        }).on('change', function (ev) {
-            vm.arrivalData.hide();
-            vm.arrivalDate = moment(vm.arrivalData.date);
-            vm.validateArrivalDate();
-        }).on('keydown', function (ev) {
-            if (ev.keyCode == 13) {
-                ev.target.dispatchEvent(new CustomEvent('change'));
-            }
-        }).data('datepicker');
-
-        this.arrivalData.date = this.arrivalDate.toDate();
-        this.arrivalData.setValue();
-        this.arrivalData.fill();
-
-        //Get the user to autofill the boxes.
-        // this.terms = $('#terms').val(); 
-        // $('#terms-link').val(this.terms);
         $.ajax({
             url: "/api/profile",
             method: 'GET',
@@ -797,6 +813,9 @@ export default {
                 console.log((xhr.responseJSON && xhr.responseJSON.msg) ? xhr.responseJSON.msg : '"'+err+'" response when communicating with Mooring.');
             }
         });
+    },
+    created: function(){
+        this.minDate = moment().format('YYYY-MM-DD');
     }
 };
 

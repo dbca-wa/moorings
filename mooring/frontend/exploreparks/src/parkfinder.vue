@@ -1,395 +1,567 @@
 <template>
-    <div v-cloak class="f6inject">
-       <div class="row">
-        <div class="small-12 medium-3 large-6 columns search-params">
-            <div class="columns small-12 medium-12 large-12" v-show="current_booking.length > 0">
-                <div class="row">
-                    <div class="columns small-12 medium-12 large-12" >
-                        <button  title="Please add items into your trolley." v-show="ongoing_booking" style="color: #FFFFFF; background-color: rgb(255, 0, 0); margin-right:10px;" class="button small-12 medium-12 large-12" >Time Left {{ timeleft }}</button>
-                        <a v-show="current_booking.length > 0" class="button small-12 medium-12 large-12" :href="parkstayUrl+'/booking'" style="border-radius: 4px; border: 1px solid #2e6da4">Proceed to Check Out</a> <a type="button" :href="parkstayUrl+'/booking/abort'" class="button float-right warning continueBooking" style="color: #fff; background-color: #f0ad4e;  border-color: #eea236; border-radius: 4px;">
-                            Cancel in-progress booking
-                        </a>
-                    </div>
-                    <div class="small-12 medium-12 large-12">
-                        <div class="card">
-                            <div class="card-body"><h3 class="card-title">Trolley: <span id='total_trolley'>${{ total_booking }}</span></h3></div>
+    <!-- <div v-cloak class="f6inject"> -->
+    <div v-cloak ref="parkfinderWrapper">
+        <div class="container">
+            <!-- First Row: Search Panel and Map -->
+            <div class="row">
+
+                <!-- Left Column (Search Panel) -->
+                <div class="col-lg-5">
+                    <!-- The content of the original left column will go here -->
+                    <div v-show="current_booking.length > 0">
+                        <!-- Button group using Flexbox for alignment -->
+                        <div class="d-grid gap-2 d-md-flex justify-content-md-start mb-3">
+                            <button v-show="ongoing_booking" class="btn btn-danger me-md-2" type="button">Time Left {{ timeleft }}</button>
+                            <a v-show="current_booking.length > 0" class="btn btn-primary me-md-2" :href="parkstayUrl+'/booking'">Proceed to Check Out</a>
+                            <a class="btn btn-warning" :href="parkstayUrl+'/booking/abort'">Cancel in-progress booking</a>
                         </div>
-                          <div class='columns small-12 medium-12 large-12' style="margin-top:10px; margin-bottom:10px;">
-                                <div v-for="item in current_booking" class="row small-12 medium-12 large-12">
-                                        <div class="columns small-12 medium-9 large-9">{{ item.item }}</div>
-                                        <div class="columns small-12 medium-2 large-2">${{ item.amount }}</div>
-                                        <div class="columns small-12 medium-1 large-1"><a v-show="item.past_booking == false" style='color: red; opacity: 1;' type="button" class="close" @click="deleteBooking(item.id)">x</a></div>
+
+                        <div class="small-12 medium-12 large-12">
+                            <!-- Trolley summary card -->
+                            <div class="card mb-3">
+                                <div class="card-body">
+                                    <h5 class="card-title mb-0">Trolley: <span id='total_trolley'>${{ total_booking }}</span></h5>
                                 </div>
-                           </div>
+                            </div>
+                            <div v-for="item in current_booking" :key="item.id" class="row gx-2 align-items-center mb-1">
+                                <!-- gx-2 adds a small horizontal gutter between columns -->
+                                <!-- align-items-center vertically aligns the content -->
+                                
+                                <!-- Item Name column -->
+                                <div class="col-8">{{ item.item }}</div>
+                                
+                                <!-- Amount column -->
+                                <div class="col-3 text-end">${{ item.amount }}</div>
+                                
+                                <!-- Delete button column -->
+                                <div class="col-1 text-end">
+                                    <button v-show="item.past_booking == false" type="button" class="btn-close" @click="deleteBooking(item.id)" aria-label="Close"></button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Search input field -->
+                    <div class="mb-3">
+                        <label for="searchInput" class="form-label">Search</label>
+                        <input id="searchInput" type="text" class="form-control" placeholder="Search for a mooring...">
+                    </div>
+                    <!-- Date inputs in a row -->
+                    <div class="row g-3 mb-3">
+                        <div class="col-md-6">
+                            <label for="dateArrival" class="form-label">Arrival</label>
+                            <input
+                                type="date"
+                                id="dateArrival"
+                                class="form-control"
+                                v-model="arrivalDateForInput"
+                                :min="minArrivalDateForInput"
+                                @change="handleArrivalDateChange"
+                            >
+                        </div>
+                        <div class="col-md-6">
+                            <label for="dateDeparture" class="form-label">Departure</label>
+                            <input
+                                type="date"
+                                id="dateDeparture"
+                                class="form-control"
+                                v-model="departureDateForInput"
+                                :min="minDepartureDateForInput"
+                            >
+                        </div>
+                    </div>
+                    <div class="form-check d-none">
+                        <input type="checkbox" class="form-check-input" id="bookableOnly" v-model="bookableOnly">
+                        <label for="bookableOnly" class="form-check-label">Show bookable moorings only</label>
+                    </div>
+
+                    <!-- A simple horizontal rule -->
+                    <hr>
+
+                    <!-- A row for all vessel detail inputs -->
+                    <div class="row g-3 mb-3">
+                        <!-- Vessel Registration -->
+                        <div class="col-md-6">
+                            <label for="vesselRego" class="form-label">Vessel Registration</label>
+                            <input v-model="vesselRego" id="vesselRego" name="vessel_rego" type="text" class="form-control" placeholder="REGO134" :disabled="current_booking.length > 0">
+                        </div>
+
+                        <!-- Vessel Size -->
+                        <div class="col-md-6">
+                            <label for="vesselSize" class="form-label">Vessel Size (Meters)</label>
+                            <input v-model="vesselSize" id="vesselSize" name="vessel_size" type="number" class="form-control" placeholder="35" :disabled="current_booking.length > 0" step="0.01">
+                        </div>
+
+                        <!-- Vessel Draft -->
+                        <div class="col-md-6">
+                            <label for="vesselDraft" class="form-label">Vessel Draft (Meters)</label>
+                            <input v-model="vesselDraft" id="vesselDraft" name="vessel_draft" type="number" class="form-control" placeholder="10" :disabled="current_booking.length > 0" step="0.01">
+                        </div>
+
+                        <!-- Vessel Beam -->
+                        <div class="col-md-6">
+                            <label for="vesselBeam" class="form-label">Vessel Beam (Meters)</label>
+                            <input v-model="vesselBeam" id="vesselBeam" name="vessel_beams" type="number" class="form-control" placeholder="3" :disabled="current_booking.length > 0" step="0.01">
+                        </div>
+
+                        <!-- Vessel Weight -->
+                        <div class="col-md-6">
+                            <label for="vesselWeight" class="form-label">Vessel Weight (Tonnes)</label>
+                            <input v-model="vesselWeight" id="vesselWeight" name="vessel_weight" type="number" class="form-control" placeholder="2" :disabled="current_booking.length > 0" step="0.01">
+                        </div>
+
+                        <!-- Guests Dropdown -->
+                        <!-- We wrap the button and menu in a div with .dropdown for proper positioning -->
+                        <div class="col-md-6">
+                            <label class="form-label">Guests</label>
+                            <div class="dropdown">
+                                <button type="button" class="btn btn-outline-secondary w-100 dropdown-toggle" id="guestsDropdownButton" data-bs-toggle="dropdown" aria-expanded="false">
+                                    {{ numPeople }}
+                                </button>
+                                <div class="dropdown-menu p-3" aria-labelledby="guestsDropdownButton" style="width: 300px;">
+                                    <!-- Adults -->
+                                    <div class="row g-3 align-items-center mb-3">
+                                        <div class="col-6">
+                                            <label for="numAdults" class="col-form-label">Adults</label>
+                                        </div>
+                                        <div class="col-6">
+                                            <input type="number" id="numAdults" name="num_adults" class="form-control" v-model="numAdults" min="0" max="16">
+                                        </div>
+                                    </div>
+
+                                    <!-- Concessions (Hidden) -->
+                                    <!-- Replaced style="display:none;" with "d-none" class -->
+                                    <div class="row g-3 align-items-center mb-3 d-none">
+                                        <div class="col-6">
+                                            <label for="numConcessions" class="col-form-label">
+                                                <span title="Holders of one of the following Australian-issued cards: - Seniors Card - Age Pension - Disability Support - Carer Payment - Carer Allowance - Companion Card - Department of Veterans' Affairs">Concessions</span>
+                                            </label>
+                                        </div>
+                                        <div class="col-6">
+                                            <input type="number" id="numConcessions" name="num_concessions" class="form-control" v-model="numConcessions" min="0" max="16">
+                                        </div>
+                                    </div>
+
+                                    <!-- Children -->
+                                    <div class="row g-3 align-items-center mb-3">
+                                        <div class="col-6">
+                                            <label for="numChildren" class="col-form-label">Children (4-16)</label>
+                                        </div>
+                                        <div class="col-6">
+                                            <input type="number" id="numChildren" name="num_children" class="form-control" v-model="numChildren" min="0" max="16">
+                                        </div>
+                                    </div>
+
+                                    <!-- Infants -->
+                                    <div class="row g-3 align-items-center mb-3">
+                                        <div class="col-6">
+                                            <label for="numInfants" class="col-form-label">Infants (under 4)</label>
+                                        </div>
+                                        <div class="col-6">
+                                            <input type="number" id="numInfants" name="num_infants" class="form-control" v-model="numInfants" min="0" max="16">
+                                        </div>
+                                    </div>
+
+                                    <!-- Moorings (Hidden) -->
+                                    <!-- Replaced style="display:none;" with "d-none" class -->
+                                    <div class="row g-3 align-items-center d-none">
+                                        <div class="col-6">
+                                            <label for="numMooring" class="col-form-label">Moorings</label>
+                                        </div>
+                                        <div class="col-6">
+                                            <input type="number" id="numMooring" name="num_mooring" class="form-control" v-model="numMooring" min="0" max="16">
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <hr>
+
+                    <!-- Mooring Filter Section -->
+                    <div class="mb-3">
+                        <label class="form-label fw-bold">Mooring</label>
+                        <div class="d-flex flex-wrap">
+                            <div class="form-check me-3">
+                                <input type="radio" name="gear_type" id="gear_all" value="all" v-model="gearType" class="form-check-input" @change="reload()">
+                                <label for="gear_all" class="form-check-label"><i class="symb RC3"></i> All types</label>
+                            </div>
+                            <div class="form-check me-3">
+                                <input type="radio" name="gear_type" id="gear_rental_available" value="rental-available" v-model="gearType" class="form-check-input" @change="reload()">
+                                <label for="gear_rental_available" class="form-check-label"><i class="symb RC20"></i> Rental (available)</label>
+                            </div>
+                            <div class="form-check me-3">
+                                <input type="radio" name="gear_type" id="gear_rental_notavailable" value="rental-notavailable" v-model="gearType" class="form-check-input" @change="reload()">
+                                <label for="gear_rental_notavailable" class="form-check-label"><i class="symb RC20"></i> Rental (not available)</label>
+                            </div>
+                            <div class="form-check me-3">
+                                <input type="radio" name="gear_type" id="gear_public_notbookable" value="public-notbookable" v-model="gearType" class="form-check-input" @change="reload()">
+                                <label for="gear_public_notbookable" class="form-check-label"><i class="symb RC20"></i> Public (not bookable)</label>
+                            </div>
+                        </div>
+                    </div>
+
+                    <hr>
+
+                    <!-- Types Filter Section -->
+                    <div class="mb-3">
+                        <label class="form-label fw-bold">Types</label>
+                        <div class="d-flex flex-wrap">
+                            <div class="form-check me-3">
+                                <input type="radio" name="pen_type" id="pen_all" value="all" v-model="penType" class="form-check-input" @change="reload()">
+                                <label for="pen_all" class="form-check-label"><i class="symb RC3"></i> All types</label>
+                            </div>
+                            <div class="form-check me-3">
+                                <input type="radio" name="pen_type" id="pen_moorings" value="0" v-model="penType" class="form-check-input" @change="reload()">
+                                <label for="pen_moorings" class="form-check-label"><i class="symb RC20"></i> Moorings</label>
+                            </div>
+                            <div class="form-check me-3">
+                                <input type="radio" name="pen_type" id="pen_jetty" value="1" v-model="penType" class="form-check-input" @change="reload()">
+                                <label for="pen_jetty" class="form-check-label"><i class="symb RC20"></i> Jetty Pens</label>
+                            </div>
+                            <div class="form-check me-3">
+                                <input type="radio" name="pen_type" id="pen_beach" value="2" v-model="penType" class="form-check-input" @change="reload()">
+                                <label for="pen_beach" class="form-check-label"><i class="symb RC20"></i> Beach Pens</label>
+                            </div>
+                        </div>
+                    </div>
+
+                    <hr>
+
+                    <!-- Availability Legend Section -->
+                    <div class="mb-3">
+                        <label class="form-label fw-bold">Availability</label>
+                        <!-- Use a row with columns for the legend items for proper alignment -->
+                        <div class="row">
+                            <div class="col-6 col-md-3 mb-2">
+                                <div class="d-flex align-items-center">
+                                    <img class="publicPin me-2" :src="pin_gray" />
+                                    <span>Public</span>
+                                </div>
+                            </div>
+                            <div class="col-6 col-md-3 mb-2">
+                                <div class="d-flex align-items-center">
+                                    <img class="availablePin me-2" :src="pin_orange" />
+                                    <span>Available</span>
+                                </div>
+                            </div>
+                            <div class="col-6 col-md-3 mb-2">
+                                <div class="d-flex align-items-center">
+                                    <img class="partialPin me-2" :src="pin_orange_red" />
+                                    <span>Partial Dates</span>
+                                </div>
+                            </div>
+                            <div class="col-6 col-md-3 mb-2">
+                                <div class="d-flex align-items-center">
+                                    <img class="unavailablePin me-2" :src="pin_red" />
+                                    <span>Unavailable</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <hr>
+
+                    <!-- Hidden "Select features" Section -->
+                    <!-- This section is hidden by d-none, but correctly styled with BS5 form-checks -->
+                    <div class="mb-3 d-none">
+                        <label class="form-label fw-bold">Select features</label>
+                        <div class="d-flex flex-wrap">
+                            <div v-for="filt in filterList" :key="filt.key" class="form-check me-3">
+                                <input type="checkbox" class="form-check-input" :id="'filt_' + filt.key" :value="'filt_'+ filt.key" v-model="filterParams[filt.key]" @change="updateFilter()">
+                                <label :for="'filt_' + filt.key" class="form-check-label"><i class="symb" :class="filt.symb"></i> {{ filt.name }}</label>
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+
+                <!-- Right Column (Map) -->
+                <div class="col-lg-7">
+                    <!-- The content of the original right column will go here -->
+                    <!-- <div class="alert alert-warning" style='text-align: center' role="alert" v-if="admissions_key" id="admissions_link">
+                        <strong style='font-size: 16px;'>
+                            <a :href='"/annual-admissions/" + admissions_key + "/"'>Click here for paying annual admission fees only</a>
+                        </strong><br>
+                    </div>   
+                    <div class="alert alert-warning" style='text-align: center' role="alert" v-if="admissions_key" id="admissions_link">
+                        <strong style='font-size: 16px;'>
+                            <a :href='"/admissions/" + admissions_key + "/"'>Click here for paying individual admission fees for a single visit</a>
+                        </strong><br>
+                    </div>
+                    <div class="alert alert-info" style='text-align: center' role="alert" v-if="admissions_key" id="admissions_link">
+                        <strong style='font-size: 16px;'>
+                            <a href='https://rottnestisland.com/boating/Fees'>Click here for more information on admission fees</a>
+                        </strong><br>
+                    </div> -->
+                    <div v-if="admissions_key">
+                        <div class="alert alert-warning text-center" role="alert">
+                            <strong class="fs-6">
+                                <a :href='"/annual-admissions/" + admissions_key + "/"'>Click here for paying annual admission fees only</a>
+                            </strong>
+                        </div>
+                        <div class="alert alert-warning text-center" role="alert">
+                            <strong class="fs-6">
+                                <a :href='"/admissions/" + admissions_key + "/"'>Click here for paying individual admission fees for a single visit</a>
+                            </strong>
+                        </div>
+                        <div class="alert alert-info text-center" role="alert">
+                            <strong class="fs-6">
+                                <a href='https://rottnestisland.com/boating/Fees'>Click here for more information on admission fees</a>
+                            </strong>
+                        </div>
+                    </div>
+
+                    <!-- <div style='width: 100%; height: 1px;' align='right'>
+                        <div v-show='mapLoading == true' class='map-loading' style='border: 1px solid #00000'>
+                            <img style='width:20px; height: 20px;' src='@/assets/ajax-loader-spinner.gif'>&nbsp;&nbsp;Please Wait
+                        </div>
+                    </div>
+
+                    <div id="map"></div>
+
+                    <div style='width: 100%' align='right'>
+                        <img id='satellite-toggle' class='map-toggle-white'  type='button'  @click="toggleMap('satellite');" src='./assets/img/satellite_icon.png' />
+                        <img id='map-toggle' class='map-toggle-black'  type='button'  @click="toggleMap('map');" src='./assets/img/map_icon.png' />
+                    </div> -->
+
+                    <!-- Map Container using Bootstrap's position utilities -->
+                    <div class="position-relative mb-3">
+                        <!-- Loading indicator positioned at the top-right -->
+                        <div v-show="mapLoading" class="position-absolute top-0 end-0 p-2 bg-white border rounded shadow-sm" style="z-index: 10;">
+                            <div class="d-flex align-items-center">
+                                <img style="width:20px; height: 20px;" src="@/assets/ajax-loader-spinner.gif" alt="Loading...">
+                                <span class="ms-2">Please Wait</span>
+                            </div>
+                        </div>
+                        
+                        <div id="map" style="height: 600px;" ref="mapElement"></div>
+                        
+                        <!-- Map toggle buttons positioned at the bottom-right -->
+                        <div class="position-absolute bottom-0 end-0 p-2">
+                            <img id="satellite-toggle" class="map-toggle-white" type="button" @click="toggleMap('satellite');" src="./assets/img/satellite_icon.png" alt="Satellite view" />
+                            <img id="map-toggle" class="map-toggle-black" type="button" @click="toggleMap('map');" src="./assets/img/map_icon.png" alt="Map view" />
+                        </div>
+                    </div>
+
+                    <div id="mapPopup" class="mapPopup bg-white p-3 border rounded shadow" v-cloak>
+                        <a href="#" id="mapPopupClose" class="mapPopupClose"></a>
+                        <div id="mapPopupContent">
+                            <!-- <h4 style="margin: 0"><b id="mapPopupName"></b></h4>
+                            <p><i id="mapPopupPrice"></i></p>
+                            <img class="thumbnail" id="mapPopupImage" style='width: 230px; height: 230px;' />
+                            <div id="mapPopupDescription" style="font-size: 0.75rem;"/>
+                            <p>Mooring Limits</p>
+                            <div class="row">
+                                <div class="col-md-7"  style='display:none'>
+                                    <small>Max Stay: <span id='max_stay_period'></span> day/s</small>
+                                </div>
+                                <div class="col-md-5">
+                                    <small>Max Size: <span id='vessel_size_popup'></span></small>
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-md-7">
+                                    <small>Max Draft: <span id='vessel_draft_popup'></span></small>
+                                </div>
+                                <div class="col-md-5">
+                                    <small><span id='vessel_beam_weight_popup'></span></small>
+                                </div>
+                            </div>
+                            <input id='mapPopupMooringType' type='hidden' >
+                            <a id="mapPopupInfo" class="button formButton" style="margin-bottom: 0; margin-top: 1em;" target="_blank">More info</a>
+                            <a id="mapPopupBook" class="button formButton" style="margin-bottom: 0;" v-on:click="BookNowCheck()" >Book now</a> -->
+
+                            <h4 style="margin: 0;"><b id="mapPopupName"></b></h4>
+                            <p><i id="mapPopupPrice"></i></p>
+                            <img class="img-thumbnail" id="mapPopupImage" style="width: 230px; height: 230px;" />
+                            <div id="mapPopupDescription" style="font-size: 0.75rem;"></div>
+                            <p class="mt-3">Mooring Limits</p>
+
+                            <!-- Mooring Limits grid updated to Bootstrap 5 -->
+                            <div class="row">
+                                <div class="col-7 d-none">
+                                    <small>Max Stay: <span id="max_stay_period"></span> day/s</small>
+                                </div>
+                                <div class="col-5">
+                                    <small>Max Size: <span id="vessel_size_popup"></span></small>
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-7">
+                                    <small>Max Draft: <span id="vessel_draft_popup"></span></small>
+                                </div>
+                                <div class="col-5">
+                                    <small><span id="vessel_beam_weight_popup"></span></small>
+                                </div>
+                            </div>
+                            
+                            <input id="mapPopupMooringType" type="hidden">
+                            
+                            <!-- Buttons updated to Bootstrap 5 style -->
+                            <div class="d-grid gap-2 mt-3">
+                                <a id="mapPopupInfo" class="btn btn-outline-secondary btn-sm" target="_blank">More info</a>
+                                <a id="mapPopupBook" class="btn btn-primary btn-sm" @click="BookNowCheck()">Book now</a>
+                            </div>
+
+                        </div>
                     </div>
                 </div>
             </div>
 
-                <div class="row">
-                    <div class="small-12 columns">
-                        <label>Search <input class="input-group-field" id="searchInput" type="text" placeholder="Search for a mooring..."/></label>
-                    </div>
-                </div>
-                <div class="row">
-                    <div class="small-12 medium-12 large-6 columns">
-                        <label for="dateArrival">Arrival</label>
-                        <input
-                            type="date"
-                            id="dateArrival"
-                            v-model="arrivalDateForInput"
-                            :min="minArrivalDateForInput"
-                            @change="handleArrivalDateChange"
-                        >
-                    </div>
-                    <div class="small-12 medium-12 large-6 columns">
-                        <label for="dateDeparture">Departure</label>
-                        <input
-                            type="date"
-                            id="dateDeparture"
-                            v-model="departureDateForInput"
-                            :min="minDepartureDateForInput"
-                        >
-                    </div>
-                    
-                    <div class="small-12 medium-12 large-12 columns" style="display:none;">
-                        <label><input type="checkbox" v-model="bookableOnly"/> Show bookable moorings only</label>
-                    </div>
-                </div>
-                <div class="row"><div class="small-12 columns">
-                    <hr/>
-                </div>
-                </div>
-                <div class="row">
-                    <div class="small-12 medium-12 large-6 columns">
-                    <label>Vessel Registration  <input v-model="vesselRego" id="vesselRego" name="vessel_rego" type="text" placeholder="REGO134" :disabled="current_booking.length > 0" step='0.01' /></label>
-                    </div>
-                    <div class="small-12 medium-12 large-6 columns">
-                    <label>Vessel Size (Meters) <input v-model="vesselSize" id="vesselSize" name="vessel_size" type="number" placeholder="35" :disabled="current_booking.length > 0" step='0.01' /></label>
-                    </div>
-                    <div class="small-12 medium-12 large-6 columns">
-                    <label>Vessel Draft (Meters) <input v-model="vesselDraft" id="vesselDraft" name="vessel_draft" type="number" placeholder="10" :disabled="current_booking.length > 0" step='0.01' /></label>
-                    </div>
-                    <div class="small-12 medium-12 large-6 columns">
-                    <label>Vessel Beams (Meters)  <input v-model="vesselBeam" id="vesselBeam" name="vessel_beams" type="number" placeholder="3" :disabled="current_booking.length > 0" step='0.01' /></label>
-                    </div>
-                    <div class="small-12 medium-12 large-6 columns">
-                    <label>Vessel Weight (Tonnes)  <input v-model="vesselWeight" id="vesselWeight" name="vessel_weight" type="number" placeholder="2" :disabled="current_booking.length > 0" step='0.01' /></label>
-                    </div>
-                    <div class="small-12 medium-12 large-6 columns" >
-                        <label>
-                            Guests <input type="button" class="button formButton" v-bind:value="numPeople" data-toggle="guests-dropdown"/>
-                        </label>
-                        <div class="dropdown-pane" id="guests-dropdown" data-dropdown data-auto-focus="true">
-                            <div class="row">
-                                <div class="small-6 columns">
-                                    <label for="num_adults" class="text-right">Adults</label>
-                                </div>
-                                <div class="small-6 columns">
-                                    <input type="number" id="numAdults" name="num_adults" v-model="numAdults" min="0" max="16"/>
-                                </div>
-                            </div>
-                            <div class="row" style="display:none;">
-                                <div class="small-6 columns">
-                                    <label for="num_concessions" class="text-right"><span class="has-tip" title="Holders of one of the following Australian-issued cards:
-                                        - Seniors Card
-                                        - Age Pension
-                                        - Disability Support
-                                        - Carer Payment
-                                        - Carer Allowance
-                                        - Companion Card
-                                        - Department of Veterans' Affairs">Concessions</span>
-                                    </label>
-                                </div><div class="small-6 columns">
-                                    <input type="number" id="numConcessions" name="num_concessions" v-model="numConcessions" min="0" max="16"/>
-                                </div>
-                            </div>
-                            <div class="row">
-                                <div class="small-6 columns">
-                                    <label for="num_children" class="text-right">Children (4-16)</label>
-                                </div>
-                                <div class="small-6 columns">
-                                    <input type="number" id="numChildren" name="num_children" v-model="numChildren" min="0" max="16"/>
-                                </div>
-                            </div>
-                            <div class="row">
-                                <div class="small-6 columns">
-                                    <label for="num_children" class="text-right">Infants (under 4)</label>
-                                </div>
-                                <div class="small-6 columns">
-                                    <input type="number" id="numInfants" name="num_infants" v-model="numInfants" min="0" max="16"/>
-                                </div>
-                            </div>
-                            <div class="row" style="display:none;">
-                                <div class="small-6 columns">
-                                    <label for="num_children" class="text-right">Moorings</label>
-                                </div>
-                                <div class="small-6 columns">
-                                    <input type="number" id="numMooring" name="num_mooring" v-model="numMooring" min="0" max="16"/>
-                                </div>
-                            </div>
-                       </div>
-                    </div>
-                </div>
-                <div class="row">
-                    <div class="small-12 columns">
-                    <hr/>
-                    </div>
-                </div>
-                <div class="row">
-                    <div class="small-12 medium-12 large-12 columns">
-                        <label>Mooring</label>
-                    </div>
-                    <div class="small-12 medium-12 large-4 columns">
-                        <label><input type="radio" name="gear_type" value="all" v-model="gearType" class="show-for-sr" v-on:change="reload()"/><i class="symb RC3"></i> All types</label>
-                    </div>
-                    <div class="small-12 medium-12 large-4 columns">
-                        <label><input type="radio" name="gear_type" value="rental-available" v-model="gearType" class="show-for-sr" v-on:change="reload()"/><i class="symb RC20"></i> Rental (available)</label>
-                    </div>
-                    <div class="small-12 medium-12 large-4 columns">
-                        <label><input type="radio" name="gear_type" value="rental-notavailable" v-model="gearType" class="show-for-sr" v-on:change="reload()"/><i class="symb RC20"></i> Rental (not available)</label>
-                    </div>
-                    <div class="small-12 medium-12 large-4 columns">
-                        <label><input type="radio" name="gear_type" value="public-notbookable" v-model="gearType" class="show-for-sr" v-on:change="reload()"/><i class="symb RC20"></i> Public (not bookable)</label>
-                    </div>
-                </div>
+            <!-- Second Row: Search Results -->
+            <!-- mt-4 adds some margin-top for spacing -->
+            <div class="row mt-4">
+                <div class="col-12">
+                    <!-- The content of the search results template will go here -->
+                    <template v-if="filteredItems.length > 0">
+                        <div class="row g-4">
+                            <!-- <div class="small-12 medium-4 large-4 columns" v-for="f in paginated('filterResults')" v-if="f.vessel_size_limit >= vesselSize && f.vessel_draft_limit >= vesselDraft && weightBeam(f) == true"> -->
+                            <!-- <div class="small-12 medium-4 large-4 columns" v-for="f in paginatedIt</div>ems" :key="f.id"> -->
+                            <div class="col-md-6 col-lg-4" v-for="f in paginatedItems" :key="f.id">
+                                <div class="card h-100">
+                                    <!-- <div class="row"> -->
+                                    <img v-if="f.images[0]" class="card-img-top" :src="f.images[0].image" alt="Mooring image" style="height: 230px; object-fit: cover;">
+                                    <img v-else class="card-img-top" src="@/assets/mooring_photo_scaled.png" alt="Default mooring image" style="height: 230px; object-fit: cover;">
+                                    <div class="card-body d-flex flex-column">
+                                        <h5 class="card-title">{{ f.name }}</h5>
+                                        <!-- Description with a standard card-text class -->
+                                        <div class="card-text" v-html="f.description"></div>
 
-                <div class="row">
-                     <div class="small-12 columns">
-                        <hr/>
-                     </div>
-                 </div>
-                 <div class="row">
-                    <div class="small-12 medium-12 large-12 columns">
-                        <label>Types</label>
-                    </div>
-                    <div class="small-12 medium-12 large-4 columns">
-                        <label><input type="radio" name="pen_type" value="all" v-model="penType" class="show-for-sr" v-on:change="reload()"/><i class="symb RC3"></i> All types</label>
-                    </div>
-                    <div class="small-12 medium-12 large-4 columns">
-                        <label><input type="radio" name="pen_type" value="0" v-model="penType" class="show-for-sr" v-on:change="reload()"/><i class="symb RC20"></i> Moorings</label>
-                    </div>
-                    <div class="small-12 medium-12 large-4 columns">
-                        <label><input type="radio" name="pen_type" value="1" v-model="penType" class="show-for-sr" v-on:change="reload()"/><i class="symb RC20"></i> Jetty Pens</label>
-                    </div>
-                    <div class="small-12 medium-12 large-4 columns">
-                        <label><input type="radio" name="pen_type" value="2" v-model="penType" class="show-for-sr" v-on:change="reload()"/><i class="symb RC20"></i> Beach Pens</label>
-                    </div>
-                </div>
+                                        <!-- <p v-if="f.price_hint && Number(f.price_hint)"><i><small>From ${{ f.price_hint }} per night</small></i></p> -->
+                                        <!-- Price hint with standard text classes -->
+                                        <p v-if="f.price_hint && Number(f.price_hint)" class="card-text">
+                                            <small class="text-muted">From ${{ f.price_hint }} per night</small>
+                                        </p>
 
-                <hr class="search"/>
+                                        <!-- <p style='display:none'><i><small>Vessel Size Limit: {{ f.vessel_size_limit }} </small></i></p>
+                                        <p ><i><small>Max Stay Period: {{ f.max_advance_booking }} day/s </small></i></p> -->
+                                        <div class="mt-auto">
+                                            <!-- <p>Mooring Limits</p> -->
+                                            <p class="mb-2"><strong>Mooring Limits</strong></p>
 
-                <div class="row" id="legend" style="margin-bottom:10px;">
-                    <div class="small-12 medium-12 large-12 columns">
-                        <label>Availability</label>
-                    </div>
-                    <div class="small-12 medium-12 large-3 columns">
-                        <label>Public:
-                            <img class="publicPin" :src="pin_gray" />
-                        </label>
-                    </div>
-                    <div class="small-12 medium-12 large-3 columns">
-                        <label>Available:
-                            <img class="availablePin" :src="pin_orange" />
-                        </label>
-                    </div>
-                    <div class="small-12 medium-12 large-3 columns">
-                        <label>Partial Dates:
-                            <img class="partialPin" :src="pin_orange_red" />
-                        </label>
-                    </div>
-                    <div class="small-12 medium-12 large-3 columns">
-                        <label>Unavailable:
-                            <img class="unavailablePin" :src="pin_red" />
-                        </label>
-                    </div>
-                </div>
+                                            <!-- <div class="row">
+                                                <div class="col-md-6"  style='display:none'>
+                                                    <small>Max Stay: {{ f.max_advance_booking }} day/s</small>
+                                                </div>
+                                                <div class="col-md-6">
+                                                    <small>Max Size: {{ f.vessel_size_limit }}</small>
+                                                </div>
+                                            </div>
+                                            <div class="row">
+                                                <div class="col-md-6">
+                                                    <small>Max Draft: {{ f.vessel_draft_limit }}</small>
+                                                </div>
+                                                <div class="col-md-6">
+                                                    <small v-if="f.mooring_physical_type == 0"> Max Weight: {{ f.vessel_weight_limit }}</small>
+                                                    <small v-else> Max Beam: {{ f.vessel_beam_limit }}</small>
+                                                </div>
+                                            </div> -->
 
-                <div class="row"><div class="small-12 columns">
-                    <hr class="search"/>
-                </div>
-                <div class="row" style='display:none'>
-                    <div class="small-12 medium-12 large-12 columns">
-                        <label>Select features</label>
-                    </div>
-                    <template v-for="filt in filterList">
-                        <div class="small-12 medium-12 large-4 columns">
-                            <label><input type="checkbox" class="show-for-sr" :value="'filt_'+ filt.key" v-model="filterParams[filt.key]" v-on:change="updateFilter()"/> <i class="symb" :class="filt.symb"></i> {{ filt.name }}</label>
+                                            <div class="row small">
+                                                <div class="col-6" v-if="f.max_advance_booking">
+                                                    Max Stay: {{ f.max_advance_booking }} day/s
+                                                </div>
+                                                <div class="col-6">
+                                                    Max Size: {{ f.vessel_size_limit }}
+                                                </div>
+                                                <div class="col-6">
+                                                    Max Draft: {{ f.vessel_draft_limit }}
+                                                </div>
+                                                <div class="col-6">
+                                                    <span v-if="f.mooring_physical_type == 0">Max Weight: {{ f.vessel_weight_limit }}</span>
+                                                    <span v-else>Max Beam: {{ f.vessel_beam_limit }}</span>
+                                                </div>
+                                            </div>
+
+                                            <!-- <a class="button" v-bind:href="f.info_url" target="_blank">More info</a>
+                                                
+                                            <a v-if="f.mooring_type == 0 && vesselSize > 0 && vesselDraft > 0 && vesselWeight > 0 && vesselRego != '' && vesselRego !== ' '" class="button" v-bind:href="parkstayUrl+'/availability2/?site_id='+f.id+'&'+bookingParam">Book now</a>
+                                            <a v-else-if="f.mooring_type == 1 && vesselSize > 0 && vesselDraft > 0 && vesselBeam > 0 && vesselRego != '' && vesselRego !== ' '" class="button" v-bind:href="parkstayUrl+'/availability2/?site_id='+f.id+'&'+bookingParam">Book now</a>
+                                            <a v-else-if="f.mooring_type == 2 && vesselSize > 0 && vesselDraft > 0 && vesselBeam > 0 && vesselRego != '' && vesselRego !== ' '" class="button" v-bind:href="parkstayUrl+'/availability2/?site_id='+f.id+'&'+bookingParam">Book now</a>
+                                            <a v-else-if="f.mooring_type == 0" class="button" v-on:click="BookNow('mooring')">Book now</a>
+                                            <a v-else-if="f.mooring_type == 1 || f.mooring_type == 2 " class="button" v-on:click="BookNow('jettybeach')">Book now</a>
+                                            <a v-else />  -->
+
+                                            <!-- Button Group with responsive layout -->
+                                            <div class="d-grid gap-2 d-md-flex mt-3">
+                                                <a class="btn btn-outline-secondary btn-sm" :href="f.info_url" target="_blank">More info</a>
+                                                
+                                                <!-- "Book now" button with your original v-if logic -->
+                                                <a v-if="f.mooring_type == 0 && vesselSize > 0 && vesselDraft > 0 && vesselWeight > 0 && vesselRego != '' && vesselRego !== ' '" class="btn btn-primary btn-sm" :href="parkstayUrl+'/availability2/?site_id='+f.id+'&'+bookingParam">Book now</a>
+                                                <a v-else-if="f.mooring_type == 1 && vesselSize > 0 && vesselDraft > 0 && vesselBeam > 0 && vesselRego != '' && vesselRego !== ' '" class="btn btn-primary btn-sm" :href="parkstayUrl+'/availability2/?site_id='+f.id+'&'+bookingParam">Book now</a>
+                                                <a v-else-if="f.mooring_type == 2 && vesselSize > 0 && vesselDraft > 0 && vesselBeam > 0 && vesselRego != '' && vesselRego !== ' '" class="btn btn-primary btn-sm" :href="parkstayUrl+'/availability2/?site_id='+f.id+'&'+bookingParam">Book now</a>
+                                                <a v-else-if="f.mooring_type == 0" class="btn btn-primary btn-sm" @click="BookNow('mooring')">Book now</a>
+                                                <a v-else-if="f.mooring_type == 1 || f.mooring_type == 2 " class="btn btn-primary btn-sm" @click="BookNow('jettybeach')">Book now</a>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- <div class="row text-center">
+                            <div class="button-group">
+                                <button class="button" @click="prevPage" :disabled="currentPage === 1">
+                                « Prev
+                                </button>
+                                <span class="button secondary disabled">
+                                Page {{ currentPage }} / {{ totalPages }}
+                                </span>
+                                <button class="button" @click="nextPage" :disabled="currentPage === totalPages">
+                                Next »
+                                </button>
+                            </div>
+                        </div> -->
+
+                        <!-- Pagination Buttons -->
+                        <div class="d-flex justify-content-center mt-4" v-if="totalPages > 1">
+                            <nav aria-label="Page navigation">
+                                <ul class="pagination">
+                                    <li class="page-item" :class="{ disabled: currentPage === 1 }">
+                                        <a class="page-link" href="#" @click.prevent="prevPage">« Prev</a>
+                                    </li>
+                                    <!-- <li class="page-item active" aria-current="page">
+                                        <span class="page-link">Page {{ currentPage }} / {{ totalPages }}</span>
+                                    </li> -->
+                                    <!-- Page Number Links -->
+                                    <li
+                                        v-for="page in pageNumbers"
+                                        :key="page"
+                                        class="page-item"
+                                        :class="{ active: currentPage === page }"
+                                    >
+                                        <a class="page-link" href="#" @click.prevent="goToPage(page)">{{ page }}</a>
+                                    </li>
+                                    <li class="page-item" :class="{ disabled: currentPage === totalPages }">
+                                        <a class="page-link" href="#" @click.prevent="nextPage">Next »</a>
+                                    </li>
+                                </ul>
+                            </nav>
                         </div>
                     </template>
-<!--
-                    <template v-for="filt in extraFilterList">
-                        <div class="small-12 medium-12 large-4 columns" v-bind:class="{'filter-hide': hideExtraFilters}">
-                            <label><input type="checkbox" class="show-for-sr" :value="'filt_'+ filt.key" v-model="filterParams[filt.key]" v-on:change="updateFilter()"/> <i class="symb" :class="filt.symb"></i> {{ filt.name }}</label>
+                    <template v-else>
+                        <!-- <div class="row align-center">
+                            <div class="small-12 medium-12 large-12 columns">
+                                <h2 class="text-center">There are no moorings found matching your search criteria. Please change your search query.</h2>
+                            </div>
+                        </div> -->
+                        <!-- "No results" Message -->
+                        <div class="alert alert-info" role="alert">
+                            <h4 class="alert-heading">No Results Found</h4>
+                            <p>There are no moorings found matching your search criteria. Please change your search query.</p>
                         </div>
                     </template>
--->
-		        </div>
-<!--
-                <div class="row">
-                    <div class="small-12 medium-12 large-4 columns" v-bind:class="{'filter-hide': hideExtraFilters}">
-                        <label><input type="checkbox" v-model="sitesOnline" v-on:change="updateFilter()"/><img v-bind:src="sitesOnlineIcon" width="24" height="24"/> Online bookings</label>
-                    </div>
-                    <div class="small-12 medium-12 large-4 columns" v-bind:class="{'filter-hide': hideExtraFilters}">
-                        <label><input type="checkbox" v-model="sitesInPerson" v-on:change="updateFilter()"/><img v-bind:src="sitesInPersonIcon" width="24" height="24"/> No online bookings</label>
-                    </div>
-                    <div class="small-12 medium-12 large-4 columns" v-bind:class="{'filter-hide': hideExtraFilters}">
-                        <label><input type="checkbox" v-model="sitesAlt" v-on:change="updateFilter()"/><img v-bind:src="sitesAltIcon" width="24" height="24"/> Third-party site</label>
-                    </div>
-                    <div class="small-12 medium-12 large-12 columns filter-button">
-                        <button class="button expanded" v-on:click="toggleShowFilters"><span v-if="hideExtraFilters">Show more filters ▼</span><span v-else>Hide filters ▲</span></button>
-                    </div>
-                </div>
--->
-            </div>
-            </div>
-<!-- here -->
-            <div class="small-12 medium-9 large-6 columns">
-		        <div class="alert alert-warning" style='text-align: center' role="alert" v-if="admissions_key" id="admissions_link">
-                    <strong style='font-size: 16px;'>
-                        <a :href='"/annual-admissions/" + admissions_key + "/"'>Click here for paying annual admission fees only</a>
-                    </strong><br>
-                </div>   
-                <div class="alert alert-warning" style='text-align: center' role="alert" v-if="admissions_key" id="admissions_link">
-                    <strong style='font-size: 16px;'>
-                        <a :href='"/admissions/" + admissions_key + "/"'>Click here for paying individual admission fees for a single visit</a>
-                    </strong><br>
-                </div>
-                <div class="alert alert-info" style='text-align: center' role="alert" v-if="admissions_key" id="admissions_link">
-                    <strong style='font-size: 16px;'>
-                        <a href='https://rottnestisland.com/boating/Fees'>Click here for more information on admission fees</a>
-                    </strong><br>
-                </div>
-
-                <div style='width: 100%; height: 1px;' align='right'>
-                    <div v-show='mapLoading == true' class='map-loading' style='border: 1px solid #00000'>
-                        <img style='width:20px; height: 20px;' src='@/assets/ajax-loader-spinner.gif'>&nbsp;&nbsp;Please Wait
-                    </div>
-                </div>
-
-                <div id="map"></div>
-
-                <div style='width: 100%' align='right'>
-	                <img id='satellite-toggle' class='map-toggle-white'  type='button'  @click="toggleMap('satellite');" src='./assets/img/satellite_icon.png' />
-                    <img id='map-toggle' class='map-toggle-black'  type='button'  @click="toggleMap('map');" src='./assets/img/map_icon.png' />
-                </div>
-                <div id="mapPopup" class="mapPopup" v-cloak>
-                    <a href="#" id="mapPopupClose" class="mapPopupClose"></a>
-                    <div id="mapPopupContent">
-                        <h4 style="margin: 0"><b id="mapPopupName"></b></h4>
-                        <p><i id="mapPopupPrice"></i></p>
-                        <img class="thumbnail" id="mapPopupImage" style='width: 230px; height: 230px;' />
-                        <div id="mapPopupDescription" style="font-size: 0.75rem;"/>
-                        <p>Mooring Limits</p>
-                        <div class="row">
-                            <div class="col-md-7"  style='display:none'>
-                                <small>Max Stay: <span id='max_stay_period'></span> day/s</small>
-                            </div>
-                            <div class="col-md-5">
-                                <small>Max Size: <span id='vessel_size_popup'></span></small>
-                            </div>
-                        </div>
-                        <div class="row">
-                            <div class="col-md-7">
-                                <small>Max Draft: <span id='vessel_draft_popup'></span></small>
-                            </div>
-                            <div class="col-md-5">
-                                <small><span id='vessel_beam_weight_popup'></span></small>
-                            </div>
-                        </div>
-                        <input id='mapPopupMooringType' type='hidden' >
-                        <a id="mapPopupInfo" class="button formButton" style="margin-bottom: 0; margin-top: 1em;" target="_blank">More info</a>
-                        <a id="mapPopupBook" class="button formButton" style="margin-bottom: 0;" v-on:click="BookNowCheck()" >Book now</a>
-                    </div>
                 </div>
             </div>
         </div>
-
-        <template v-if="filteredItems.length > 0">
-            <div class="row">
-                <!-- <div class="small-12 medium-4 large-4 columns" v-for="f in paginated('filterResults')" v-if="f.vessel_size_limit >= vesselSize && f.vessel_draft_limit >= vesselDraft && weightBeam(f) == true"> -->
-                    <div class="small-12 medium-4 large-4 columns" v-for="f in paginatedItems" :key="f.id">
-                    <div class="row">
-                        <div class="small-12 columns">
-                            <span class="searchTitle">{{ f.name }}</span>
-                        </div>
-                        <div class="small-12 medium-12 large-12 columns" >
-                            <img v-if="f.images[0]" class="thumbnail" v-bind:src="f.images[0].image" style='width: 230px; height: 230px;' />
-                            <img v-else class="thumbnail" src="@/assets/mooring_photo_scaled.png" style='width: 230px; height: 230px;'/>
-                        </div>
-                        <div class="small-12 medium-9 large-9 columns">
-                            <div v-html="f.description"/>
-                            <p v-if="f.price_hint && Number(f.price_hint)"><i><small>From ${{ f.price_hint }} per night</small></i></p>
-                            <!-- <p style='display:none'><i><small>Vessel Size Limit: {{ f.vessel_size_limit }} </small></i></p>
-                            <p ><i><small>Max Stay Period: {{ f.max_advance_booking }} day/s </small></i></p> -->
-                            <p>Mooring Limits</p>
-                            <div class="row">
-                                <div class="col-md-6"  style='display:none'>
-                                    <small>Max Stay: {{ f.max_advance_booking }} day/s</small>
-                                </div>
-                                <div class="col-md-6">
-                                    <small>Max Size: {{ f.vessel_size_limit }}</small>
-                                </div>
-                            </div>
-                            <div class="row">
-                                <div class="col-md-6">
-                                    <small>Max Draft: {{ f.vessel_draft_limit }}</small>
-                                </div>
-                                <div class="col-md-6">
-                                    <small v-if="f.mooring_physical_type == 0"> Max Weight: {{ f.vessel_weight_limit }}</small>
-                                    <small v-else> Max Beam: {{ f.vessel_beam_limit }}</small>
-                                </div>
-                            </div>
-
-                            <a class="button" v-bind:href="f.info_url" target="_blank">More info</a>
-                                
-                            <a v-if="f.mooring_type == 0 && vesselSize > 0 && vesselDraft > 0 && vesselWeight > 0 && vesselRego != '' && vesselRego !== ' '" class="button" v-bind:href="parkstayUrl+'/availability2/?site_id='+f.id+'&'+bookingParam">Book now</a>
-                            <a v-else-if="f.mooring_type == 1 && vesselSize > 0 && vesselDraft > 0 && vesselBeam > 0 && vesselRego != '' && vesselRego !== ' '" class="button" v-bind:href="parkstayUrl+'/availability2/?site_id='+f.id+'&'+bookingParam">Book now</a>
-                            <a v-else-if="f.mooring_type == 2 && vesselSize > 0 && vesselDraft > 0 && vesselBeam > 0 && vesselRego != '' && vesselRego !== ' '" class="button" v-bind:href="parkstayUrl+'/availability2/?site_id='+f.id+'&'+bookingParam">Book now</a>
-                            <a v-else-if="f.mooring_type == 0" class="button" v-on:click="BookNow('mooring')">Book now</a>
-                            <a v-else-if="f.mooring_type == 1 || f.mooring_type == 2 " class="button" v-on:click="BookNow('jettybeach')">Book now</a>
-                            <a v-else /> 
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <div class="row text-center">
-                <div class="button-group">
-                    <button class="button" @click="prevPage" :disabled="currentPage === 1">
-                    « Prev
-                    </button>
-                    <span class="button secondary disabled">
-                    Page {{ currentPage }} / {{ totalPages }}
-                    </span>
-                    <button class="button" @click="nextPage" :disabled="currentPage === totalPages">
-                    Next »
-                    </button>
-                </div>
-            </div>
-        </template>
-
-        <template v-else>
-            <div class="row align-center">
-                <div class="small-12 medium-12 large-12 columns">
-                    <h2 class="text-center">There are no moorings found matching your search criteria. Please change your search query.</h2>
-                </div>
-            </div>
-        </template>
     </div>
 </template>
 
 <script>
-// CSS files for Foundation and its plugins
-// import 'foundation-sites/dist/css/foundation.min.css';
-// import 'foundation-datepicker/css/foundation-datepicker.min.css';
-
-// JS files for Foundation and its plugins
-// Thanks to ProvidePlugin, we don't need to import jQuery here.
-// import 'foundation-sites';
-// import 'foundation-datepicker/js/foundation-datepicker'; // Adjust path if needed
-
 import Awesomplete from 'awesomplete';
-
+import { Dropdown } from 'bootstrap';
 
 // import ol from 'openlayers';
 import Map from 'ol/Map'
@@ -614,9 +786,11 @@ export default {
                 // var count = this.numAdults + this.numConcessions + this.numChildren + this.numInfants + this.numMooring;
                 var count = this.numAdults + this.numConcessions + this.numChildren + this.numInfants;
                 if (count === 1) {
-                    return count +" person ▼";
+                    // return count +" person ▼";
+                    return count +" person";
                 } else {
-                    return count + " people ▼";
+                    // return count + " people ▼";
+                    return count + " people";
                 }
             }
         },
@@ -741,7 +915,14 @@ export default {
         totalPages() {
             // Calculates total pages, ensuring it's at least 1.
             return Math.ceil(this.filteredItems.length / this.itemsPerPage) || 1;
-        }
+        },
+        pageNumbers() {
+            const pages = [];
+            for (let i = 1; i <= this.totalPages; i++) {
+                pages.push(i);
+            }
+            return pages;
+        },
     },
     watch: {
         // Watch for changes in filter criteria and reset to the first page.
@@ -1881,6 +2062,11 @@ export default {
         this.$nextTick(() => {
             var vm = this;
 
+            // Find all elements with `data-bs-toggle="dropdown"` inside this component
+            const dropdownElementList = this.$refs.parkfinderWrapper.querySelectorAll('[data-bs-toggle="dropdown"]');
+            // Initialize a new Dropdown instance for each one
+            [...dropdownElementList].map(dropdownToggleEl => new Dropdown(dropdownToggleEl));
+
             var template_group = $('#template_group').val();
             if (template_group == 'rottnest') { 
                 vm.admissions_key = 'ria';
@@ -2001,6 +2187,7 @@ export default {
                     vm.groundsData.clear();
                     vm.groundsData.extend(features);
                     // vm.groundsSource.loadSource();
+                    vm.updateFilter(); // Ensure groundsFilter is populated
                     vm.buildmarkers();
                 }
             });

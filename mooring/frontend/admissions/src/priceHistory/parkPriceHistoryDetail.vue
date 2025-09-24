@@ -295,12 +295,6 @@
 </template>
 
 <script>
-// import JQuery from 'jquery'
-// window.jQuery = JQuery
-// window.$ = JQuery
-// import 'foundation-sites';
-// import 'foundation-datepicker/js/foundation-datepicker';
-
 import bootstrapModal from '../utils/bootstrap-modal.vue'
 import reason from '../utils/reasons.vue'
 import { api_endpoints, validate, helpers, bus } from '../hooks'

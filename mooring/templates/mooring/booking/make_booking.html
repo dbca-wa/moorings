@@ -25,10 +25,9 @@
               margin-left: -9px;
               font-weight: bold;
         }
-    
-
     </style>
 {% endblock %}
+
 {% block content %}
 <div id="addBooking">
 {% if not booking %}
@@ -41,7 +40,8 @@
         </div>
     </div>
 {% else %}
-    <form method="POST" name="addBookingForm" @submit.prevent="validate()" novalidate><div class="container">
+    <form method="POST" name="addBookingForm" @submit.prevent="validate()" novalidate>
+        <div class="container">
         <input id="booking_hash_id" name="booking_hash_id" type="hidden" value="{{ checkouthash }}" />
         {% csrf_token %}
         <div class="row">
@@ -87,35 +87,34 @@
                         </div>
                         <div class="col-md-12">
                             <div id='mooring_pricing_table'>
-                                <div class="row" >
-                                    <div class="col-md-12">
+                                <div class="row pb-2 mb-2 border-bottom fw-bold text-muted">
+                                    <div class="col-md-12 mb-2">
                                         <h3 class="text-primary">Mooring Fees</h3>
                                     </div>
                                     <div class="col-md-3">
-                                        <strong>Mooring</strong>
+                                        Mooring
                                     </div>
                                     <div class="col-md-1">
-                                        <strong>Vessel</strong>
+                                        Vessel
                                     </div>
                                     <div class="col-md-2">
-                                        <strong>From</strong>
+                                        From
                                     </div>
                                     <div class="col-md-1">
-                                        &nbsp;
                                     </div>
                                     <div class="col-md-2">
-                                        <strong>To</strong>
+                                        To
                                     </div>
                                     <div class="col-md-1">
-                                        <strong>Price</strong>
+                                        Price
                                     </div>
-                                    <div class="col-md-2 over_ride_price_mooring_header" style='display:none'>
-                                        <strong>Price Override</strong>
+                                    <div class="col-md-2 over_ride_price_mooring_header d-none">
+                                        Price Override
                                     </div>
                                 </div>
 
                                 {% for bm in booking_mooring %}
-                                <div class="row" >
+                                <div class="row align-items-center py-2">
                                     <div class="col-md-3">
                                         {{ bm.campsite.mooringarea.name }} 
                                     </div>
@@ -127,7 +126,7 @@
                                     <div class="col-md-2">
                                         {{ bm.from_dt }} 
                                     </div>
-                                    <div class="col-md-1">
+                                    <div class="col-md-1 text-center text-muted">
                                         to
                                     </div>
                                     <div class="col-md-2">
@@ -136,49 +135,51 @@
                                     <div class="col-md-1">
                                         ${{ bm.amount }}
                                     </div>
-                                    <div class="col-md-2 over_ride_price_mooring_body form-group" style='display:none; margin-bottom: 0px;'>
-						            <span class='money_sign'>$</span>
-                                         	<input style='width: 100px;' type='number' id='over_ride_mooring_price{{ bm.id }}' step='0.01' class='form-control input-sm money' value='{{ bm.amount }}' v-on:change="money_update($event)">
+                                    <!-- Use Bootstrap's `input-group` for the price override field -->
+                                    <div class="col-md-2 over_ride_price_mooring_body d-none">
+                                        <div class="input-group input-group-sm">
+                                            <span class="input-group-text">$</span>
+                                            <input type='number' id='over_ride_mooring_price{{ bm.id }}' step='0.01' class='form-control' value='{{ bm.amount }}' @change="money_update($event)">
+                                        </div>
                                     </div>
                                 </div>
                                 {% endfor %}
-				</div>
-                                <BR> 
+                            </div>
+
                             <div id='admissions_pricing_table' v-if="payingAdmissions && linesAdmissions.length > 0" v-cloak>
-                                <div class="row" >
-                                    <div class="col-md-12">
+                                <div class="row pb-2 mb-2 border-bottom fw-bold text-muted">
+                                    <div class="col-md-12 mb-2">
                                         <h3 class="text-primary">Admission Fees</h3>
                                     </div>
                                     <div class="col-md-1">
-                                        <strong>Adults</strong>
+                                        Adults
                                     </div>
                                     <div class="col-md-1">
-                                        <strong>Children</strong>
+                                        Children
                                     </div>
                                     <div class="col-md-1">
-                                        <strong>Infants</strong>
-                                    </div>
-                                    <div class="col-md-1">
-                                        &nbsp;
-                                    </div>
-                                    <div class="col-md-2">
-                                        <strong>From</strong>
+                                        Infants
                                     </div>
                                     <div class="col-md-1">
                                         &nbsp;
                                     </div>
                                     <div class="col-md-2">
-                                        <strong>To</strong>
+                                        From
                                     </div>
                                     <div class="col-md-1">
-                                        <strong>Price</strong>
                                     </div>
-                                    <div class="col-md-2 over_ride_price_mooring_header" style='display:none'>
-                                        <strong>Price Override</strong>
+                                    <div class="col-md-2">
+                                        To
+                                    </div>
+                                    <div class="col-md-1">
+                                        Price
+                                    </div>
+                                    <div class="col-md-2 over_ride_price_mooring_header d-none">
+                                        Price Override
                                     </div>
                                 </div>
                                 {% verbatim %}
-                                <div class="row" v-for="index in linesAdmissions.length" v-cloak>
+                                <div class="row align-items-center py-2" v-for="line in linesAdmissions" :key="line.rowid" v-cloak>
                                     <div class="col-md-1">
                                         {{ numAdults }}
                                     </div>
@@ -189,53 +190,49 @@
                                         {{ numInfants }}
                                     </div>
                                     <div class="col-md-1">
-                                        &nbsp;
                                     </div>
                                     <div class="col-md-2">
-                                        {{ linesAdmissions[index-1].from }}
+                                        {{ line.from }}
                                     </div>
                                     <div class="col-md-1">
                                         to
                                     </div>
                                     <div class="col-md-2">
-                                            {{ linesAdmissions[index-1].to }}
+                                        {{ line.to }}
                                     </div>
                                     <div class="col-md-1">
-                                        ${{ linesAdmissions[index-1].admissionFee }}
+                                        ${{ line.admissionFee }}
                                     </div>
-                                    <div class="col-md-2 over_ride_price_mooring_body form-group" style='display:none; margin-bottom: 0px'>
-                                                <span class='money_sign'>$</span>
-                                                <input style='width: 100px;' type='number' :id='linesAdmissions[index-1].rowid' step='0.01' class='form-control input-sm' @blur="admission_money_update($event,index)" v-model.text="linesAdmissions[index-1].override_price">
+                                    <div class="col-md-2 over_ride_price_mooring_body d-none">
+                                        <div class="input-group input-group-sm">
+                                            <span class='input-group-text'>$</span>
+                                            <input type='number' :id='line.rowid' step='0.01' class='form-control' @blur="admission_money_update($event,index)" v-model.number="line.override_price">
+                                        </div>
                                     </div>
-
                                 </div>
                                 {% endverbatim %}
                             </div>
-                                        <h3 class="text-primary">Adjustments</h3>
-                                <div class="row">
-
-                                {% for bc in booking_change_fees %}
-                                  <div class="col-md-9">
+                            <h3 class="text-primary mt-4">Adjustments</h3>
+                            {% for bc in booking_change_fees %}
+                                <div class="row align-items-center py-2">
+                                    <div class="col-md-9">
                                         {{ bc.description }}
-                                  </div>
-                                  <div class="col-md-2">
+                                    </div>
+                                    <div class="col-md-2 text-end">
                                         ${{ bc.amount }}
-                                  </div>
-                                {% endfor %}
+                                    </div>
                                 </div>
-
+                            {% endfor %}
                         </div>
                         <div class="hiddenBookings" style="display:none;">
                             <input type="hidden" id="bookingLines" v-model="bookingLines" name="bookingLines"/>
                         </div>
-
                         <div class="hiddenAdmissions" style="display:none;">
                             <input type="hidden" id="admissionsLines" v-model="admissionsLines" name="admissionsLines"/>
                         </div>
                         <div class="hiddenocc" style="display:none;">
                             <input type="hidden" id="occ" v-model="occ" name="occ"/>
                         </div>
- 
                         <div class="col-md-2" style='display:none'>
                               <img alt="campground"  class="img-thumbnail img-responsive" src="{{ booking.campground.first_image.image.url }}" style='display:none'>
                               <p class="pricing" v-cloak >
@@ -317,29 +314,24 @@
                 </div>
             </div>
         </div>
-        <div class="row">
-            
-            <div class="col-lg-12"> 
-                <div class='col-lg-6 col-xs-12 col-sm-12' style='padding:0px; padding-left: 1px;' >
-                <div class="p-3 bg-light border rounded col-lg-12 col-xs-12 col-sm-12 ml-1" style='min-height: 450px;' >
+        <div class="row mt-4">
+            <!-- Left Column: Personal Details -->
+            <div class='col-lg-6'>
+                <div class="p-3 bg-light border rounded h-100">
                     <div class="row">
                         <div class="col-lg-12">
                             <h3 class="text-primary">Personal Details</h3>
                         </div>
                     </div>
-                    <div class="row">
+                    <div class="row mb-3">
                     {% if request.user.is_anonymous or request.user.is_staff %}
                         <div class="col-md-6">
-                            <div class="form-group">
-                            {{form.email.label_tag}}
-                            {{ form.email|class:'form-control'}}
-                            </div>
+                            {{ form.email.label_tag }}
+                            {{ form.email|class:'form-control' }}
                         </div>
                         <div class="col-md-6" >
-                            <div class="form-group">
-                                {{form.confirm_email.label_tag}}
-                                {{ form.confirm_email|class:'form-control'}}
-                            </div>
+                            {{ form.confirm_email.label_tag }}
+                            {{ form.confirm_email|class:'form-control' }}
                         </div>
                     {% else %}
                         <div class="col-md-12">
@@ -347,46 +339,37 @@
                         </div>
                     {% endif %}
                     </div>
-                    <div class="row">
+                    <div class="row mb-3">
                         <div class="col-md-6">
-                            <div class="form-group">
-                            {{form.first_name.label_tag}}
-                            {{ form.first_name|class:'form-control'}}
-                            </div>
+                            {{ form.first_name.label_tag }}
+                            {{ form.first_name|class:'form-control' }}
                         </div>
                         <div class="col-md-6">
-                            <div class="form-group">
-                                {{form.last_name.label_tag}}
-                                {{ form.last_name|class:'form-control'}}
-                            </div>
+                            {{ form.last_name.label_tag }}
+                            {{ form.last_name|class:'form-control' }}
                         </div>
                     </div>
-                    <div class="row">
+                    <div class="row mb-3">
                         <div class="col-md-6">
-                            <div class="form-group">
-                                {{form.postcode.label_tag}}
-                                {{ form.postcode|class:'form-control'}}
-                            </div>
+                            {{ form.postcode.label_tag }}
+                            {{ form.postcode|class:'form-control' }}
                         </div>
                         <div class="col-md-6">
-                            <div class="form-group">
-                                {{form.country.label_tag}}
-                                {{ form.country|class:'form-control'}}
-                            </div>
+                            {{ form.country.label_tag }}
+                            {{ form.country|class:'form-control' }}
                         </div>
                     </div>
-                    <div class="row">
+                    <div class="row mb-3">
                         <div class="col-md-6">
-                            <div class="form-group">
-                                {{form.phone.label_tag}}
-                                {{ form.phone|class:'form-control'}}
-                            </div>
+                            {{ form.phone.label_tag }}
+                            {{ form.phone|class:'form-control' }}
                         </div>
                     </div>
                 </div>
-                </div>
-                <div class='col-lg-6 col-xs-12 col-sm-12' style='padding:0px; padding-left: 1px;'>
-                <div class="p-3 bg-light border rounded col-lg-12 col-xs-12 col-sm-12 " style='min-height: 450px;'>
+            </div>
+            <!-- Right Column: Vessels -->
+            <div class='col-lg-6'>
+                <div class="p-3 bg-light border rounded h-100">
                     <div class="row">
                         <div class="col-lg-12">
                             <h3 class="text-primary">Vessels</h3>
@@ -409,13 +392,12 @@
                             </div>
                         </div>
                     </div>
-                    <div class="row">
+                    <div class="row mb-3">
                         <div class="col-md-6">
-                            <div class="form-group">
-                                <label class="text-right">Vessel Registration:</label>
-                                <input class="form-control" type="text" v-model="rego" required v-on:change="searchRego()" style="text-transform:uppercase" readonly/>
-                            </div>
-                            <div class="form-group" v-for="(vehicle, index) in vehicles" style="display:none;">
+                            <label class="text-end">Vessel Registration:</label>
+                            <input class="form-control" type="text" v-model="rego" required v-on:change="searchRego()" style="text-transform:uppercase" readonly/>
+
+                            <div v-for="(vehicle, index) in vehicles" style="display:none;">
                                 <select v-on:change="calculateTotal" v-bind:name="'form-'+Number(index).toString()+'-vehicle_type'" class="form-control" v-model="vehicle[0]" >
                                     <option value="0">Vessel</option>
                                 </select>
@@ -428,71 +410,61 @@
                             <div class="checkbox" v-if="pricing.vehicle"><label><input v-bind:name="'form-'+Number(index).toString()+'-entry_fee'" type="checkbox" v-model="vehicle[2]" v-on:change="updateVehicles"/> Entry fee</label></div>
                         </div> -->
                     
-                    <div class="row">
-                        <div class="col-md-6">
-                            <div class="form-group">
-                                <label for="vessel_size" class="text-right">Vessel Size (Meters)</label>
-                                <input type="number" class="form-control" id="vessel_size" name="size" v-model="size" readonly/>
-                            </div>
-                        </div>
-                        <div class="col-md-6">
-                            <div class="form-group">
-                                <label for="vessel_draft" class="text-right">Vessel Draft (Meters)</label>
-                                <input type="number" class="form-control" id="vessel_draft" name="draft" v-model="draft" readonly/>
-                            </div>
-                        </div>
-                        <div class="col-md-6">
-                            <div class="form-group">
-                                <label for="vessel_beam" class="text-right">Vessel Beams (Meters)</label>
-                                <input type="number" class="form-control" id="vessel_beam" name="size" v-model="beam" readonly/>
-                            </div>
-                        </div>
-                        <div class="col-md-6">
-                            <div class="form-group">
-                                <label for="vessel_weight" class="text-right">Vessel Weight (Tonnes)</label>
-                                <input type="number" class="form-control" id="vessel_weight" name="draft" v-model="weight" readonly/>
+                    <div class="row mb-3">
+                        <div class="col-md-12">
+                            <div class="row g-3">
+                                <div class="col-md-6">
+                                    <label for="vessel_size" class="text-right">Vessel Size (Meters)</label>
+                                    <input type="number" class="form-control" id="vessel_size" name="size" v-model="size" readonly/>
+                                </div>
+                                <div class="col-md-6">
+                                    <label for="vessel_draft" class="text-right">Vessel Draft (Meters)</label>
+                                    <input type="number" class="form-control" id="vessel_draft" name="draft" v-model="draft" readonly/>
+                                </div>
+                                <div class="col-md-6">
+                                    <label for="vessel_beam" class="text-right">Vessel Beams (Meters)</label>
+                                    <input type="number" class="form-control" id="vessel_beam" name="size" v-model="beam" readonly/>
+                                </div>
+                                <div class="col-md-6">
+                                    <label for="vessel_weight" class="text-right">Vessel Weight (Tonnes)</label>
+                                    <input type="number" class="form-control" id="vessel_weight" name="draft" v-model="weight" readonly/>
+                                </div>
                             </div>
                         </div>
                     </div>
                     <div v-if="linesAdmissions.length > 0">
                         <h3 class="text-primary">Guest Details</h3>
-                        <div v-if="payingAdmissions" class="row">
+                        <div v-if="payingAdmissions" class="row g-3">
                             <div class="col-md-4">
-                                <div class="form-group">
-                                    <label for="num_adults" class="text-right">Adults (ages 12+):</label>
-                                    <input type="number" class="form-control" id="numAdults" name="num_adults" v-model="numAdults" v-on:change="guestsUpdated()" min="0" max="16"/>
-                                </div>
+                                <label for="num_adults" class="text-end">Adults (ages 12+):</label>
+                                <input type="number" class="form-control" id="numAdults" name="num_adults" v-model="numAdults" v-on:change="guestsUpdated()" min="0" max="16"/>
                             </div>
                             <div class="col-md-4">
-                                <div class="form-group">
-                                    <label for="num_children" class="text-right">Children (ages 4-12):</label>
-                                    <input type="number" class="form-control" id="numChildren" name="num_children" v-model="numChildren" v-on:change="guestsUpdated()" min="0" max="16"/>
-                                </div>
+                                <label for="num_children" class="text-end">Children (ages 4-12):</label>
+                                <input type="number" class="form-control" id="numChildren" name="num_children" v-model="numChildren" v-on:change="guestsUpdated()" min="0" max="16"/>
                             </div>
                             <div class="col-md-4">
-                                <div class="form-group">
-                                    <label for="num_infants" class="text-right">Infants (ages 0-4):</label>
-                                    <input type="number" class="form-control" id="numInfants" name="num_infants" v-model="numInfants" v-on:change="guestsUpdated()" min="0" max="16"/>
-                                </div>
+                                <label for="num_infants" class="text-end">Infants (ages 0-4):</label>
+                                <input type="number" class="form-control" id="numInfants" name="num_infants" v-model="numInfants" v-on:change="guestsUpdated()" min="0" max="16"/>
                             </div>
                             <div class="col-md-4">
                             </div>
 
-                                <div class="row" style="display:none;">
-                                    <div class="small-6 columns">
-                                        <label for="num_concessions" class="text-right"><span class="has-tip" title="Holders of one of the following Australian-issued cards:
-                                            - Seniors Card
-                                            - Age Pension
-                                            - Disability Support
-                                            - Carer Payment
-                                            - Carer Allowance
-                                            - Companion Card
-                                            - Department of Veterans' Affairs">Concessions</span>
-                                        </label>
-                                    </div><div class="small-6 columns">
-                                        <input type="number" id="numConcessions" name="num_concessions" v-model="numConcessions" min="0" max="16"/></label>
-                                    </div>
+                            <div class="row" style="display:none;">
+                                <div class="small-6 columns">
+                                    <label for="num_concessions" class="text-end"><span class="has-tip" title="Holders of one of the following Australian-issued cards:
+                                        - Seniors Card
+                                        - Age Pension
+                                        - Disability Support
+                                        - Carer Payment
+                                        - Carer Allowance
+                                        - Companion Card
+                                        - Department of Veterans' Affairs">Concessions</span>
+                                    </label>
+                                </div><div class="small-6 columns">
+                                    <input type="number" id="numConcessions" name="num_concessions" v-model="numConcessions" min="0" max="16"/></label>
                                 </div>
+                            </div>
                             <div class="row" style="display:none;">
                                 <div class="small-6 columns">
                                     <label for="num_children" class="text-right">Moorings<label>
@@ -511,108 +483,84 @@
                             </div>
                         </div>
                      </div>
-                    </div>
-                    <template v-if="pricing.vehicle">
-                        <div class="row" v-cloak>
-                            <div class="col-md-12">
-                        {% verbatim %}
-                                <p>Entry fee total: <strong>${{ entryFee|formatMoney(2) }}</strong></p>
-                        {% endverbatim %}
-                            </div>
-                        </div>
-                        <div class="row">
-                            <div class="col-md-12">
-                                <b>NOTE:</b> A vehicle entry fee is not required for the holder of a valid <a href="https://shop.dpaw.wa.gov.au/park-passes">Park Pass</a>.
-                            </div>
-                        </div>
-                    </template>
                 </div>
+                <template v-if="pricing.vehicle">
+                    <div class="row" v-cloak>
+                        <div class="col-md-12">
+                    {% verbatim %}
+                            <p>Entry fee total: <strong>${{ entryFee|formatMoney(2) }}</strong></p>
+                    {% endverbatim %}
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-12">
+                            <b>NOTE:</b> A vehicle entry fee is not required for the holder of a valid <a href="https://shop.dpaw.wa.gov.au/park-passes">Park Pass</a>.
+                        </div>
+                    </div>
+                </template>
             </div>
         </div>
-        <div class="row">
+        <div class="row mt-4">
             <div class="col-lg-12">
                 <div class="p-3 bg-light border rounded">
-                    <div class="row">
-                      <div class="col-md-6">
-                          <div class="form-group">
-                            <label for="Total Price">Total Price <span class="text-muted">(GST inclusive.)</span></label>
-                            <div class="input-group">
-                              <span class="input-group-addon">AUD $</span>
-                              <input type="text" class="form-control" :value="total|formatMoney(2)" readonly="true">
+                    <!-- Sub-row for Total Price and main action buttons -->
+                    <div class="row align-items-center">
+                        <!-- Left Column: Total Price -->
+                        <div class="col-md-6">
+                            <label for="totalPrice" class="h5">Total Price <span class="text-muted small">(GST inclusive.)</span></label>
+                            <div class="input-group input-group-lg">
+                                <span class="input-group-text">AUD $</span>
+                                <input id="totalPrice" type="text" class="form-control" :value="total|formatMoney(2)" readonly="true">
                             </div>
-                          </div>
-                      </div>
-                      <div class="col-md-6">
-                          <div class="form-group">
-                              <p style="margin-top:30px;"></p>
-                          </div>
-                      </div>
+                        </div>
+
+                        <!-- Right Column: Checkbox and Submit Button -->
+                        <div class="col-md-6">
+                            <div class="d-flex justify-content-end align-items-center">
+                                <div class="form-check me-3">
+                                    <input type="checkbox" id="toc_check" class="form-check-input" v-model="toc">
+                                    <label for="toc_check" class="form-check-label">I agree to the <a target="_blank" href="{{EXPLORE_PARKS_TERMS}}">terms and conditions</a></label>
+                                </div>
+                                <button v-if="total >= 0" :disabled="!toc" type="submit" class="btn btn-primary btn-lg">Proceed to payment</button>
+                                <button v-else :disabled="!toc" type="submit" class="btn btn-primary btn-lg">Proceed to Refund</button>
+                            </div>
+                        </div>
                     </div>
 
-                    <div class="row">
+                    {% if request.user.is_staff %}
+                    <div class="row border-top mt-3 pt-3">
                         <div class="col-md-6">
-                            {% if request.user.is_staff %}
-                                    <div class="row">
-                                        <div class="col-md-4">
-                                            <label>Phone Booking Fee:</label>
-                                        </div>
-                                        <div class="col-md-2">
-                                            <input type="checkbox" id="nononline" name="nononline" v-model="nononline" @change="calculateTotal()" checked/>
-                                        </div>
-                                    </div>
-                            <div class="row">
-                                <div class="col-md-4">
-                                    <label>Override Price:</label>
-                                </div>
-                                <div class="col-md-2">
-                                    <input type="checkbox" id="override" name="override" v-model="override"/>
-                                </div>
+                            <div class="form-check mb-2">
+                                <input type="checkbox" id="nononline" name="nononline" class="form-check-input" v-model="nononline" @change="calculateTotal()" checked>
+                                <label for="nononline" class="form-check-label">Phone Booking Fee</label>
                             </div>
-                                <div v-if="override">
-                                    <div class="form-group" style='display:none'>
-                                        <label>Override Amount:</label>
-                                        <div class="input-group">
-                                            <span class="input-group-addon">AUD $</span>
-                                            <input type="number" class="form-control" name="overridePrice" v-model="overridePrice" step="0.01">
-                                        </div>
-                                    </div>
-                                    <div class="form-group" id="override-container">
-                                        <label>Reason:</label>
-                                        <select class="overrideReason form-control" name="overrideReason" id="overrideReason" style="width:100%;">
-                                            <option value=''>None</option>
-                                            <option v-for="res in override_reasons" :value="res.id">{% verbatim %}{{res.text}}{% endverbatim %}</option>
-                                        </select>
-                                    </div>
-                                    <div class="form-group" >
-                                        <label>Details:</label>
-                                        <textarea v-model="overrideDetail" name="overrideDetail" id='overrideDetail' style="width:100%;resize:none;" class='form-control'></textarea>
-                                    </div>
-                                    <p class="text-muted" style='color: red; font-weight:bold;'>
-                                        Note, these details will show on the customer invoice.
-                                    </p>
-
-                                </div>
-                            {% endif %}
-                            <p class="text-muted" >
-                                Payments will be recorded against the booking once the booking is completed and the payment is received.
+                            <div class="form-check">
+                                <input type="checkbox" id="override" name="override" class="form-check-input" v-model="override">
+                                <label for="override" class="form-check-label">Override Price</label>
+                            </div>
+                        </div>
+                        <div class="col-md-6" v-if="override">
+                            <label for="overrideReason">Reason:</label>
+                            <select class="form-select" name="overrideReason" id="overrideReason" v-model="selectedReason">
+                                <option value=''>None</option>
+                                <option v-for="res in override_reasons" :value="res.id">{% verbatim %}{{res.text}}{% endverbatim %}</option>
+                            </select>
+                            <label for="overrideDetail" class="mt-2">Details:</label>
+                            <textarea v-model="overrideDetail" name="overrideDetail" id='overrideDetail' class='form-control' style="resize:none;"></textarea>
+                            <p class="text-danger small mt-1">
+                                Note, these details will show on the customer invoice.
                             </p>
                         </div>
-                        <div class="col-md-6">
-                            <div class="row"> 
-                                <div class="col-md-8 col-md-offset-5">
-                                    <div class="checkbox">
-                                        <label><input type="checkbox" id="toc_check" value="" v-model="toc"> I agree to the <a target="_blank" href="{{EXPLORE_PARKS_TERMS}}">terms and conditions</a></label>
-                                    </div>
-                                    <button v-if="total >= 0" :disabled="!toc" type="submit" class="btn btn-primary btn-lg">Proceed to payment</button>
-                                    <button v-else="total < 0" :disabled="!toc" type="submit" class="btn btn-primary btn-lg">Proceed to Refund</button>
-                                </div>
-                            </div>
-                        </div>
                     </div>
+                    {% endif %}
+                    <!-- <p class="text-muted" >
+                        Payments will be recorded against the booking once the booking is completed and the payment is received.
+                    </p> -->
                 </div>
             </div>
         </div>
-    </div></form>
+    </div>
+    </form>
 {% endif %}
 </div>
 {% endblock %}
