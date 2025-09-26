@@ -512,8 +512,7 @@
             <div class="col-lg-12">
                 <div class="p-3 bg-light border rounded">
                     <!-- Sub-row for Total Price and main action buttons -->
-                    <div class="row align-items-center">
-                        <!-- Left Column: Total Price -->
+                    <!-- <div class="row align-items-center">
                         <div class="col-md-6">
                             <label for="totalPrice" class="h5">Total Price <span class="text-muted small">(GST inclusive.)</span></label>
                             <div class="input-group input-group-lg">
@@ -521,8 +520,6 @@
                                 <input id="totalPrice" type="text" class="form-control" :value="total|formatMoney(2)" readonly="true">
                             </div>
                         </div>
-
-                        <!-- Right Column: Checkbox and Submit Button -->
                         <div class="col-md-6">
                             <div class="d-flex justify-content-end align-items-center">
                                 <div class="form-check me-3">
@@ -534,7 +531,38 @@
                             </div>
                         </div>
                     </div>
+ -->
+                    <div>
+                        <!-- First Row: Contains only the label -->
+                        <div class="row">
+                            <div class="col-md-12">
+                                <label for="totalPrice" class="h4">Total Price <span class="text-muted small">(GST inclusive.)</span></label>
+                            </div>
+                        </div>
 
+                        <!-- Second Row: Contains the input and the buttons -->
+                        <div class="row align-items-end">
+                            <!-- Left Column: Total Price Input -->
+                            <div class="col-md-6">
+                                <div class="input-group input-group-lg">
+                                    <span class="input-group-text">AUD $</span>
+                                    <input id="totalPrice" type="text" class="form-control" :value="total|formatMoney(2)" readonly="true">
+                                </div>
+                            </div>
+
+                            <!-- Right Column: Checkbox and Submit Button -->
+                            <div class="col-md-6">
+                                <div class="d-flex justify-content-end align-items-center">
+                                    <div class="form-check me-3">
+                                        <input type="checkbox" id="toc_check" class="form-check-input" v-model="toc">
+                                        <label for="toc_check" class="form-check-label">I agree to the <a target="_blank" href="{{EXPLORE_PARKS_TERMS}}">terms and conditions</a></label>
+                                    </div>
+                                    <button v-if="total >= 0" :disabled="!toc" type="submit" class="btn btn-primary btn-lg">Proceed to payment</button>
+                                    <button v-else :disabled="!toc" type="submit" class="btn btn-primary btn-lg">Proceed to Refund</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
                     {% if request.user.is_staff %}
                     <div class="row border-top mt-3 pt-3">
                         <div class="col-md-6">
