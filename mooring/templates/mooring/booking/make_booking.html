@@ -227,13 +227,13 @@
                                 </div>
                             {% endfor %}
                         </div>
-                        <div class="hiddenBookings" style="display:none;">
+                        <div class="hiddenBookings d-none">
                             <input type="hidden" id="bookingLines" v-model="bookingLines" name="bookingLines"/>
                         </div>
-                        <div class="hiddenAdmissions" style="display:none;">
+                        <div class="hiddenAdmissions d-none">
                             <input type="hidden" id="admissionsLines" v-model="admissionsLines" name="admissionsLines"/>
                         </div>
-                        <div class="hiddenocc" style="display:none;">
+                        <div class="hiddenocc d-none">
                             <input type="hidden" id="occ" v-model="occ" name="occ"/>
                         </div>
                         <div class="col-md-2" style='display:none'>
@@ -377,16 +377,16 @@
                         <div class="col-lg-12">
                             <h3 class="text-primary">Vessels</h3>
                             <p v-if="pricing.vehicle"><b><a href="{{EXPLORE_PARKS_ENTRY_FEES}}" target="_blank">Entry fees</a> are required for each vehicle entering this park.</b></p>
-                            <p style='display: none;' v-else>No entry fees are required for this park.</p>
+                            <p class='d-none' v-else>No entry fees are required for this park.</p>
                         </div>
                     </div>
                     {# Manual rendering of the 'vehicles' formset. #}
                     {# Django 1.11 will move form rendering junk into proper templates, #}
                     {# so there should be a cleaner way of doing this in future. #}
-                    <div class="row" style='display: none;' v-cloak>
+                    <div class="row d-none" v-cloak>
                         <div class="col-md-4">
                             <div class="form-group">
-                                <label style='display: none;'>Number of vessels:
+                                <label class='d-none'>Number of vessels:
                                     <input class="form-control" name="form-TOTAL_FORMS" max="8" min="1" value="1" v-model="vehicleCount" v-on:change="updateVehicles" type="number"/>
                                     <input id="id_form-INITIAL_FORMS" name="form-INITIAL_FORMS" type="hidden" value="1" />
                                     <input id="id_form-MIN_NUM_FORMS" name="form-MIN_NUM_FORMS" type="hidden" value="0" />
@@ -400,7 +400,7 @@
                             <label class="text-end">Vessel Registration:</label>
                             <input class="form-control" type="text" v-model="rego" required v-on:change="searchRego()" style="text-transform:uppercase" readonly/>
 
-                            <div v-for="(vehicle, index) in vehicles" style="display:none;">
+                            <div v-for="(vehicle, index) in vehicles" class="d-none">
                                 <select v-on:change="calculateTotal" v-bind:name="'form-'+Number(index).toString()+'-vehicle_type'" class="form-control" v-model="vehicle[0]" >
                                     <option value="0">Vessel</option>
                                 </select>
@@ -453,7 +453,7 @@
                             <div class="col-md-4">
                             </div>
 
-                            <div class="row" style="display:none;">
+                            <div class="row d-none">
                                 <div class="small-6 columns">
                                     <label for="num_concessions" class="text-end"><span class="has-tip" title="Holders of one of the following Australian-issued cards:
                                         - Seniors Card
@@ -468,7 +468,7 @@
                                     <input type="number" id="numConcessions" name="num_concessions" v-model="numConcessions" min="0" max="16"/></label>
                                 </div>
                             </div>
-                            <div class="row" style="display:none;">
+                            <div class="row d-none">
                                 <div class="small-6 columns">
                                     <label for="num_children" class="text-right">Moorings<label>
                                 </div>
