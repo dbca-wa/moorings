@@ -1,5 +1,4 @@
 <template>
-    <!-- <div v-cloak class="f6inject"> -->
     <div v-cloak ref="parkfinderWrapper">
         <div class="container">
             <!-- First Row: Search Panel and Map -->
@@ -11,32 +10,36 @@
                     <div v-show="current_booking.length > 0">
                         <!-- Button group using Flexbox for alignment -->
                         <div class="d-grid gap-2 d-md-flex justify-content-md-start mb-3">
-                            <button v-show="ongoing_booking" class="btn btn-danger me-md-2" type="button">Time Left {{ timeleft }}</button>
-                            <a v-show="current_booking.length > 0" class="btn btn-primary me-md-2" :href="parkstayUrl+'/booking'">Proceed to Check Out</a>
-                            <a class="btn btn-warning" :href="parkstayUrl+'/booking/abort'">Cancel in-progress booking</a>
+                            <div class="text-danger d-flex flex-column align-items-center me-3">
+                                <span class="text-danger d-flex align-items-center me-3">
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-clock-fill me-1" viewBox="0 0 16 16"><path d="M16 8A8 8 0 1 1 0 8a8 8 0 0 1 16 0zM8 3.5a.5.5 0 0 0-1 0V9a.5.5 0 0 0 .252.434l3.5 2a.5.5 0 0 0 .496-.868L8 8.71V3.5z"/></svg>
+                                    Time Left: <strong class="ms-1">{{ timeleft }}</strong>
+                                </span>
+                            </div>
                         </div>
 
-                        <div class="small-12 medium-12 large-12">
-                            <!-- Trolley summary card -->
-                            <div class="card mb-3">
-                                <div class="card-body">
-                                    <h5 class="card-title mb-0">Trolley: <span id='total_trolley'>${{ total_booking }}</span></h5>
+                        <div class="card mb-3">
+                            <div class="card-header d-flex justify-content-between align-items-center">
+                                <h5 class="mb-0">Trolley: <span id='total_trolley'>${{ total_booking }}</span></h5>
+                                <div class="d-flex align-items-center">
+                                    <a class="btn btn-warning" :href="parkstayUrl+'/booking/abort'">Cancel in-progress booking</a>
                                 </div>
                             </div>
-                            <div v-for="item in current_booking" :key="item.id" class="row gx-2 align-items-center mb-1">
-                                <!-- gx-2 adds a small horizontal gutter between columns -->
-                                <!-- align-items-center vertically aligns the content -->
-                                
-                                <!-- Item Name column -->
-                                <div class="col-8">{{ item.item }}</div>
-                                
-                                <!-- Amount column -->
-                                <div class="col-3 text-end">${{ item.amount }}</div>
-                                
-                                <!-- Delete button column -->
-                                <div class="col-1 text-end">
-                                    <button v-show="item.past_booking == false" type="button" class="btn-close" @click="deleteBooking(item.id)" aria-label="Close"></button>
-                                </div>
+                            <ul class="list-group list-group-flush" v-if="current_booking && current_booking.length > 0">
+                                <li v-for="item in current_booking" :key="item.id" class="list-group-item d-flex justify-content-between align-items-center">
+                                    <span>{{ item.item }}</span>
+                                    <div class="d-flex align-items-center">
+                                        <span class="me-3">${{ item.amount }}</span>
+                                        <a href="#" v-show="item.past_booking == false" @click.prevent="deleteBooking(item.id, item.past_booking)" class="text-danger" title="Remove item">
+                                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-x-circle-fill" viewBox="0 0 16 16">
+                                                <path d="M16 8A8 8 0 1 1 0 8a8 8 0 0 1 16 0M5.354 4.646a.5.5 0 1 0-.708.708L7.293 8l-2.647 2.646a.5.5 0 0 0 .708.708L8 8.707l2.646 2.647a.5.5 0 0 0 .708-.708L8.707 8l2.647-2.646a.5.5 0 0 0-.708-.708L8 7.293z"/>
+                                            </svg>
+                                        </a>
+                                    </div>
+                                </li>
+                            </ul>
+                            <div class="card-body text-end">
+                                <a v-show="current_booking.length > 0" class="btn btn-primary me-md-2" :href="parkstayUrl+'/booking'">Proceed to Check Out</a>
                             </div>
                         </div>
                     </div>
@@ -2530,217 +2533,6 @@ export default {
         content: "v";
     }
 
-    .f6inject {
-
-        .search-params hr {
-            margin: 0;
-        }
-
-        .search-params label {
-            cursor: pointer;
-            font-size: 0.8em;
-        }
-
-        /* filter hiding on small screens */
-        @media print, screen and (max-width: 63.9375em) {
-            .filter-hide {
-                display: none;
-            }
-        }
-
-        @media print, screen and (min-width: 64em) {
-            .filter-button {
-                display: none; 
-            }
-        }
-
-        #map {
-            height: 75vh;
-        }
-
-        /* set on the #map element when mousing over a feature */
-        .click {
-            cursor: pointer;
-        }
-
-        input + .symb {
-            color: #000000;
-            transition: color 0.25s ease-out;
-        }
-
-        input:checked + .symb {
-            color: #2199e8;
-        }
-
-        .button.formButton {
-            display: block;
-            width: 100%;
-        }
-
-        .button.selector {
-            background-color: #fff;
-            border: 1px solid #777;
-            border-radius: 4px;
-            color: #000;
-        }
-
-        .button.selector:hover {
-            background-color: #d6eaff;
-            border: 1px solid #729fcf;
-        }
-
-        .button.selector ~ input:checked {
-            color: #fff;
-            background-color: #0060c4;
-            border: 1px solid #00366e;
-        }
-
-        .button.selector:hover ~ input:checked {
-            color: #fff;
-            background-color: #0e83ff;
-            border: 1px solid #004d9f;
-        }
-
-        .pagination {
-            padding: 0;
-            text-align: center;
-            margin-left: auto;
-            margin-right: auto;
-            margin-bottom: 1em;
-        }
-
-        .pagination .active {
-            background: #2199e8;
-            color: #fefefe;
-            cursor: default;
-        }
-
-        .pagination li {
-            display: inline-block;
-            cursor: pointer;
-        }
-
-        .tooltip {
-            position: relative;
-            border-radius: 4px;
-            background-color: #ffcc33;
-            color: black;
-            padding: 4px 8px;
-            opacity: 0.7;
-            white-space: nowrap;
-        }
-
-        .tooltip:before {
-            border-top: 6px solid rgba(0, 0, 0, 0.5);
-            border-right: 6px solid transparent;
-            border-left: 6px solid transparent;
-            content: "";
-            position: absolute;
-            bottom: -6px;
-            margin-left: -7px;
-            left: 50%;
-        }
-
-        .mapPopup {
-            position: absolute;
-            background-color: white;
-            -webkit-filter: drop-shadow(0 1px 4px rgba(0,0,0,0.2));
-            filter: drop-shadow(0 1px 4px rgba(0,0,0,0.2));
-            padding: 15px;
-            border-radius: 10px;
-            border: 1px solid #cccccc;
-            bottom: 32px;
-            left: -140px;
-            width: 280px;
-        }
-
-        .mapPopup:after, .mapPopup:before {
-            top: 100%;
-            border: solid transparent;
-            content: " ";
-            height: 0;
-            width: 0;
-            position: absolute;
-            pointer-events: none;
-        }
-
-        .mapPopup:after {
-            border-top-color: white;
-            border-width: 10px;
-            left: 138px;
-            margin-left: -10px; 
-        }
-
-        .mapPopup:before {
-            border-top-color: #cccccc;
-            border-width: 11px;
-            left: 138px;
-            margin-left: -11px;
-        }
-
-        .mapPopupClose {
-            text-decoration: none;
-            position: absolute;
-            top: 2px;
-            right: 8px;
-        }
-
-        .mapPopupClose:after {
-            content: "✖";
-        }
-
-        .searchTitle {
-            font-size: 150%;
-            font-weight: bold;
-        }
-
-        .resultList {
-            padding: 0;
-        }
-
-        .map-toggle-black {
-        width: 80px;
-        height: 80px;
-        background-color: #FFFFFF;
-        color: black;
-        position: relative;
-        right: 10px;
-        top: -90px;
-        z-index: 300;
-        border: 2px solid #FFFFFF;
-        cursor: pointer;
-        border-radius: 2px;
-        box-shadow: 0px 1px 4px rgba(0, 0, 0, 0.3);
-        }
-        .map-toggle-white {
-        width: 80px;
-        height: 80px;
-        background-color: #FFFFFF;
-        color: black;
-        position: relative;
-        right: 10px;
-        top: -90px;
-        z-index: 300;
-        border: 2px solid #000000;
-        cursor: pointer;
-        border-radius: 2px;
-        box-shadow: 0px 1px 4px rgba(0, 0, 0, 0.3);
-        }
-        .map-loading {
-        position: relative;
-        top: 14px;
-        background-color: #FFFFFF;
-        border: 1px solid #bab9b9;
-        z-index: 5;
-        width: 110px;
-        text-align: center;
-        opacity: 0.7;
-        margin-right: 8px;
-        font-size: 12px;
-        padding: 4px;
-        }
-    }
-
     /* hacks to make awesomeplete play nice with F6 */
     div.awesomplete {
         display: block;
@@ -2754,13 +2546,5 @@ export default {
     .ol-control button {
         height: 2em;
         width: 2em;
-    }
-    .card{
-        background-color: #f5f5f5;
-        height:40px;
-    }
-    .card-title{
-        margin-top:-7px;
-        font-size: 16px;
     }
 </style>
