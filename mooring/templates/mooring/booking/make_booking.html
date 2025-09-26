@@ -387,7 +387,7 @@
                         <div class="col-md-4">
                             <div class="form-group">
                                 <label class='d-none'>Number of vessels:
-                                    <input class="form-control" name="form-TOTAL_FORMS" max="8" min="1" value="1" v-model="vehicleCount" v-on:change="updateVehicles" type="number"/>
+                                    <input class="form-control" name="form-TOTAL_FORMS" max="8" min="1" value="1" v-model="vehicleCount" @change="updateVehicles" type="number"/>
                                     <input id="id_form-INITIAL_FORMS" name="form-INITIAL_FORMS" type="hidden" value="1" />
                                     <input id="id_form-MIN_NUM_FORMS" name="form-MIN_NUM_FORMS" type="hidden" value="0" />
                                     <input id="id_form-MAX_NUM_FORMS" name="form-MAX_NUM_FORMS" type="hidden" value="8" />
@@ -398,19 +398,19 @@
                     <div class="row mb-3">
                         <div class="col-md-6">
                             <label class="text-end">Vessel Registration:</label>
-                            <input class="form-control" type="text" v-model="rego" required v-on:change="searchRego()" style="text-transform:uppercase" readonly/>
+                            <input class="form-control" type="text" v-model="rego" required @change="searchRego()" style="text-transform:uppercase" readonly/>
 
                             <div v-for="(vehicle, index) in vehicles" class="d-none">
-                                <select v-on:change="calculateTotal" v-bind:name="'form-'+Number(index).toString()+'-vehicle_type'" class="form-control" v-model="vehicle[0]" >
+                                <select @change="calculateTotal" v-bind:name="'form-'+Number(index).toString()+'-vehicle_type'" class="form-control" v-model="vehicle[0]" >
                                     <option value="0">Vessel</option>
                                 </select>
                                 <label for="'form-'+Number(index).toString()+'-vehicle_rego'" class="text-right" >Vessel</label><label>&nbspRegistration:</label>
-                                <input class="form-control" v-bind:name="'form-'+Number(index).toString()+'-vehicle_rego'" type="text" v-model="vehicle[1]" v-on:change="searchRego()" style="text-transform:uppercase;" readonly/>
+                                <input class="form-control" v-bind:name="'form-'+Number(index).toString()+'-vehicle_rego'" type="text" v-model="vehicle[1]" @change="searchRego()" style="text-transform:uppercase;" readonly/>
                             </div>
                         </div>
                     </div>
                         <!-- <div class="col-md-4">
-                            <div class="checkbox" v-if="pricing.vehicle"><label><input v-bind:name="'form-'+Number(index).toString()+'-entry_fee'" type="checkbox" v-model="vehicle[2]" v-on:change="updateVehicles"/> Entry fee</label></div>
+                            <div class="checkbox" v-if="pricing.vehicle"><label><input v-bind:name="'form-'+Number(index).toString()+'-entry_fee'" type="checkbox" v-model="vehicle[2]" @change="updateVehicles"/> Entry fee</label></div>
                         </div> -->
                     
                     <div class="row mb-3">
@@ -440,15 +440,15 @@
                         <div v-if="payingAdmissions" class="row g-3">
                             <div class="col-md-4">
                                 <label for="num_adults" class="text-end">Adults (ages 12+):</label>
-                                <input type="number" class="form-control" id="numAdults" name="num_adults" v-model="numAdults" v-on:change="guestsUpdated()" min="0" max="16"/>
+                                <input type="number" class="form-control" id="numAdults" name="num_adults" v-model="numAdults" @change="guestsUpdated()" min="0" max="16"/>
                             </div>
                             <div class="col-md-4">
                                 <label for="num_children" class="text-end">Children (ages 4-12):</label>
-                                <input type="number" class="form-control" id="numChildren" name="num_children" v-model="numChildren" v-on:change="guestsUpdated()" min="0" max="16"/>
+                                <input type="number" class="form-control" id="numChildren" name="num_children" v-model="numChildren" @change="guestsUpdated()" min="0" max="16"/>
                             </div>
                             <div class="col-md-4">
                                 <label for="num_infants" class="text-end">Infants (ages 0-4):</label>
-                                <input type="number" class="form-control" id="numInfants" name="num_infants" v-model="numInfants" v-on:change="guestsUpdated()" min="0" max="16"/>
+                                <input type="number" class="form-control" id="numInfants" name="num_infants" v-model="numInfants" @change="guestsUpdated()" min="0" max="16"/>
                             </div>
                             <div class="col-md-4">
                             </div>
