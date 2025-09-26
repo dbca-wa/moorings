@@ -1,5 +1,5 @@
 <template lang="html">
-  <div id="spinnerLoader" v-show="isLoading"  >
+  <div v-show="isLoading"  >
     <div class="container">
       <div class="row" style='width: 200px; border: 1px solid #ddd; background-color: #FFF;' >
         <div class="col-lg-12">
@@ -25,15 +25,3 @@ export default {
   }
 }
 </script>
-
-<style lang="css">
-  #spinnerLoader {
-    width: 100%;
-    text-align: center;
-    padding: 1em 0;
-    position:absolute; 
-    margin-top: -30px;
-    z-index: 5;
-  }
-</style>
-

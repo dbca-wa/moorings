@@ -1,5 +1,8 @@
 <template>
     <div id="sites-cal" ref="availabilityWrapper">
+        <div v-if="isLoading" class="loader-overlay">
+            <loader :isLoading.sync="isLoading">&nbsp;</loader>
+        </div>
         <div class="container">
             <a name="makebooking" />
             <div class="row" v-if="status == 'offline'">
@@ -98,7 +101,7 @@
                 </div>
             </div>
 
-            <loader :isLoading.sync="isLoading">&nbsp;</loader>
+            <!-- <loader :isLoading.sync="isLoading">&nbsp;</loader> -->
 
             <div class="row mt-4" v-if="name">
                 <div class="col-12">
@@ -1340,3 +1343,22 @@ export default {
     }
 }
 </script>
+
+<style>
+.loader-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+
+  background-color: rgba(255, 255, 255, 0.4);
+
+  display: flex;
+  justify-content: center;
+  align-items: center;
+
+  z-index: 9999;
+  text-align: center;
+}
+</style>
