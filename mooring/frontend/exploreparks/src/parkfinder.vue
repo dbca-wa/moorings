@@ -518,7 +518,8 @@ export default {
     data: function () {
         return {
             parkstayUrl: '',
-            defaultCenter: [13775786.985667605, -2871569.067879858], // [123.75, -24.966],
+            //defaultCenter: [13775786.985667605, -2871569.067879858], // [123.75, -24.966],
+            defaultCenter: [13075786.985667605, -2871569.067879858], // [123.75, -24.966],
             defaultLayers: [
                 ['dpaw:mapbox_outdoors', {}],
                 ['cddp:dpaw_tenure', {}],
