@@ -403,7 +403,7 @@
                                             </div>
 
                                             <!-- Button Group with responsive layout -->
-                                            <div class="d-grid gap-2 d-md-flex mt-3">
+                                            <div class="d-grid gap-2 d-md-flex justify-content-md-center mt-3">
                                                 <a class="btn btn-outline-secondary btn-sm" :href="f.info_url" target="_blank">More info</a>
                                                 
                                                 <!-- "Book now" button with your original v-if logic -->
