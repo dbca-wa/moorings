@@ -360,19 +360,19 @@
             </div>
 
             <!-- Second Row: Search Results -->
-            <!-- mt-4 adds some margin-top for spacing -->
             <div class="row mt-4">
                 <div class="col-12">
                     <!-- The content of the search results template will go here -->
                     <template v-if="filteredItems.length > 0">
                         <div class="row g-4">
                             <div class="col-md-6 col-lg-4" v-for="f in paginatedItems" :key="f.id">
-                                <div class="card h-100">
-                                    <!-- <div class="row"> -->
-                                    <img v-if="f.images[0]" class="card-img-top" :src="f.images[0].image" alt="Mooring image" style="height: 230px; object-fit: cover;">
-                                    <img v-else class="card-img-top" src="@/assets/mooring_photo_scaled.png" alt="Default mooring image" style="height: 230px; object-fit: cover;">
+                                <div class="card h-100 shadow">
+                                    <div class="card-header">
+                                        <h5 class="card-title mb-0">{{ f.name }}</h5>
+                                    </div>
+                                    <img v-if="f.images[0]" class="" :src="f.images[0].image" alt="Mooring image" style="height: 230px; object-fit: cover;">
+                                    <img v-else class="" src="@/assets/mooring_photo_scaled.png" alt="Default mooring image" style="height: 230px; object-fit: cover;">
                                     <div class="card-body d-flex flex-column">
-                                        <h5 class="card-title">{{ f.name }}</h5>
                                         <!-- Description with a standard card-text class -->
                                         <div class="card-text" v-html="f.description"></div>
 
@@ -381,7 +381,7 @@
                                             <small class="text-muted">From ${{ f.price_hint }} per night</small>
                                         </p>
 
-                                        <p ><i><small>Max Stay Period: {{ f.max_advance_booking }} day/s </small></i></p> -->
+                                        <p ><i><small>Max Stay Period: {{ f.max_advance_booking }} day/s </small></i></p>
                                         <div class="mt-auto">
                                             <!-- <p>Mooring Limits</p> -->
                                             <p class="mb-2"><strong>Mooring Limits</strong></p>
