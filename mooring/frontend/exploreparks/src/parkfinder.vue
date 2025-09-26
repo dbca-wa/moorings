@@ -285,7 +285,7 @@
                     <div v-if="admissions_key">
                         <div class="alert alert-warning text-center" role="alert">
                             <strong class="fs-6">
-                                <a :href='"/annual-admissions/" + admissions_key + "/"'>Click here for paying annual admission fees only</a>
+                                <a :href='"https://www.ria.wa.gov.au/boating/admission-fees/"'>Click here for paying annual admission fees only</a>
                             </strong>
                         </div>
                         <div class="alert alert-warning text-center" role="alert">
