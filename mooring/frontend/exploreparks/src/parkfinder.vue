@@ -279,22 +279,6 @@
 
                 <!-- Right Column (Map) -->
                 <div class="col-lg-7">
-                    <!-- The content of the original right column will go here -->
-                    <!-- <div class="alert alert-warning" style='text-align: center' role="alert" v-if="admissions_key" id="admissions_link">
-                        <strong style='font-size: 16px;'>
-                            <a :href='"/annual-admissions/" + admissions_key + "/"'>Click here for paying annual admission fees only</a>
-                        </strong><br>
-                    </div>   
-                    <div class="alert alert-warning" style='text-align: center' role="alert" v-if="admissions_key" id="admissions_link">
-                        <strong style='font-size: 16px;'>
-                            <a :href='"/admissions/" + admissions_key + "/"'>Click here for paying individual admission fees for a single visit</a>
-                        </strong><br>
-                    </div>
-                    <div class="alert alert-info" style='text-align: center' role="alert" v-if="admissions_key" id="admissions_link">
-                        <strong style='font-size: 16px;'>
-                            <a href='https://rottnestisland.com/boating/Fees'>Click here for more information on admission fees</a>
-                        </strong><br>
-                    </div> -->
                     <div v-if="admissions_key">
                         <div class="alert alert-warning text-center" role="alert">
                             <strong class="fs-6">
@@ -312,19 +296,6 @@
                             </strong>
                         </div>
                     </div>
-
-                    <!-- <div style='width: 100%; height: 1px;' align='right'>
-                        <div v-show='mapLoading == true' class='map-loading' style='border: 1px solid #00000'>
-                            <img style='width:20px; height: 20px;' src='@/assets/ajax-loader-spinner.gif'>&nbsp;&nbsp;Please Wait
-                        </div>
-                    </div>
-
-                    <div id="map"></div>
-
-                    <div style='width: 100%' align='right'>
-                        <img id='satellite-toggle' class='map-toggle-white'  type='button'  @click="toggleMap('satellite');" src='./assets/img/satellite_icon.png' />
-                        <img id='map-toggle' class='map-toggle-black'  type='button'  @click="toggleMap('map');" src='./assets/img/map_icon.png' />
-                    </div> -->
 
                     <!-- Map Container using Bootstrap's position utilities -->
                     <div class="position-relative mb-3">
@@ -348,31 +319,6 @@
                     <div id="mapPopup" class="mapPopup bg-white p-3 border rounded shadow" v-cloak>
                         <a href="#" id="mapPopupClose" class="mapPopupClose"></a>
                         <div id="mapPopupContent">
-                            <!-- <h4 style="margin: 0"><b id="mapPopupName"></b></h4>
-                            <p><i id="mapPopupPrice"></i></p>
-                            <img class="thumbnail" id="mapPopupImage" style='width: 230px; height: 230px;' />
-                            <div id="mapPopupDescription" style="font-size: 0.75rem;"/>
-                            <p>Mooring Limits</p>
-                            <div class="row">
-                                <div class="col-md-7"  style='display:none'>
-                                    <small>Max Stay: <span id='max_stay_period'></span> day/s</small>
-                                </div>
-                                <div class="col-md-5">
-                                    <small>Max Size: <span id='vessel_size_popup'></span></small>
-                                </div>
-                            </div>
-                            <div class="row">
-                                <div class="col-md-7">
-                                    <small>Max Draft: <span id='vessel_draft_popup'></span></small>
-                                </div>
-                                <div class="col-md-5">
-                                    <small><span id='vessel_beam_weight_popup'></span></small>
-                                </div>
-                            </div>
-                            <input id='mapPopupMooringType' type='hidden' >
-                            <a id="mapPopupInfo" class="button formButton" style="margin-bottom: 0; margin-top: 1em;" target="_blank">More info</a>
-                            <a id="mapPopupBook" class="button formButton" style="margin-bottom: 0;" v-on:click="BookNowCheck()" >Book now</a> -->
-
                             <h4 style="margin: 0;"><b id="mapPopupName"></b></h4>
                             <p><i id="mapPopupPrice"></i></p>
                             <img class="img-thumbnail" id="mapPopupImage" style="width: 230px; height: 230px;" />
@@ -417,8 +363,6 @@
                     <!-- The content of the search results template will go here -->
                     <template v-if="filteredItems.length > 0">
                         <div class="row g-4">
-                            <!-- <div class="small-12 medium-4 large-4 columns" v-for="f in paginated('filterResults')" v-if="f.vessel_size_limit >= vesselSize && f.vessel_draft_limit >= vesselDraft && weightBeam(f) == true"> -->
-                            <!-- <div class="small-12 medium-4 large-4 columns" v-for="f in paginatedIt</div>ems" :key="f.id"> -->
                             <div class="col-md-6 col-lg-4" v-for="f in paginatedItems" :key="f.id">
                                 <div class="card h-100">
                                     <!-- <div class="row"> -->
@@ -429,35 +373,15 @@
                                         <!-- Description with a standard card-text class -->
                                         <div class="card-text" v-html="f.description"></div>
 
-                                        <!-- <p v-if="f.price_hint && Number(f.price_hint)"><i><small>From ${{ f.price_hint }} per night</small></i></p> -->
                                         <!-- Price hint with standard text classes -->
                                         <p v-if="f.price_hint && Number(f.price_hint)" class="card-text">
                                             <small class="text-muted">From ${{ f.price_hint }} per night</small>
                                         </p>
 
-                                        <!-- <p style='display:none'><i><small>Vessel Size Limit: {{ f.vessel_size_limit }} </small></i></p>
                                         <p ><i><small>Max Stay Period: {{ f.max_advance_booking }} day/s </small></i></p> -->
                                         <div class="mt-auto">
                                             <!-- <p>Mooring Limits</p> -->
                                             <p class="mb-2"><strong>Mooring Limits</strong></p>
-
-                                            <!-- <div class="row">
-                                                <div class="col-md-6"  style='display:none'>
-                                                    <small>Max Stay: {{ f.max_advance_booking }} day/s</small>
-                                                </div>
-                                                <div class="col-md-6">
-                                                    <small>Max Size: {{ f.vessel_size_limit }}</small>
-                                                </div>
-                                            </div>
-                                            <div class="row">
-                                                <div class="col-md-6">
-                                                    <small>Max Draft: {{ f.vessel_draft_limit }}</small>
-                                                </div>
-                                                <div class="col-md-6">
-                                                    <small v-if="f.mooring_physical_type == 0"> Max Weight: {{ f.vessel_weight_limit }}</small>
-                                                    <small v-else> Max Beam: {{ f.vessel_beam_limit }}</small>
-                                                </div>
-                                            </div> -->
 
                                             <div class="row small">
                                                 <div class="col-6" v-if="f.max_advance_booking">
@@ -474,15 +398,6 @@
                                                     <span v-else>Max Beam: {{ f.vessel_beam_limit }}</span>
                                                 </div>
                                             </div>
-
-                                            <!-- <a class="button" v-bind:href="f.info_url" target="_blank">More info</a>
-                                                
-                                            <a v-if="f.mooring_type == 0 && vesselSize > 0 && vesselDraft > 0 && vesselWeight > 0 && vesselRego != '' && vesselRego !== ' '" class="button" v-bind:href="parkstayUrl+'/availability2/?site_id='+f.id+'&'+bookingParam">Book now</a>
-                                            <a v-else-if="f.mooring_type == 1 && vesselSize > 0 && vesselDraft > 0 && vesselBeam > 0 && vesselRego != '' && vesselRego !== ' '" class="button" v-bind:href="parkstayUrl+'/availability2/?site_id='+f.id+'&'+bookingParam">Book now</a>
-                                            <a v-else-if="f.mooring_type == 2 && vesselSize > 0 && vesselDraft > 0 && vesselBeam > 0 && vesselRego != '' && vesselRego !== ' '" class="button" v-bind:href="parkstayUrl+'/availability2/?site_id='+f.id+'&'+bookingParam">Book now</a>
-                                            <a v-else-if="f.mooring_type == 0" class="button" v-on:click="BookNow('mooring')">Book now</a>
-                                            <a v-else-if="f.mooring_type == 1 || f.mooring_type == 2 " class="button" v-on:click="BookNow('jettybeach')">Book now</a>
-                                            <a v-else />  -->
 
                                             <!-- Button Group with responsive layout -->
                                             <div class="d-grid gap-2 d-md-flex mt-3">
@@ -501,20 +416,6 @@
                             </div>
                         </div>
 
-                        <!-- <div class="row text-center">
-                            <div class="button-group">
-                                <button class="button" @click="prevPage" :disabled="currentPage === 1">
-                                « Prev
-                                </button>
-                                <span class="button secondary disabled">
-                                Page {{ currentPage }} / {{ totalPages }}
-                                </span>
-                                <button class="button" @click="nextPage" :disabled="currentPage === totalPages">
-                                Next »
-                                </button>
-                            </div>
-                        </div> -->
-
                         <!-- Pagination Buttons -->
                         <div class="d-flex justify-content-center mt-4" v-if="totalPages > 1">
                             <nav aria-label="Page navigation">
@@ -522,9 +423,6 @@
                                     <li class="page-item" :class="{ disabled: currentPage === 1 }">
                                         <a class="page-link" href="#" @click.prevent="prevPage">« Prev</a>
                                     </li>
-                                    <!-- <li class="page-item active" aria-current="page">
-                                        <span class="page-link">Page {{ currentPage }} / {{ totalPages }}</span>
-                                    </li> -->
                                     <!-- Page Number Links -->
                                     <li
                                         v-for="page in pageNumbers"
@@ -542,11 +440,6 @@
                         </div>
                     </template>
                     <template v-else>
-                        <!-- <div class="row align-center">
-                            <div class="small-12 medium-12 large-12 columns">
-                                <h2 class="text-center">There are no moorings found matching your search criteria. Please change your search query.</h2>
-                            </div>
-                        </div> -->
                         <!-- "No results" Message -->
                         <div class="alert alert-info" role="alert">
                             <h4 class="alert-heading">No Results Found</h4>
@@ -1059,35 +952,6 @@ export default {
                     duration: 1000
                 });
 
-                // Open the popup
-                /*let feature = this.groundsData.a.find(f => parseInt(f.a) == parseInt(target.properties.id));
-                if (feature) {
-                    setTimeout(() => {
-                        vm.popup.setPosition(feature.getGeometry().getCoordinates());
-                        // really want to make vue.js render this, except reactivity dies
-                        // when you pass control of the popup element to OpenLayers :(
-                        $("#mapPopupName")[0].innerHTML = feature.get('name');
-                        if (feature.get('images')) {
-                            $("#mapPopupImage").attr('src', feature.get('images')[0].image);
-                            $("#mapPopupImage").show();
-                        } else {
-                            $("#mapPopupImage").hide();
-                        }
-                        if (feature.get('price_hint') && Number(feature.get('price_hint'))) {
-                            $("#mapPopupPrice")[0].innerHTML = '<small>From $' + feature.get('price_hint') + ' per night</small>';
-                        } else {
-                            $("#mapPopupPrice")[0].innerHTML = '';
-                        }
-                        $("#mapPopupDescription")[0].innerHTML = feature.get('description');
-                        $("#mapPopupInfo").attr('href', feature.get('info_url'));
-                        $("#mapPopupBook").attr('href', vm.parkstayUrl+'/availability2/?site_id='+feature.getId()+'&'+vm.bookingParam);
-                        if (feature.get('campground_type') == 0) {
-                            $("#mapPopupBook").show();
-                        } else {
-                            $("#mapPopupBook").hide();
-                        }
-                    },1000);
-                }*/
                 return;
             }
 
@@ -1167,17 +1031,6 @@ export default {
                         return 1;
                     }
                     return 0;
-
-                    /* alphabet sort
-                    var nameA = a.name.toUpperCase();
-                    var nameB = b.name.toUpperCase();
-                    if (nameA < nameB) {
-                        return -1;
-                    }
-                    if (nameA > nameB) {
-                        return 1;
-                    }
-                    return 0; */
                 });
             };
             if (runNow) {
