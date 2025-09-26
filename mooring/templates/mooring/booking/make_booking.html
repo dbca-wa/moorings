@@ -49,22 +49,30 @@
                 <div class="p-3 bg-light border rounded">
                     <div class="row">
                         <div class="col-md-12">
-                            <p v-cloak>
+                            <div class="d-flex justify-content-between align-items-center" v-cloak>
                             {% verbatim %}
-                                <b>Time left to complete booking {{ timeleft }}.</b> 
+                                <span class="text-danger">
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-clock-fill me-1" viewBox="0 0 16 16"><path d="M16 8A8 8 0 1 1 0 8a8 8 0 0 1 16 0zM8 3.5a.5.5 0 0 0-1 0V9a.5.5 0 0 0 .252.434l3.5 2a.5.5 0 0 0 .496-.868L8 8.71V3.5z"/></svg>
+                                    Time Left to complete booking: <strong class="ms-1">{{ timeleft }}</strong>
+                                </span>
                             {% endverbatim %}
-                                <a class="btn btn-info" href="{% url 'public_abort_booking' %}?change=True">Change in-progress booking</a>
-                                <a class="btn btn-warning" href="{% url 'public_abort_booking' %}">Cancel in-progress booking</a>
-                                {% if booking.old_booking %}
-                                     {% if payments_officer_group %}
-                                     {% if occ == 'true' %}
-                                         <a class="btn btn-danger" href="{% url 'public_make_booking' %}?occ=false">Remove override</a>
-                                     {% else %}
-                                         <a class="btn btn-danger" href="{% url 'public_make_booking' %}?occ=true">Override change fees</a>
-                                     {% endif %}
-                                     {% endif %}
-                                {% endif %}
-                            </p>
+                                <div>
+                                    <a class="btn btn-info" href="{% url 'public_abort_booking' %}?change=True">Change in-progress booking</a>
+                                    <a class="btn btn-warning ms-2" href="{% url 'public_abort_booking' %}">Cancel in-progress booking</a>
+                                    {% if booking.old_booking %}
+                                        {% if payments_officer_group %}
+                                        {% if occ == 'true' %}
+                                            <a class="btn btn-danger" href="{% url 'public_make_booking' %}?occ=false">Remove override</a>
+                                        {% else %}
+                                            <a class="btn btn-danger" href="{% url 'public_make_booking' %}?occ=true">Override change fees</a>
+                                        {% endif %}
+                                        {% endif %}
+                                    {% endif %}
+                                </div>
+                            </div>
+
+                            <hr>
+
                             {% if show_errors %}
                             <div class="alert alert-danger">
                                 <p>There were some problems with your submission:</p>
@@ -87,9 +95,9 @@
                         </div>
                         <div class="col-md-12">
                             <div id='mooring_pricing_table'>
-                                <div class="row pb-2 mb-2 border-bottom fw-bold text-muted">
+                                <div class="row pb-2 mb-2 border-bottom fw-bold">
                                     <div class="col-md-12 mb-2">
-                                        <h3 class="text-primary">Mooring Fees</h3>
+                                        <h4>Mooring Fees</h4>
                                     </div>
                                     <div class="col-md-3">
                                         Mooring
@@ -147,9 +155,9 @@
                             </div>
 
                             <div id='admissions_pricing_table' v-if="payingAdmissions && linesAdmissions.length > 0" v-cloak>
-                                <div class="row pb-2 mb-2 border-bottom fw-bold text-muted">
-                                    <div class="col-md-12 mb-2">
-                                        <h3 class="text-primary">Admission Fees</h3>
+                                <div class="row pb-2 mb-2 border-bottom fw-bold">
+                                    <div class="col-md-12 mb-2 mt-4">
+                                        <h4>Admission Fees</h4>
                                     </div>
                                     <div class="col-md-1">
                                         Adults
@@ -212,7 +220,7 @@
                                 </div>
                                 {% endverbatim %}
                             </div>
-                            <h3 class="text-primary mt-4">Adjustments</h3>
+                            <h4 class="mt-4">Adjustments</h4>
                             {% for bc in booking_change_fees %}
                                 <div class="row align-items-center py-2">
                                     <div class="col-md-9">
@@ -224,13 +232,13 @@
                                 </div>
                             {% endfor %}
                         </div>
-                        <div class="hiddenBookings" style="display:none;">
+                        <div class="hiddenBookings d-none">
                             <input type="hidden" id="bookingLines" v-model="bookingLines" name="bookingLines"/>
                         </div>
-                        <div class="hiddenAdmissions" style="display:none;">
+                        <div class="hiddenAdmissions d-none">
                             <input type="hidden" id="admissionsLines" v-model="admissionsLines" name="admissionsLines"/>
                         </div>
-                        <div class="hiddenocc" style="display:none;">
+                        <div class="hiddenocc d-none">
                             <input type="hidden" id="occ" v-model="occ" name="occ"/>
                         </div>
                         <div class="col-md-2" style='display:none'>
@@ -320,7 +328,7 @@
                 <div class="p-3 bg-light border rounded h-100">
                     <div class="row">
                         <div class="col-lg-12">
-                            <h3 class="text-primary">Personal Details</h3>
+                            <h4>Personal Details</h4>
                         </div>
                     </div>
                     <div class="row mb-3">
@@ -372,19 +380,19 @@
                 <div class="p-3 bg-light border rounded h-100">
                     <div class="row">
                         <div class="col-lg-12">
-                            <h3 class="text-primary">Vessels</h3>
+                            <h4>Vessels</h4>
                             <p v-if="pricing.vehicle"><b><a href="{{EXPLORE_PARKS_ENTRY_FEES}}" target="_blank">Entry fees</a> are required for each vehicle entering this park.</b></p>
-                            <p style='display: none;' v-else>No entry fees are required for this park.</p>
+                            <p class='d-none' v-else>No entry fees are required for this park.</p>
                         </div>
                     </div>
                     {# Manual rendering of the 'vehicles' formset. #}
                     {# Django 1.11 will move form rendering junk into proper templates, #}
                     {# so there should be a cleaner way of doing this in future. #}
-                    <div class="row" style='display: none;' v-cloak>
+                    <div class="row d-none" v-cloak>
                         <div class="col-md-4">
                             <div class="form-group">
-                                <label style='display: none;'>Number of vessels:
-                                    <input class="form-control" name="form-TOTAL_FORMS" max="8" min="1" value="1" v-model="vehicleCount" v-on:change="updateVehicles" type="number"/>
+                                <label class='d-none'>Number of vessels:
+                                    <input class="form-control" name="form-TOTAL_FORMS" max="8" min="1" value="1" v-model="vehicleCount" @change="updateVehicles" type="number"/>
                                     <input id="id_form-INITIAL_FORMS" name="form-INITIAL_FORMS" type="hidden" value="1" />
                                     <input id="id_form-MIN_NUM_FORMS" name="form-MIN_NUM_FORMS" type="hidden" value="0" />
                                     <input id="id_form-MAX_NUM_FORMS" name="form-MAX_NUM_FORMS" type="hidden" value="8" />
@@ -395,19 +403,19 @@
                     <div class="row mb-3">
                         <div class="col-md-6">
                             <label class="text-end">Vessel Registration:</label>
-                            <input class="form-control" type="text" v-model="rego" required v-on:change="searchRego()" style="text-transform:uppercase" readonly/>
+                            <input class="form-control" type="text" v-model="rego" required @change="searchRego()" style="text-transform:uppercase" readonly/>
 
-                            <div v-for="(vehicle, index) in vehicles" style="display:none;">
-                                <select v-on:change="calculateTotal" v-bind:name="'form-'+Number(index).toString()+'-vehicle_type'" class="form-control" v-model="vehicle[0]" >
+                            <div v-for="(vehicle, index) in vehicles" class="d-none">
+                                <select @change="calculateTotal" v-bind:name="'form-'+Number(index).toString()+'-vehicle_type'" class="form-control" v-model="vehicle[0]" >
                                     <option value="0">Vessel</option>
                                 </select>
                                 <label for="'form-'+Number(index).toString()+'-vehicle_rego'" class="text-right" >Vessel</label><label>&nbspRegistration:</label>
-                                <input class="form-control" v-bind:name="'form-'+Number(index).toString()+'-vehicle_rego'" type="text" v-model="vehicle[1]" v-on:change="searchRego()" style="text-transform:uppercase;" readonly/>
+                                <input class="form-control" v-bind:name="'form-'+Number(index).toString()+'-vehicle_rego'" type="text" v-model="vehicle[1]" @change="searchRego()" style="text-transform:uppercase;" readonly/>
                             </div>
                         </div>
                     </div>
                         <!-- <div class="col-md-4">
-                            <div class="checkbox" v-if="pricing.vehicle"><label><input v-bind:name="'form-'+Number(index).toString()+'-entry_fee'" type="checkbox" v-model="vehicle[2]" v-on:change="updateVehicles"/> Entry fee</label></div>
+                            <div class="checkbox" v-if="pricing.vehicle"><label><input v-bind:name="'form-'+Number(index).toString()+'-entry_fee'" type="checkbox" v-model="vehicle[2]" @change="updateVehicles"/> Entry fee</label></div>
                         </div> -->
                     
                     <div class="row mb-3">
@@ -433,24 +441,24 @@
                         </div>
                     </div>
                     <div v-if="linesAdmissions.length > 0">
-                        <h3 class="text-primary">Guest Details</h3>
+                        <h4 class="mt-4">Guest Details</h4>
                         <div v-if="payingAdmissions" class="row g-3">
                             <div class="col-md-4">
                                 <label for="num_adults" class="text-end">Adults (ages 12+):</label>
-                                <input type="number" class="form-control" id="numAdults" name="num_adults" v-model="numAdults" v-on:change="guestsUpdated()" min="0" max="16"/>
+                                <input type="number" class="form-control" id="numAdults" name="num_adults" v-model="numAdults" @change="guestsUpdated()" min="0" max="16"/>
                             </div>
                             <div class="col-md-4">
                                 <label for="num_children" class="text-end">Children (ages 4-12):</label>
-                                <input type="number" class="form-control" id="numChildren" name="num_children" v-model="numChildren" v-on:change="guestsUpdated()" min="0" max="16"/>
+                                <input type="number" class="form-control" id="numChildren" name="num_children" v-model="numChildren" @change="guestsUpdated()" min="0" max="16"/>
                             </div>
                             <div class="col-md-4">
                                 <label for="num_infants" class="text-end">Infants (ages 0-4):</label>
-                                <input type="number" class="form-control" id="numInfants" name="num_infants" v-model="numInfants" v-on:change="guestsUpdated()" min="0" max="16"/>
+                                <input type="number" class="form-control" id="numInfants" name="num_infants" v-model="numInfants" @change="guestsUpdated()" min="0" max="16"/>
                             </div>
                             <div class="col-md-4">
                             </div>
 
-                            <div class="row" style="display:none;">
+                            <div class="row d-none">
                                 <div class="small-6 columns">
                                     <label for="num_concessions" class="text-end"><span class="has-tip" title="Holders of one of the following Australian-issued cards:
                                         - Seniors Card
@@ -465,7 +473,7 @@
                                     <input type="number" id="numConcessions" name="num_concessions" v-model="numConcessions" min="0" max="16"/></label>
                                 </div>
                             </div>
-                            <div class="row" style="display:none;">
+                            <div class="row d-none">
                                 <div class="small-6 columns">
                                     <label for="num_children" class="text-right">Moorings<label>
                                 </div>
@@ -504,8 +512,7 @@
             <div class="col-lg-12">
                 <div class="p-3 bg-light border rounded">
                     <!-- Sub-row for Total Price and main action buttons -->
-                    <div class="row align-items-center">
-                        <!-- Left Column: Total Price -->
+                    <!-- <div class="row align-items-center">
                         <div class="col-md-6">
                             <label for="totalPrice" class="h5">Total Price <span class="text-muted small">(GST inclusive.)</span></label>
                             <div class="input-group input-group-lg">
@@ -513,8 +520,6 @@
                                 <input id="totalPrice" type="text" class="form-control" :value="total|formatMoney(2)" readonly="true">
                             </div>
                         </div>
-
-                        <!-- Right Column: Checkbox and Submit Button -->
                         <div class="col-md-6">
                             <div class="d-flex justify-content-end align-items-center">
                                 <div class="form-check me-3">
@@ -526,7 +531,38 @@
                             </div>
                         </div>
                     </div>
+ -->
+                    <div>
+                        <!-- First Row: Contains only the label -->
+                        <div class="row">
+                            <div class="col-md-12">
+                                <label for="totalPrice" class="h4">Total Price <span class="text-muted small">(GST inclusive.)</span></label>
+                            </div>
+                        </div>
 
+                        <!-- Second Row: Contains the input and the buttons -->
+                        <div class="row align-items-end">
+                            <!-- Left Column: Total Price Input -->
+                            <div class="col-md-6">
+                                <div class="input-group input-group-lg">
+                                    <span class="input-group-text">AUD $</span>
+                                    <input id="totalPrice" type="text" class="form-control" :value="total|formatMoney(2)" readonly="true">
+                                </div>
+                            </div>
+
+                            <!-- Right Column: Checkbox and Submit Button -->
+                            <div class="col-md-6">
+                                <div class="d-flex justify-content-end align-items-center">
+                                    <div class="form-check me-3">
+                                        <input type="checkbox" id="toc_check" class="form-check-input" v-model="toc">
+                                        <label for="toc_check" class="form-check-label">I agree to the <a target="_blank" href="{{EXPLORE_PARKS_TERMS}}">terms and conditions</a></label>
+                                    </div>
+                                    <button v-if="total >= 0" :disabled="!toc" type="submit" class="btn btn-primary btn-lg">Proceed to payment</button>
+                                    <button v-else :disabled="!toc" type="submit" class="btn btn-primary btn-lg">Proceed to Refund</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
                     {% if request.user.is_staff %}
                     <div class="row border-top mt-3 pt-3">
                         <div class="col-md-6">
