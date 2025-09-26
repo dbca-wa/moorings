@@ -53,17 +53,11 @@
                             <h5 class="mb-0">Trolley: <span id='total_trolley'>${{ total_booking }}</span></h5>
                             
                             <div v-show="ongoing_booking" class="d-flex align-items-center">
-                                <!-- Timer Text (using Badge for styling) -->
-                                <!-- <span class="badge bg-warning text-dark me-3">
-                                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-clock me-1" viewBox="0 0 16 16"><path d="M8 3.5a.5.5 0 0 0-1 0V9a.5.5 0 0 0 .252.434l3.5 2a.5.5 0 0 0 .496-.868L8 8.71z"/><path d="M8 16A8 8 0 1 0 8 0a8 8 0 0 0 0 16m7-8A7 7 0 1 1 1 8a7 7 0 0 1 14 0"/></svg>
-                                    Time Left: {{ timeleft }}
-                                </span> -->
-                                <!-- <span class="text-warning-emphasis d-flex align-items-center me-3"> -->
-                                <span class="text-danger-emphasis d-flex align-items-center me-3">
+                                <!-- Timer Text  -->
+                                <span class="text-danger d-flex align-items-center me-3">
                                     <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-clock-fill me-1" viewBox="0 0 16 16"><path d="M16 8A8 8 0 1 1 0 8a8 8 0 0 1 16 0zM8 3.5a.5.5 0 0 0-1 0V9a.5.5 0 0 0 .252.434l3.5 2a.5.5 0 0 0 .496-.868L8 8.71V3.5z"/></svg>
                                     Time Left: <strong class="ms-1">{{ timeleft }}</strong>
                                 </span>
-                                
                                 <!-- Cancel Button -->
                                 <a v-if="current_booking.length > 0" :href="parkstayUrl+'/booking/abort'" class="btn btn-sm btn-warning">Cancel in-progress booking</a>
                             </div>
@@ -90,13 +84,13 @@
                                 <button title="Please enter vessel details" class="btn btn-primary" @click="validateVessel()">Proceed to Check Out</button>
                             </div>
                             <div v-else>
-                               <div v-if="vesselWeight == 0 && vesselBeam == 0">
-                                <button title="Please enter vessel details" class="btn btn-primary" @click="validateVessel()">Proceed to Check Out</button>
-                               </div>
-                               <div v-else>
-                                <a v-if="current_booking.length > 0 && booking_changed == true && numAdults >= 0" class="btn btn-primary" :href="parkstayUrl+'/booking'">Proceed to Check Out</a>
-                                <button v-else-if="current_booking.length > 0 && booking_changed == true && numAdults < 0" class="btn btn-secondary" disabled>Please select minimum of 1 adult guest</button>
-                                <button v-else class="btn btn-secondary" disabled>Add items to Proceed to Check Out</button>
+                                <div v-if="vesselWeight == 0 && vesselBeam == 0">
+                                    <button title="Please enter vessel details" class="btn btn-primary" @click="validateVessel()">Proceed to Check Out</button>
+                                </div>
+                                <div v-else>
+                                    <a v-if="current_booking.length > 0 && booking_changed == true && numAdults >= 0" class="btn btn-primary" :href="parkstayUrl+'/booking'">Proceed to Check Out</a>
+                                    <button v-else-if="current_booking.length > 0 && booking_changed == true && numAdults < 0" class="btn btn-secondary" disabled>Please select minimum of 1 adult guest</button>
+                                    <button v-else class="btn btn-secondary" disabled>Add items to Proceed to Check Out</button>
                                 </div>
                             </div>
                         </div>
