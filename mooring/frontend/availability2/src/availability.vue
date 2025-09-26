@@ -53,18 +53,13 @@
                             <h5 class="mb-0">Trolley: <span id='total_trolley'>${{ total_booking }}</span></h5>
                             
                             <div v-show="ongoing_booking" class="d-flex align-items-center">
-                                <!-- Timer Text (using Badge for styling) -->
-                                <!-- <span class="badge bg-warning text-dark me-3">
-                                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-clock me-1" viewBox="0 0 16 16"><path d="M8 3.5a.5.5 0 0 0-1 0V9a.5.5 0 0 0 .252.434l3.5 2a.5.5 0 0 0 .496-.868L8 8.71z"/><path d="M8 16A8 8 0 1 0 8 0a8 8 0 0 0 0 16m7-8A7 7 0 1 1 1 8a7 7 0 0 1 14 0"/></svg>
-                                    Time Left: {{ timeleft }}
-                                </span> -->
-                                <span class="text-warning-emphasis d-flex align-items-center me-3">
+                                <!-- Timer Text  -->
+                                <span class="text-danger d-flex align-items-center me-3">
                                     <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-clock-fill me-1" viewBox="0 0 16 16"><path d="M16 8A8 8 0 1 1 0 8a8 8 0 0 1 16 0zM8 3.5a.5.5 0 0 0-1 0V9a.5.5 0 0 0 .252.434l3.5 2a.5.5 0 0 0 .496-.868L8 8.71V3.5z"/></svg>
                                     Time Left: <strong class="ms-1">{{ timeleft }}</strong>
                                 </span>
-                                
                                 <!-- Cancel Button -->
-                                <a v-if="current_booking.length > 0" :href="parkstayUrl+'/booking/abort'" class="btn btn-sm btn-danger">Cancel in-progress booking</a>
+                                <a v-if="current_booking.length > 0" :href="parkstayUrl+'/booking/abort'" class="btn btn-sm btn-warning">Cancel in-progress booking</a>
                             </div>
                         </div>
                         
@@ -74,12 +69,11 @@
                                 <span>{{ item.item }}</span>
                                 <div class="d-flex align-items-center">
                                     <span class="me-3">${{ item.amount }}</span>
-                                    <!-- <button v-show="item.past_booking == false" type="button" class="btn-close" @click="deleteBooking(item.id, item.past_booking)" aria-label="Remove item"></button> -->
-                                     <a href="#" v-show="item.past_booking == false" @click.prevent="deleteBooking(item.id, item.past_booking)" class="text-danger" title="Remove item">
-    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-x-circle-fill" viewBox="0 0 16 16">
-        <path d="M16 8A8 8 0 1 1 0 8a8 8 0 0 1 16 0M5.354 4.646a.5.5 0 1 0-.708.708L7.293 8l-2.647 2.646a.5.5 0 0 0 .708.708L8 8.707l2.646 2.647a.5.5 0 0 0 .708-.708L8.707 8l2.647-2.646a.5.5 0 0 0-.708-.708L8 7.293z"/>
-    </svg>
-</a>
+                                    <a href="#" v-show="item.past_booking == false" @click.prevent="deleteBooking(item.id, item.past_booking)" class="text-danger" title="Remove item">
+                                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-x-circle-fill" viewBox="0 0 16 16">
+                                            <path d="M16 8A8 8 0 1 1 0 8a8 8 0 0 1 16 0M5.354 4.646a.5.5 0 1 0-.708.708L7.293 8l-2.647 2.646a.5.5 0 0 0 .708.708L8 8.707l2.646 2.647a.5.5 0 0 0 .708-.708L8.707 8l2.647-2.646a.5.5 0 0 0-.708-.708L8 7.293z"/>
+                                        </svg>
+                                    </a>
                                 </div>
                             </li>
                         </ul>
@@ -90,13 +84,13 @@
                                 <button title="Please enter vessel details" class="btn btn-primary" @click="validateVessel()">Proceed to Check Out</button>
                             </div>
                             <div v-else>
-                               <div v-if="vesselWeight == 0 && vesselBeam == 0">
-                                <button title="Please enter vessel details" class="btn btn-primary" @click="validateVessel()">Proceed to Check Out</button>
-                               </div>
-                               <div v-else>
-                                <a v-if="current_booking.length > 0 && booking_changed == true && numAdults >= 0" class="btn btn-primary" :href="parkstayUrl+'/booking'">Proceed to Check Out</a>
-                                <button v-else-if="current_booking.length > 0 && booking_changed == true && numAdults < 0" class="btn btn-secondary" disabled>Please select minimum of 1 adult guest</button>
-                                <button v-else class="btn btn-secondary" disabled>Add items to Proceed to Check Out</button>
+                                <div v-if="vesselWeight == 0 && vesselBeam == 0">
+                                    <button title="Please enter vessel details" class="btn btn-primary" @click="validateVessel()">Proceed to Check Out</button>
+                                </div>
+                                <div v-else>
+                                    <a v-if="current_booking.length > 0 && booking_changed == true && numAdults >= 0" class="btn btn-primary" :href="parkstayUrl+'/booking'">Proceed to Check Out</a>
+                                    <button v-else-if="current_booking.length > 0 && booking_changed == true && numAdults < 0" class="btn btn-secondary" disabled>Please select minimum of 1 adult guest</button>
+                                    <button v-else class="btn btn-secondary" disabled>Add items to Proceed to Check Out</button>
                                 </div>
                             </div>
                         </div>
@@ -381,14 +375,15 @@
                                                         <div v-else-if="bp.status == 'selected'">
                                                             <!-- Wrap button and close icon in a relative position container -->
                                                             <div class="position-relative">
-                                                                <button class="btn btn-sm btn-info w-100" @click="deleteBooking(bp.booking_row_id, bp.past_booking)"> 
+                                                                <!-- <button class="btn btn-sm btn-info w-100" @click="deleteBooking(bp.booking_row_id, bp.past_booking)">  -->
+                                                                <button class="btn btn-sm btn-success w-100 disabled" style="pointer-events: none;"> 
                                                                     Book {{ bp.period_name }}
                                                                     <span v-if="site.mooring_class == 'small'">${{ bp.small_price }}</span>
                                                                     <span v-if="site.mooring_class == 'medium'">${{ bp.medium_price }}</span>
                                                                     <span v-if="site.mooring_class == 'large'">${{ bp.large_price }} </span>
                                                                 </button>
                                                                 <!-- Position the close button on top of the main button -->
-                                                                <a href="#" v-show="bp.past_booking == false" class="text-danger position-absolute top-0 end-0" style="transform: translate(6px, -6px); z-index: 5;" @click.prevent.stop="deleteBooking(bp.booking_row_id, bp.past_booking)" title="Remove">
+                                                                <a href="#" v-show="bp.past_booking == false" class="text-danger position-absolute top-0 end-0" style="transform: translate(6px, -6px); z-index: 5;" @click.prevent="deleteBooking(bp.booking_row_id, bp.past_booking)" title="Remove">
                                                                     <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-x-circle-fill" viewBox="0 0 16 16">
                                                                         <circle cx="8" cy="8" r="8" fill="white"/>
                                                                         <path d="M16 8A8 8 0 1 1 0 8a8 8 0 0 1 16 0M5.354 4.646a.5.5 0 1 0-.708.708L7.293 8l-2.647 2.646a.5.5 0 0 0 .708.708L8 8.707l2.646 2.647a.5.5 0 0 0 .708-.708L8.707 8l2.647-2.646a.5.5 0 0 0-.708-.708L8 7.293z"/>
