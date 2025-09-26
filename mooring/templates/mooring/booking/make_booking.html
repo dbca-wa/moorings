@@ -70,6 +70,9 @@
                                     {% endif %}
                                 </div>
                             </div>
+
+                            <hr>
+
                             {% if show_errors %}
                             <div class="alert alert-danger">
                                 <p>There were some problems with your submission:</p>
@@ -92,9 +95,9 @@
                         </div>
                         <div class="col-md-12">
                             <div id='mooring_pricing_table'>
-                                <div class="row pb-2 mb-2 border-bottom fw-bold text-muted">
+                                <div class="row pb-2 mb-2 border-bottom fw-bold">
                                     <div class="col-md-12 mb-2">
-                                        <h3 class="text-primary">Mooring Fees</h3>
+                                        <h4>Mooring Fees</h4>
                                     </div>
                                     <div class="col-md-3">
                                         Mooring
@@ -152,9 +155,9 @@
                             </div>
 
                             <div id='admissions_pricing_table' v-if="payingAdmissions && linesAdmissions.length > 0" v-cloak>
-                                <div class="row pb-2 mb-2 border-bottom fw-bold text-muted">
-                                    <div class="col-md-12 mb-2">
-                                        <h3 class="text-primary">Admission Fees</h3>
+                                <div class="row pb-2 mb-2 border-bottom fw-bold">
+                                    <div class="col-md-12 mb-2 mt-4">
+                                        <h4>Admission Fees</h4>
                                     </div>
                                     <div class="col-md-1">
                                         Adults
@@ -217,7 +220,7 @@
                                 </div>
                                 {% endverbatim %}
                             </div>
-                            <h3 class="text-primary mt-4">Adjustments</h3>
+                            <h4 class="mt-4">Adjustments</h4>
                             {% for bc in booking_change_fees %}
                                 <div class="row align-items-center py-2">
                                     <div class="col-md-9">
@@ -325,7 +328,7 @@
                 <div class="p-3 bg-light border rounded h-100">
                     <div class="row">
                         <div class="col-lg-12">
-                            <h3 class="text-primary">Personal Details</h3>
+                            <h4>Personal Details</h4>
                         </div>
                     </div>
                     <div class="row mb-3">
@@ -377,7 +380,7 @@
                 <div class="p-3 bg-light border rounded h-100">
                     <div class="row">
                         <div class="col-lg-12">
-                            <h3 class="text-primary">Vessels</h3>
+                            <h4>Vessels</h4>
                             <p v-if="pricing.vehicle"><b><a href="{{EXPLORE_PARKS_ENTRY_FEES}}" target="_blank">Entry fees</a> are required for each vehicle entering this park.</b></p>
                             <p class='d-none' v-else>No entry fees are required for this park.</p>
                         </div>
@@ -438,7 +441,7 @@
                         </div>
                     </div>
                     <div v-if="linesAdmissions.length > 0">
-                        <h3 class="text-primary">Guest Details</h3>
+                        <h4 class="mt-4">Guest Details</h4>
                         <div v-if="payingAdmissions" class="row g-3">
                             <div class="col-md-4">
                                 <label for="num_adults" class="text-end">Adults (ages 12+):</label>
