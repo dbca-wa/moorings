@@ -664,6 +664,23 @@ export default {
             }
         }
     },
+    watch: {
+        /**
+         * Watches for changes in the 'timer' property to handle the timeout logic.
+         * @param {number} newValue - The new value of the timer.
+         */
+        timer(newValue) {
+            // Trigger the expiration logic only when the timer crosses the zero threshold.
+            if (newValue < 0) {
+                if (this.ongoing_booking && !this.booking_expired_notification) {
+                    console.log('TIMED OUT');
+                    clearInterval(this.timer); 
+                    this.bookingExpired();
+                    this.booking_expired_notification = true;
+                }
+            }
+        }
+    },
     methods: {
         toggleMoreInfo: function(){
             this.showMoreInfo ? this.showMoreInfo = false: this.showMoreInfo = true;
