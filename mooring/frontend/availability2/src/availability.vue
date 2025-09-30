@@ -1337,7 +1337,11 @@ export default {
             this.arrivalEl = $('#date-arrival');
             this.update();
 
-                var saneTz = (0 < Math.floor((vm.expiry - moment.now())/1000) < vm.timer);
+            // var saneTz = (0 < Math.floor((vm.expiry - moment.now())/1000) < vm.timer);
+            // Calculate remaining seconds based on the user's clock
+            const remainingSeconds = Math.floor((vm.expiry - moment.now()) / 1000);
+            // Check if the user's clock is reasonable
+            const saneTz = (0 < remainingSeconds && remainingSeconds < vm.timer);
 
                 // Clear any existing timer before starting a new one
                 if (vm.timerInterval) {
