@@ -1343,26 +1343,23 @@ export default {
             // Check if the user's clock is reasonable
             const saneTz = (0 < remainingSeconds && remainingSeconds < vm.timer);
 
-                // Clear any existing timer before starting a new one
-                if (vm.timerInterval) {
-                    clearInterval(vm.timerInterval);
+            // Clear any existing timer before starting a new one
+            if (vm.timerInterval) {
+                clearInterval(vm.timerInterval);
+            }
+
+            vm.timerInterval = setInterval(function (ev) {
+                // fall back to the pre-encoded timer
+                if (!saneTz) {
+                    vm.timer -= 1;
+                } else {
+                    // if the timezone is sane, do live updates
+                    // this way unloaded tabs won't cache the wrong time.
+                    var newTimer = Math.floor((vm.expiry - moment.now())/1000);
+                    vm.timer = newTimer;
                 }
+            }, 1000);
 
-                vm.timerInterval = setInterval(function (ev) {
-                    // fall back to the pre-encoded timer
-                    if (!saneTz) {
-                        vm.timer -= 1;
-                    } else {
-                        // if the timezone is sane, do live updates
-                        // this way unloaded tabs won't cache the wrong time.
-                        var newTimer = Math.floor((vm.expiry - moment.now())/1000);
-                        vm.timer = newTimer;
-                    }
-
-                    if ((vm.timer <= -1)) {
-
-                    }
-                }, 1000);
             // Fix white space which appears on the right of the availablity screen START
             $('#guests-button').click();
             $('#guests-button').click();
