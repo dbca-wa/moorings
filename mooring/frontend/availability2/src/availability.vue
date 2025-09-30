@@ -554,7 +554,8 @@ export default {
             mooring_book_row_disabled: [],
             mooring_book_row_display: [],
             loadingID: 0,
-            timerInterval: null 
+            timerInterval: null,
+            initialTimerValue: null
         };
     },
     computed: {
@@ -777,8 +778,6 @@ export default {
                             allowOutsideClick: false
                          })
                      }
-
-
                       vm.update();
                   },
                   error: function(data, stat, err) {
@@ -791,13 +790,9 @@ export default {
 	                  showLoaderOnConfirm: true,
 	                  allowOutsideClick: false
         	        })
-
-
-
                        vm.update();
                   }
               });
-
 	},
 	addBookingRow: function(site_index_id) {
                         var vm = this;
@@ -1150,6 +1145,7 @@ export default {
                                 vm.booking_changed = data.booking_changed;
                                 vm.total_booking = data.total_booking;
                                 vm.timer = data.timer;
+                                vm.initialTimerValue = data.timer;
                                 vm.expiry = data.expiry;
                 
                                 if (data.error_type != null) {
@@ -1337,26 +1333,29 @@ export default {
             this.arrivalEl = $('#date-arrival');
             this.update();
 
-            // var saneTz = (0 < Math.floor((vm.expiry - moment.now())/1000) < vm.timer);
-            // Calculate remaining seconds based on the user's clock
-            const remainingSeconds = Math.floor((vm.expiry - moment.now()) / 1000);
-            // Check if the user's clock is reasonable
-            const saneTz = (0 < remainingSeconds && remainingSeconds < vm.timer);
-
             // Clear any existing timer before starting a new one
             if (vm.timerInterval) {
                 clearInterval(vm.timerInterval);
             }
 
             vm.timerInterval = setInterval(function (ev) {
-                // fall back to the pre-encoded timer
-                if (!saneTz) {
-                    vm.timer -= 1;
-                } else {
-                    // if the timezone is sane, do live updates
-                    // this way unloaded tabs won't cache the wrong time.
-                    var newTimer = Math.floor((vm.expiry - moment.now())/1000);
+                if (vm.expiry && typeof vm.expiry === 'number') {
+                    var newTimer = Math.floor((vm.expiry - moment.now()) / 1000);
+
+                    // Check if the calculated time is unreasonably large.
+                    // This detects if the user has moved their clock to the past.
+                    // A small buffer (e.g., 5 seconds) is added to handle minor delays.
+                    if (newTimer > (vm.initialTimerValue + 5)) {
+                        console.warn('Potential clock manipulation detected. Expiring timer.');
+                        // Force the timer to expire immediately.
+                        vm.timer = -1; 
+                        return; // Stop further processing in this interval
+                    }
+
                     vm.timer = newTimer;
+                } else {
+                    // Fallback method
+                    vm.timer -= 1;
                 }
             }, 1000);
 
