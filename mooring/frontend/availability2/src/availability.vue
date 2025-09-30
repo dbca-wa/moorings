@@ -652,17 +652,6 @@ export default {
                 }
 
                 return ret
-
-                // if (this.ongoing_booking) {
-                //     if (this.timer < 0) {
-                //         if (this.booking_expired_notification == false) { 
-                //             console.log('TIMED OUT');
-                //             clearInterval(this.timer);
-                //             this.bookingExpired();
-                //             this.booking_expired_notification = true;
-                //         }
-                //     }
-                // }
             }
         }
     },
