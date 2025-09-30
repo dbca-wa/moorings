@@ -579,6 +579,8 @@ export default {
             pinsCache:{},
             mapLoading: false,
             loadingID: 0,
+            timerInterval: null,
+            initialTimerValue: null,
 
             // For custom pagination.  vue-paginate cannot be used with Vue3
             currentPage: 1,
@@ -692,38 +694,31 @@ export default {
             }
         },
         timeleft: {
-                cache: false,
-                get: function() {
-                    // Minutes and seconds
-                    var mins = ~~(this.timer / 60);
-                    var secs = this.timer % 60;
-
-                    // Hours, minutes and seconds
-                    var hrs = ~~(this.timer / 3600);
-                    var mins = ~~((this.timer % 3600) / 60);
-                    var secs = this.timer % 60;
-
-                    // Output like "1:01" or "4:03:59" or "123:03:59"
-                    var ret = "";
-
-                    if (hrs > 0) {
-                        ret += "" + hrs + ":" + (mins < 10 ? "0" : "");
-                    }
-
-                    ret += "" + mins + ":" + (secs < 10 ? "0" : "");
-                    ret += "" + secs;
-                    if (this.ongoing_booking) {
-                       if (this.timer < 0) {
-                            if (this.booking_expired_notification == false) {
-                           console.log('TIMED OUT');
-                           clearInterval(this.timer);
-                           this.bookingExpired();
-                           this.booking_expired_notification = true;
-                        }
-                       }
-                    }
-                    return ret;
+            cache: false,
+            get: function get() {
+                if (typeof this.timer !== 'number' || this.timer < 0) {
+                    return '--:--';
                 }
+
+                // Hours, minutes and seconds
+                var hrs = Math.floor(this.timer / 3600);
+                var mins = Math.floor((this.timer % 3600) / 60);
+                var secs = this.timer % 60;
+
+                // Output like "1:01" or "4:03:59" or "123:03:59"
+                const formattedMins = String(mins).padStart(2, '0');
+                const formattedSecs = String(secs).padStart(2, '0');
+                let ret = "";
+                if (hrs > 0) {
+                    // If there are hours, format as "h:mm:ss"
+                    ret = `${hrs}:${formattedMins}:${formattedSecs}`;
+                } else {
+                    // Otherwise, format as "mm:ss"
+                    ret = `${formattedMins}:${formattedSecs}`;
+                }
+
+                return ret
+            }
         },
         bookingParam: {
             cache: false,
@@ -830,6 +825,21 @@ export default {
         },
         vesselDraft() {
             this.currentPage = 1;
+        },
+        /**
+         * Watches for changes in the 'timer' property to handle the timeout logic.
+         * @param {number} newValue - The new value of the timer.
+         */
+        timer(newValue) {
+            // Trigger the expiration logic only when the timer crosses the zero threshold.
+            if (newValue < 0) {
+                if (this.ongoing_booking && !this.booking_expired_notification) {
+                    console.log('TIMED OUT');
+                    clearInterval(this.timerInterval); 
+                    this.bookingExpired();
+                    this.booking_expired_notification = true;
+                }
+            }
         }
     },
     methods: {
@@ -1634,6 +1644,7 @@ export default {
                     vm.current_booking = response.current_booking.current_booking;
                     vm.total_booking = response.current_booking.total_price;
                     vm.timer = response.current_booking.timer;
+                    vm.initialTimerValue = response.current_booking.timer;
                     vm.ongoing_booking = response.current_booking.ongoing_booking[0];
                     if (response.current_booking.details != null) {  
                         vm.numAdults = parseInt(response.current_booking.details[0].num_adults) > 0 ? parseInt(response.current_booking.details[0].num_adults) : 2;
@@ -2404,22 +2415,29 @@ export default {
                 vm.searchRego(rego);
             }
 
-            var saneTz = (0 < Math.floor((vm.expiry - moment.now())/1000) < vm.timer);
-            var timer = setInterval(function (ev) {
-                // fall back to the pre-encoded timer
-                if (!saneTz) {
-                    vm.timer -= 1;
-                } else {
-                    // if the timezone is sane, do live updates
-                    // this way unloaded tabs won't cache the wrong time.
-                    var newTimer = Math.floor((vm.expiry - moment.now())/1000);
-                    vm.timer = newTimer;
-                }
+            // Clear any existing timer before starting a new one
+            if (vm.timerInterval) {
+                clearInterval(vm.timerInterval);
+            }
 
-                if ((vm.timer <= -1)) {
-                    // clearInterval(timer);
-                    // var loc = window.location;
-                    // window.location = loc.protocol + '//' + loc.host + loc.pathname;
+            vm.timerInterval = setInterval(function (ev) {
+                if (vm.expiry && typeof vm.expiry === 'number') {
+                    var newTimer = Math.floor((vm.expiry - moment.now()) / 1000);
+
+                    // Check if the calculated time is unreasonably large.
+                    // This detects if the user has moved their clock to the past.
+                    // A small buffer (e.g., 5 seconds) is added to handle minor delays.
+                    if (newTimer > (vm.initialTimerValue + 5)) {
+                        console.warn('Potential clock manipulation detected. Expiring timer.');
+                        // Force the timer to expire immediately.
+                        vm.timer = -1; 
+                        return; // Stop further processing in this interval
+                    }
+
+                    vm.timer = newTimer;
+                } else {
+                    // Fallback method
+                    vm.timer -= 1;
                 }
             }, 1000);
 

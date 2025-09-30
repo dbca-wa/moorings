@@ -72,7 +72,7 @@
                                 <span>{{ item.item }}</span>
                                 <div class="d-flex align-items-center">
                                     <span class="me-3">${{ item.amount }}</span>
-                                    <a href="#" v-show="item.past_booking == false" @click.prevent="deleteBooking(item.id, item.past_booking)" class="text-danger" title="Remove item">
+                                    <a href="#" v-show="item.past_booking == false" @click.prevent="deleteBooking(item.id, item.past_booking)" class="text-danger" title="Remove from Trolley">
                                         <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-x-circle-fill" viewBox="0 0 16 16">
                                             <path d="M16 8A8 8 0 1 1 0 8a8 8 0 0 1 16 0M5.354 4.646a.5.5 0 1 0-.708.708L7.293 8l-2.647 2.646a.5.5 0 0 0 .708.708L8 8.707l2.646 2.647a.5.5 0 0 0 .708-.708L8.707 8l2.647-2.646a.5.5 0 0 0-.708-.708L8 7.293z"/>
                                         </svg>
@@ -355,19 +355,8 @@
                                                             <button
                                                                 class="btn btn-sm btn-success w-100"
                                                                 @click="addBooking(site.id,site.mooring_id,bp.id,bp.date)"
-                                                                v-if="bp.caption.length > 1"
-                                                                data-bs-toggle="tooltip"
-                                                                :title="bp.caption"
-                                                            >
-                                                                Book {{ bp.period_name }}
-                                                                <span v-if="site.mooring_class == 'small'">${{ bp.small_price }}</span>
-                                                                <span v-if="site.mooring_class == 'medium'">${{ bp.medium_price }}</span>
-                                                                <span v-if="site.mooring_class == 'large'">${{ bp.large_price }}</span>
-                                                            </button>
-                                                            <button
-                                                                v-else
-                                                                class="btn btn-sm btn-success w-100"
-                                                                @click="addBooking(site.id,site.mooring_id,bp.id,bp.date)"
+                                                                :data-bs-toggle="bp.caption && bp.caption.length > 1 ? 'tooltip' : null"
+                                                                :title="bp.caption && bp.caption.length > 1 ? bp.caption : null"
                                                             >
                                                                 Book {{ bp.period_name }}
                                                                 <span v-if="site.mooring_class == 'small'">${{ bp.small_price }}</span>
@@ -379,29 +368,39 @@
                                                             <!-- Wrap button and close icon in a relative position container -->
                                                             <div class="position-relative">
                                                                 <!-- <button class="btn btn-sm btn-info w-100" @click="deleteBooking(bp.booking_row_id, bp.past_booking)">  -->
-                                                                <button class="btn btn-sm btn-success w-100 disabled" style="pointer-events: none;"> 
+                                                                <button class="btn btn-sm btn-success w-100" disabled> 
                                                                     Book {{ bp.period_name }}
                                                                     <span v-if="site.mooring_class == 'small'">${{ bp.small_price }}</span>
                                                                     <span v-if="site.mooring_class == 'medium'">${{ bp.medium_price }}</span>
                                                                     <span v-if="site.mooring_class == 'large'">${{ bp.large_price }} </span>
                                                                 </button>
-                                                                <!-- Position the close button on top of the main button -->
-                                                                <a href="#" v-show="bp.past_booking == false" class="text-danger position-absolute top-0 end-0" style="transform: translate(6px, -6px); z-index: 5;" @click.prevent="deleteBooking(bp.booking_row_id, bp.past_booking)" title="Remove">
-                                                                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-x-circle-fill" viewBox="0 0 16 16">
-                                                                        <circle cx="8" cy="8" r="8" fill="white"/>
-                                                                        <path d="M16 8A8 8 0 1 1 0 8a8 8 0 0 1 16 0M5.354 4.646a.5.5 0 1 0-.708.708L7.293 8l-2.647 2.646a.5.5 0 0 0 .708.708L8 8.707l2.646 2.647a.5.5 0 0 0 .708-.708L8.707 8l2.647-2.646a.5.5 0 0 0-.708-.708L8 7.293z"/>
-                                                                    </svg>
-                                                                </a>
+                                                                <div 
+                                                                    class="position-absolute top-0 end-0 d-flex align-items-center bg-body-secondary rounded-pill ps-2" 
+                                                                    style="transform: translate(6px, -8px); z-index: 5; line-height: 1;"
+                                                                >
+                                                                    <span class="small fw-bold me-1 text-dark">In Trolley</span>
+                                                                    <a 
+                                                                        href="#" 
+                                                                        class="text-danger" 
+                                                                        style="text-decoration: none;"
+                                                                        @click.prevent="deleteBooking(bp.booking_row_id, bp.past_booking)"
+                                                                        title="Remove from Trolley"
+                                                                    >
+                                                                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-x-circle-fill" viewBox="0 0 16 16">
+                                                                            <path d="M16 8A8 8 0 1 1 0 8a8 8 0 0 1 16 0M5.354 4.646a.5.5 0 1 0-.708.708L7.293 8l-2.647 2.646a.5.5 0 0 0 .708.708L8 8.707l2.646 2.647a.5.5 0 0 0 .708-.708L8.707 8l2.647-2.646a.5.5 0 0 0-.708-.708L8 7.293z"/>
+                                                                        </svg>
+                                                                    </a>
+                                                                </div>
                                                             </div>
                                                         </div>
                                                         <div v-else-if="bp.status == 'perday'">
-                                                            <button class="btn btn-sm btn-light w-100" disabled>One Mooring Limit</button>
+                                                            <span class="small text-muted">One Mooring Limit</span>
                                                         </div>
                                                         <div v-else-if="bp.status == 'maxstay'">
-                                                            <button class="btn btn-sm btn-light w-100" disabled>Max Stay Limit Reached</button>
+                                                            <span class="small text-muted">Max Stay Limit Reached</span>
                                                         </div>
                                                         <div v-else>
-                                                            <button class="btn btn-sm btn-danger w-100 disabled" style="text-decoration: line-through; opacity: 0.65;">{{ bp.period_name }}</button>
+                                                            <span class="small text-danger text-decoration-line-through opacity-75">{{ bp.period_name }}</span>
                                                         </div>
                                                     </div>
                                                 </td>
@@ -553,7 +552,9 @@ export default {
             mooring_book_row_price: [],
             mooring_book_row_disabled: [],
             mooring_book_row_display: [],
-            loadingID: 0 
+            loadingID: 0,
+            timerInterval: null,
+            initialTimerValue: null
         };
     },
     computed: {
@@ -626,43 +627,49 @@ export default {
         },
 
         timeleft: {
-                cache: false,
-                get: function get() {
-                    // Minutes and seconds
-                    var mins = ~~(this.timer / 60);
-                    var secs = this.timer % 60;
-
-                    // Hours, minutes and seconds
-                    var hrs = ~~(this.timer / 3600);
-                    var mins = ~~((this.timer % 3600) / 60);
-                    var secs = this.timer % 60;
-
-                    // Output like "1:01" or "4:03:59" or "123:03:59"
-                    var ret = "";
-
-                    if (hrs > 0) {
-                        ret += "" + hrs + ":" + (mins < 10 ? "0" : "");
-                    }
-
-                    ret += "" + mins + ":" + (secs < 10 ? "0" : "");
-                    ret += "" + secs;
-                    if (this.ongoing_booking) {
-                       
-                       if (this.timer < 0) {
-                            if (this.booking_expired_notification == false) { 
-   		   	   console.log('TIMED OUT');
-                           clearInterval(this.timer);
-//                         var loc = window.location;
-//                         window.location = loc.protocol + '//' + loc.host + loc.pathname;
-                           this.bookingExpired();
-                           this.booking_expired_notification = true;
-			}
-		       }
-                    }
-                    return ret;
+            cache: false,
+            get: function get() {
+                if (typeof this.timer !== 'number' || this.timer < 0) {
+                    return '--:--';
                 }
-        }
 
+                // Hours, minutes and seconds
+                var hrs = Math.floor(this.timer / 3600);
+                var mins = Math.floor((this.timer % 3600) / 60);
+                var secs = this.timer % 60;
+
+                // Output like "1:01" or "4:03:59" or "123:03:59"
+                const formattedMins = String(mins).padStart(2, '0');
+                const formattedSecs = String(secs).padStart(2, '0');
+                let ret = "";
+                if (hrs > 0) {
+                    // If there are hours, format as "h:mm:ss"
+                    ret = `${hrs}:${formattedMins}:${formattedSecs}`;
+                } else {
+                    // Otherwise, format as "mm:ss"
+                    ret = `${formattedMins}:${formattedSecs}`;
+                }
+
+                return ret
+            }
+        }
+    },
+    watch: {
+        /**
+         * Watches for changes in the 'timer' property to handle the timeout logic.
+         * @param {number} newValue - The new value of the timer.
+         */
+        timer(newValue) {
+            // Trigger the expiration logic only when the timer crosses the zero threshold.
+            if (newValue < 0) {
+                if (this.ongoing_booking && !this.booking_expired_notification) {
+                    console.log('TIMED OUT');
+                    clearInterval(this.timerInterval); 
+                    this.bookingExpired();
+                    this.booking_expired_notification = true;
+                }
+            }
+        }
     },
     methods: {
         toggleMoreInfo: function(){
@@ -759,8 +766,6 @@ export default {
                             allowOutsideClick: false
                          })
                      }
-
-
                       vm.update();
                   },
                   error: function(data, stat, err) {
@@ -773,13 +778,9 @@ export default {
 	                  showLoaderOnConfirm: true,
 	                  allowOutsideClick: false
         	        })
-
-
-
                        vm.update();
                   }
               });
-
 	},
 	addBookingRow: function(site_index_id) {
                         var vm = this;
@@ -1132,6 +1133,7 @@ export default {
                                 vm.booking_changed = data.booking_changed;
                                 vm.total_booking = data.total_booking;
                                 vm.timer = data.timer;
+                                vm.initialTimerValue = data.timer;
                                 vm.expiry = data.expiry;
                 
                                 if (data.error_type != null) {
@@ -1319,22 +1321,32 @@ export default {
             this.arrivalEl = $('#date-arrival');
             this.update();
 
-                var saneTz = (0 < Math.floor((vm.expiry - moment.now())/1000) < vm.timer);
-                var timer = setInterval(function (ev) {
-                    // fall back to the pre-encoded timer
-                    if (!saneTz) {
-                        vm.timer -= 1;
-                    } else {
-                        // if the timezone is sane, do live updates
-                        // this way unloaded tabs won't cache the wrong time.
-                        var newTimer = Math.floor((vm.expiry - moment.now())/1000);
-                        vm.timer = newTimer;
+            // Clear any existing timer before starting a new one
+            if (vm.timerInterval) {
+                clearInterval(vm.timerInterval);
+            }
+
+            vm.timerInterval = setInterval(function (ev) {
+                if (vm.expiry && typeof vm.expiry === 'number') {
+                    var newTimer = Math.floor((vm.expiry - moment.now()) / 1000);
+
+                    // Check if the calculated time is unreasonably large.
+                    // This detects if the user has moved their clock to the past.
+                    // A small buffer (e.g., 5 seconds) is added to handle minor delays.
+                    if (newTimer > (vm.initialTimerValue + 5)) {
+                        console.warn('Potential clock manipulation detected. Expiring timer.');
+                        // Force the timer to expire immediately.
+                        vm.timer = -1; 
+                        return; // Stop further processing in this interval
                     }
 
-                    if ((vm.timer <= -1)) {
+                    vm.timer = newTimer;
+                } else {
+                    // Fallback method
+                    vm.timer -= 1;
+                }
+            }, 1000);
 
-                    }
-                }, 1000);
             // Fix white space which appears on the right of the availablity screen START
             $('#guests-button').click();
             $('#guests-button').click();
