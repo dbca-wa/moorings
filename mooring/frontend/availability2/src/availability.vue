@@ -374,13 +374,23 @@
                                                                     <span v-if="site.mooring_class == 'medium'">${{ bp.medium_price }}</span>
                                                                     <span v-if="site.mooring_class == 'large'">${{ bp.large_price }} </span>
                                                                 </button>
-                                                                <!-- Position the close button on top of the main button -->
-                                                                <a href="#" v-show="bp.past_booking == false" class="text-danger position-absolute top-0 end-0" style="transform: translate(6px, -6px); z-index: 5;" @click.prevent="deleteBooking(bp.booking_row_id, bp.past_booking)" title="Remove">
-                                                                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-x-circle-fill" viewBox="0 0 16 16">
-                                                                        <circle cx="8" cy="8" r="8" fill="white"/>
-                                                                        <path d="M16 8A8 8 0 1 1 0 8a8 8 0 0 1 16 0M5.354 4.646a.5.5 0 1 0-.708.708L7.293 8l-2.647 2.646a.5.5 0 0 0 .708.708L8 8.707l2.646 2.647a.5.5 0 0 0 .708-.708L8.707 8l2.647-2.646a.5.5 0 0 0-.708-.708L8 7.293z"/>
-                                                                    </svg>
-                                                                </a>
+                                                                <div 
+                                                                    class="position-absolute top-0 end-0 d-flex align-items-center bg-body-secondary rounded-pill ps-2" 
+                                                                    style="transform: translate(6px, -8px); z-index: 5; line-height: 1;"
+                                                                >
+                                                                    <span class="small fw-bold me-1 text-dark">In Trolley</span>
+                                                                    <a 
+                                                                        href="#" 
+                                                                        class="text-danger" 
+                                                                        style="text-decoration: none;"
+                                                                        @click.prevent="deleteBooking(bp.booking_row_id, bp.past_booking)"
+                                                                        title="Remove from Trolley"
+                                                                    >
+                                                                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-x-circle-fill" viewBox="0 0 16 16">
+                                                                            <path d="M16 8A8 8 0 1 1 0 8a8 8 0 0 1 16 0M5.354 4.646a.5.5 0 1 0-.708.708L7.293 8l-2.647 2.646a.5.5 0 0 0 .708.708L8 8.707l2.646 2.647a.5.5 0 0 0 .708-.708L8.707 8l2.647-2.646a.5.5 0 0 0-.708-.708L8 7.293z"/>
+                                                                        </svg>
+                                                                    </a>
+                                                                </div>
                                                             </div>
                                                         </div>
                                                         <div v-else-if="bp.status == 'perday'">
