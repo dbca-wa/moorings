@@ -355,19 +355,8 @@
                                                             <button
                                                                 class="btn btn-sm btn-success w-100"
                                                                 @click="addBooking(site.id,site.mooring_id,bp.id,bp.date)"
-                                                                v-if="bp.caption.length > 1"
-                                                                data-bs-toggle="tooltip"
-                                                                :title="bp.caption"
-                                                            >
-                                                                Book {{ bp.period_name }}
-                                                                <span v-if="site.mooring_class == 'small'">${{ bp.small_price }}</span>
-                                                                <span v-if="site.mooring_class == 'medium'">${{ bp.medium_price }}</span>
-                                                                <span v-if="site.mooring_class == 'large'">${{ bp.large_price }}</span>
-                                                            </button>
-                                                            <button
-                                                                v-else
-                                                                class="btn btn-sm btn-success w-100"
-                                                                @click="addBooking(site.id,site.mooring_id,bp.id,bp.date)"
+                                                                :data-bs-toggle="bp.caption && bp.caption.length > 1 ? 'tooltip' : null"
+                                                                :title="bp.caption && bp.caption.length > 1 ? bp.caption : null"
                                                             >
                                                                 Book {{ bp.period_name }}
                                                                 <span v-if="site.mooring_class == 'small'">${{ bp.small_price }}</span>
