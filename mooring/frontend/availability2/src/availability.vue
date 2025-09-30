@@ -626,43 +626,43 @@ export default {
         },
 
         timeleft: {
-                cache: false,
-                get: function get() {
-                    // Minutes and seconds
-                    var mins = ~~(this.timer / 60);
-                    var secs = this.timer % 60;
-
-                    // Hours, minutes and seconds
-                    var hrs = ~~(this.timer / 3600);
-                    var mins = ~~((this.timer % 3600) / 60);
-                    var secs = this.timer % 60;
-
-                    // Output like "1:01" or "4:03:59" or "123:03:59"
-                    var ret = "";
-
-                    if (hrs > 0) {
-                        ret += "" + hrs + ":" + (mins < 10 ? "0" : "");
-                    }
-
-                    ret += "" + mins + ":" + (secs < 10 ? "0" : "");
-                    ret += "" + secs;
-                    if (this.ongoing_booking) {
-                       
-                       if (this.timer < 0) {
-                            if (this.booking_expired_notification == false) { 
-   		   	   console.log('TIMED OUT');
-                           clearInterval(this.timer);
-//                         var loc = window.location;
-//                         window.location = loc.protocol + '//' + loc.host + loc.pathname;
-                           this.bookingExpired();
-                           this.booking_expired_notification = true;
-			}
-		       }
-                    }
-                    return ret;
+            cache: false,
+            get: function get() {
+                if (typeof this.timer !== 'number' || this.timer < 0) {
+                    return '--:--';
                 }
-        }
 
+                // Hours, minutes and seconds
+                var hrs = Math.floor(this.timer / 3600);
+                var mins = Math.floor((this.timer % 3600) / 60);
+                var secs = this.timer % 60;
+
+                // Output like "1:01" or "4:03:59" or "123:03:59"
+                const formattedMins = String(mins).padStart(2, '0');
+                const formattedSecs = String(secs).padStart(2, '0');
+                let ret = "";
+                if (hrs > 0) {
+                    // If there are hours, format as "h:mm:ss"
+                    ret = `${hrs}:${formattedMins}:${formattedSecs}`;
+                } else {
+                    // Otherwise, format as "mm:ss"
+                    ret = `${formattedMins}:${formattedSecs}`;
+                }
+
+                return ret
+
+                // if (this.ongoing_booking) {
+                //     if (this.timer < 0) {
+                //         if (this.booking_expired_notification == false) { 
+                //             console.log('TIMED OUT');
+                //             clearInterval(this.timer);
+                //             this.bookingExpired();
+                //             this.booking_expired_notification = true;
+                //         }
+                //     }
+                // }
+            }
+        }
     },
     methods: {
         toggleMoreInfo: function(){
