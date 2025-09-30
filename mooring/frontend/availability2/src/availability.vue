@@ -553,7 +553,8 @@ export default {
             mooring_book_row_price: [],
             mooring_book_row_disabled: [],
             mooring_book_row_display: [],
-            loadingID: 0 
+            loadingID: 0,
+            timerInterval: null 
         };
     },
     computed: {
@@ -674,7 +675,7 @@ export default {
             if (newValue < 0) {
                 if (this.ongoing_booking && !this.booking_expired_notification) {
                     console.log('TIMED OUT');
-                    clearInterval(this.timer); 
+                    clearInterval(this.timerInterval); 
                     this.bookingExpired();
                     this.booking_expired_notification = true;
                 }
@@ -1337,7 +1338,13 @@ export default {
             this.update();
 
                 var saneTz = (0 < Math.floor((vm.expiry - moment.now())/1000) < vm.timer);
-                var timer = setInterval(function (ev) {
+
+                // Clear any existing timer before starting a new one
+                if (vm.timerInterval) {
+                    clearInterval(vm.timerInterval);
+                }
+
+                vm.timerInterval = setInterval(function (ev) {
                     // fall back to the pre-encoded timer
                     if (!saneTz) {
                         vm.timer -= 1;
