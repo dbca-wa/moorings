@@ -379,7 +379,7 @@
                                                             <!-- Wrap button and close icon in a relative position container -->
                                                             <div class="position-relative">
                                                                 <!-- <button class="btn btn-sm btn-info w-100" @click="deleteBooking(bp.booking_row_id, bp.past_booking)">  -->
-                                                                <button class="btn btn-sm btn-success w-100 disabled" style="pointer-events: none;"> 
+                                                                <button class="btn btn-sm btn-success w-100" disabled> 
                                                                     Book {{ bp.period_name }}
                                                                     <span v-if="site.mooring_class == 'small'">${{ bp.small_price }}</span>
                                                                     <span v-if="site.mooring_class == 'medium'">${{ bp.medium_price }}</span>
