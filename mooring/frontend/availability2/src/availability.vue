@@ -395,13 +395,13 @@
                                                             </div>
                                                         </div>
                                                         <div v-else-if="bp.status == 'perday'">
-                                                            <button class="btn btn-sm btn-light w-100" disabled>One Mooring Limit</button>
+                                                            <span class="small text-muted">One Mooring Limit</span>
                                                         </div>
                                                         <div v-else-if="bp.status == 'maxstay'">
-                                                            <button class="btn btn-sm btn-light w-100" disabled>Max Stay Limit Reached</button>
+                                                            <span class="small text-muted">Max Stay Limit Reached</span>
                                                         </div>
                                                         <div v-else>
-                                                            <button class="btn btn-sm btn-danger w-100 disabled" style="text-decoration: line-through; opacity: 0.65;">{{ bp.period_name }}</button>
+                                                            <span class="small text-danger text-decoration-line-through opacity-75">{{ bp.period_name }}</span>
                                                         </div>
                                                     </div>
                                                 </td>
