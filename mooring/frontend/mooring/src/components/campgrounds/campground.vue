@@ -1,291 +1,273 @@
 <template lang="html">
     <div v-if="campground && campground.id" class="pb-2">
-        <!-- <div class="panel-group" id="details-accordion" role="tablist" aria-multiselectable="true" style="padding:0;"> -->
-            <pkCsClose ref="closeCampsite" @closeCampsite="closeCampsite()"></pkCsClose>
-            <pkCsOpen ref="openCampsite" @openCampsite="openCampsite()"></pkCsOpen>
+        <pkCsClose ref="closeCampsite" @closeCampsite="closeCampsite()"></pkCsClose>
+        <pkCsOpen ref="openCampsite" @openCampsite="openCampsite()"></pkCsOpen>
 
-            <div class="card" id="details">
-                <div class="card-header" role="tab" id="details-heading">
-                    <h2 class="mb-0">
-                        <button 
-                            class="btn d-flex justify-content-between align-items-center w-100 text-start text-decoration-none"
-                            type="button"
-                            :aria-expanded="isExpandedDetails"
-                            aria-controls="details-collapse"
-                            @click="toggleCollapseDetails"
-                        >
-                            <h3 class="mb-0">Mooring Details</h3>
-                            <i :class="['bi', isExpandedDetails ? 'bi-chevron-up' : 'bi-chevron-down', 'fs-4', 'fw-bold']"></i>
-                        </button>
-                    </h2>
-                </div>
-                <div
-                    id="details-collapse"
-                    class="collapse show"
-                    aria-labelledby="details-heading"
-                    ref="collapseElementDetails"
-                >
-                    <div class="card-body">
-                        <campgroundAttr :createCampground=false :campground="campground" @updated="updateCampground" @save="sendData" />
-                    </div>
+        <div class="card" id="details">
+            <div class="card-header" role="tab" id="details-heading">
+                <h2 class="mb-0">
+                    <button 
+                        class="btn d-flex justify-content-between align-items-center w-100 text-start text-decoration-none"
+                        type="button"
+                        :aria-expanded="isExpandedDetails"
+                        aria-controls="details-collapse"
+                        @click="toggleCollapseDetails"
+                    >
+                        <h3 class="mb-0">Mooring Details</h3>
+                        <i :class="['bi', isExpandedDetails ? 'bi-chevron-up' : 'bi-chevron-down', 'fs-4', 'fw-bold']"></i>
+                    </button>
+                </h2>
+            </div>
+            <div
+                id="details-collapse"
+                class="collapse show"
+                aria-labelledby="details-heading"
+                ref="collapseElementDetails"
+            >
+                <div class="card-body">
+                    <campgroundAttr :createCampground=false :campground="campground" @updated="updateCampground" @save="sendData" />
                 </div>
             </div>
+        </div>
 
-            <div class="card mt-3" id="contact">
-                <div class="card-header" role="tab" id="contact-heading">
-                    <h2 class="mb-0">
-                        <button 
-                            class="btn d-flex justify-content-between align-items-center w-100 text-start text-decoration-none"
-                            type="button"
-                            :aria-expanded="isExpandedContact"
-                            aria-controls="contact-collapse"
-                            @click="toggleCollapseContact"
-                        >
-                            <h3 class="mb-0">Contact</h3>
-                            <i :class="['bi', isExpandedContact ? 'bi-chevron-up' : 'bi-chevron-down', 'fs-4', 'fw-bold']"></i>
-                        </button>
-                    </h2>
-                </div>
-                <div
-                    id="contact-collapse"
-                    class="collapse show"
-                    aria-labelledby="contact-heading"
-                    ref="collapseElementContact"
-                >
-                    <div class="card-body">
-                        <campgroundContact :createCampground=false :campground="campground" @error="swalMessage" @updated="updateCampground" @save="sendData" />
-                    </div>
+        <div class="card mt-3" id="contact">
+            <div class="card-header" role="tab" id="contact-heading">
+                <h2 class="mb-0">
+                    <button 
+                        class="btn d-flex justify-content-between align-items-center w-100 text-start text-decoration-none"
+                        type="button"
+                        :aria-expanded="isExpandedContact"
+                        aria-controls="contact-collapse"
+                        @click="toggleCollapseContact"
+                    >
+                        <h3 class="mb-0">Contact</h3>
+                        <i :class="['bi', isExpandedContact ? 'bi-chevron-up' : 'bi-chevron-down', 'fs-4', 'fw-bold']"></i>
+                    </button>
+                </h2>
+            </div>
+            <div
+                id="contact-collapse"
+                class="collapse show"
+                aria-labelledby="contact-heading"
+                ref="collapseElementContact"
+            >
+                <div class="card-body">
+                    <campgroundContact :createCampground=false :campground="campground" @error="swalMessage" @updated="updateCampground" @save="sendData" />
                 </div>
             </div>
+        </div>
 
-            <div class="card mt-3" id="limits">
-                <div class="card-header" role="tab" id="limits-heading">
-                    <h2 class="mb-0">
-                        <button 
-                            class="btn d-flex justify-content-between align-items-center w-100 text-start text-decoration-none"
-                            type="button"
-                            :aria-expanded="isExpandedLimits"
-                            aria-controls="limits-collapse"
-                            @click="toggleCollapseLimits"
-                        >
-                            <h3 class="mb-0">Vessel Limits</h3>
-                            <i :class="['bi', isExpandedLimits ? 'bi-chevron-up' : 'bi-chevron-down', 'fs-4', 'fw-bold']"></i>
-                        </button>
-                    </h2>
-                </div>
-                <div
-                    id="limits-collapse"
-                    class="collapse show"
-                    aria-labelledby="limits-heading"
-                    ref="collapseElementLimits"
-                >
-                    <div class="card-body">
-                        <campgroundLimits :createCampground=false :campground="campground" @error="swalMessage" @updated="updateCampground" @save="sendData" />
-                    </div>
+        <div class="card mt-3" id="limits">
+            <div class="card-header" role="tab" id="limits-heading">
+                <h2 class="mb-0">
+                    <button 
+                        class="btn d-flex justify-content-between align-items-center w-100 text-start text-decoration-none"
+                        type="button"
+                        :aria-expanded="isExpandedLimits"
+                        aria-controls="limits-collapse"
+                        @click="toggleCollapseLimits"
+                    >
+                        <h3 class="mb-0">Vessel Limits</h3>
+                        <i :class="['bi', isExpandedLimits ? 'bi-chevron-up' : 'bi-chevron-down', 'fs-4', 'fw-bold']"></i>
+                    </button>
+                </h2>
+            </div>
+            <div
+                id="limits-collapse"
+                class="collapse show"
+                aria-labelledby="limits-heading"
+                ref="collapseElementLimits"
+            >
+                <div class="card-body">
+                    <campgroundLimits :createCampground=false :campground="campground" @error="swalMessage" @updated="updateCampground" @save="sendData" />
                 </div>
             </div>
+        </div>
 
-            <div class="card mt-3" id="images">
-                <div class="card-header" role="tab" id="images-heading">
-                    <h2 class="mb-0">
-                        <button 
-                            class="btn d-flex justify-content-between align-items-center w-100 text-start text-decoration-none"
-                            type="button"
-                            :aria-expanded="isExpandedImages"
-                            aria-controls="images-collapse"
-                            @click="toggleCollapseImages"
-                        >
-                            <h3 class="mb-0">Mooring Images</h3>
-                            <i :class="['bi', isExpandedImages ? 'bi-chevron-up' : 'bi-chevron-down', 'fs-4', 'fw-bold']"></i>
-                        </button>
-                    </h2>
-                </div>
-                <div
-                    id="images-collapse"
-                    class="collapse show"
-                    aria-labelledby="images-heading"
-                    ref="collapseElementImages"
-                >
-                    <div class="card-body">
-                        <campgroundImages :createCampground=false :campground="campground" @updated="updateCampground" @save="sendData" />
-                    </div>
+        <div class="card mt-3" id="images">
+            <div class="card-header" role="tab" id="images-heading">
+                <h2 class="mb-0">
+                    <button 
+                        class="btn d-flex justify-content-between align-items-center w-100 text-start text-decoration-none"
+                        type="button"
+                        :aria-expanded="isExpandedImages"
+                        aria-controls="images-collapse"
+                        @click="toggleCollapseImages"
+                    >
+                        <h3 class="mb-0">Mooring Images</h3>
+                        <i :class="['bi', isExpandedImages ? 'bi-chevron-up' : 'bi-chevron-down', 'fs-4', 'fw-bold']"></i>
+                    </button>
+                </h2>
+            </div>
+            <div
+                id="images-collapse"
+                class="collapse show"
+                aria-labelledby="images-heading"
+                ref="collapseElementImages"
+            >
+                <div class="card-body">
+                    <campgroundImages :createCampground=false :campground="campground" @updated="updateCampground" @save="sendData" />
                 </div>
             </div>
+        </div>
 
-            <div class="card mt-3" id="mappanel">
-                <div class="card-header" role="tab" id="location-heading">
-                    <h2 class="mb-0">
-                        <button 
-                            class="btn d-flex justify-content-between align-items-center w-100 text-start text-decoration-none"
-                            type="button"
-                            :aria-expanded="isExpandedLocation"
-                            aria-controls="location-collapse"
-                            @click="toggleCollapseLocation"
-                        >
-                            <h3 class="mb-0">Mooring Location</h3>
-                            <i :class="['bi', isExpandedLocation ? 'bi-chevron-up' : 'bi-chevron-down', 'fs-4', 'fw-bold']"></i>
-                        </button>
-                    </h2>
-                </div>
-                <div
-                    id="location-collapse"
-                    class="collapse show"
-                    aria-labelledby="location-heading"
-                    ref="collapseElementLocation"
-                >
-                    <div class="card-body">
-                        <campgroundMap :createCampground=false :campground="campground" @error="swalMessage" @updated="updateCampground" @save="sendData" />
-                    </div>
+        <div class="card mt-3" id="mappanel">
+            <div class="card-header" role="tab" id="location-heading">
+                <h2 class="mb-0">
+                    <button 
+                        class="btn d-flex justify-content-between align-items-center w-100 text-start text-decoration-none"
+                        type="button"
+                        :aria-expanded="isExpandedLocation"
+                        aria-controls="location-collapse"
+                        @click="toggleCollapseLocation"
+                    >
+                        <h3 class="mb-0">Mooring Location</h3>
+                        <i :class="['bi', isExpandedLocation ? 'bi-chevron-up' : 'bi-chevron-down', 'fs-4', 'fw-bold']"></i>
+                    </button>
+                </h2>
+            </div>
+            <div
+                id="location-collapse"
+                class="collapse show"
+                aria-labelledby="location-heading"
+                ref="collapseElementLocation"
+            >
+                <div class="card-body">
+                    <campgroundMap :createCampground=false :campground="campground" @error="swalMessage" @updated="updateCampground" @save="sendData" />
                 </div>
             </div>
+        </div>
 
-            <div class="card mt-3" id="additional">
-                <div class="card-header" role="tab" id="additional-heading">
-                    <h2 class="mb-0">
-                        <button 
-                            class="btn d-flex justify-content-between align-items-center w-100 text-start text-decoration-none"
-                            type="button"
-                            :aria-expanded="isExpandedAdditional"
-                            aria-controls="additional-collapse"
-                            @click="toggleCollapseAdditional"
-                        >
-                            <h3 class="mb-0">Additional Details</h3>
-                            <i :class="['bi', isExpandedAdditional ? 'bi-chevron-up' : 'bi-chevron-down', 'fs-4', 'fw-bold']"></i>
-                        </button>
-                    </h2>
-                </div>
-                <div
-                    id="additional-collapse"
-                    class="collapse show"
-                    aria-labelledby="additional-heading"
-                    ref="collapseElementAdditional"
-                >
-                    <div class="card-body">
-                        <campgroundAdditional :createCampground=false :campground="campground" @updated="updateCampground" @save="sendData" />
-                    </div>
+        <div class="card mt-3" id="additional">
+            <div class="card-header" role="tab" id="additional-heading">
+                <h2 class="mb-0">
+                    <button 
+                        class="btn d-flex justify-content-between align-items-center w-100 text-start text-decoration-none"
+                        type="button"
+                        :aria-expanded="isExpandedAdditional"
+                        aria-controls="additional-collapse"
+                        @click="toggleCollapseAdditional"
+                    >
+                        <h3 class="mb-0">Additional Details</h3>
+                        <i :class="['bi', isExpandedAdditional ? 'bi-chevron-up' : 'bi-chevron-down', 'fs-4', 'fw-bold']"></i>
+                    </button>
+                </h2>
+            </div>
+            <div
+                id="additional-collapse"
+                class="collapse show"
+                aria-labelledby="additional-heading"
+                ref="collapseElementAdditional"
+            >
+                <div class="card-body">
+                    <campgroundAdditional :createCampground=false :campground="campground" @updated="updateCampground" @save="sendData" />
                 </div>
             </div>
+        </div>
 
-            <div class="card mt-3" id="stayhistory">
-                <div class="card-header" role="tab" id="stayhistory-heading">
-                    <h2 class="mb-0">
-                        <button 
-                            class="btn d-flex justify-content-between align-items-center w-100 text-start text-decoration-none"
-                            type="button"
-                            :aria-expanded="isExpandedStayHistory"
-                            aria-controls="stayhistory-collapse"
-                            @click="toggleCollapseStayHistory"
-                        >
-                            <h3 class="mb-0">Maximum Stay History</h3>
-                            <i :class="['bi', isExpandedStayHistory ? 'bi-chevron-up' : 'bi-chevron-down', 'fs-4', 'fw-bold']"></i>
-                        </button>
-                    </h2>
-                </div>
-                <div
-                    id="stayhistory-collapse"
-                    class="collapse show"
-                    aria-labelledby="stayhistory-heading"
-                    ref="collapseElementStayHistory"
-                >
-                    <div class="card-body">
-                        <stay-history :object_id="ID" :datatableURL="stayHistoryURL" />
-                    </div>
+        <div class="card mt-3" id="stayhistory">
+            <div class="card-header" role="tab" id="stayhistory-heading">
+                <h2 class="mb-0">
+                    <button 
+                        class="btn d-flex justify-content-between align-items-center w-100 text-start text-decoration-none"
+                        type="button"
+                        :aria-expanded="isExpandedStayHistory"
+                        aria-controls="stayhistory-collapse"
+                        @click="toggleCollapseStayHistory"
+                    >
+                        <h3 class="mb-0">Maximum Stay History</h3>
+                        <i :class="['bi', isExpandedStayHistory ? 'bi-chevron-up' : 'bi-chevron-down', 'fs-4', 'fw-bold']"></i>
+                    </button>
+                </h2>
+            </div>
+            <div
+                id="stayhistory-collapse"
+                class="collapse show"
+                aria-labelledby="stayhistory-heading"
+                ref="collapseElementStayHistory"
+            >
+                <div class="card-body">
+                    <stay-history :object_id="ID" :datatableURL="stayHistoryURL" />
                 </div>
             </div>
+        </div>
 
-            <div class="card mt-3" id="bookingperiod">
-                <div class="card-header" role="tab" id="bookingperiod-heading">
-                    <h2 class="mb-0">
-                        <button 
-                            class="btn d-flex justify-content-between align-items-center w-100 text-start text-decoration-none"
-                            type="button"
-                            :aria-expanded="isExpandedBookingPeriod"
-                            aria-controls="bookingperiod-collapse"
-                            @click="toggleCollapseBookingPeriod"
-                        >
-                            <h3 class="mb-0">Booking Period History</h3>
-                            <i :class="['bi', isExpandedBookingPeriod ? 'bi-chevron-up' : 'bi-chevron-down', 'fs-4', 'fw-bold']"></i>
-                        </button>
-                    </h2>
-                </div>
-                <div
-                    id="bookingperiod-collapse"
-                    class="collapse show"
-                    aria-labelledby="bookingperiod-heading"
-                    ref="collapseElementBookingPeriod"
-                >
-                    <div class="card-body">
-                        <priceHistory
-                            ref="price_dt"
-                            level="campground"
-                            :dt_options="ph_options"
-                            :historyDeleteURL="priceHistoryDeleteURL"
-                            :showAddBtn="hasCampsites"
-                            v-show="campground.price_level==0"
-                            :object_id="ID"
-                        />
-                    </div>
+        <div class="card mt-3" id="bookingperiod">
+            <div class="card-header" role="tab" id="bookingperiod-heading">
+                <h2 class="mb-0">
+                    <button 
+                        class="btn d-flex justify-content-between align-items-center w-100 text-start text-decoration-none"
+                        type="button"
+                        :aria-expanded="isExpandedBookingPeriod"
+                        aria-controls="bookingperiod-collapse"
+                        @click="toggleCollapseBookingPeriod"
+                    >
+                        <h3 class="mb-0">Booking Period History</h3>
+                        <i :class="['bi', isExpandedBookingPeriod ? 'bi-chevron-up' : 'bi-chevron-down', 'fs-4', 'fw-bold']"></i>
+                    </button>
+                </h2>
+            </div>
+            <div
+                id="bookingperiod-collapse"
+                class="collapse show"
+                aria-labelledby="bookingperiod-heading"
+                ref="collapseElementBookingPeriod"
+            >
+                <div class="card-body">
+                    <priceHistory
+                        ref="price_dt"
+                        level="campground"
+                        :dt_options="ph_options"
+                        :historyDeleteURL="priceHistoryDeleteURL"
+                        :showAddBtn="hasCampsites"
+                        v-show="campground.price_level==0"
+                        :object_id="ID"
+                    />
                 </div>
             </div>
+        </div>
 
-            <div class="card mt-3" id="closures">
-                <div class="card-header" role="tab" id="closures-heading">
-                    <h2 class="mb-0">
-                        <button 
-                            class="btn d-flex justify-content-between align-items-center w-100 text-start text-decoration-none"
-                            type="button"
-                            :aria-expanded="isExpandedClosures"
-                            aria-controls="closures-collapse"
-                            @click="toggleCollapseClosures"
-                        >
-                            <h3 class="mb-0">Closure History</h3>
-                            <i :class="['bi', isExpandedClosures ? 'bi-chevron-up' : 'bi-chevron-down', 'fs-4', 'fw-bold']"></i>
-                        </button>
-                    </h2>
-                </div>
-                <!-- <div id="closures-collapse" class="card-body"> -->
-                <div
-                    id="closures-collapse"
-                    class="collapse show"
-                    aria-labelledby="closures-heading"
-                    ref="collapseElementClosures"
-                >
-                    <div class="card-body">
-                        <closureHistory ref="cg_closure_dt" :object_id="ID" :datatableURL="closureHistoryURL" />
-                    </div>
+        <div class="card mt-3" id="closures">
+            <div class="card-header" role="tab" id="closures-heading">
+                <h2 class="mb-0">
+                    <button 
+                        class="btn d-flex justify-content-between align-items-center w-100 text-start text-decoration-none"
+                        type="button"
+                        :aria-expanded="isExpandedClosures"
+                        aria-controls="closures-collapse"
+                        @click="toggleCollapseClosures"
+                    >
+                        <h3 class="mb-0">Closure History</h3>
+                        <i :class="['bi', isExpandedClosures ? 'bi-chevron-up' : 'bi-chevron-down', 'fs-4', 'fw-bold']"></i>
+                    </button>
+                </h2>
+            </div>
+            <!-- <div id="closures-collapse" class="card-body"> -->
+            <div
+                id="closures-collapse"
+                class="collapse show"
+                aria-labelledby="closures-heading"
+                ref="collapseElementClosures"
+            >
+                <div class="card-body">
+                    <closureHistory ref="cg_closure_dt" :object_id="ID" :datatableURL="closureHistoryURL" />
                 </div>
             </div>
+        </div>
 
-            <confirmbox id="deleteRange" :options="deletePrompt"></confirmbox>
-            <bulk-close-campsites v-on:bulkCloseCampsites="bulkCloseCampsites" v-if="showBulkCloseCampsites" v-on:close="showBulkCloseCampsites = false" ref="bulkCloseCampsites" v-bind:campsites="campsites"/>
-            <!-- <div class="navbar navbar-default" id="footer" v-if="invent">
-                <div class="container">
-                    <div class="navbar navbar-nav navbar-right">
+        <confirmbox id="deleteRange" :options="deletePrompt"></confirmbox>
+        <bulk-close-campsites v-on:bulkCloseCampsites="bulkCloseCampsites" v-if="showBulkCloseCampsites" v-on:close="showBulkCloseCampsites = false" ref="bulkCloseCampsites" v-bind:campsites="campsites"/>
+
+        <nav class="navbar fixed-bottom bg-light border-top py-2" v-if="invent">
+            <div class="container">
+                <div class="d-flex justify-content-end w-100">
+                    <div class="d-flex gap-2">
                         <a href="#" class="btn btn-primary" @click.prevent="sendData">Update</a>
-                        <a href="/dashboard/moorings/" class="btn btn-primary">Cancel</a>
+                        <a href="/dashboard/moorings/" class="btn btn-secondary">Cancel</a>
                     </div>
                 </div>
-            </div> -->
-            <!-- <div class="navbar navbar-default" id="footer" v-if="invent">
-                <div class="container">
-                    <div class="d-flex justify-content-end w-100">
-                        <div class="d-flex gap-2">
-                            <a href="#" class="btn btn-primary" @click.prevent="sendData">Update</a>
-                            <a href="/dashboard/moorings/" class="btn btn-secondary">Cancel</a>
-                        </div>
-                    </div>
-                </div>
-            </div> -->
-            <nav class="navbar fixed-bottom bg-light border-top py-2" v-if="invent">
-                <div class="container">
-                    <div class="d-flex justify-content-end w-100">
-                        <div class="d-flex gap-2">
-                            <a href="#" class="btn btn-primary" @click.prevent="sendData">Update</a>
-                            <a href="/dashboard/moorings/" class="btn btn-secondary">Cancel</a>
-                        </div>
-                    </div>
-                </div>
-            </nav>
+            </div>
+        </nav>
     </div>
 </template>
 
