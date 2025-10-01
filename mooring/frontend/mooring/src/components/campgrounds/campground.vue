@@ -1,5 +1,5 @@
 <template lang="html">
-    <div v-if="campground && campground.id">
+    <div v-if="campground && campground.id" class="pb-2">
         <!-- <div class="panel-group" id="details-accordion" role="tablist" aria-multiselectable="true" style="padding:0;"> -->
             <pkCsClose ref="closeCampsite" @closeCampsite="closeCampsite()"></pkCsClose>
             <pkCsOpen ref="openCampsite" @openCampsite="openCampsite()"></pkCsOpen>
@@ -255,21 +255,55 @@
                     </div>
                 </div>
             </div>
+
+            <confirmbox id="deleteRange" :options="deletePrompt"></confirmbox>
+            <bulk-close-campsites v-on:bulkCloseCampsites="bulkCloseCampsites" v-if="showBulkCloseCampsites" v-on:close="showBulkCloseCampsites = false" ref="bulkCloseCampsites" v-bind:campsites="campsites"/>
+            <!-- <div class="navbar navbar-default" id="footer" v-if="invent">
+                <div class="container">
+                    <div class="navbar navbar-nav navbar-right">
+                        <a href="#" class="btn btn-primary" @click.prevent="sendData">Update</a>
+                        <a href="/dashboard/moorings/" class="btn btn-primary">Cancel</a>
+                    </div>
+                </div>
+            </div> -->
+            <!-- <div class="navbar navbar-default" id="footer" v-if="invent">
+                <div class="container">
+                    <div class="d-flex justify-content-end w-100">
+                        <div class="d-flex gap-2">
+                            <a href="#" class="btn btn-primary" @click.prevent="sendData">Update</a>
+                            <a href="/dashboard/moorings/" class="btn btn-secondary">Cancel</a>
+                        </div>
+                    </div>
+                </div>
+            </div> -->
+            <nav class="navbar fixed-bottom bg-light border-top py-2" v-if="invent">
+                <div class="container">
+                    <div class="d-flex justify-content-end w-100">
+                        <div class="d-flex gap-2">
+                            <a href="#" class="btn btn-primary" @click.prevent="sendData">Update</a>
+                            <a href="/dashboard/moorings/" class="btn btn-secondary">Cancel</a>
+                        </div>
+                    </div>
+                </div>
+            </nav>
     </div>
 </template>
 
-<style>
+<!-- <style>
 #footer {
     position: fixed;
     left: 0;
     right: 0;
     bottom: 0;
-    height: 40px;
     width: 100%;
     margin: 0;
     z-index:50;
+    padding: 10px 0;
+
+    background-color: #f8f9fa;
+    border-top: 1px solid #dee2e6;
 }
-</style>
+</style> -->
 
 <script>
 import {
