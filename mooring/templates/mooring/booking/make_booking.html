@@ -677,11 +677,24 @@
             override: function (val){
                 console.log("Something changed");
                 if (val) {
-                     $('.over_ride_price_mooring_header').show();
-                     $('.over_ride_price_mooring_body').show();
+                    $('.over_ride_price_mooring_header').show();
+                    $('.over_ride_price_mooring_body').show();
      
+                    // The logic from the jQuery click handler
+                    for (var i = 0; i < this.linesAdmissions.length; i++){
+                        if (this.linesAdmissions[i].override_price === undefined) {
+                            this.linesAdmissions[i].override_price = this.linesAdmissions[i].admissionFee;
+                        }
+
+                        // Ensure override_price is not zero or negative if it was not set before.
+                        // Note: The original logic had an empty `if (override_price > 0)` block, which might need review.
+                        // This implementation ensures the override_price is initialized with the admissionFee.
+                        if (!this.linesAdmissions[i].override_price || this.linesAdmissions[i].override_price <= 0) {
+                            this.linesAdmissions[i].override_price = this.linesAdmissions[i].admissionFee; 
+                        }
+                    }
 //                    this.$nextTick(() => {
-                       this.$nextTick(function() {
+                    this.$nextTick(function() {
                         $('.overrideReason').select2({
                             minimumResultsForSearch: Infinity
                         }).
@@ -695,10 +708,12 @@
                         }); 
                     })
                 } else {
-                     $('.over_ride_price_mooring_header').hide();
-                     $('.over_ride_price_mooring_body').hide();
-		}
+                    $('.over_ride_price_mooring_header').hide();
+                    $('.over_ride_price_mooring_body').hide();
+                }
                 
+                // This should be called regardless of the checkbox state
+                this.calculateTotal(); 
             }
         },
         computed: {
@@ -1277,30 +1292,30 @@
             vm.calculateTotal();
             // console.log("FEE CHANGE");
 	    // console.log(vm.booking_change_fees);
-            $('#override').on("click", function() {
-                    var override_checked = $('#'+this.id).prop("checked"); 
-                    for (var i = 0; i < vm.linesAdmissions.length; i++){
-                        var thisAdmission = 0;
-                        if (override_checked == true) {
-                            console.log("ADMISSIONS OVERRIDE");
-                            console.log(vm.linesAdmissions[i].override_price);
-                            var override_price = vm.linesAdmissions[i].override_price;
+            // $('#override').on("click", function() {
+            //         var override_checked = $('#'+this.id).prop("checked"); 
+            //         for (var i = 0; i < vm.linesAdmissions.length; i++){
+            //             var thisAdmission = 0;
+            //             if (override_checked == true) {
+            //                 console.log("ADMISSIONS OVERRIDE");
+            //                 console.log(vm.linesAdmissions[i].override_price);
+            //                 var override_price = vm.linesAdmissions[i].override_price;
 
-                            if (vm.linesAdmissions[i].override_price == undefined) {
-                                 vm.linesAdmissions[i].override_price = vm.linesAdmissions[i].admissionFee;
-                            }
+            //                 if (vm.linesAdmissions[i].override_price == undefined) {
+            //                      vm.linesAdmissions[i].override_price = vm.linesAdmissions[i].admissionFee;
+            //                 }
 
-                            if (override_price > 0) {
-                            } else {
-                                 vm.linesAdmissions[i].override_price = vm.linesAdmissions[i].admissionFee; 
-                            }
+            //                 if (override_price > 0) {
+            //                 } else {
+            //                      vm.linesAdmissions[i].override_price = vm.linesAdmissions[i].admissionFee; 
+            //                 }
 
-                        }
+            //             }
 
-                    }
+            //         }
 
-               vm.calculateTotal(); 
-            });
+            //    vm.calculateTotal(); 
+            // });
 
             $( "#id_email" ).change(function() {
                 var email = this.value;
