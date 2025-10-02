@@ -1,6 +1,6 @@
   <div class="card mb-3">
     <div class="card-body">
-        <div class="row"><div class="col-sm-12" style='display: none;'>
+        <div class="row"><div class="col-sm-12 d-none">
             <h3 class="text-primary">{{ booking.mooringarea.name }}, {{ booking.mooringarea.park.name }}</h3>
         </div></div>
         <div class="row g-3">
@@ -10,7 +10,7 @@
                 {% endif %}
             </div>
             <div class="col-sm-9">
-                <div class="row mb-2" style='display: none;'>
+                <div class="row mb-2 d-none">
                     <div class="col-sm-4">
                         <b>Mooring:</b>
                     </div>
@@ -26,7 +26,7 @@
                         {{ booking.stay_dates }}
                     </div>
                 </div>
-                <div class="row mb-2" style='display: none;'>
+                <div class="row mb-2 d-none">
                     <div class="col-sm-4">
                         <b>Number of guests:</b>
                     </div>
