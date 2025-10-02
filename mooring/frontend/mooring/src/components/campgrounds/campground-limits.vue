@@ -187,7 +187,7 @@ export default {
                     vm.$emit('error', error);
                 }
             } else {
-                if(!parseFloat(vm.campground.vessel_weight_limit) >= 0){
+                if(!(parseFloat(vm.campground.vessel_weight_limit) >= 0.0)){
                     isValid = false;
                     var error = {
                         title : "Invalid Weight",

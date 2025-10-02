@@ -948,7 +948,7 @@ export default {
                     }
                 }
             } else {
-                if(!parseFloat(vm.campground.vessel_weight_limit) >= 0){
+                if(!(parseFloat(vm.campground.vessel_weight_limit) >= 0)){
                     isValid = false;
                     var error = {
                         title : "Invalid Weight",
