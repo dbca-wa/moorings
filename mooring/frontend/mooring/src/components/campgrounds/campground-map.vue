@@ -288,7 +288,7 @@ export default {
             image: new Icon({
                 anchor: [0.5, 1],
                 src: markerIcon,
-                scale: 0.8,
+                scale: 1.0,
             }),
         });
         var source = new VectorSource({wrapX: false, features: [iconFeature]});
