@@ -870,6 +870,15 @@ export default {
                     vm.class_val = 1;
                 } else if (vm.campground.mooring_class == "large"){
                     vm.class_val = 2;
+                } else {
+                    isValid = false;
+                    var error = {
+                        title : "Mooring Class Required",
+                        text : "Please select a mooring class.",
+                        type : "warning",
+                    };
+                    $('#campground_class').focus();
+                    vm.swalMessage(error);
                 }
                 if (parseInt(vm.campground.vessel_size_limit) > vm.limits[vm.class_val].value){
                     isValid = false;
