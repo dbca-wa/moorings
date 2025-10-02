@@ -62,20 +62,20 @@
                     <div class="col-sm-12 mt-4">
                     {% if booking.invoice_status == 'paid' or booking.invoice_status == 'over_paid' %}
                         {% if request.user == booking.customer or request.user.is_staff or request.session.ps_last_booking == booking.id %}
-                            <a href="{% url 'get_confirmation' booking.id %}" class="btn btn-info btn-lg" target="_blank" >Confirmation</a>
+                            <a href="{% url 'get_confirmation' booking.id %}" class="btn btn-info btn-lg me-2 mb-2" target="_blank" >Confirmation</a>
                             {% if request.user.is_authenticated %}
                                 {% for bi in book_inv %}
                                     <!-- <a href="{% url 'mooring-invoice-pdf' bi %}" class="btn btn-info btn-lg" >Invoice</a> -->
-                                    <a href="/ledger-toolkit-api/invoice-pdf/{{ bi }}" class="btn btn-info btn-lg" target="invoice-pdf-{{ bi }}" style='text-decoration: none;'>Invoice</a>
+                                    <a href="/ledger-toolkit-api/invoice-pdf/{{ bi }}" class="btn btn-info btn-lg me-2 mb-2" target="invoice-pdf-{{ bi }}" style='text-decoration: none;'>Invoice</a>
                                 {% endfor %}
                                 {% if booking.in_future %}
-                                    <a href="{% url 'public_view_booking' booking.id %}" class="btn btn-info btn-lg" >Change Booking</a>
-                                    <a href="{% url 'public_cancel_booking' booking.id %}" class="btn btn-info btn-lg" >Cancel Booking</a>
+                                    <a href="{% url 'public_view_booking' booking.id %}" class="btn btn-info btn-lg me-2 mb-2">Change Booking</a>
+                                    <a href="{% url 'public_cancel_booking' booking.id %}" class="btn btn-info btn-lg me-2 mb-2">Cancel Booking</a>
                                 {% endif %}
                             {% else %}
-                                <a href="{% url 'home' %}" class="btn btn-info btn-lg">Log in</a><p>You must be logged in to see your invoice online.</p>
+                                <a href="{% url 'home' %}" class="btn btn-info btn-lg me-2 mb-2">Log in</a>
+                                <p>You must be logged in to see your invoice online.</p>
                             {% endif %}
-                            
                             <p class="fs-4 fw-bold mt-3">You must bring your confirmation with you to the mooring.</p>
                         {% else %}
                             <p class="fs-4 fw-bold">You do not have permission to access the confirmation or invoice for this booking.<br>Please check your email or contact RIA directly.</p>
