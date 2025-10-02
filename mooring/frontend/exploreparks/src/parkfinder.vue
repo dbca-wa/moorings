@@ -2294,23 +2294,35 @@ export default {
     
             // loop to change the pointer when mousing over a vector layer
             this.olmap.on('pointermove', function(ev) {
+                // Return immediately if the map is being dragged
                 if (ev.dragging) {
                     return;
                 }
-                var result = map.forEachFeatureAtPixel(ev.pixel, function(feature, layer) {
-                $('#map').attr('title', feature.get('name'));
-                return feature;
+            
+                // Get the map's container element
+                const mapElement = map.getTargetElement();
+            
+                // Check if a feature (marker, etc.) exists at the hovered pixel.
+                // A hitTolerance can make it easier for users to hit the target.
+                const hit = map.hasFeatureAtPixel(ev.pixel, {
+                    hitTolerance: 5 
                 });
-                if (result) {
-                    if ($('#map').hasClass('click')) { 
-                    } else {
-                        $('#map').addClass('click', result);
-                    }
+            
+                // Change the cursor style based on whether a feature was hit
+                mapElement.style.cursor = hit ? 'pointer' : '';
+
+                // Optional: Update the element's title to show a tooltip
+                if (hit) {
+                    // Iterate through features to get the name for the title attribute
+                    map.forEachFeatureAtPixel(ev.pixel, function(feature) {
+                        mapElement.title = feature.get('name') || '';
+                        return true; // Stop after the first feature
+                    }, {
+                        hitTolerance: 5
+                    });
                 } else {
-                    $('#map').removeClass('click', result);
-                }
-                if (!result) {
-                    $('#map').removeAttr('title');
+                    // Reset the title when not hovering over a feature
+                    mapElement.title = '';
                 }
             });
 
