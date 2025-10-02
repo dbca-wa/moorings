@@ -95,6 +95,10 @@ import Map from 'ol/Map.js'
 import View from 'ol/View.js'
 import Draw from 'ol/interaction/Draw.js'
 
+import { Style, Icon } from 'ol/style.js';
+// import markerIcon from '../../assets/pin.svg';
+import markerIcon from '../../assets/marker.svg';
+
 import Quill from 'quill';
 import loader from '../utils/loader.vue'
 import alert from '../utils/alert.vue'
@@ -275,15 +279,23 @@ export default {
         });
 
         } else {
-        iconFeature = new Feature({
-            geometry: new Point(coords),
-            saved_coordinates: 'yes',
-        });
+            iconFeature = new Feature({
+                geometry: new Point(coords),
+                saved_coordinates: 'yes',
+            });
         }
+        const markerStyle = new Style({
+            image: new Icon({
+                anchor: [0.5, 1],
+                src: markerIcon,
+                scale: 1.0,
+            }),
+        });
         var source = new VectorSource({wrapX: false, features: [iconFeature]});
 
         var vector = new VectorLayer({
-            source: source
+            source: source,
+            style: markerStyle
         });
 
         var map = new Map({
