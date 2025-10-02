@@ -5,6 +5,9 @@
         </div></div>
         <div class="row g-3">
             <div class="col-sm-3">
+                {% if booking.campground.first_image.image.url %}
+                    <img class="img-thumbnail img-fluid" alt="" src="{{ booking.campground.first_image.image.url }}"/>
+                {% endif %}
             </div>
             <div class="col-sm-9">
                 <div class="row mb-2" style='display: none;'>
