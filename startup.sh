@@ -24,4 +24,7 @@ then
     echo "Failed to start gunicorn: $status"
     exit $status
   fi
+else
+		       echo "ENABLE_WEB environment vairable not set to True, web server is not starting."
+		          /bin/bash  
 fi
