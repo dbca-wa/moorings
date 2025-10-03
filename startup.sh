@@ -16,6 +16,7 @@ then
 fi
 
 if [ $ENABLE_WEB == "True" ];
+then
   # Start the second process
   gunicorn mooring.wsgi --bind :8080 --config /app/gunicorn.ini
   status=$?
