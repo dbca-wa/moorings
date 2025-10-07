@@ -11,8 +11,6 @@ window.jQuery = $;
 window.moment = moment;
 window.swal = swal;
 
-// import './foundation-min.scss';
-// import 'foundation-datepicker/css/foundation-datepicker.css';
 import 'ol/ol.css';
 import 'awesomplete/awesomplete.css';
 import 'bootstrap/dist/css/bootstrap.min.css';
