@@ -117,7 +117,7 @@
                                         Price
                                     </div>
                                     <!-- <div class="col-md-2 over_ride_price_mooring_header d-none"> -->
-                                    <div class="col-md-2 over_ride_price_mooring_header" :class="{'d-none': !override}">
+                                    <div class="col-md-2 over_ride_price_mooring_header" :class="{'d-none': !override}" v-cloak>
                                         Price Override
                                     </div>
                                 </div>
@@ -145,7 +145,7 @@
                                         ${{ bm.amount }}
                                     </div>
                                     <!-- Use Bootstrap's `input-group` for the price override field -->
-                                    <div class="col-md-2 over_ride_price_mooring_body" :class="{'d-none': !override}">
+                                    <div class="col-md-2 over_ride_price_mooring_body" :class="{'d-none': !override}" v-cloak>
                                         <div class="input-group input-group-sm">
                                             <span class="input-group-text">$</span>
                                             <input type='number' id='over_ride_mooring_price{{ bm.id }}' step='0.01' class='form-control' value='{{ bm.amount }}' @change="money_update($event)">
@@ -184,7 +184,7 @@
                                         Price
                                     </div>
                                     <!-- <div class="col-md-2 over_ride_price_mooring_header d-none"> -->
-                                    <div class="col-md-2 over_ride_price_mooring_header" :class="{'d-none': !override}">
+                                    <div class="col-md-2 over_ride_price_mooring_header" :class="{'d-none': !override}" v-cloak>
                                         Price Override
                                     </div>
                                 </div>
@@ -213,7 +213,7 @@
                                     <div class="col-md-1">
                                         ${{ line.admissionFee }}
                                     </div>
-                                    <div class="col-md-2 over_ride_price_mooring_body" :class="{'d-none': !override}">
+                                    <div class="col-md-2 over_ride_price_mooring_body" :class="{'d-none': !override}" v-cloak>
                                         <div class="input-group input-group-sm">
                                             <span class='input-group-text'>$</span>
                                             <input type='number' :id='line.rowid' step='0.01' class='form-control' @blur="admission_money_update($event,index)" v-model.number="line.override_price">
