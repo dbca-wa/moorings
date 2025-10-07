@@ -942,7 +942,7 @@ class MakeBookingsView(TemplateView):
 
         payments_officer_group = False
         if request.user.is_authenticated:
-            payments_officer_group = request.user.groups.filter(name=['Payments Officers',]).exists()
+            payments_officer_group = request.user.groups().filter(name=['Payments Officers',]).exists()
 
         if occ == 'true':
             if payments_officer_group:
