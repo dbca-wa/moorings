@@ -940,8 +940,10 @@ class MakeBookingsView(TemplateView):
         campsite = booking.campsites.all()[0].campsite if booking else None
         entry_fees = MarinaEntryRate.objects.filter(Q(period_start__lte = booking.arrival), Q(period_end__gt=booking.arrival)|Q(period_end__isnull=True)).order_by('-period_start').first() if (booking and campsite.mooringarea.park.entry_fee_required) else None
 
-        # payments_officer_group = request.user.groups().filter(name__in=['Payments Officers']).exists()
-        payments_officer_group = request.user.groups().filter(name=['Payments Officers']).exists()
+        payments_officer_group = False
+        if request.user.is_authenticated:
+            payments_officer_group = request.user.groups.filter(name=['Payments Officers',]).exists()
+
         if occ == 'true':
             if payments_officer_group:
                 overide_change_fees = True
