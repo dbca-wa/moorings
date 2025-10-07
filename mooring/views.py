@@ -395,7 +395,9 @@ class CancelBookingView(TemplateView):
         booking_total = Decimal('0.00')
         overide_cancel_fees = False
 
-        payments_officer_group = request.user.groups().filter(name=['Payments Officers']).exists()
+        payments_officer_group = False
+        if request.user.is_authenticated:
+            payments_officer_group = request.user.groups().filter(name=['Payments Officers']).exists()
 
         if request.user.is_staff or request.user.is_superuser or Booking.objects.filter(customer=request.user,pk=booking_id).count() == 1:
              booking = Booking.objects.get(pk=booking_id)
@@ -420,7 +422,9 @@ class CancelBookingView(TemplateView):
         overide_cancel_fees = False
         occ = request.POST.get('occ', 'false')
         cancellation_reason = request.POST.get('cancellation_reason','')
-        payments_officer_group = request.user.groups().filter(name=['Payments Officers']).exists()
+        payments_officer_group = False
+        if request.user.is_authenticated:
+            payments_officer_group = request.user.groups().filter(name=['Payments Officers']).exists()
         failed_refund = False
 
         if request.session:
@@ -620,14 +624,15 @@ class CancelAdmissionsBookingView(TemplateView):
         booking_total = Decimal('0.00')
         overide_cancel_fees=False
         if request.user.is_staff or request.user.is_superuser or AdmissionsBooking.objects.filter(customer=request.user,pk=booking_id).count() == 1:
-             booking = AdmissionsBooking.objects.get(pk=booking_id)
-             if booking.booking_type == 4:
-                  print ("ADMISSIONS BOOKING HAS BEEN CANCELLED")
-                  return HttpResponseRedirect(reverse('home'))
+            booking = AdmissionsBooking.objects.get(pk=booking_id)
+            if booking.booking_type == 4:
+                print ("ADMISSIONS BOOKING HAS BEEN CANCELLED")
+                return HttpResponseRedirect(reverse('home'))
 
 
-        if request.user.groups().filter(name=['Mooring Admin']).exists():
-              overide_cancel_fees=True
+        if request.user.is_authenticated:
+            if request.user.groups().filter(name=['Mooring Admin']).exists():
+                overide_cancel_fees=True
           
         booking_cancellation_fees = utils.calculate_price_admissions_cancel(booking, [], overide_cancel_fees)
         booking_total = booking_total + sum(Decimal(i['amount']) for i in booking_cancellation_fees)
@@ -655,8 +660,9 @@ class CancelAdmissionsBookingView(TemplateView):
                   print ("ADMISSIONS BOOKING HAS BEEN CANCELLED")
                   return HttpResponseRedirect(reverse('home'))
 
-        if request.user.groups().filter(name__in=['Mooring Admin']).exists():
-              overide_cancel_fees=True
+        if request.user.is_authenticated:
+            if request.user.groups().filter(name__in=['Mooring Admin']).exists():
+                overide_cancel_fees=True
         
         bpoint_id = self.get_booking_info(self, request, *args, **kwargs)
         booking_cancellation_fees = utils.calculate_price_admissions_cancel(booking, [], overide_cancel_fees)
@@ -1278,7 +1284,9 @@ class MakeBookingsView(TemplateView):
         overide_change_fees = False
         occ = request.POST.get('occ', 'false')
         overidden = True if request.POST.get('override') else False
-        payments_officer_group = request.user.groups().filter(name=['Payments Officers']).exists()
+        payments_officer_group = False
+        if request.user.is_authenticated:
+            payments_officer_group = request.user.groups().filter(name=['Payments Officers']).exists()
         if occ == 'true':
             if payments_officer_group:
                 overide_change_fees = True
@@ -2022,7 +2030,9 @@ class AnnualAdmissionsView(CreateView):
         
         initial['allow_override_fees'] = False
         initial['discount_reason'] = DiscountReason.objects.filter(mooring_group=al[0].mooring_group)
-        payments_officer_group = self.request.user.groups().filter(name=['Payments Officers']).exists()
+        payments_officer_group = False
+        if self.request.user.is_authenticated:
+            payments_officer_group = self.request.user.groups().filter(name=['Payments Officers']).exists()
         if payments_officer_group:
              initial['allow_override_fees'] = True
         initial['vessel_length'] = '0.00'
@@ -2037,7 +2047,9 @@ class AnnualAdmissionsView(CreateView):
         print ("SUBMITTED BOOKING")
         self.object = form.save(commit=False)
         forms_data = form.cleaned_data
-        payments_officer_group = self.request.user.groups().filter(name=['Payments Officers']).exists()
+        payments_officer_group = False
+        if self.request.user.is_authenticated:
+            payments_officer_group = self.request.user.groups().filter(name=['Payments Officers']).exists()
         allow_override_fees=False
         if payments_officer_group:
              allow_override_fees = True
@@ -3476,7 +3488,7 @@ class RefundBookingHistory(LoginRequiredMixin, TemplateView):
         booking_id = kwargs['pk']
         booking = None
         print ("LOADED")
-        if request.user.is_superuser or request.user.groups().filter(name=['Payments Officers']).exists():
+        if request.user.is_superuser or (request.user.is_authenticated and request.user.groups().filter(name=['Payments Officers']).exists()):
 #            booking = Booking.objects.get(customer=request.user, booking_type__in=(0, 1), is_canceled=False, pk=booking_id)
              booking = Booking.objects.get(pk=booking_id)
              newest_booking = self.get_newest_booking(booking_id)
@@ -3619,7 +3631,7 @@ class RefundAnnualBookingHistory(LoginRequiredMixin, TemplateView):
         booking_id = kwargs['pk']
         booking = None
 
-        if request.user.is_superuser or request.user.groups().filter(name=['Payments Officers']).exists():
+        if request.user.is_superuser or (request.user.is_authenticated and request.user.groups().filter(name=['Payments Officers']).exists()):
 #            booking = Booking.objects.get(customer=request.user, booking_type__in=(0, 1), is_canceled=False, pk=booking_id)
              newest_booking = models.BookingAnnualAdmission.objects.get(pk=booking_id)
              #newest_booking = self.get_newest_booking(booking_id)
