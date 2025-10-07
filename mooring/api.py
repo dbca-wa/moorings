@@ -815,35 +815,35 @@ class MooringAreaViewSet(viewsets.ModelViewSet):
         #json_data = cache.get('MooringAreaViewSet:datatable_list:jsondata:'+cache_append)
         json_data = None
         if json_data is None:
-           qs = []
-           mooring_json = []
-           for mg in mooring_groups:
-               moorings_in_group = mg.moorings.all()
-               for mig in moorings_in_group:
-                   #qs.append(mig)
-                   row_json_data = cache.get('MooringAreaViewSet:datatable_list:row:'+str(mig.id))
-                   row_json_data = None
-                   if row_json_data is None:
-                      row = {}
-                      row['active'] = mig.active 
-                      row['current_closure'] = mig.current_closure 
-                      row['district'] =  mig.district
-                      row['id'] = mig.id
-                      row['mooring_physical_type'] = mig.mooring_physical_type
-                      row['mooring_type'] = mig.mooring_type
-                      row['name'] = mig.name
-                      row['park'] = mig.park.name
-                      row['ratis_id'] = mig.ratis_id
-                      row['region'] = mig.region
-                      row['mooring_specification'] = specification[mig.mooring_specification]
-                      row_json_data = geojson.dumps(row)
-                      cache.set('MooringAreaViewSet:datatable_list:row:'+str(mig.id),row_json_data,600)
-                   else:
-                      row = geojson.loads(row_json_data)    
-                   mooring_json.append(row)
+            qs = []
+            mooring_json = []
+            for mg in mooring_groups:
+                moorings_in_group = mg.moorings.all()
+                for mig in moorings_in_group:
+                    #qs.append(mig)
+                    row_json_data = cache.get('MooringAreaViewSet:datatable_list:row:'+str(mig.id))
+                    row_json_data = None
+                    if row_json_data is None:
+                        row = {}
+                        row['active'] = mig.active 
+                        row['current_closure'] = mig.current_closure 
+                        row['district'] =  mig.district
+                        row['id'] = mig.id
+                        row['mooring_physical_type'] = mig.mooring_physical_type
+                        row['mooring_type'] = mig.mooring_type
+                        row['name'] = mig.name
+                        row['park'] = mig.park.name
+                        row['ratis_id'] = mig.ratis_id
+                        row['region'] = mig.region
+                        row['mooring_specification'] = specification[mig.mooring_specification]
+                        row_json_data = geojson.dumps(row)
+                        cache.set('MooringAreaViewSet:datatable_list:row:'+str(mig.id),row_json_data,600)
+                    else:
+                        row = geojson.loads(row_json_data)    
+                    mooring_json.append(row)
 
-           json_data = geojson.dumps(mooring_json)
-           #cache.set('MooringAreaViewSet:datatable_list:jsondata:'+cache_append,json_data,600)
+            json_data = geojson.dumps(mooring_json)
+            #cache.set('MooringAreaViewSet:datatable_list:jsondata:'+cache_append,json_data,600)
         return HttpResponse(json_data, content_type='application/json')
 
         #return Response(data)
