@@ -48,8 +48,8 @@
                         {% elif message.tags == 'success' %}alert-success
                         {% else %}alert-info{% endif %}
                         alert-dismissible fade show" role="alert">
-                        <button type="button" class="close" data-dismiss="alert" aria-hidden="true">&#215;</button>
                         {{ message|safe }}
+                        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
                     </div>
                 {% endfor %}
             </div>
