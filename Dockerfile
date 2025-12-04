@@ -51,8 +51,7 @@ RUN touch /app/.env
 COPY mooring ./mooring
 
 RUN echo "--- Building frontend application: exploreparks ---" && \
-    cd "/app/mooring/frontend/exploreparks" && \
-    npm ci && \
+    cd "/app/mooring/frontend/exploreparks" && \    
     npm run build
     
 RUN python3 manage_mo.py collectstatic --noinput
