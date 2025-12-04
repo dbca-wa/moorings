@@ -12,7 +12,7 @@ RUN apt-get upgrade -y
 RUN apt-get install --no-install-recommends -y wget git libmagic-dev gcc g++ binutils libproj-dev gdal-bin tzdata cron rsyslog gunicorn libreoffice gpg-agent 
 RUN apt-get install --no-install-recommends -y libpq-dev patch
 RUN apt-get install --no-install-recommends -y postgresql-client mtr htop vim ssh
-RUN apt-get install --no-install-recommends -y postfix syslog-ng syslog-ng-core
+RUN apt-get install --no-install-recommends -y postfix syslog-ng syslog-ng-core npm
 RUN add-apt-repository ppa:deadsnakes/ppa -y
 RUN apt update
 RUN apt-get install --no-install-recommends -y  python3.8 python3.8-distutils python3.8-dev python3-pip python3-setuptools
