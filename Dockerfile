@@ -49,6 +49,12 @@ ENV TZ=Australia/Perth
 RUN ln -snf /usr/share/zoneinfo/$TZ /etc/localtime && echo $TZ > /etc/timezone
 RUN touch /app/.env
 COPY mooring ./mooring
+
+RUN echo "--- Building frontend application: exploreparks ---" && \
+    cd "/app/mooring/frontend/exploreparks" && \
+    npm ci && \
+    npm run build
+    
 RUN python3 manage_mo.py collectstatic --noinput
 
 RUN mkdir /app/tmp/
