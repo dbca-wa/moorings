@@ -1935,6 +1935,10 @@ class AnnualAdmissionsView(CreateView):
     model = BookingAnnualAdmission
    
     def get(self, request, *args, **kwargs):
+        loc = self.kwargs['loc']
+        if loc == 'ria':
+            ML_ADMISSION_URL= settings.ML_ADMISSION_URL
+            return HttpResponseRedirect(ML_ADMISSION_URL)
         return super(AnnualAdmissionsView, self).get(request, *args, **kwargs)
 
     def get_form_class(self):
