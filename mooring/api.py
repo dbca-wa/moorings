@@ -4904,7 +4904,7 @@ def get_paid_admissions(request):
     else:
 
          if settings.ML_ADMISSION_PAID_CHECK == True:
-            ml_vl = models.VesselLicence.objects.filter(status=1, start_date__lte=dtarrival,expiry_date__gte=dtarrival,vessel_rego__icontains=rego)
+            ml_vl = models.VesselLicence.objects.filter(status=1, start_date__lte=dtarrival,expiry_date__gte=dtarrival,vessel_rego=rego)
             if ml_vl.count() > 0:
                   response.append({'admissionsPaid': True, 'id': ml_vl[0].id, 'rego_no': ml_vl[0].vessel_rego})
 
