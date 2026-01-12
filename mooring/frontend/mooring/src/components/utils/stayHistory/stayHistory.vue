@@ -145,6 +145,15 @@ export default {
     methods: {
         showAddStay: function(create) {
             create = typeof create !== 'undefined' ? create : true;
+            if (create) {
+                this.stay = {
+                    reason: '',
+                    max_days: '',
+                    range_start: '',
+                    range_end: '',
+                    details: ''
+                };
+            }
             this.$refs.addMaxStayModal.isOpen = true;
             this.$refs.addMaxStayModal.create = create;
         },

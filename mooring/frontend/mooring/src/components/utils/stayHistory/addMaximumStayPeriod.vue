@@ -1,5 +1,5 @@
 <template>
-<modal ref="modal" :large=true @ok="addMaxStay()" okText="Add">
+<modal ref="modal" :large=true @ok="addMaxStay()" :okText="create ? 'Add' : 'Update'">
     <template #header>
         <div class="modal-header">
             <h4 class="modal-title">{{ getTitle }}</h4>
@@ -135,6 +135,9 @@ export default {
     },
     methods: {
         close: function() {
+            if (this.stay.hasOwnProperty('id')) {
+                this.stay.id = null;
+            }
             this.stay.max_days= '';
             this.stay.range_start = '';
             this.stay.range_end = '';
