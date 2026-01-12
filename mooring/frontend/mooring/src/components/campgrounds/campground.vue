@@ -405,26 +405,22 @@ export default {
                     }
                 }, {
                     // Action
-                    data: 'details',
+                    data: null,
                     mRender: function(data, type, full) {
-                        if (data) {
-                            var id = full.id;
-                            var column = "<td ><a href='#' class='editPrice' data-date_start=\"__START__\"  data-date_end=\"__END__\"  data-rate=\"__RATE__\" data-reason=\"__REASON__\" data-details=\"__DETAILS__\" data-booking_period_id=\"__BOOKING__\" data-price_id=\"__PRICEID__\" >Edit</a><br/>"
-                            if (full.deletable){
-                                column += "<a href='#' class='deletePrice' data-date_start=\"__START__\"  data-date_end=\"__END__\"  data-rate=\"__RATE__\" data-reason=\"__REASON__\" data-details=\"__DETAILS__\" data-booking_period_id=\"__BOOKING__\" data-price_id=\"__PRICEID__\">Delete</a></td>";
-                            }
-                            column = column.replace(/__START__/g, full.date_start)
-                            column = column.replace(/__END__/g, full.date_end)
-                            column = column.replace(/__RATE__/g, full.rate_id)
-                            column = column.replace(/__REASON__/g, full.reason)
-                            column = column.replace(/__DETAILS__/g, full.details)
-                            column = column.replace(/__BOOKING__/g, full.booking_period_id)
-                            column = column.replace(/__PRICEID__/g, full.price_id)
-                            return column
+                        var id = full.id;
+                        var column = "<td><a href='#' class='editPrice' data-date_start=\"__START__\"  data-date_end=\"__END__\"  data-rate=\"__RATE__\" data-reason=\"__REASON__\" data-details=\"__DETAILS__\" data-booking_period_id=\"__BOOKING__\" data-price_id=\"__PRICEID__\" >Edit</a>";
+                        if (full.deletable){
+                            column += "<br/><a href='#' class='deletePrice' data-date_start=\"__START__\"  data-date_end=\"__END__\"  data-rate=\"__RATE__\" data-reason=\"__REASON__\" data-details=\"__DETAILS__\" data-booking_period_id=\"__BOOKING__\" data-price_id=\"__PRICEID__\">Delete</a>";
                         }
-                        else {
-                            return "";
-                        }
+                        column += "</td>";
+                        column = column.replace(/__START__/g, full.date_start)
+                        column = column.replace(/__END__/g, full.date_end)
+                        column = column.replace(/__RATE__/g, full.rate_id)
+                        column = column.replace(/__REASON__/g, full.reason)
+                        column = column.replace(/__DETAILS__/g, full.details)
+                        column = column.replace(/__BOOKING__/g, full.booking_period_id)
+                        column = column.replace(/__PRICEID__/g, full.price_id)
+                        return column
                     }
                 }],
                 language: {
@@ -478,18 +474,18 @@ export default {
                     data: 'name',
                     mRender: function(data, type, full) {
                         var id = full.id;
+                        var column = "<td><a href='__ID__' class='detailRoute' data-campsite=\"__ID__\" >Edit</a>";
                         if (full.active) {
-                            var column ="<td ><a href='__ID__' class='detailRoute' data-campsite=\"__ID__\" >Edit</a><br/>";
                             if ( full.campground_open ){
-                                column += "<a href='#' class='statusCS' data-status='close' data-campsite=\"__ID__\" >Close</a></td>";
+                                column += "<br/><a href='#' class='statusCS' data-status='close' data-campsite=\"__ID__\" >Close</a>";
                             }
                         }
                         else {
-                            var column = "<td ><a href='__ID__' class='detailRoute' data-campsite=\"__ID__\" >Edit</a><br/>";
                             if ( full.campground_open ){
-                                column += "<a href='#' class='statusCS' data-status='open' data-campsite=\"__ID__\" data-current_closure='"+ full.current_closure +"'>Open</a></td>";
+                                column += "<br/><a href='#' class='statusCS' data-status='open' data-campsite=\"__ID__\" data-current_closure='"+ full.current_closure +"'>Open</a>";
                             }
                         }
+                        column += "</td>";
 
                         return column.replace(/__ID__/g, id);
                     }
