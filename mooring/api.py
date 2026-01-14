@@ -5125,7 +5125,7 @@ def get_paid_admissions(request):
     now_dt = datetime.now()
     rego = request.GET.get('rego','')
     dateArrival = request.GET.get('dateArrival','')
-    dtarrival = datetime.strptime(dateArrival, '%d/%m/%Y')
+    dtarrival = datetime.strptime(dateArrival, '%Y-%m-%d')
 
     response = []
     if RegisteredVessels.objects.filter(rego_no=rego).count() > 0:
