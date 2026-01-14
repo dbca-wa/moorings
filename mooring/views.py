@@ -397,7 +397,7 @@ class CancelBookingView(TemplateView):
 
         payments_officer_group = False
         if request.user.is_authenticated:
-            payments_officer_group = request.user.groups().filter(name=['Payments Officers']).exists()
+            payments_officer_group = request.user.groups().filter(name='Payments Officers').exists()
 
         if request.user.is_staff or request.user.is_superuser or Booking.objects.filter(customer=request.user,pk=booking_id).count() == 1:
              booking = Booking.objects.get(pk=booking_id)
@@ -424,7 +424,7 @@ class CancelBookingView(TemplateView):
         cancellation_reason = request.POST.get('cancellation_reason','')
         payments_officer_group = False
         if request.user.is_authenticated:
-            payments_officer_group = request.user.groups().filter(name=['Payments Officers']).exists()
+            payments_officer_group = request.user.groups().filter(name='Payments Officers').exists()
         failed_refund = False
 
         if request.session:
