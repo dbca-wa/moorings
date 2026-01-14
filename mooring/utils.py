@@ -2311,7 +2311,7 @@ def check_mooring_admin_access(request):
         return True
     else:
         if request.user.is_authenticated:
-            if request.user.groups().filter(name=['Mooring Admin']).exists():
+            if request.user.groups().filter(name='Mooring Admin').exists():
                 return True
     return False
 
