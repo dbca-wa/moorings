@@ -1802,9 +1802,9 @@ def admissionsCheckout(request, admissionsBooking, lines, invoice_text=None, vou
     if internal:
         responseJson = place_order_submission(request)
     else:
-        print(reverse('checkout:index'))
-        responseJson = HttpResponse(geojson.dumps({'status': 'success','redirect': reverse('checkout:index'),}), content_type='application/json')
-        # response = HttpResponseRedirect(reverse('checkout:index'))
+        print(reverse('ledgergw-payment-details'))
+        responseJson = HttpResponse(geojson.dumps({'status': 'success','redirect': reverse('ledgergw-payment-details'),}), content_type='application/json')
+        # response = HttpResponseRedirect(reverse('ledgergw-payment-details'))
 
         # inject the current basket into the redirect response cookies
         # or else, anonymous users will be directionless
@@ -1847,7 +1847,7 @@ def annual_admission_checkout(request, booking, lines, invoice_text=None, vouche
 #    if internal:
 #        response = place_order_submission(request)
 #    else:
-    response = HttpResponseRedirect(reverse('checkout:index'))
+    response = HttpResponseRedirect(reverse('ledgergw-payment-details'))
     # inject the current basket into the redirect response cookies
     # or else, anonymous users will be directionless
     response.set_cookie(
