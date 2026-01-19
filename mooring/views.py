@@ -3064,13 +3064,51 @@ class AdmissionsBookingSuccessView(TemplateView):
     def get(self, request, *args, **kwargs):
         try:
             context_processor = template_context(self.request)
-            booking = utils.get_session_admissions_booking(request.session)
-            booking_reference = settings.DAILY_ADMISSION_REF_PREFIX + str(booking.id)
-            basket = Basket.objects.filter(status='Submitted', system=settings.PAYMENT_SYSTEM_ID, booking_reference=booking_reference).order_by('-id')[:1]
-            context = utils.booking_admission_success(basket, booking, context_processor)
+            
+            # Get invoice_ref from URL parameter (payment completion redirect)
+            invoice_ref = request.GET.get('invoice')
+            
+            if invoice_ref:
+                # Payment completed - get booking from invoice
+                logger.info(f"Payment completed with invoice: {invoice_ref}")
+                inv = Invoice.objects.get(reference=invoice_ref)
+                
+                # Find basket by booking_reference
+                basket = Basket.objects.filter(
+                    owner=inv.owner,
+                    system=settings.PAYMENT_SYSTEM_ID,
+                    status='Submitted',
+                    booking_reference__startswith=settings.DAILY_ADMISSION_REF_PREFIX
+                ).order_by('-date_submitted')[:1]
+                
+                if not basket or not basket[0].booking_reference:
+                    raise Exception('Could not find basket with booking reference')
+                
+                # Get booking from basket's booking_reference
+                booking_id = int(basket[0].booking_reference.replace(settings.DAILY_ADMISSION_REF_PREFIX, ''))
+                booking = AdmissionsBooking.objects.get(id=booking_id)
+                
+                logger.info(f"Found booking {booking.id} from invoice")
+            else:
+                # No invoice parameter - try session (during payment flow)
+                logger.info("No invoice parameter, getting from session")
+                booking = utils.get_session_admissions_booking(request.session)
+                booking_reference = settings.DAILY_ADMISSION_REF_PREFIX + str(booking.id)
+                basket = Basket.objects.filter(
+                    status='Submitted',
+                    system=settings.PAYMENT_SYSTEM_ID,
+                    booking_reference=booking_reference
+                ).order_by('-id')[:1]
+                invoice_ref = None  # Will be retrieved in utils function
+            
+            # Process booking success
+            context = utils.booking_admission_success(basket, booking, context_processor, invoice_ref)
             request.session['ad_last_booking'] = booking.id
             utils.delete_session_admissions_booking(request.session)
             return render(request, self.template_name, context)
+        except Exception as e:
+            logger.error(f"Error in AdmissionsBookingSuccessView: {str(e)}", exc_info=True)
+            raise
 
             #arrival = AdmissionsLine.objects.filter(admissionsBooking=booking)[0].arrivalDate
             #overnight = AdmissionsLine.objects.filter(admissionsBooking=booking)[0].overnightStay
