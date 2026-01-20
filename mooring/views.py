@@ -611,7 +611,7 @@ class CancelAdmissionsBookingView(TemplateView):
         booking = None
         booking_total = Decimal('0.00')
         overide_cancel_fees=False
-        if request.user.is_staff or request.user.is_superuser or AdmissionsBooking.objects.filter(customer=request.user,pk=booking_id).count() == 1:
+        if request.user.is_staff or request.user.is_superuser or AdmissionsBooking.objects.filter(customer_id=request.user.id,pk=booking_id).count() == 1:
             booking = AdmissionsBooking.objects.get(pk=booking_id)
             if booking.booking_type == 4:
                 print ("ADMISSIONS BOOKING HAS BEEN CANCELLED")
@@ -638,7 +638,7 @@ class CancelAdmissionsBookingView(TemplateView):
         booking = None
         overide_cancel_fees = False
 
-        if request.user.is_staff or request.user.is_superuser or AdmissionsBooking.objects.filter(customer=request.user,pk=booking_id).count() == 1:
+        if request.user.is_staff or request.user.is_superuser or AdmissionsBooking.objects.filter(customer_id=request.user.id,pk=booking_id).count() == 1:
              booking = AdmissionsBooking.objects.get(pk=booking_id)
              if booking.booking_type == 4:
                   logger.info(f'Admissions Booking: [{booking.id}] has already been cancelled.')
@@ -3142,7 +3142,7 @@ class AdmissionBookingCancelCompletedView(LoginRequiredMixin, TemplateView):
         booking_id = kwargs['booking_id']
         booking = None
         refund_failed = None
-        if request.user.is_staff or request.user.is_superuser or AdmissionsBooking.objects.filter(customer=request.user,pk=booking_id).count() == 1:
+        if request.user.is_staff or request.user.is_superuser or AdmissionsBooking.objects.filter(customer_id=request.user.id,pk=booking_id).count() == 1:
              booking = AdmissionsBooking.objects.get(pk=booking_id)
              if RefundFailed.objects.filter(admission_booking=booking).count() > 0:
                 refund_failed = RefundFailed.objects.filter(admission_booking=booking)
@@ -3308,7 +3308,7 @@ class MyBookingsView(LoginRequiredMixin, TemplateView):
 
     def get(self, request, *args, **kwargs):
         bookings = Booking.objects.filter(customer=request.user, booking_type__in=(0, 1), is_canceled=False)
-        admissions = AdmissionsBooking.objects.filter(customer=request.user, booking_type__in=(0, 1))
+        admissions = AdmissionsBooking.objects.filter(customer_id=request.user.id, booking_type__in=(0, 1))
         today = timezone.now().date()
 
         ad_currents = admissions.distinct().filter(admissionsline__arrivalDate__gte=today)
