@@ -661,7 +661,7 @@ class CancelAdmissionsBookingView(TemplateView):
                   return HttpResponseRedirect(reverse('home'))
 
         if request.user.is_authenticated:
-            if request.user.groups().filter(name__in=['Mooring Admin']).exists():
+            if request.user.groups().filter(name='Mooring Admin').exists():
                 overide_cancel_fees=True
         
         bpoint_id = self.get_booking_info(self, request, *args, **kwargs)
