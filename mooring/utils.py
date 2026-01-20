@@ -1793,6 +1793,7 @@ def admissionsCheckout(request, admissionsBooking, lines, invoice_text=None, vou
         'force_redirect': True,
         'proxy': True if internal else False,
         'invoice_text': invoice_text,
+        'session_type': 'ledger_api',
     }
     
     if internal or request.user.is_anonymous or request.user != admissionsBooking.customer:
