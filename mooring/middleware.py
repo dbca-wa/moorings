@@ -32,6 +32,7 @@ class CacheHeaders(object):
 
 
 CHECKOUT_PATH = re.compile('^/ledger-api')
+# CHECKOUT_PATH = re.compile('^/booking')
 PROCESS_PAYMENT =  re.compile('^/ledger-api/process-payment')
 
 # class BookingTimerMiddleware(object):
@@ -226,28 +227,28 @@ class BookingTimerMiddleware(object):
         if CHECKOUT_PATH.match(request.path):
             try:
                 booking = Booking.objects.get(pk=request.session['ps_booking'])
-            except:
-                # no idea what object is in self.request.session['ps_booking'], ditch it
-                delete_session_booking(request.session)
-                return HttpResponseRedirect(reverse('public_make_booking'))
-
-            try:
-                del request.session['ad_booking']
-                del request.session['annual_admission_booking']
-            except:
-                pass
-
-            if timezone.now() > booking.expiry_time:
                 try:
-                    delete_session_booking(request.session)
+                    del request.session['ad_booking']
+                    del request.session['annual_admission_booking']
                 except:
                     pass
-                return HttpResponseRedirect(reverse('public_make_booking'))
+
+                if timezone.now() > booking.expiry_time:
+                    try:
+                        delete_session_booking(request.session)
+                    except:
+                        pass
+                    return HttpResponseRedirect(reverse('public_make_booking'))
+            except:
+                pass
 
         # force a redirect if in the checkout
         if ('ps_booking_internal' not in request.COOKIES) and CHECKOUT_PATH.match(request.path):
             if ('ps_booking' not in request.session) and CHECKOUT_PATH.match(request.path) and ('ad_booking' not in request.session) and ('annual_admission_booking' not in request.session):
-                return HttpResponseRedirect(reverse('public_make_booking'))
+                # return HttpResponseRedirect(reverse('public_make_booking'))
+                url_redirect = reverse('public_make_booking')
+                response = HttpResponse("<script> window.location='"+url_redirect+"';</script> <center><div class='container'><div class='alert alert-primary' role='alert'><a href='"+url_redirect+"'> Redirecting please wait: "+url_redirect+"</a><div></div></center>")
+                return response
             else:
                 return
         return

@@ -86,6 +86,8 @@ from django_ical.views import ICalFeed
 from datetime import datetime, timedelta, date
 from decimal import *
 from pytz import timezone as pytimezone
+import hashlib
+import logging
 
 from mooring.helpers import is_officer, is_payment_officer
 from mooring import utils
@@ -397,7 +399,7 @@ class CancelBookingView(TemplateView):
 
         payments_officer_group = False
         if request.user.is_authenticated:
-            payments_officer_group = request.user.groups().filter(name=['Payments Officers']).exists()
+            payments_officer_group = request.user.groups().filter(name='Payments Officers').exists()
 
         if request.user.is_staff or request.user.is_superuser or Booking.objects.filter(customer=request.user,pk=booking_id).count() == 1:
              booking = Booking.objects.get(pk=booking_id)
@@ -424,7 +426,7 @@ class CancelBookingView(TemplateView):
         cancellation_reason = request.POST.get('cancellation_reason','')
         payments_officer_group = False
         if request.user.is_authenticated:
-            payments_officer_group = request.user.groups().filter(name=['Payments Officers']).exists()
+            payments_officer_group = request.user.groups().filter(name='Payments Officers').exists()
         failed_refund = False
 
         if request.session:
@@ -604,26 +606,12 @@ class CancelBookingView(TemplateView):
 class CancelAdmissionsBookingView(TemplateView):
     template_name = 'mooring/admissions/cancel_booking.html'
 
-    def get_booking_info(self, request, *args, **kwargs):
-        booking_id = kwargs['pk']
-        booking = AdmissionsBooking.objects.get(pk=booking_id)
-        bpoint_id = None
-        booking_invoice = AdmissionsBookingInvoice.objects.filter(admissions_booking=booking)
-        for bi in booking_invoice:
-            inv = Invoice.objects.filter(reference=bi.invoice_reference)
-            for i in inv:
-                for b in i.bpoint_transactions:
-                   if b.action == 'payment':
-                      bpoint_id = b.id
-
-        return bpoint_id
-
     def get(self, request, *args, **kwargs):
         booking_id = kwargs['pk']
         booking = None
         booking_total = Decimal('0.00')
         overide_cancel_fees=False
-        if request.user.is_staff or request.user.is_superuser or AdmissionsBooking.objects.filter(customer=request.user,pk=booking_id).count() == 1:
+        if request.user.is_staff or request.user.is_superuser or AdmissionsBooking.objects.filter(customer_id=request.user.id,pk=booking_id).count() == 1:
             booking = AdmissionsBooking.objects.get(pk=booking_id)
             if booking.booking_type == 4:
                 print ("ADMISSIONS BOOKING HAS BEEN CANCELLED")
@@ -631,7 +619,7 @@ class CancelAdmissionsBookingView(TemplateView):
 
 
         if request.user.is_authenticated:
-            if request.user.groups().filter(name=['Mooring Admin']).exists():
+            if request.user.groups().filter(name='Mooring Admin').exists():
                 overide_cancel_fees=True
           
         booking_cancellation_fees = utils.calculate_price_admissions_cancel(booking, [], overide_cancel_fees)
@@ -647,122 +635,66 @@ class CancelAdmissionsBookingView(TemplateView):
 
         booking_id = kwargs['pk']
         booking_total = Decimal('0.00')
-        basket_total = Decimal('0.00')
         booking = None
-        invoice = None
-        refund = None
-        failed_refund = False
-        overide_cancel_fees=False
+        overide_cancel_fees = False
 
-        if request.user.is_staff or request.user.is_superuser or AdmissionsBooking.objects.filter(customer=request.user,pk=booking_id).count() == 1:
+        if request.user.is_staff or request.user.is_superuser or AdmissionsBooking.objects.filter(customer_id=request.user.id,pk=booking_id).count() == 1:
              booking = AdmissionsBooking.objects.get(pk=booking_id)
              if booking.booking_type == 4:
-                  print ("ADMISSIONS BOOKING HAS BEEN CANCELLED")
+                  logger.info(f'Admissions Booking: [{booking.id}] has already been cancelled.')
                   return HttpResponseRedirect(reverse('home'))
 
         if request.user.is_authenticated:
-            if request.user.groups().filter(name__in=['Mooring Admin']).exists():
-                overide_cancel_fees=True
+            if request.user.groups().filter(name='Mooring Admin').exists():
+                overide_cancel_fees = True
         
-        bpoint_id = self.get_booking_info(self, request, *args, **kwargs)
         booking_cancellation_fees = utils.calculate_price_admissions_cancel(booking, [], overide_cancel_fees)
         booking_total = booking_total + sum(Decimal(i['amount']) for i in booking_cancellation_fees)
 
-#        booking_total =  Decimal('{:.2f}'.format(float(booking_total - booking_total - booking_total)))
-
-
-
-        # START PLACE IN UTILS
-
         lines = []
         for cf in booking_cancellation_fees:
-                lines.append({'ledger_description':cf['description'],"quantity":1,"price_incl_tax":cf['amount'],"oracle_code":cf['oracle_code'], 'line_status': 3})
+            lines.append({
+                'ledger_description': cf['description'],
+                "quantity": 1,
+                "price_incl_tax": cf['amount'],
+                "oracle_code": cf['oracle_code'],
+                'line_status': 3
+            })
+
         basket_params = {
             'products': lines,
             'vouchers': [],
             'system': settings.PS_PAYMENT_SYSTEM_ID,
             'custom_basket': True,
-            'booking_reference': settings.DAILY_ADMISSION_REF_PREFIX + str(booking.id)
+            'booking_reference': settings.DAILY_ADMISSION_REF_PREFIX + str(booking.id),
+            'booking_reference_link': settings.DAILY_ADMISSION_REF_PREFIX + str(booking.id)
         }
+
         basket_params = utils.convert_decimal_to_float(basket_params)
-        basket_hash = create_basket_session(request, request.user.id, basket_params)
-        basket = utils.get_basket_by_basket_hash(basket_hash)
 
-        checkout_params = {
-            'system': settings.PS_PAYMENT_SYSTEM_ID,
-            'fallback_url': request.build_absolute_uri('/'),
-            'return_url': request.build_absolute_uri(reverse('public_admissions_success')),
-            'return_preload_url': request.build_absolute_uri(reverse('public_admissions_success')),
-            'force_redirect': True,
-            'proxy': False,
-            'invoice_text': "Cancellation of Admissions",
-            'basket_owner': booking.customer.id
-        }
+        checkouthash = hashlib.sha256(str(booking.pk).encode('utf-8')).hexdigest()
+        logger.info(f"checkouthash: [{checkouthash}] has been generated from the admissions booking.pk: [{booking.pk}].")
 
-        create_checkout_session(request, checkout_params)
-
-        # END PLACE IN UTILS
-        order_response = place_order_submission(request)
-
-        if Order.objects.filter(basket=basket).count() > 0:
-            pass
-        else:
-            result =  HttpResponse(
-                content="ERROR: Cannot find a order for the basket.",
-                status=200,
-            )
-            return result
+        return_url = request.build_absolute_uri()+"/admissions/cancellation-success/?checkouthash="+checkouthash
+        return_preload_url = request.build_absolute_uri()+"/admissions/return-cancelled/"
+        jsondata = process_api_refund(request, basket_params, booking.customer.id, return_url, return_preload_url)
+        
+        if jsondata['message'] == 'success':
+            for ir in jsondata['data']['invoice_reference']:
+                AdmissionsBookingInvoice.objects.get_or_create(admissions_booking=booking, invoice_reference=ir)
             
-        new_order = Order.objects.get(basket=basket)
-        new_invoice = Invoice.objects.get(order_number=new_order.number)
-        book_inv, created = AdmissionsBookingInvoice.objects.get_or_create(admissions_booking=booking, invoice_reference=new_invoice.reference)
-
-
-        b_total = Decimal('{:.2f}'.format(float(booking_total - booking_total - booking_total))) 
-        info = {'amount': Decimal('{:.2f}'.format(float(booking_total - booking_total - booking_total))), 'details' : 'Refund via system'}
-#         info = {'amount': float('10.00'), 'details' : 'Refund via system'}
-        try:
-            bpoint = BpointTransaction.objects.get(id=bpoint_id)
-            refund = bpoint.refund(info,request.user)
-            invoice = Invoice.objects.get(reference=bpoint.crn1)
-            update_payments(invoice.reference)
+            booking.booking_type = 4
+            booking.cancelation_time = datetime.now()
+            booking.canceled_by = request.user
+            booking.cancellation_reason = cancellation_reason
+            booking.save()
+            
             emails.send_refund_completed_email_customer_admissions(booking, context_processor)
-        except: 
-            failed_refund = True
+            return HttpResponseRedirect(reverse('public_admission_booking_cancelled', args=(booking.id,)))
+        else:
             emails.send_refund_failure_email_admissions(booking, context_processor)
             emails.send_refund_failure_email_customer_admissions(booking, context_processor)
-            booking_invoice = AdmissionsBookingInvoice.objects.filter(admissions_booking=booking).order_by('id')
-            for bi in booking_invoice:
-                invoice = Invoice.objects.get(reference=bi.invoice_reference)
-            RefundFailed.objects.create(admission_booking=booking, invoice_reference=invoice.reference, refund_amount=b_total,status=0,basket_json=booking_cancellation_fees)
-
-        new_order = Order.objects.get(basket=basket)
-        new_invoice = Invoice.objects.get(order_number=new_order.number)
-        new_invoice.settlement_date = None
-        new_invoice.save()
-
-
-        if refund:
-            bpoint_refund = BpointTransaction.objects.get(txn_number=refund.txn_number)
-            bpoint_refund.crn1 = new_invoice.reference
-            bpoint_refund.save()
-            update_payments(invoice.reference)
-        update_payments(new_invoice.reference)
-  
-        if failed_refund is True:
-            # Refund Failed Assign Refund amount to allocation pool.
-            lines = [{'ledger_description':'Refund assigned to unallocated pool',"quantity":1,"price_incl_tax":abs(info['amount']),"oracle_code":settings.UNALLOCATED_ORACLE_CODE, 'line_status': 1}]
-            utils.allocate_failedrefund_to_unallocated(request, booking, lines, invoice_text=None, internal=False,order_total=abs(info['amount']),user=booking.customer)
- 
- 
-        invoice.voided = True
-        invoice.save()
-        booking.booking_type = 4
-        booking.cancelation_time = datetime.now()
-        booking.canceled_by = request.user
-        booking.cancellation_reason = cancellation_reason
-        booking.save()
-        return HttpResponseRedirect(reverse('public_admission_booking_cancelled', args=(booking.id,)))
+            return HttpResponseRedirect(reverse('home'))
 
 # class RefundPaymentView(TemplateView):
 #     template_name = 'mooring/booking/refund_booking.html'
@@ -948,7 +880,7 @@ class MakeBookingsView(TemplateView):
 
         payments_officer_group = False
         if request.user.is_authenticated:
-            payments_officer_group = request.user.groups().filter(name=['Payments Officers',]).exists()
+            payments_officer_group = request.user.groups().filter(name='Payments Officers').exists()
 
         if occ == 'true':
             if payments_officer_group:
@@ -1286,7 +1218,7 @@ class MakeBookingsView(TemplateView):
         overidden = True if request.POST.get('override') else False
         payments_officer_group = False
         if request.user.is_authenticated:
-            payments_officer_group = request.user.groups().filter(name=['Payments Officers']).exists()
+            payments_officer_group = request.user.groups().filter(name='Payments Officers').exists()
         if occ == 'true':
             if payments_officer_group:
                 overide_change_fees = True
@@ -2032,7 +1964,7 @@ class AnnualAdmissionsView(CreateView):
         initial['discount_reason'] = DiscountReason.objects.filter(mooring_group=al[0].mooring_group)
         payments_officer_group = False
         if self.request.user.is_authenticated:
-            payments_officer_group = self.request.user.groups().filter(name=['Payments Officers']).exists()
+            payments_officer_group = self.request.user.groups().filter(name='Payments Officers').exists()
         if payments_officer_group:
              initial['allow_override_fees'] = True
         initial['vessel_length'] = '0.00'
@@ -2049,7 +1981,7 @@ class AnnualAdmissionsView(CreateView):
         forms_data = form.cleaned_data
         payments_officer_group = False
         if self.request.user.is_authenticated:
-            payments_officer_group = self.request.user.groups().filter(name=['Payments Officers']).exists()
+            payments_officer_group = self.request.user.groups().filter(name='Payments Officers').exists()
         allow_override_fees=False
         if payments_officer_group:
              allow_override_fees = True
@@ -3064,13 +2996,51 @@ class AdmissionsBookingSuccessView(TemplateView):
     def get(self, request, *args, **kwargs):
         try:
             context_processor = template_context(self.request)
-            booking = utils.get_session_admissions_booking(request.session)
-            booking_reference = settings.DAILY_ADMISSION_REF_PREFIX + str(booking.id)
-            basket = Basket.objects.filter(status='Submitted', system=settings.PAYMENT_SYSTEM_ID, booking_reference=booking_reference).order_by('-id')[:1]
-            context = utils.booking_admission_success(basket, booking, context_processor)
+            
+            # Get invoice_ref from URL parameter (payment completion redirect)
+            invoice_ref = request.GET.get('invoice')
+            
+            if invoice_ref:
+                # Payment completed - get booking from invoice
+                logger.info(f"Payment completed with invoice: {invoice_ref}")
+                inv = Invoice.objects.get(reference=invoice_ref)
+                
+                # Find basket by booking_reference
+                basket = Basket.objects.filter(
+                    owner=inv.owner,
+                    system=settings.PAYMENT_SYSTEM_ID,
+                    status='Submitted',
+                    booking_reference__startswith=settings.DAILY_ADMISSION_REF_PREFIX
+                ).order_by('-date_submitted')[:1]
+                
+                if not basket or not basket[0].booking_reference:
+                    raise Exception('Could not find basket with booking reference')
+                
+                # Get booking from basket's booking_reference
+                booking_id = int(basket[0].booking_reference.replace(settings.DAILY_ADMISSION_REF_PREFIX, ''))
+                booking = AdmissionsBooking.objects.get(id=booking_id)
+                
+                logger.info(f"Found booking {booking.id} from invoice")
+            else:
+                # No invoice parameter - try session (during payment flow)
+                logger.info("No invoice parameter, getting from session")
+                booking = utils.get_session_admissions_booking(request.session)
+                booking_reference = settings.DAILY_ADMISSION_REF_PREFIX + str(booking.id)
+                basket = Basket.objects.filter(
+                    status='Submitted',
+                    system=settings.PAYMENT_SYSTEM_ID,
+                    booking_reference=booking_reference
+                ).order_by('-id')[:1]
+                invoice_ref = None  # Will be retrieved in utils function
+            
+            # Process booking success
+            context = utils.booking_admission_success(basket, booking, context_processor, invoice_ref)
             request.session['ad_last_booking'] = booking.id
             utils.delete_session_admissions_booking(request.session)
             return render(request, self.template_name, context)
+        except Exception as e:
+            logger.error(f"Error in AdmissionsBookingSuccessView: {str(e)}", exc_info=True)
+            raise
 
             #arrival = AdmissionsLine.objects.filter(admissionsBooking=booking)[0].arrivalDate
             #overnight = AdmissionsLine.objects.filter(admissionsBooking=booking)[0].overnightStay
@@ -3172,7 +3142,7 @@ class AdmissionBookingCancelCompletedView(LoginRequiredMixin, TemplateView):
         booking_id = kwargs['booking_id']
         booking = None
         refund_failed = None
-        if request.user.is_staff or request.user.is_superuser or AdmissionsBooking.objects.filter(customer=request.user,pk=booking_id).count() == 1:
+        if request.user.is_staff or request.user.is_superuser or AdmissionsBooking.objects.filter(customer_id=request.user.id,pk=booking_id).count() == 1:
              booking = AdmissionsBooking.objects.get(pk=booking_id)
              if RefundFailed.objects.filter(admission_booking=booking).count() > 0:
                 refund_failed = RefundFailed.objects.filter(admission_booking=booking)
@@ -3338,7 +3308,7 @@ class MyBookingsView(LoginRequiredMixin, TemplateView):
 
     def get(self, request, *args, **kwargs):
         bookings = Booking.objects.filter(customer=request.user, booking_type__in=(0, 1), is_canceled=False)
-        admissions = AdmissionsBooking.objects.filter(customer=request.user, booking_type__in=(0, 1))
+        admissions = AdmissionsBooking.objects.filter(customer_id=request.user.id, booking_type__in=(0, 1))
         today = timezone.now().date()
 
         ad_currents = admissions.distinct().filter(admissionsline__arrivalDate__gte=today)
@@ -3488,7 +3458,7 @@ class RefundBookingHistory(LoginRequiredMixin, TemplateView):
         booking_id = kwargs['pk']
         booking = None
         print ("LOADED")
-        if request.user.is_superuser or (request.user.is_authenticated and request.user.groups().filter(name=['Payments Officers']).exists()):
+        if request.user.is_superuser or (request.user.is_authenticated and request.user.groups().filter(name='Payments Officers').exists()):
 #            booking = Booking.objects.get(customer=request.user, booking_type__in=(0, 1), is_canceled=False, pk=booking_id)
              booking = Booking.objects.get(pk=booking_id)
              newest_booking = self.get_newest_booking(booking_id)
@@ -3631,7 +3601,7 @@ class RefundAnnualBookingHistory(LoginRequiredMixin, TemplateView):
         booking_id = kwargs['pk']
         booking = None
 
-        if request.user.is_superuser or (request.user.is_authenticated and request.user.groups().filter(name=['Payments Officers']).exists()):
+        if request.user.is_superuser or (request.user.is_authenticated and request.user.groups().filter(name='Payments Officers').exists()):
 #            booking = Booking.objects.get(customer=request.user, booking_type__in=(0, 1), is_canceled=False, pk=booking_id)
              newest_booking = models.BookingAnnualAdmission.objects.get(pk=booking_id)
              #newest_booking = self.get_newest_booking(booking_id)

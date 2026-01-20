@@ -2224,6 +2224,19 @@ class AdmissionsBooking(models.Model):
         return 'AD{} : {}'.format(self.id, email)
 
     @property
+    def customer(self):
+        if self.customer_id:
+            return EmailUser.objects.get(id=self.customer_id)
+        return None
+
+    @customer.setter
+    def customer(self, value):
+        if value is None:
+            self.customer_id = None
+        else:
+            self.customer_id = value.id
+
+    @property
     def confirmation_number(self):
         return 'AD{}'.format(self.id)
 

@@ -256,3 +256,6 @@ VUE3_ENTRY_SCRIPT_AVAILABILITY2 = decouple.config(
 DATA_SOURCE_FOR_MAP_LAYERS = decouple.config('DATA_SOURCE_FOR_MAP_LAYERS', default='https://kb.dbca.wa.gov.au')
 MOORING_BOOKING_REF_PREFIX = decouple.config('MOORING_BOOKING_REF_PREFIX', 'PS')
 DAILY_ADMISSION_REF_PREFIX = decouple.config('DAILY_ADMISSION_REF_PREFIX', 'AD')
+
+SESSION_ENGINE = 'django.contrib.sessions.backends.file'
+SESSION_FILE_PATH = decouple.config('SESSION_FILE_PATH', default='/app/session_store/')

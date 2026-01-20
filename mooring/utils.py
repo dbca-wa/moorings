@@ -1793,18 +1793,19 @@ def admissionsCheckout(request, admissionsBooking, lines, invoice_text=None, vou
         'force_redirect': True,
         'proxy': True if internal else False,
         'invoice_text': invoice_text,
+        'session_type': 'ledger_api',
     }
     
-    if internal or request.user.is_anonymous:
+    if admissionsBooking.customer:
         checkout_params['basket_owner'] = admissionsBooking.customer.id
     create_checkout_session(request, checkout_params)
 
     if internal:
         responseJson = place_order_submission(request)
     else:
-        print(reverse('checkout:index'))
-        responseJson = HttpResponse(geojson.dumps({'status': 'success','redirect': reverse('checkout:index'),}), content_type='application/json')
-        # response = HttpResponseRedirect(reverse('checkout:index'))
+        print(reverse('ledgergw-payment-details'))
+        responseJson = HttpResponse(geojson.dumps({'status': 'success','redirect': reverse('ledgergw-payment-details'),}), content_type='application/json')
+        # response = HttpResponseRedirect(reverse('ledgergw-payment-details'))
 
         # inject the current basket into the redirect response cookies
         # or else, anonymous users will be directionless
@@ -1847,7 +1848,7 @@ def annual_admission_checkout(request, booking, lines, invoice_text=None, vouche
 #    if internal:
 #        response = place_order_submission(request)
 #    else:
-    response = HttpResponseRedirect(reverse('checkout:index'))
+    response = HttpResponseRedirect(reverse('ledgergw-payment-details'))
     # inject the current basket into the redirect response cookies
     # or else, anonymous users will be directionless
     response.set_cookie(
@@ -2311,7 +2312,7 @@ def check_mooring_admin_access(request):
         return True
     else:
         if request.user.is_authenticated:
-            if request.user.groups().filter(name=['Mooring Admin']).exists():
+            if request.user.groups().filter(name='Mooring Admin').exists():
                 return True
     return False
 
@@ -2481,7 +2482,7 @@ def booking_success(basket, booking, context_processor):
 
 def booking_annual_admission_success(basket, booking, context_processor):
 
-    order = Order.objects.get(basket=basket[0])
+    order = Order.objects.get(basket_id=basket[0].id)
     invoice = Invoice.objects.get(order_number=order.number)
     invoice_ref = invoice.reference
     book_inv, created = models.BookingAnnualInvoice.objects.get_or_create(booking_annual_admission=booking, invoice_reference=invoice_ref)
@@ -2492,9 +2493,11 @@ def booking_annual_admission_success(basket, booking, context_processor):
         try:
             inv = Invoice.objects.get(reference=invoice_ref)
             booking_customer = User.objects.get(id=booking.customer_id)
-            order = Order.objects.get(number=inv.order_number)
-            order.user = booking_customer
-            order.save()
+            # Note: Order is an API wrapper object, not a Django model
+            # It doesn't have a save() method, so we can't update order.user here
+            # order = Order.objects.get(number=inv.order_number)
+            # order.user = booking_customer
+            # order.save()  # This would fail - OrderObject has no save method
         except Invoice.DoesNotExist:
             print ("INVOICE ERROR")
             logger.error('{} tried making a booking with an incorrect invoice'.format('User {} with id {}'.format(booking_customer.first_name + booking_customer.last_name, booking.customer_id) if booking_customer else 'An anonymous user'))
@@ -2547,35 +2550,41 @@ def booking_annual_admission_success(basket, booking, context_processor):
             return context
 
 
-def booking_admission_success(basket, booking, context_processor):
+def booking_admission_success(basket, booking, context_processor, invoice_ref=None):
 
      arrival = models.AdmissionsLine.objects.filter(admissionsBooking=booking)[0].arrivalDate
      overnight = models.AdmissionsLine.objects.filter(admissionsBooking=booking)[0].overnightStay
 
-     order = Order.objects.get(basket=basket[0])
-     invoice = Invoice.objects.get(order_number=order.number)
-     invoice_ref = invoice.reference
-
-     #invoice_ref = request.GET.get('invoice')
+     # Get invoice reference if not provided
+     if not invoice_ref:
+         order = Order.objects.get(basket_id=basket[0].id)
+         invoice = Invoice.objects.get(order_number=order.number)
+         invoice_ref = invoice.reference
 
      if booking.booking_type == 3:
          try:
              inv = Invoice.objects.get(reference=invoice_ref)
-             order = Order.objects.get(number=inv.order_number)
-             order.user = booking.customer
-             order.save()
+             # Note: Order is an API wrapper object, not a Django model
+             # It doesn't have a save() method, so we can't update order.user here
+             # If order user update is needed, use Ledger API's update endpoint
+             # order = Order.objects.get(number=inv.order_number)
+             # order.user = booking.customer
+             # order.save()  # This would fail - OrderObject has no save method
          except Invoice.DoesNotExist:
-             logger.error('{} tried making a booking with an incorrect invoice'.format('User {} with id {}'.format(booking.customer.get_full_name(),booking.customer.id) if booking.customer else 'An anonymous user'))
-             return redirect('admissions', args=(booking.location.key,))
+             logger.error('{} tried making a booking with an incorrect invoice {}'.format('User {} with id {}'.format(booking.customer.get_full_name(),booking.customer.id) if booking.customer else 'An anonymous user', invoice_ref))
+             raise Exception(f'Invoice {invoice_ref} not found')
+         except Exception as e:
+             logger.error(f'Error validating invoice {invoice_ref}: {str(e)}')
+             raise
 
          if inv.system not in ['0516']:
              logger.error('{} tried making a booking with an invoice from another system with reference number {}'.format('User {} with id {}'.format(booking.customer.get_full_name(),booking.customer.id) if booking.customer else 'An anonymous user',inv.reference))
-             return redirect('admissions', args=(booking.location.key,))
+             raise Exception(f'Invoice {invoice_ref} is from wrong system: {inv.system}')
 
          try:
              b = AdmissionsBookingInvoice.objects.get(invoice_reference=invoice_ref)
              logger.error('{} tried making an admission booking with an already used invoice with reference number {}'.format('User {} with id {}'.format(booking.customer.get_full_name(),booking.customer.id) if booking.customer else 'An anonymous user',inv.reference))
-             return redirect('admissions',  args=(booking.location.key,))
+             raise Exception(f'Invoice {invoice_ref} has already been used')
          except AdmissionsBookingInvoice.DoesNotExist:
              logger.info('{} finished temporary booking {}, creating new AdmissionBookingInvoice with reference {}'.format('User {} with id {}'.format(booking.customer.get_full_name(),booking.customer.id) if booking.customer else 'An anonymous user',booking.id, invoice_ref))
              # FIXME: replace with server side notify_url callback
@@ -2601,10 +2610,11 @@ def booking_admission_success(basket, booking, context_processor):
              except Exception as e:
                  print ("Error Sending Booking Confirmation ("+str(booking.id)+") :"+str(e))
 
-
-             context = {
-                'admissionsBooking': booking,
-                'arrival' : arrival,
-                'overnight': overnight,
-                'admissionsInvoice': [invoice_ref]
-             }
+     # Return context for template rendering
+     context = {
+        'admissionsBooking': booking,
+        'arrival' : arrival,
+        'overnight': overnight,
+        'admissionsInvoice': [invoice_ref]
+     }
+     return context
