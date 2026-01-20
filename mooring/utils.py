@@ -1796,7 +1796,7 @@ def admissionsCheckout(request, admissionsBooking, lines, invoice_text=None, vou
         'session_type': 'ledger_api',
     }
     
-    if internal or request.user.is_anonymous or request.user != admissionsBooking.customer:
+    if admissionsBooking.customer:
         checkout_params['basket_owner'] = admissionsBooking.customer.id
     create_checkout_session(request, checkout_params)
 
