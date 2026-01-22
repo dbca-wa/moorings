@@ -17,9 +17,11 @@
         <div class="col-sm-12">
             <h2>Upcoming Bookings and Admission Fee Payments</h2>
 {% if not current_bookings and not current_admissions %}
-            <div class="well">
-                <h3>You do not have any upcoming bookings!</h3>
-                <p>Please visit the <a href="{{EXPLORE_PARKS_SEARCH}}">mooring map</a> to book a mooring.</p>
+            <div class="card">
+                <div class="card-body">
+                    <h3>You do not have any upcoming bookings!</h3>
+                    <p>Please visit the <a href="{{EXPLORE_PARKS_SEARCH}}">mooring map</a> to book a mooring.</p>
+                </div>
             </div>
 {% else %}
     {% for bk in current_bookings %}
