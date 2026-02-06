@@ -2927,7 +2927,7 @@ class VesselLicence(models.Model):
 
     def save(self, *args,**kwargs):
         self.updated = timezone.now()
-        UpdateLog.objects.create(model_name='VesselLicence', json_context={'vessel_rego':self.vessel_rego,'licence_id': self.licence_id, 'licence_type': dict(self.LICENCE_TYPE).get(self.licence_type), 'licence_type_id': self.licence_type,'start_date': self.start_date, 'expiry_date':self.expiry_date,'status': dict(self.STATUS).get(self.status), 'status_id': self.status  })
+        UpdateLog.objects.create(model_name='VesselLicence', json_context={'vessel_rego':self.vessel_rego,'licence_id': self.licence_id, 'licence_type': dict(self.LICENCE_TYPE).get(self.licence_type), 'licence_type_id': self.licence_type,'start_date': self.start_date.isoformat() if self.start_date else None, 'expiry_date':self.expiry_date.isoformat() if self.expiry_date else None,'status': dict(self.STATUS).get(self.status), 'status_id': self.status  })
         super(VesselLicence, self).save(*args,**kwargs)
 
 
