@@ -17,7 +17,6 @@ import {
 }
 from '../../hooks.js'
 import Quill from 'quill';
-import Render from 'quill-render';
 
 export default {
     name:"editor",

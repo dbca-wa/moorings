@@ -71,7 +71,6 @@ import {
 }
 from '../utils/eventBus.js';
 import Quill from 'quill';
-import Render from 'quill-render';
 import loader from '../utils/loader.vue'
 import alert from '../utils/alert.vue'
 export default {
