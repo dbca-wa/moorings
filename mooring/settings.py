@@ -92,6 +92,7 @@ TEMPLATES[0]['OPTIONS']['context_processors'].append('mooring.context_processors
 #    'set_placeholder': False,
 #}'''
 LEDGER_TEMPLATE = 'bootstrap5'
+LEDGER_UI_CARDS_MANAGEMENT = True
 CACHES = {
     'default': {
         'BACKEND': 'django.core.cache.backends.filebased.FileBasedCache',
