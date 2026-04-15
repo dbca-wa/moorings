@@ -92,6 +92,16 @@ TEMPLATES[0]['OPTIONS']['context_processors'].append('mooring.context_processors
 #    'set_placeholder': False,
 #}'''
 LEDGER_TEMPLATE = 'bootstrap5'
+LEDGER_UI_ACCOUNTS_MANAGEMENT = [
+            {'first_name': {'options' : {'view': True, 'edit': True}}},
+            {'last_name': {'options' : {'view': True, 'edit': True}}},
+            {'residential_address': {'options' : {'view': True, 'edit': True}}},
+            {'phone_number' : {'options' : {'view': True, 'edit': True}}},
+            {'mobile_number' : {'options' : {'view': True, 'edit': True}}},
+]
+LEDGER_UI_ACCOUNTS_MANAGEMENT_KEYS = []
+for am in LEDGER_UI_ACCOUNTS_MANAGEMENT:
+    LEDGER_UI_ACCOUNTS_MANAGEMENT_KEYS.append(list(am.keys())[0])
 LEDGER_UI_CARDS_MANAGEMENT = True
 CACHES = {
     'default': {
