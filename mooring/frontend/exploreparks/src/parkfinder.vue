@@ -285,17 +285,17 @@
                     <div v-if="admissions_key">
                         <div class="alert alert-warning text-center" role="alert">
                             <strong class="fs-6">
-                                <a :href='"https://www.ria.wa.gov.au/boating/admission-fees/"'>Click here for paying annual admission fees only</a>
+                                <a :href='"https://www.ria.wa.gov.au/boating/admission-fees/"' class="text-decoration-none">Click here for paying annual admission fees only</a>
                             </strong>
                         </div>
                         <div class="alert alert-warning text-center" role="alert">
                             <strong class="fs-6">
-                                <a :href='"/admissions/" + admissions_key + "/"'>Click here for paying individual admission fees for a single visit</a>
+                                <a :href='"/admissions/" + admissions_key + "/"' class="text-decoration-none">Click here for paying individual admission fees for a single visit</a>
                             </strong>
                         </div>
                         <div class="alert alert-info text-center" role="alert">
                             <strong class="fs-6">
-                                <a href='https://rottnestisland.com/boating/Fees'>Click here for more information on admission fees</a>
+                                <a href='https://rottnestisland.com/boating/Fees' class="text-decoration-none">Click here for more information on admission fees</a>
                             </strong>
                         </div>
                     </div>
