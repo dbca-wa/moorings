@@ -9,7 +9,7 @@
                         </div>
                         <div class="row" style="margin-top:2%;">
                             <div class="col-lg-6">
-                                <div class="p-4">
+                                <div class="p-4 bg-light rounded">
                                     <h3 class="text-primary text-center mb-4">Personal Details</h3>
 
                                     <div class="row mb-3">
@@ -54,7 +54,7 @@
                             </div>
 
                             <div class="col-lg-6">
-                                <div class="p-4">
+                                <div class="p-4 bg-light rounded">
                                     <h3 class="text-primary text-center mb-4">Booking Details</h3>
 
                                     <div class="row mb-3">
