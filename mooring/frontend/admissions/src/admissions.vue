@@ -175,7 +175,7 @@
                             <!-- Price information link -->
                             <div class="row mt-2">
                                 <div class="col-12">
-                                    <label>Click <a @click="loadFeeUrl();" id='daily-fees-link' href="javascript:void(0);">here</a> for price information.</label>
+                                    <label>Click <a :href="feeUrl" id='daily-fees-link' target="_blank" rel="noopener noreferrer">here</a> for price information.</label>
                                 </div>
                             </div>
                         </div>
@@ -282,6 +282,7 @@ export default {
             isModalOpen: false,
             message: '',
             minDate: null,
+            feeUrl: '',
         }
     },
     components: {
@@ -719,11 +720,7 @@ export default {
            console.log(terms);
            window.open(terms,'_terms');
 	},
-        loadFeeUrl: function() {
-           var daily_terms_url = $('#daily_terms_url').val();
-           console.log(daily_terms_url);
-           window.open(daily_terms_url,'_daily_terms_url');
-        },
+
         calculateTotal: function(){
             var date = new Date(this.arrivalDate);
             var temp = date.toISOString().substring(0,10);
@@ -788,6 +785,7 @@ export default {
     },
     mounted: function(){
         let vm = this;
+        this.feeUrl = $('#daily_terms_url').val();
         $.ajax({
             url: "/api/profile",
             method: 'GET',
