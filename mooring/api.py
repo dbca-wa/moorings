@@ -5132,9 +5132,9 @@ def get_paid_admissions(request):
          rv = RegisteredVessels.objects.filter(rego_no=rego)
 
          if settings.ML_ADMISSION_PAID_CHECK == True:
-            ml_vl = models.VesselLicence.objects.filter(status=1, start_date__lte=dtarrival,expiry_date__gte=dtarrival,vessel_rego__icontains=rego)
+            ml_vl = models.VesselLicence.objects.filter(status=1, start_date__lte=dtarrival,expiry_date__gte=dtarrival,vessel_rego=rego)
             if ml_vl.count() > 0:
-                  response.append({'admissionsPaid': True, 'id': mv_vl[0].id, 'rego_no': mv_vl[0].vessel_rego})
+                  response.append({'admissionsPaid': True, 'id': ml_vl[0].id, 'rego_no': ml_vl[0].vessel_rego})
 
          else:
             response.append({'admissionsPaid': rv[0].admissionsPaid, 'id': rv[0].id, 'rego_no': rv[0].rego_no})
@@ -5148,7 +5148,7 @@ def get_paid_admissions(request):
     else:
 
          if settings.ML_ADMISSION_PAID_CHECK == True:
-            ml_vl = models.VesselLicence.objects.filter(status=1, start_date__lte=dtarrival,expiry_date__gte=dtarrival,vessel_rego__icontains=rego)
+            ml_vl = models.VesselLicence.objects.filter(status=1, start_date__lte=dtarrival,expiry_date__gte=dtarrival,vessel_rego=rego)
             if ml_vl.count() > 0:
                   response.append({'admissionsPaid': True, 'id': ml_vl[0].id, 'rego_no': ml_vl[0].vessel_rego})
 
