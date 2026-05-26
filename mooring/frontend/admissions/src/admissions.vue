@@ -383,6 +383,18 @@ export default {
             }
             if(!formInvalid){
                 //we can continue and send off to basket.
+                var captchaValue = document.getElementById('id_captcha').value;
+                if (!captchaValue) {
+                    swal.fire({
+                        title: 'Error',
+                        text: 'Please complete the captcha.',
+                        type: 'error',
+                        showCancelButton: false,
+                        confirmButtonText: 'CLOSE',
+                        allowOutsideClick: false
+                    });
+                    return;
+                }
                 var vesselReg = this.vesselReg;
                 var location = $('#location').val();
                 var submitData = {
@@ -398,7 +410,8 @@ export default {
                     lastName: lastName,
                     email: email,
                     location: location,
-                    mobile: mobile
+                    mobile: mobile,
+                    captcha: captchaValue
                     // mooring_group: mooring_group
                 }
                 $.ajax({
@@ -417,7 +430,18 @@ export default {
                             window.location.href = data.redirect;
                         } else if (data.status == 'failure'){
                             console.log("failure");
-                            if (data.error[1].includes("Admissions Oracle Code")){
+                            if (data.error[1].includes("Captcha")){
+                                swal.fire({
+                                    title: 'Captcha Error',
+                                    text: data.error[1],
+                                    type: 'error',
+                                    showCancelButton: false,
+                                    confirmButtonText: 'Reload',
+                                    allowOutsideClick: false
+                                }).then(function() {
+                                    window.location.reload();
+                                });
+                            } else if (data.error[1].includes("Admissions Oracle Code")){
                                 var msg = data.error[1].split('.')[0];
                                 vm.message = msg;
                                 // vm.$modal.show('messageModal');
