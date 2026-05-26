@@ -147,7 +147,11 @@
                         </div>
                     </div>
                 </div>
-                <div id="captcha-slot" class="row mt-3"></div>
+                <div id="captcha-slot" class="row mt-3">
+                    <div class="col-lg-12">
+                        <div class="p-4 bg-light rounded" id="captcha-inner-slot"></div>
+                    </div>
+                </div>
                 <div class="row mt-4">
                     <div class="col-lg-12">
                         <div class="p-4 bg-light rounded">
@@ -811,7 +815,7 @@ export default {
     mounted: function(){
         let vm = this;
         const captchaWidget = document.getElementById('jwidget_div_captcha');
-        const captchaSlot = document.getElementById('captcha-slot');
+        const captchaSlot = document.getElementById('captcha-inner-slot');
         if (captchaWidget && captchaSlot) {
             captchaSlot.appendChild(captchaWidget);
         }
@@ -876,6 +880,12 @@ export default {
     margin-left:10px;
 }
 
+#jwidget_div_captcha center {
+    text-align: left;
+}
+#jwidget_div_captcha div:has(> br) {
+    display: none;
+}
 
 
 </style>
