@@ -147,6 +147,7 @@
                         </div>
                     </div>
                 </div>
+                <div id="captcha-slot" class="row mt-3"></div>
                 <div class="row mt-4">
                     <div class="col-lg-12">
                         <div class="p-4 bg-light rounded">
@@ -809,6 +810,11 @@ export default {
     },
     mounted: function(){
         let vm = this;
+        const captchaWidget = document.getElementById('jwidget_div_captcha');
+        const captchaSlot = document.getElementById('captcha-slot');
+        if (captchaWidget && captchaSlot) {
+            captchaSlot.appendChild(captchaWidget);
+        }
         this.feeUrl = $('#daily_terms_url').val();
         $.ajax({
             url: "/api/profile",
