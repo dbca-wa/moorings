@@ -1,6 +1,7 @@
 import hashlib
 import logging
 import calendar
+from django_crispy_jcaptcha.widget import CaptchaImages
 import json
 import os
 import mimetypes
@@ -3778,9 +3779,15 @@ class AdmissionFeesView(TemplateView):
         context_processor = template_context(self.request)
         context = {
             'loc': self.kwargs['loc'],
-            'context_processor' : context_processor
+            'context_processor': context_processor,
+            'captcha_widget': CaptchaImages().render('captcha', None),
         }
         return render(self.request, self.template_name, context)
+
+
+def refresh_captcha(request):
+    return HttpResponse(CaptchaImages().render('captcha', None), content_type='text/html')
+
 
 # class AdmissionsCostView(TemplateView):
 #     template_name = 'mooring/admissions/admissions_cost.html'

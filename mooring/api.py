@@ -1,6 +1,8 @@
 from datetime import timezone as timezone_dt
 import traceback
 import base64
+from django import forms as django_forms
+from django_crispy_jcaptcha.widget import CaptchaValidation
 import geojson
 import decimal
 import logging
@@ -2331,6 +2333,15 @@ def create_admissions_booking(request, *args, **kwargs):
 
     location_text = request.POST.get('location')
     location = AdmissionsLocation.objects.filter(key=location_text)[0]
+
+    captcha_value = request.POST.get('captcha', '')
+    try:
+        CaptchaValidation(captcha_value, django_forms)
+    except django_forms.ValidationError:
+        return HttpResponse(geojson.dumps({
+            'status': 'failure',
+            'error': (None, 'Captcha verification failed, please reload the page and try again.')
+        }), content_type='application/json')
 
     data = {
         'vesselRegNo': request.POST.get('vesselReg'),

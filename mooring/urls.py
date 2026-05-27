@@ -5,6 +5,7 @@ from django.conf.urls.static import static
 from rest_framework import routers
 from mooring import are_migrations_running, views, api
 from mooring.admin import admin
+from django_crispy_jcaptcha import views as jcaptcha_views
 
 # from ledger.urls import urlpatterns as ledger_patterns
 from ledger_api_client.urls import urlpatterns as ledger_patterns
@@ -112,6 +113,8 @@ api_patterns = [
 # URL Patterns
 urlpatterns = [
     re_path(r'^admin/', admin.site.urls),
+    re_path(r'^jcaptcha/image-selection/(?P<hashkey>\w+).(?P<extension>\w\w\w)$', jcaptcha_views.getImagePrimary, name='jcaptcha-image-primary'),
+    re_path(r'^jcaptcha/image-match/(?P<hashkey>\w+).(?P<extension>\w\w\w)$', jcaptcha_views.getImageHash, name='jcaptcha-image-match'),
     re_path(r'', include(api_patterns)),
     re_path(r'^forbidden', views.ForbiddenView.as_view(), name='forbidden-view'),
     re_path(r'^account/', views.ProfileView.as_view(), name='account'),
@@ -181,6 +184,7 @@ urlpatterns = [
     re_path(r'^createdbasket/', views.AdmissionsBasketCreated.as_view(), name='created_basket'),
     re_path(r'^map/', views.MapView.as_view(), name='map'),
     re_path(r'^admissions/(?P<loc>[a-z]+)/$', views.AdmissionFeesView.as_view(), name='admissions'),
+    re_path(r'^admissions/captcha/refresh/$', views.refresh_captcha, name='admissions-captcha-refresh'),
     re_path(r'^admissions-cost/$', views.AdmissionsCostView.as_view(), name='admissions_cost'),
     re_path(r'mooring/payments/invoice-pdf/(?P<reference>\d+)',views.InvoicePDFView.as_view(), name='mooring-invoice-pdf'),
     re_path(r'^mooringsiteratelog/(?P<pk>[0-9]+)/', views.MooringsiteRateLogView.as_view(), name='mooringsiteratelog'),

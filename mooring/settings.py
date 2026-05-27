@@ -41,7 +41,10 @@ INSTALLED_APPS += [
     'crispy_forms',
     'crispy_bootstrap5',
     'django_vite',
+    'django_crispy_jcaptcha',
 ]
+
+JCAPTCHA_IMAGE_LIST = 'jcaptcha2'
 
 MIDDLEWARE_CLASSES += [
     'mooring.middleware.BookingTimerMiddleware',
