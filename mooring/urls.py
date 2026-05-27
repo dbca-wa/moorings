@@ -184,6 +184,7 @@ urlpatterns = [
     re_path(r'^createdbasket/', views.AdmissionsBasketCreated.as_view(), name='created_basket'),
     re_path(r'^map/', views.MapView.as_view(), name='map'),
     re_path(r'^admissions/(?P<loc>[a-z]+)/$', views.AdmissionFeesView.as_view(), name='admissions'),
+    re_path(r'^admissions/captcha/refresh/$', views.refresh_captcha, name='admissions-captcha-refresh'),
     re_path(r'^admissions-cost/$', views.AdmissionsCostView.as_view(), name='admissions_cost'),
     re_path(r'mooring/payments/invoice-pdf/(?P<reference>\d+)',views.InvoicePDFView.as_view(), name='mooring-invoice-pdf'),
     re_path(r'^mooringsiteratelog/(?P<pk>[0-9]+)/', views.MooringsiteRateLogView.as_view(), name='mooringsiteratelog'),

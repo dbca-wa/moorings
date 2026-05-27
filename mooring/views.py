@@ -3784,6 +3784,11 @@ class AdmissionFeesView(TemplateView):
         }
         return render(self.request, self.template_name, context)
 
+
+def refresh_captcha(request):
+    return HttpResponse(CaptchaImages().render('captcha', None), content_type='text/html')
+
+
 # class AdmissionsCostView(TemplateView):
 #     template_name = 'mooring/admissions/admissions_cost.html'
 

@@ -436,15 +436,21 @@ export default {
                         } else if (data.status == 'failure'){
                             console.log("failure");
                             if (data.error[1].includes("Captcha")){
+                                $.get('/admissions/captcha/refresh/').done(function(html) {
+                                    var parser = new DOMParser();
+                                    var doc = parser.parseFromString(html, 'text/html');
+                                    var newWidget = doc.getElementById('jwidget_div_captcha');
+                                    var slot = document.getElementById('captcha-inner-slot');
+                                    if (newWidget && slot) {
+                                        slot.innerHTML = newWidget.outerHTML;
+                                    }
+                                });
                                 swal.fire({
                                     title: 'Captcha Error',
-                                    text: data.error[1],
+                                    text: 'Captcha incorrect, please try again.',
                                     type: 'error',
                                     showCancelButton: false,
-                                    confirmButtonText: 'Reload',
-                                    allowOutsideClick: false
-                                }).then(function() {
-                                    window.location.reload();
+                                    confirmButtonText: 'OK',
                                 });
                             } else if (data.error[1].includes("Admissions Oracle Code")){
                                 var msg = data.error[1].split('.')[0];
