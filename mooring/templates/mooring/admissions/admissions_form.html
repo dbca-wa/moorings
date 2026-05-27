@@ -94,6 +94,8 @@
     <input id="daily_terms_url" name="terms" type="hidden" value="{{ context_processor.DAILY_FEES_URL}}"/>
 
     <div id='appdiv'></div>
+    <div style="display:none">{{ captcha_widget }}</div>
+
     <div id="admissionsBooking">
       <alert :show="showAlert" :type="alertType" :data-alert="alertMessage" :duration="5000">
           <p :text-content.prop="alertMessage"></p>

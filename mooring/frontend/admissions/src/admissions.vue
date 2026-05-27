@@ -147,6 +147,11 @@
                         </div>
                     </div>
                 </div>
+                <div id="captcha-slot" class="row mt-3">
+                    <div class="col-lg-12">
+                        <div class="p-4 bg-light rounded" id="captcha-inner-slot"></div>
+                    </div>
+                </div>
                 <div class="row mt-4">
                     <div class="col-lg-12">
                         <div class="p-4 bg-light rounded">
@@ -383,6 +388,18 @@ export default {
             }
             if(!formInvalid){
                 //we can continue and send off to basket.
+                var captchaValue = document.getElementById('id_captcha').value;
+                if (!captchaValue) {
+                    swal.fire({
+                        title: 'Error',
+                        text: 'Please complete the captcha.',
+                        type: 'error',
+                        showCancelButton: false,
+                        confirmButtonText: 'CLOSE',
+                        allowOutsideClick: false
+                    });
+                    return;
+                }
                 var vesselReg = this.vesselReg;
                 var location = $('#location').val();
                 var submitData = {
@@ -398,7 +415,8 @@ export default {
                     lastName: lastName,
                     email: email,
                     location: location,
-                    mobile: mobile
+                    mobile: mobile,
+                    captcha: captchaValue
                     // mooring_group: mooring_group
                 }
                 $.ajax({
@@ -417,7 +435,24 @@ export default {
                             window.location.href = data.redirect;
                         } else if (data.status == 'failure'){
                             console.log("failure");
-                            if (data.error[1].includes("Admissions Oracle Code")){
+                            if (data.error[1].includes("Captcha")){
+                                $.get('/admissions/captcha/refresh/').done(function(html) {
+                                    var parser = new DOMParser();
+                                    var doc = parser.parseFromString(html, 'text/html');
+                                    var newWidget = doc.getElementById('jwidget_div_captcha');
+                                    var slot = document.getElementById('captcha-inner-slot');
+                                    if (newWidget && slot) {
+                                        slot.innerHTML = newWidget.outerHTML;
+                                    }
+                                });
+                                swal.fire({
+                                    title: 'Captcha Error',
+                                    text: 'Captcha incorrect, please try again.',
+                                    type: 'error',
+                                    showCancelButton: false,
+                                    confirmButtonText: 'OK',
+                                });
+                            } else if (data.error[1].includes("Admissions Oracle Code")){
                                 var msg = data.error[1].split('.')[0];
                                 vm.message = msg;
                                 // vm.$modal.show('messageModal');
@@ -785,6 +820,11 @@ export default {
     },
     mounted: function(){
         let vm = this;
+        const captchaWidget = document.getElementById('jwidget_div_captcha');
+        const captchaSlot = document.getElementById('captcha-inner-slot');
+        if (captchaWidget && captchaSlot) {
+            captchaSlot.appendChild(captchaWidget);
+        }
         this.feeUrl = $('#daily_terms_url').val();
         $.ajax({
             url: "/api/profile",
@@ -846,6 +886,12 @@ export default {
     margin-left:10px;
 }
 
+#jwidget_div_captcha center {
+    text-align: left;
+}
+#jwidget_div_captcha div:has(> br) {
+    display: none;
+}
 
 
 </style>
