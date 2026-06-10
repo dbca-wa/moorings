@@ -1785,11 +1785,15 @@ def admissionsCheckout(request, admissionsBooking, lines, invoice_text=None, vou
 
     basket_params = convert_decimal_to_float(basket_params)
     basket_hash = create_basket_session(request, request.user.id, basket_params)
+    if settings.EMAIL_INSTANCE == 'DEV':
+        admissions_preload_url = settings.PARKSTAY_EXTERNAL_URL.rstrip('/') + reverse('public_admissions_success')
+    else:
+        admissions_preload_url = request.build_absolute_uri(reverse('public_admissions_success'))
     checkout_params = {
         'system': settings.PS_PAYMENT_SYSTEM_ID,
         'fallback_url': request.build_absolute_uri('/'),
         'return_url': request.build_absolute_uri(reverse('public_admissions_success')),
-        'return_preload_url': request.build_absolute_uri(reverse('public_admissions_success')),
+        'return_preload_url': admissions_preload_url,
         'force_redirect': True,
         'proxy': True if internal else False,
         'invoice_text': invoice_text,
@@ -1829,11 +1833,15 @@ def annual_admission_checkout(request, booking, lines, invoice_text=None, vouche
     }
     basket_params = convert_decimal_to_float(basket_params)
     basket_hash = create_basket_session(request, booking.customer.id, basket_params)
+    if settings.EMAIL_INSTANCE == 'DEV':
+        annual_admission_preload_url = settings.PARKSTAY_EXTERNAL_URL.rstrip('/') + reverse('public_booking_annual_admission_success')
+    else:
+        annual_admission_preload_url = request.build_absolute_uri(reverse('public_booking_annual_admission_success'))
     checkout_params = {
         'system': settings.PS_PAYMENT_SYSTEM_ID,
         'fallback_url': request.build_absolute_uri('/'),
         'return_url': request.build_absolute_uri(reverse('public_booking_annual_admission_success')),
-        'return_preload_url': request.build_absolute_uri(reverse('public_booking_annual_admission_success')),
+        'return_preload_url': annual_admission_preload_url,
         'force_redirect': True,
         'proxy': True if internal else False,
         'invoice_text': invoice_text,
@@ -1892,11 +1900,15 @@ def checkout(request, booking, lines, invoice_text=None, vouchers=[], internal=F
 
     basket_params = convert_decimal_to_float(basket_params)
     basket_hash = create_basket_session(request, booking.customer.id, basket_params)
+    if settings.EMAIL_INSTANCE == 'DEV':
+        booking_preload_url = settings.PARKSTAY_EXTERNAL_URL.rstrip('/') + reverse('public_booking_success')
+    else:
+        booking_preload_url = request.build_absolute_uri(reverse('public_booking_success'))
     checkout_params = {
         'system': settings.PS_PAYMENT_SYSTEM_ID,
         'fallback_url': request.build_absolute_uri('/'),
         'return_url': request.build_absolute_uri(reverse('public_booking_success')),
-        'return_preload_url': request.build_absolute_uri(reverse('public_booking_success')),
+        'return_preload_url': booking_preload_url,
         'force_redirect': True,
         'proxy': True if internal else False,
         'invoice_text': invoice_text,
