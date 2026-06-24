@@ -4,6 +4,10 @@ from django.urls import include, re_path
 from django.conf.urls.static import static
 from rest_framework import routers
 from mooring import are_migrations_running, views, api
+from mooring.payment_api import (
+    BookingPaymentNotificationView,
+    AdmissionsPaymentNotificationView,
+)
 from mooring.admin import admin
 from django_crispy_jcaptcha import views as jcaptcha_views
 
@@ -80,6 +84,13 @@ api_patterns = [
     re_path(r'^api/create_booking', api.create_booking, name='create_booking'),
     re_path(r'^api/mooring_map/', api.mooring_map_view, name='mooring_map_api'),
     re_path(r'^api/create_admissions_booking', api.create_admissions_booking, name="create_admissions_booking"),
+    # Payment notification endpoints (session-less, called by Ledger)
+    re_path(r'^api/booking-payment-notification/(?P<pk>[0-9a-f-]+)/$',
+            BookingPaymentNotificationView.as_view(),
+            name='api-booking-payment-notification'),
+    re_path(r'^api/admissions-payment-notification/(?P<pk>[0-9a-f-]+)/$',
+            AdmissionsPaymentNotificationView.as_view(),
+            name='api-admissions-payment-notification'),
     re_path(r'api/get_confirmation/(?P<booking_id>[0-9]+)/$', api.get_confirmation, name='get_confirmation'),
     re_path(r'^api/get_aa_letter/(?P<booking_id>[0-9]+)/$', api.get_annual_admission_letter, name='get_aa_letter'),
     re_path(r'api/get_admissions_confirmation/(?P<booking_id>[0-9]+)/$', api.get_admissions_confirmation, name='get_admissions_confirmation'),
