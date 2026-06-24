@@ -15,6 +15,7 @@ from django.db.models import Q
 from django.contrib.gis.db import models
 from django.db import models as django_models
 from django.db import IntegrityError, transaction, connection
+from django.http import HttpRequest
 from django.utils import timezone
 from datetime import date, time, datetime, timedelta
 from django.conf import settings
@@ -2121,6 +2122,52 @@ class Booking(models.Model):
         
         # Return context dict for email/display
         return booking._get_success_context(invoice_reference)
+    
+    def send_payment_emails(self, request_or_context):
+        """
+        Send payment confirmation and invoice emails.
+        
+        This method can be called from either:
+        1. Success views with HttpRequest (sync flow after payment redirect)
+        2. API notification endpoints with context dict (async background callback)
+        
+        Args:
+            request_or_context: Either HttpRequest object or dict containing context data
+        
+        Raises:
+            No exceptions - email errors are logged but don't fail the transaction
+        """
+        from mooring import emails
+        from mooring.context_processors import template_context
+        
+        try:
+            # Determine if input is HttpRequest or dict context
+            if isinstance(request_or_context, HttpRequest):
+                # Sync flow - extract context from request
+                context_processor = template_context(request_or_context)
+                logger.info(f'Sending payment emails for booking {self.id} (sync flow with HttpRequest)')
+            else:
+                # Async flow - use provided context dict
+                context_processor = request_or_context
+                logger.info(f'Sending payment emails for booking {self.id} (async flow with context dict)')
+            
+            # Send invoice email
+            try:
+                emails.send_booking_invoice(self, context_processor)
+                logger.info(f'Successfully sent invoice email for booking {self.id}')
+            except Exception as e:
+                logger.error(f'Error sending invoice email for booking {self.id}: {e}', exc_info=True)
+            
+            # Send confirmation email
+            try:
+                emails.send_booking_confirmation(self, context_processor)
+                logger.info(f'Successfully sent confirmation email for booking {self.id}')
+            except Exception as e:
+                logger.error(f'Error sending confirmation email for booking {self.id}: {e}', exc_info=True)
+                
+        except Exception as e:
+            # Catch-all for any unexpected errors - log but don't fail
+            logger.error(f'Unexpected error sending payment emails for booking {self.id}: {e}', exc_info=True)
 
 class BookingHistory(models.Model):
     booking = models.ForeignKey(Booking, related_name='history', null=True, blank=True, on_delete=models.SET_NULL)
@@ -2617,6 +2664,52 @@ class AdmissionsBooking(models.Model):
         
         # Return context dict for email/display
         return booking._get_success_context(invoice_reference)
+    
+    def send_payment_emails(self, request_or_context):
+        """
+        Send payment confirmation and invoice emails for admissions booking.
+        
+        This method can be called from either:
+        1. Success views with HttpRequest (sync flow after payment redirect)
+        2. API notification endpoints with context dict (async background callback)
+        
+        Args:
+            request_or_context: Either HttpRequest object or dict containing context data
+        
+        Raises:
+            No exceptions - email errors are logged but don't fail the transaction
+        """
+        from mooring import emails
+        from mooring.context_processors import template_context
+        
+        try:
+            # Determine if input is HttpRequest or dict context
+            if isinstance(request_or_context, HttpRequest):
+                # Sync flow - extract context from request
+                context_processor = template_context(request_or_context)
+                logger.info(f'Sending payment emails for admissions booking {self.id} (sync flow with HttpRequest)')
+            else:
+                # Async flow - use provided context dict
+                context_processor = request_or_context
+                logger.info(f'Sending payment emails for admissions booking {self.id} (async flow with context dict)')
+            
+            # Send invoice email
+            try:
+                emails.send_admissions_booking_invoice(self, context_processor)
+                logger.info(f'Successfully sent invoice email for admissions booking {self.id}')
+            except Exception as e:
+                logger.error(f'Error sending invoice email for admissions booking {self.id}: {e}', exc_info=True)
+            
+            # Send confirmation email
+            try:
+                emails.send_admissions_booking_confirmation(self, context_processor)
+                logger.info(f'Successfully sent confirmation email for admissions booking {self.id}')
+            except Exception as e:
+                logger.error(f'Error sending confirmation email for admissions booking {self.id}: {e}', exc_info=True)
+                
+        except Exception as e:
+            # Catch-all for any unexpected errors - log but don't fail
+            logger.error(f'Unexpected error sending payment emails for admissions booking {self.id}: {e}', exc_info=True)
 
 
 class AdmissionsLine(models.Model):
