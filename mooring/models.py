@@ -25,7 +25,8 @@ from mooring.exceptions import BookingRangeWithinException
 from django.core.cache import cache
 # from ledger.payments.models import Invoice
 # from ledger.accounts.models import EmailUser
-from ledger_api_client.ledger_models import EmailUserRO as EmailUser, Invoice
+from ledger_api_client.ledger_models import EmailUserRO as EmailUser, Invoice, Basket
+from ledger_api_client.utils import Order, update_payments
 from django.core.files.storage import FileSystemStorage
 from django.core import serializers
 from django.utils.crypto import get_random_string
@@ -1901,6 +1902,225 @@ class Booking(models.Model):
         else:
             pass
         return payment_dict
+
+    def _get_success_context(self, invoice_reference=None):
+        """
+        Build context dictionary for success page/notifications.
+        Used by process_payment_notification to return consistent data.
+        """
+        from mooring.models import BookingInvoice, RefundFailed
+        
+        book_inv = None
+        if invoice_reference:
+            book_inv = BookingInvoice.objects.filter(
+                booking=self, 
+                invoice_reference=invoice_reference
+            ).first()
+        
+        refund_failed = None
+        if RefundFailed.objects.filter(booking=self).count() > 0:
+            refund_failed = RefundFailed.objects.filter(booking=self)
+        
+        return {
+            'booking': self,
+            'book_inv': [book_inv] if book_inv else [],
+            'refund_failed': refund_failed
+        }
+
+    @transaction.atomic
+    def process_payment_notification(self, invoice_reference):
+        """
+        Process payment notification from Ledger (idempotent).
+        
+        This method handles payment confirmation for a booking, whether called
+        from the user-facing success view or from a background notification endpoint.
+        It's designed to be idempotent - safe to call multiple times with the same
+        invoice_reference.
+        
+        Args:
+            invoice_reference (str): Invoice reference from Ledger payment system
+            
+        Returns:
+            dict: Context dictionary with booking data for email/display
+            
+        Raises:
+            ValueError: If invoice validation fails
+            Invoice.DoesNotExist: If invoice not found in Ledger
+        """
+        from mooring.models import (
+            BookingInvoice, MooringsiteBooking, AdmissionsBooking, 
+            AdmissionsBookingInvoice, AdmissionsLine, VesselDetail
+        )
+        from mooring import emails
+        
+        logger.info(f'Processing payment notification for booking {self.id}, invoice {invoice_reference}')
+        
+        # Lock booking row to prevent race conditions
+        booking = Booking.objects.select_for_update().get(id=self.id)
+        
+        # Idempotency check - if already processed, return current state
+        if booking.booking_type == 1:
+            logger.info(f'Booking {booking.id} already processed (booking_type=1), returning current state')
+            return booking._get_success_context(invoice_reference)
+        
+        # Validate invoice exists and belongs to this booking
+        try:
+            inv = Invoice.objects.get(reference=invoice_reference)
+        except Invoice.DoesNotExist:
+            logger.error(f'{booking.customer.get_full_name() if booking.customer else "Anonymous user"} '
+                        f'tried making a booking with an incorrect invoice {invoice_reference}')
+            raise
+        
+        # Verify invoice is from correct payment system
+        if inv.system not in ['0516']:
+            logger.error(f'{booking.customer.get_full_name() if booking.customer else "Anonymous user"} '
+                        f'tried making a booking with an invoice from another system: {inv.system}, '
+                        f'invoice reference: {inv.reference}')
+            raise ValueError(f'Invoice {invoice_reference} is from wrong system: {inv.system}')
+        
+        # Verify invoice ownership via basket booking_reference
+        booking_reference = settings.MOORING_BOOKING_REF_PREFIX + str(booking.id)
+        basket = Basket.objects.filter(
+            status='Submitted',
+            system=settings.PAYMENT_SYSTEM_ID,
+            booking_reference=booking_reference
+        ).order_by('-id')
+        
+        if not basket.exists():
+            logger.error(f'No basket found for booking {booking.id} with reference {booking_reference}')
+            raise ValueError(f'No basket found for booking {booking.id}')
+        
+        # Verify invoice order matches basket
+        order = Order.objects.get(number=inv.order_number)
+        if order.basket != basket.first().id:
+            logger.error(f'Invoice {invoice_reference} order does not match basket for booking {booking.id}')
+            raise ValueError(f'Invoice ownership validation failed for booking {booking.id}')
+        
+        # Create/get BookingInvoice linking record
+        book_inv, created = BookingInvoice.objects.get_or_create(
+            booking=booking, 
+            invoice_reference=invoice_reference
+        )
+        
+        if created:
+            logger.info(f'Created BookingInvoice for booking {booking.id}, invoice {invoice_reference}')
+        else:
+            logger.info(f'BookingInvoice already exists for booking {booking.id}, invoice {invoice_reference}')
+        
+        # Handle old_booking cancellation (for booking changes)
+        if booking.old_booking:
+            logger.info(f'Cancelling old booking {booking.old_booking.id} for booking change')
+            old_booking = Booking.objects.get(id=booking.old_booking.id)
+            old_booking.booking_type = 4  # Cancelled Booking
+            old_booking.cancelation_time = datetime.now()
+            old_booking.canceled_by = booking.created_by
+            old_booking.save()
+            
+            # Cancel old booking's mooringsite bookings
+            booking_items = MooringsiteBooking.objects.filter(booking=old_booking)
+            for bi in booking_items:
+                bi.booking_type = 4
+                bi.save()
+            
+            # Cancel old booking's admission payment if exists
+            if old_booking.admission_payment:
+                old_booking.admission_payment.booking_type = 4
+                old_booking.admission_payment.cancelation_time = datetime.now()
+                old_booking.admission_payment.canceled_by = booking.created_by
+                old_booking.admission_payment.save()
+        
+        # Apply override_lines amounts to booking items
+        booking_items_current = MooringsiteBooking.objects.filter(booking=booking)
+        for bi in booking_items_current:
+            if str(bi.id) in booking.override_lines:
+                bi.amount = D(booking.override_lines[str(bi.id)])
+            bi.save()
+        
+        # Update arrival and departure dates from mooringsite bookings
+        msb = MooringsiteBooking.objects.filter(booking=booking).order_by('from_dt')
+        if msb.exists():
+            from_date = msb[0].from_dt
+            to_date = msb[msb.count()-1].to_dt
+            
+            # Convert timezone-aware datetime to date
+            timestamp = calendar.timegm(from_date.timetuple())
+            local_dt = datetime.fromtimestamp(timestamp)
+            from_dt = local_dt.replace(microsecond=from_date.microsecond)
+            from_date_converted = from_dt.date()
+            
+            timestamp = calendar.timegm(to_date.timetuple())
+            local_dt = datetime.fromtimestamp(timestamp)
+            to_dt = local_dt.replace(microsecond=to_date.microsecond)
+            to_date_converted = to_dt.date()
+            
+            booking.arrival = from_date_converted
+            booking.departure = to_date_converted
+        
+        # Update booking state - set to confirmed
+        booking.booking_type = 1  # Internet booking (confirmed)
+        booking.expiry_time = None
+        
+        # Update payments via ledger
+        try:
+            update_payments(invoice_reference)
+            logger.info(f'Updated payments for invoice {invoice_reference}')
+        except Exception as e:
+            logger.warning(f'Error updating payments for invoice {invoice_reference}: {e}')
+            # Don't fail the whole transaction for payment update errors
+        
+        # Handle admission payment if exists
+        if booking.admission_payment:
+            logger.info(f'Processing admission payment {booking.admission_payment.id}')
+            ad_booking = AdmissionsBooking.objects.get(pk=booking.admission_payment.pk)
+            ad_booking.created_by = booking.created_by
+            ad_booking.booking_type = 1
+            ad_booking.save()
+            
+            # Create admission invoice record
+            ad_invoice, created = AdmissionsBookingInvoice.objects.get_or_create(
+                admissions_booking=ad_booking, 
+                invoice_reference=invoice_reference
+            )
+            
+            # Apply admission override lines
+            for al in ad_booking.override_lines.keys():
+                ad_line = AdmissionsLine.objects.get(id=int(al))
+                ad_line.cost = ad_booking.override_lines[str(al)]
+                ad_line.save()
+        
+        # Update/create VesselDetail records from booking.details
+        if booking.details and 'vessel_rego' in booking.details:
+            try:
+                vessel_rego = booking.details['vessel_rego']
+                if VesselDetail.objects.filter(rego_no=vessel_rego).exists():
+                    # Update existing vessel
+                    vd = VesselDetail.objects.filter(rego_no=vessel_rego).first()
+                    vd.vessel_size = booking.details.get('vessel_size', vd.vessel_size)
+                    vd.vessel_draft = booking.details.get('vessel_draft', vd.vessel_draft)
+                    vd.vessel_beam = booking.details.get('vessel_beam', vd.vessel_beam)
+                    vd.vessel_weight = booking.details.get('vessel_weight', vd.vessel_weight)
+                    vd.save()
+                    logger.info(f'Updated VesselDetail for rego {vessel_rego}')
+                else:
+                    # Create new vessel
+                    VesselDetail.objects.create(
+                        rego_no=vessel_rego,
+                        vessel_size=booking.details.get('vessel_size', D('0.00')),
+                        vessel_draft=booking.details.get('vessel_draft', D('0.00')),
+                        vessel_beam=booking.details.get('vessel_beam', D('0.00')),
+                        vessel_weight=booking.details.get('vessel_weight', D('0.00'))
+                    )
+                    logger.info(f'Created VesselDetail for rego {vessel_rego}')
+            except Exception as e:
+                logger.error(f'Error creating/updating VesselDetail for booking {booking.id}: {e}')
+                # Don't fail the whole transaction for vessel detail errors
+        
+        # Save booking
+        booking.save()
+        logger.info(f'Successfully processed payment notification for booking {booking.id}')
+        
+        # Return context dict for email/display
+        return booking._get_success_context(invoice_reference)
 
 class BookingHistory(models.Model):
     booking = models.ForeignKey(Booking, related_name='history', null=True, blank=True, on_delete=models.SET_NULL)
