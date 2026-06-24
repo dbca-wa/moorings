@@ -1,24 +1,20 @@
 # Prepare the base environment.
-FROM ubuntu:24.04 as builder_base_moorings
+FROM ghcr.io/dbca-wa/docker-apps-dev:ubuntu_2604_base_python as builder_base_moorings
 MAINTAINER asi@dbca.wa.gov.au
 ENV DEBIAN_FRONTEND=noninteractive
 ENV TZ=Australia/Perth
 ENV PRODUCTION_EMAIL=True
 ENV SECRET_KEY="ThisisNotRealKey"
 ENV NODE_MAJOR=22
+ENV VIRTUAL_ENV=/app/venv
+
 RUN apt-get clean
 RUN apt-get update
 RUN apt-get install --no-install-recommends -y software-properties-common
 RUN apt-get upgrade -y
-RUN apt-get install --no-install-recommends -y curl gnupg wget git libmagic-dev gcc g++ binutils libproj-dev gdal-bin tzdata rsyslog gunicorn libreoffice gpg-agent 
-RUN apt-get install --no-install-recommends -y libpq-dev patch virtualenv
-RUN apt-get install --no-install-recommends -y postgresql-client mtr htop vim ssh
-RUN apt-get install --no-install-recommends -y bzip2 unzip
-RUN apt-get install --no-install-recommends -y postfix syslog-ng syslog-ng-core
+RUN apt-get install --no-install-recommends -y curl gnupg wget git libmagic-dev gcc g++ binutils libproj-dev gdal-bin tzdata gpg-agent 
 RUN apt update
-RUN apt-get install --no-install-recommends -y  python3 python3-dev python3-pip python3-setuptools
-RUN apt remove -y libnode-dev
-RUN apt remove -y libnode72
+
 
 # Install nodejs
 RUN update-ca-certificates
@@ -47,8 +43,9 @@ RUN /tmp/default_script_installer.sh
 FROM builder_base_moorings as python_libs_moorings
 WORKDIR /app
 USER oim
-RUN virtualenv /app/venv
-ENV PATH=/app/venv/bin:$PATH
+RUN python3 -m venv $VIRTUAL_ENV
+RUN python3 -m venv $VIRTUAL_ENV
+ENV PATH=$VIRTUAL_ENV/bin:$PATH
 RUN git config --global --add safe.directory /app
 COPY requirements.txt ./
 RUN pip install --upgrade pip
@@ -90,6 +87,13 @@ COPY --chown=oim:oim  python-cron ./
 COPY --chown=oim:oim startup.sh /
 RUN chmod 755 /startup.sh
 # cron end
+
+# cleanup
+USER root
+RUN wget https://raw.githubusercontent.com/dbca-wa/wagov_utils/refs/heads/main/wagov_utils/bin/package_cleanup_2604.sh -O /tmp/package_cleanup_2604.sh
+RUN chmod 755 /tmp/package_cleanup_2604.sh
+RUN /tmp/package_cleanup_2604.sh
+USER oim
 
 EXPOSE 8080
 HEALTHCHECK --interval=1m --timeout=5s --start-period=10s --retries=3 CMD ["wget", "-q", "-O", "-", "http://localhost:8080/"]
