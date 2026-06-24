@@ -2492,6 +2492,132 @@ class AdmissionsBooking(models.Model):
         active_invoices = Invoice.objects.filter(reference__in=[x.invoice_reference for x in self.invoices.all()]).order_by('-created')
         return active_invoices[0] if active_invoices else None
 
+    def _get_success_context(self, invoice_reference=None):
+        """
+        Build context dictionary for success page/notifications.
+        Used by process_payment_notification to return consistent data.
+        """
+        from mooring.models import AdmissionsLine
+        
+        # Get arrival date and overnight status from first AdmissionsLine
+        arrival = None
+        overnight = False
+        admissions_lines = AdmissionsLine.objects.filter(admissionsBooking=self)
+        if admissions_lines.exists():
+            arrival = admissions_lines[0].arrivalDate
+            overnight = admissions_lines[0].overnightStay
+        
+        return {
+            'admissionsBooking': self,
+            'arrival': arrival,
+            'overnight': overnight,
+            'admissionsInvoice': [invoice_reference] if invoice_reference else []
+        }
+
+    @transaction.atomic
+    def process_payment_notification(self, invoice_reference):
+        """
+        Process payment notification from Ledger for admissions booking (idempotent).
+        
+        This method handles payment confirmation for an admissions booking, whether called
+        from the user-facing success view or from a background notification endpoint.
+        It's designed to be idempotent - safe to call multiple times with the same
+        invoice_reference.
+        
+        Args:
+            invoice_reference (str): Invoice reference from Ledger payment system
+            
+        Returns:
+            dict: Context dictionary with booking data for email/display
+            
+        Raises:
+            ValueError: If invoice validation fails
+            Invoice.DoesNotExist: If invoice not found in Ledger
+        """
+        from mooring.models import AdmissionsBookingInvoice, AdmissionsLine
+        from mooring import emails
+        
+        logger.info(f'Processing payment notification for admissions booking {self.id}, invoice {invoice_reference}')
+        
+        # Lock booking row to prevent race conditions
+        booking = AdmissionsBooking.objects.select_for_update().get(id=self.id)
+        
+        # Idempotency check - if already processed, return current state
+        if booking.booking_type == 1:
+            logger.info(f'AdmissionsBooking {booking.id} already processed (booking_type=1), returning current state')
+            return booking._get_success_context(invoice_reference)
+        
+        # Validate invoice exists and belongs to this booking
+        try:
+            inv = Invoice.objects.get(reference=invoice_reference)
+        except Invoice.DoesNotExist:
+            logger.error(f'{booking.customer.get_full_name() if booking.customer else "Anonymous user"} '
+                        f'tried making an admissions booking with an incorrect invoice {invoice_reference}')
+            raise
+        
+        # Verify invoice is from correct payment system
+        if inv.system not in ['0516']:
+            logger.error(f'{booking.customer.get_full_name() if booking.customer else "Anonymous user"} '
+                        f'tried making an admissions booking with an invoice from another system: {inv.system}, '
+                        f'invoice reference: {inv.reference}')
+            raise ValueError(f'Invoice {invoice_reference} is from wrong system: {inv.system}')
+        
+        # Verify invoice ownership via basket booking_reference
+        booking_reference = settings.DAILY_ADMISSION_REF_PREFIX + str(booking.id)
+        basket = Basket.objects.filter(
+            status='Submitted',
+            system=settings.PAYMENT_SYSTEM_ID,
+            booking_reference=booking_reference
+        ).order_by('-id')
+        
+        if not basket.exists():
+            logger.error(f'No basket found for admissions booking {booking.id} with reference {booking_reference}')
+            raise ValueError(f'No basket found for admissions booking {booking.id}')
+        
+        # Verify invoice order matches basket
+        order = Order.objects.get(number=inv.order_number)
+        if order.basket != basket.first().id:
+            logger.error(f'Invoice {invoice_reference} order does not match basket for admissions booking {booking.id}')
+            raise ValueError(f'Invoice ownership validation failed for admissions booking {booking.id}')
+        
+        # Check if invoice has already been used (duplicate check)
+        existing_invoice = AdmissionsBookingInvoice.objects.filter(invoice_reference=invoice_reference).exclude(admissions_booking=booking)
+        if existing_invoice.exists():
+            logger.error(f'{booking.customer.get_full_name() if booking.customer else "Anonymous user"} '
+                        f'tried making an admission booking with an already used invoice {invoice_reference}')
+            raise ValueError(f'Invoice {invoice_reference} has already been used')
+        
+        # Create/get AdmissionsBookingInvoice linking record
+        admissions_invoice, created = AdmissionsBookingInvoice.objects.get_or_create(
+            admissions_booking=booking,
+            invoice_reference=invoice_reference
+        )
+        
+        if created:
+            logger.info(f'Created AdmissionsBookingInvoice for booking {booking.id}, invoice {invoice_reference}')
+        else:
+            logger.info(f'AdmissionsBookingInvoice already exists for booking {booking.id}, invoice {invoice_reference}')
+        
+        # Apply override_lines amounts to admissions lines
+        for al_id in booking.override_lines.keys():
+            try:
+                ad_line = AdmissionsLine.objects.get(id=int(al_id))
+                ad_line.cost = booking.override_lines[str(al_id)]
+                ad_line.save()
+                logger.info(f'Applied override amount {booking.override_lines[str(al_id)]} to AdmissionsLine {al_id}')
+            except AdmissionsLine.DoesNotExist:
+                logger.warning(f'AdmissionsLine {al_id} not found for override in booking {booking.id}')
+        
+        # Update booking state - set to confirmed
+        booking.booking_type = 1  # Internet booking (confirmed)
+        
+        # Save booking
+        booking.save()
+        logger.info(f'Successfully processed payment notification for admissions booking {booking.id}')
+        
+        # Return context dict for email/display
+        return booking._get_success_context(invoice_reference)
+
 
 class AdmissionsLine(models.Model):
     arrivalDate = models.DateField()
