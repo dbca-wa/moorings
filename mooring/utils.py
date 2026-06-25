@@ -1774,7 +1774,7 @@ def create_or_update_booking(request, booking_details, updating=False, override_
 #         booking.save()
 #     return booking
 
-def admissionsCheckout(request, admissionsBooking, lines, invoice_text=None, vouchers=[], internal=False):
+def admissionsCheckout(request, admissionsBooking, lines, invoice_text=None, vouchers=[], internal=False, return_preload_url=None):
     basket_params = {
         'products': lines,
         'vouchers': vouchers,
@@ -1789,11 +1789,26 @@ def admissionsCheckout(request, admissionsBooking, lines, invoice_text=None, vou
         admissions_preload_url = settings.PARKSTAY_EXTERNAL_URL.rstrip('/') + reverse('public_admissions_success')
     else:
         admissions_preload_url = request.build_absolute_uri(reverse('public_admissions_success'))
+    
+    # Build notification URL for Ledger callbacks
+    notification_url = None
+    if return_preload_url is None:
+        # Auto-generate for AdmissionsBooking
+        endpoint = 'api-admissions-payment-notification'
+        notification_path = reverse(endpoint, kwargs={'pk': admissionsBooking.id})
+        if settings.EXTERNAL_CALLBACK_URL:
+            notification_url = f"{settings.EXTERNAL_CALLBACK_URL}{notification_path}"
+        else:
+            notification_url = request.build_absolute_uri(notification_path)
+    else:
+        # Use provided URL
+        notification_url = return_preload_url
+    
     checkout_params = {
         'system': settings.PS_PAYMENT_SYSTEM_ID,
         'fallback_url': request.build_absolute_uri('/'),
         'return_url': request.build_absolute_uri(reverse('public_admissions_success')),
-        'return_preload_url': admissions_preload_url,
+        'return_preload_url': notification_url,
         'force_redirect': True,
         'proxy': True if internal else False,
         'invoice_text': invoice_text,
@@ -1884,7 +1899,7 @@ def annual_admission_checkout(request, booking, lines, invoice_text=None, vouche
     return response
 
 
-def checkout(request, booking, lines, invoice_text=None, vouchers=[], internal=False):
+def checkout(request, booking, lines, invoice_text=None, vouchers=[], internal=False, return_preload_url=None):
     old_booking = '' 
     if booking.old_booking:
         old_booking = settings.MOORING_BOOKING_REF_PREFIX + str(booking.old_booking.id)
@@ -1904,11 +1919,35 @@ def checkout(request, booking, lines, invoice_text=None, vouchers=[], internal=F
         booking_preload_url = settings.PARKSTAY_EXTERNAL_URL.rstrip('/') + reverse('public_booking_success')
     else:
         booking_preload_url = request.build_absolute_uri(reverse('public_booking_success'))
+    
+    # Build notification URL for Ledger callbacks
+    notification_url = None
+    if return_preload_url is None:
+        # Auto-generate based on booking type
+        booking_type = booking.__class__.__name__
+        if booking_type == 'Booking':
+            endpoint = 'api-booking-payment-notification'
+        elif booking_type == 'AdmissionsBooking':
+            endpoint = 'api-admissions-payment-notification'
+        else:
+            logger.error(f'Unknown booking type: {booking_type}')
+            endpoint = None
+        
+        if endpoint:
+            notification_path = reverse(endpoint, kwargs={'pk': booking.id})
+            if settings.EXTERNAL_CALLBACK_URL:
+                notification_url = f"{settings.EXTERNAL_CALLBACK_URL}{notification_path}"
+            else:
+                notification_url = request.build_absolute_uri(notification_path)
+    else:
+        # Use provided URL
+        notification_url = return_preload_url
+    
     checkout_params = {
         'system': settings.PS_PAYMENT_SYSTEM_ID,
         'fallback_url': request.build_absolute_uri('/'),
         'return_url': request.build_absolute_uri(reverse('public_booking_success')),
-        'return_preload_url': booking_preload_url,
+        'return_preload_url': notification_url,
         'force_redirect': True,
         'proxy': True if internal else False,
         'invoice_text': invoice_text,
