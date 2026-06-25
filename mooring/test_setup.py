@@ -11,7 +11,8 @@ from django.contrib.gis.geos import Point
 from ledger_api_client.ledger_models import EmailUserRO as EmailUser, EmailUserROManager as EmailUserManager
 # from ledger.payments.models import Invoice, OracleInterfaceSystem
 # from ledger.order.models import Order
-from ledger_api_client.ledger_models 
+from ledger_api_client.ledger_models import Invoice
+from ledger_api_client.order import Order
 import random
 import string
 
