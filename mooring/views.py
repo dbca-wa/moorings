@@ -3000,30 +3000,33 @@ class AdmissionsBookingSuccessView(TemplateView):
             
             # Get invoice_ref from URL parameter (payment completion redirect)
             invoice_ref = request.GET.get('invoice')
+            booking = None
             
             if invoice_ref:
                 # Payment completed - get booking from invoice
                 logger.info(f"Payment completed with invoice: {invoice_ref}")
-                inv = Invoice.objects.get(reference=invoice_ref)
-                
-                # Find basket by booking_reference
-                basket = Basket.objects.filter(
-                    owner=inv.owner,
-                    system=settings.PAYMENT_SYSTEM_ID,
-                    status='Submitted',
-                    booking_reference__startswith=settings.DAILY_ADMISSION_REF_PREFIX
-                ).order_by('-date_submitted')[:1]
-                
-                if not basket or not basket[0].booking_reference:
-                    raise Exception('Could not find basket with booking reference')
-                
-                # Get booking from basket's booking_reference
-                booking_id = int(basket[0].booking_reference.replace(settings.DAILY_ADMISSION_REF_PREFIX, ''))
-                booking = AdmissionsBooking.objects.get(id=booking_id)
-                
-                logger.info(f"Found booking {booking.id} from invoice")
-            else:
-                # No invoice parameter - try session (during payment flow)
+                try:
+                    inv = Invoice.objects.get(reference=invoice_ref)
+                    
+                    # Find basket by booking_reference
+                    basket = Basket.objects.filter(
+                        owner=inv.owner,
+                        system=settings.PAYMENT_SYSTEM_ID,
+                        status='Submitted',
+                        booking_reference__startswith=settings.DAILY_ADMISSION_REF_PREFIX
+                    ).order_by('-date_submitted')[:1]
+                    
+                    if basket and basket[0].booking_reference:
+                        # Get booking from basket's booking_reference
+                        booking_id = int(basket[0].booking_reference.replace(settings.DAILY_ADMISSION_REF_PREFIX, ''))
+                        booking = AdmissionsBooking.objects.get(id=booking_id)
+                        logger.info(f"Found booking {booking.id} from invoice")
+                except (Invoice.DoesNotExist, AdmissionsBooking.DoesNotExist, ValueError) as e:
+                    logger.error(f'Error finding booking via invoice {invoice_ref}: {e}')
+                    booking = None
+            
+            if not booking:
+                # No invoice parameter - get from session (during payment flow)
                 logger.info("No invoice parameter, getting from session")
                 booking = utils.get_session_admissions_booking(request.session)
                 booking_reference = settings.DAILY_ADMISSION_REF_PREFIX + str(booking.id)
@@ -3032,88 +3035,38 @@ class AdmissionsBookingSuccessView(TemplateView):
                     system=settings.PAYMENT_SYSTEM_ID,
                     booking_reference=booking_reference
                 ).order_by('-id')[:1]
-                invoice_ref = None  # Will be retrieved in utils function
+                
+                if basket:
+                    order = Order.objects.get(basket=basket[0])
+                    invoice = Invoice.objects.get(order_number=order.number)
+                    invoice_ref = invoice.reference
             
-            # Process booking success
-            context = utils.booking_admission_success(basket, booking, context_processor, invoice_ref)
+            # Process payment (idempotent - safe if already called by notification)
+            context = booking.process_payment_notification(invoice_ref)
+            
+            # Send emails (idempotent - checks if already sent)
+            booking.send_payment_emails(request)
+            
+            # Session cleanup
             request.session['ad_last_booking'] = booking.id
             utils.delete_session_admissions_booking(request.session)
+            
+            # Render success page
             return render(request, self.template_name, context)
+            
         except Exception as e:
             logger.error(f"Error in AdmissionsBookingSuccessView: {str(e)}", exc_info=True)
-            raise
-
-            #arrival = AdmissionsLine.objects.filter(admissionsBooking=booking)[0].arrivalDate
-            #overnight = AdmissionsLine.objects.filter(admissionsBooking=booking)[0].overnightStay
-            #
-            #booking_reference = "AD-"+str(booking.id)
-            #basket = Basket.objects.filter(status='Submitted', booking_reference=booking_reference).order_by('-id')[:1]
-
-            #invoice_ref = request.GET.get('invoice')
-
-            #if booking.booking_type == 3:
-            #    try:
-            #        inv = Invoice.objects.get(reference=invoice_ref)
-            #        order = Order.objects.get(number=inv.order_number)
-            #        order.user = booking.customer
-            #        order.save()
-            #    except Invoice.DoesNotExist:
-            #        logger.error('{} tried making a booking with an incorrect invoice'.format('User {} with id {}'.format(booking.customer.get_full_name(),booking.customer.id) if booking.customer else 'An anonymous user'))
-            #        return redirect('admissions', args=(booking.location.key,))
-
-            #    if inv.system not in ['0516']:
-            #        logger.error('{} tried making a booking with an invoice from another system with reference number {}'.format('User {} with id {}'.format(booking.customer.get_full_name(),booking.customer.id) if booking.customer else 'An anonymous user',inv.reference))
-            #        return redirect('admissions', args=(booking.location.key,))
-
-            #    try:
-            #        b = AdmissionsBookingInvoice.objects.get(invoice_reference=invoice_ref)
-            #        logger.error('{} tried making an admission booking with an already used invoice with reference number {}'.format('User {} with id {}'.format(booking.customer.get_full_name(),booking.customer.id) if booking.customer else 'An anonymous user',inv.reference))
-            #        return redirect('admissions',  args=(booking.location.key,))
-            #    except AdmissionsBookingInvoice.DoesNotExist:
-            #        logger.info('{} finished temporary booking {}, creating new AdmissionBookingInvoice with reference {}'.format('User {} with id {}'.format(booking.customer.get_full_name(),booking.customer.id) if booking.customer else 'An anonymous user',booking.id, invoice_ref))
-            #        # FIXME: replace with server side notify_url callback
-            #        admissionsInvoice = AdmissionsBookingInvoice.objects.get_or_create(admissions_booking=booking, invoice_reference=invoice_ref)
-            #        #if request.user.__class__.__name__ == 'EmailUser':
-            #        #    booking.created_by = request.user
-
-            #        # set booking to be permanent fixture
-            #        booking.booking_type = 1  # internet booking
-            #        booking.save()
-            #        request.session['ad_last_booking'] = booking.id
-            #        utils.delete_session_admissions_booking(request.session)
-
-            #        # send out the invoice before the confirmation is sent
-            #        emails.send_admissions_booking_invoice(booking, request, context_processor)
-            #        # for fully paid bookings, fire off confirmation email
-            #        emails.send_admissions_booking_confirmation(booking,request, context_processor)
-
-
-            #        context = {
-            #           'admissionsBooking': booking,
-            #           'arrival' : arrival,
-            #           'overnight': overnight,
-            #           'admissionsInvoice': [invoice_ref]
-            #        }
-            #        return render(request, self.template_name, context)
-
-        except Exception as e:
+            
+            # Fallback to last booking from session
             if ('ad_last_booking' in request.session) and AdmissionsBooking.objects.filter(id=request.session['ad_last_booking']).exists():
                 booking = AdmissionsBooking.objects.get(id=request.session['ad_last_booking'])
-                arrival = AdmissionsLine.objects.filter(admissionsBooking=booking)[0].arrivalDate
-                overnight = AdmissionsLine.objects.filter(admissionsBooking=booking)[0].overnightStay
-                invoice_ref = AdmissionsBookingInvoice.objects.get(admissions_booking=booking).invoice_reference
-            else:
-                return redirect('home')
-
-#        if request.user.is_staff:
-#            return redirect('dash-bookings')
-        context = {
-            'admissionsBooking': booking,
-            'arrival' : arrival,
-            'overnight': overnight,
-            'admissionsInvoice': [invoice_ref]
-        }
-        return render(request, self.template_name, context)
+                if AdmissionsBookingInvoice.objects.filter(admissions_booking=booking).count() > 0:
+                    invoice_ref = AdmissionsBookingInvoice.objects.filter(admissions_booking=booking)[0].invoice_reference
+                    # Get current state (no processing, just display)
+                    context = booking.process_payment_notification(invoice_ref)
+                    return render(request, self.template_name, context)
+            
+            return redirect('home')
 
 class BookingCancelCompletedView(LoginRequiredMixin, TemplateView):
     template_name = 'mooring/booking/cancel_completed.html'
