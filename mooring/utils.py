@@ -1958,6 +1958,16 @@ def checkout(request, booking, lines, invoice_text=None, vouchers=[], internal=F
     if internal or request.user.is_anonymous:
         checkout_params['basket_owner'] = booking.customer.id
 
+    try:
+        # Use json.dumps for a clean JSON-like format
+        # 'default=str' ensures that UUIDs or other non-serializable objects are converted to strings
+        formatted_json = json.dumps(checkout_params, indent=4, default=str)
+        logger.info(f'checkout_params: \n{formatted_json}')
+    except Exception as e:
+        # Fallback to simple logging if serialization fails
+        logger.error(f'Failed to serialize checkout_params: {e}')
+        logger.info(f'checkout_params: {checkout_params}')
+
     create_checkout_session(request, checkout_params)
 
     # response = HttpResponse("<script> window.location='"+reverse('checkout:index')+"';</script> <a href='"+reverse('checkout:index')+"'> Redirecting please wait: "+reverse('checkout:index')+"</a>")

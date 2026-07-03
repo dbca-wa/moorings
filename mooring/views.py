@@ -78,11 +78,10 @@ class BpointTransaction():
     pass
 # from ledger.payments.utils import systemid_check, update_payments
 # from ledger.checkout.utils import place_order_submission 
-from ledger_api_client.utils import update_payments, place_order_submission, get_or_create
+from ledger_api_client.utils import update_payments, place_order_submission, get_or_create, Order
 # from ledger.payments.cash.models import CashTransaction 
 # Ledger
 # from ledger.order.models import Order
-from ledger_api_client.order import Order
 from django_ical.views import ICalFeed
 from datetime import datetime, timedelta, date
 from decimal import *
@@ -3238,10 +3237,10 @@ class BookingSuccessView(TemplateView):
                         system=settings.PAYMENT_SYSTEM_ID,
                         status='Submitted',
                         booking_reference__startswith=settings.MOORING_BOOKING_REF_PREFIX
-                    ).order_by('-date_submitted')[:1]
+                    ).order_by('-date_submitted').first()
                     
-                    if basket and basket[0].booking_reference:
-                        booking_id = int(basket[0].booking_reference.replace(settings.MOORING_BOOKING_REF_PREFIX, ''))
+                    if basket and basket.booking_reference:
+                        booking_id = int(basket.booking_reference.replace(settings.MOORING_BOOKING_REF_PREFIX, ''))
                         booking = Booking.objects.get(id=booking_id)
                 except (Invoice.DoesNotExist, Booking.DoesNotExist, ValueError) as e:
                     logger.error(f'Error finding booking via invoice {invoice_ref}: {e}')
@@ -3251,16 +3250,25 @@ class BookingSuccessView(TemplateView):
                 # During checkout flow - get from session
                 booking = utils.get_session_booking(request.session)
                 booking_reference = settings.MOORING_BOOKING_REF_PREFIX + str(booking.id)
+                logger.info(f'Looking for basket with booking_reference: {booking_reference}')
+                
                 basket = Basket.objects.filter(
                     status='Submitted',
                     system=settings.PAYMENT_SYSTEM_ID,
                     booking_reference=booking_reference
-                ).order_by('-id')[:1]
+                ).order_by('-id').first()
                 
                 if basket:
-                    order = Order.objects.get(basket=basket[0])
-                    invoice = Invoice.objects.get(order_number=order.number)
-                    invoice_ref = invoice.reference
+                    logger.info(f'Found basket with id: {basket.id}')
+                    try:
+                        order = Order.objects.get(basket_id=basket.id)
+                        logger.info(f'Found order with number: {order.number}')
+                        invoice = Invoice.objects.get(order_number=order.number)
+                        invoice_ref = invoice.reference
+                        logger.info(f'Found invoice with reference: {invoice_ref}')
+                    except Exception as e:
+                        logger.error(f'Error retrieving order/invoice: {e}', exc_info=True)
+                        raise
             
             # Process payment (idempotent - safe if already called by notification)
             context = booking.process_payment_notification(invoice_ref)

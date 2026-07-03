@@ -1979,7 +1979,23 @@ class Booking(models.Model):
                         f'invoice reference: {inv.reference}')
             raise ValueError(f'Invoice {invoice_reference} is from wrong system: {inv.system}')
         
-        # Verify invoice ownership via basket booking_reference
+        # Fetch the corresponding Order
+        try:
+            order = Order.objects.get(number=inv.order_number)
+        except Order.DoesNotExist:
+            logger.error(f'Order {inv.order_number} not found for invoice {invoice_reference}')
+            raise ValueError(f'Order not found for invoice {invoice_reference}')
+        
+        # Verify order belongs to the booking's customer
+        if not booking.customer:
+            logger.error(f'Booking {booking.id} has no customer')
+            raise ValueError(f'Booking {booking.id} has no customer')
+        
+        if order.user_id != booking.customer.id:
+            logger.error(f'Order {order.number} user_id {order.user_id} does not match booking {booking.id} customer {booking.customer.id}')
+            raise ValueError(f'Invoice ownership validation failed - user mismatch for booking {booking.id}')
+        
+        # Verify a basket exists for this booking with correct status
         booking_reference = settings.MOORING_BOOKING_REF_PREFIX + str(booking.id)
         basket = Basket.objects.filter(
             status='Submitted',
@@ -1988,14 +2004,10 @@ class Booking(models.Model):
         ).order_by('-id')
         
         if not basket.exists():
-            logger.error(f'No basket found for booking {booking.id} with reference {booking_reference}')
-            raise ValueError(f'No basket found for booking {booking.id}')
+            logger.error(f'No submitted basket found for booking {booking.id} with reference {booking_reference}')
+            raise ValueError(f'No submitted basket found for booking {booking.id}')
         
-        # Verify invoice order matches basket
-        order = Order.objects.get(number=inv.order_number)
-        if order.basket != basket.first().id:
-            logger.error(f'Invoice {invoice_reference} order does not match basket for booking {booking.id}')
-            raise ValueError(f'Invoice ownership validation failed for booking {booking.id}')
+        logger.info(f'Verified invoice {invoice_reference} belongs to booking {booking.id} via user_id {order.user_id} and basket verification')
         
         # Create/get BookingInvoice linking record
         book_inv, created = BookingInvoice.objects.get_or_create(
@@ -2063,7 +2075,7 @@ class Booking(models.Model):
         
         # Update payments via ledger
         try:
-            update_payments(invoice_reference)
+            update_payments()
             logger.info(f'Updated payments for invoice {invoice_reference}')
         except Exception as e:
             logger.warning(f'Error updating payments for invoice {invoice_reference}: {e}')
@@ -2138,7 +2150,7 @@ class Booking(models.Model):
             No exceptions - email errors are logged but don't fail the transaction
         """
         from mooring import emails
-        from mooring.context_processors import template_context
+        from mooring.context_processors import template_context, mooring_url_group
         
         try:
             # Determine if input is HttpRequest or dict context
@@ -2147,8 +2159,16 @@ class Booking(models.Model):
                 context_processor = template_context(request_or_context)
                 logger.info(f'Sending payment emails for booking {self.id} (sync flow with HttpRequest)')
             else:
-                # Async flow - use provided context dict
-                context_processor = request_or_context
+                # Async flow - use provided context dict and ensure required template variables
+                context_processor = request_or_context.copy() if isinstance(request_or_context, dict) else {}
+                
+                # Add default template group and other required context variables if not present
+                if 'TEMPLATE_GROUP' not in context_processor:
+                    # Default to 'pvs' template group
+                    default_context = mooring_url_group('pvs')
+                    context_processor.update(default_context)
+                    logger.info(f'Added default template context for booking {self.id} (TEMPLATE_GROUP: {default_context.get("TEMPLATE_GROUP")})')
+                
                 logger.info(f'Sending payment emails for booking {self.id} (async flow with context dict)')
             
             # Send invoice email
