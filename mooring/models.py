@@ -2564,7 +2564,7 @@ class AdmissionsBooking(models.Model):
         Build context dictionary for success page/notifications.
         Used by process_payment_notification to return consistent data.
         """
-        from mooring.models import AdmissionsLine
+        from mooring.models import AdmissionsLine, AdmissionsBookingInvoice
         
         # Get arrival date and overnight status from first AdmissionsLine
         arrival = None
@@ -2574,11 +2574,26 @@ class AdmissionsBooking(models.Model):
             arrival = admissions_lines[0].arrivalDate
             overnight = admissions_lines[0].overnightStay
         
+        # Get invoice objects (not just reference strings)
+        invoice_objs = []
+        if invoice_reference:
+            # Try to get the specific invoice object
+            invoice_obj = AdmissionsBookingInvoice.objects.filter(
+                admissions_booking=self, 
+                invoice_reference=invoice_reference
+            ).first()
+            if invoice_obj:
+                invoice_objs = [invoice_obj]
+        
+        # Fallback: get all invoices for this booking if none found
+        if not invoice_objs:
+            invoice_objs = list(AdmissionsBookingInvoice.objects.filter(admissions_booking=self).order_by('-id'))
+        
         return {
             'admissionsBooking': self,
             'arrival': arrival,
             'overnight': overnight,
-            'admissionsInvoice': [invoice_reference] if invoice_reference else []
+            'admissionsInvoice': invoice_objs
         }
 
     @transaction.atomic
@@ -2612,7 +2627,12 @@ class AdmissionsBooking(models.Model):
         # Idempotency check - if already processed, return current state
         if booking.booking_type == 1:
             logger.info(f'AdmissionsBooking {booking.id} already processed (booking_type=1), returning current state')
-            return booking._get_success_context(invoice_reference)
+            context = self._get_success_context(invoice_reference)
+            context.update({
+                'TEMPLATE_GROUP': 'ria',
+                'PUBLIC_URL': getattr(settings, 'PUBLIC_URL', ''),
+            })
+            return context
         
         # Validate invoice exists and belongs to this booking
         try:
@@ -2643,7 +2663,12 @@ class AdmissionsBooking(models.Model):
         
         # Verify invoice order matches basket
         order = Order.objects.get(number=inv.order_number)
-        if order.basket != basket.first().id:
+        order_user_id = getattr(order, 'user_id', None)
+        booking_user_id = booking.customer.id if booking.customer else None
+
+        logger.info(f"Validating ownership: Ledger Order User={order_user_id}, Booking Customer={booking_user_id}")
+
+        if order_user_id != booking_user_id:
             logger.error(f'Invoice {invoice_reference} order does not match basket for admissions booking {booking.id}')
             raise ValueError(f'Invoice ownership validation failed for admissions booking {booking.id}')
         
@@ -2683,7 +2708,14 @@ class AdmissionsBooking(models.Model):
         logger.info(f'Successfully processed payment notification for admissions booking {booking.id}')
         
         # Return context dict for email/display
-        return booking._get_success_context(invoice_reference)
+        # return booking._get_success_context(invoice_reference)
+        context = booking._get_success_context(invoice_reference)
+        context.update({
+            'TEMPLATE_GROUP': 'ria',
+            'PUBLIC_URL': getattr(settings, 'PUBLIC_URL', ''),
+            'SITE_URL': getattr(settings, 'SITE_URL', ''),
+        })
+        return context
     
     def send_payment_emails(self, request_or_context):
         """

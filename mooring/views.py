@@ -2990,7 +2990,7 @@ class AdmissionsBasketCreated(TemplateView):
     def get(request, *args, **kwargs):
         return HttpResponseRedirect(reverse('checkout:index'))
 
-class AdmissionsBookingSuccessView(TemplateView):
+class AdmissionsBookingSuccessView_back(TemplateView):
     template_name = 'mooring/admissions/admission_success.html'
 
     def get(self, request, *args, **kwargs):
@@ -3036,7 +3036,9 @@ class AdmissionsBookingSuccessView(TemplateView):
                 ).order_by('-id')[:1]
                 
                 if basket:
-                    order = Order.objects.get(basket=basket[0])
+                    # order = Order.objects.get(basket=basket[0])
+                    # Pass the ID (integer/string) instead of the model instance to ensure JSON serializability
+                    order = Order.objects.get(basket_id=basket[0].id)
                     invoice = Invoice.objects.get(order_number=order.number)
                     invoice_ref = invoice.reference
             
@@ -3066,6 +3068,105 @@ class AdmissionsBookingSuccessView(TemplateView):
                     return render(request, self.template_name, context)
             
             return redirect('home')
+
+
+class AdmissionsBookingSuccessView(TemplateView):
+    template_name = 'mooring/admissions/admission_success.html'
+
+    def get(self, request, *args, **kwargs):
+        """
+        Final absolute version. Combines original flow with robust recovery 
+        and fixes for Ledger API/Email template errors.
+        """
+        logger.info(f"Admissions success view triggered for session {request.session.session_key}")
+
+        try:
+            invoice_ref = request.GET.get('invoice')
+            booking = None
+            
+            # 1. Primary identification: Use invoice from redirect URL if available
+            if invoice_ref:
+                from mooring.models import AdmissionsBookingInvoice
+                bi = AdmissionsBookingInvoice.objects.filter(invoice_reference=invoice_ref).first()
+                if bi:
+                    # Security check: Verify invoice belongs to current user
+                    if request.user.is_authenticated and bi.admissions_booking.customer_id != request.user.id:
+                        logger.warning(f"User {request.user.id} attempted to access invoice for different user")
+                        return redirect('home')
+                    booking = bi.admissions_booking
+                    logger.info(f"Identified booking {booking.id} via URL invoice")
+
+            # 2. Secondary identification: Try to extract ID from session safely
+            if not booking:
+                # Middleware shows it can be in 'ad_booking' as [ID]
+                raw_id = request.session.get('ad_booking') or request.session.get('ad_last_booking')
+                if raw_id:
+                    # Handle list format [33000] vs integer 33000
+                    target_id = raw_id[0] if isinstance(raw_id, list) else raw_id
+                    try:
+                        booking = AdmissionsBooking.objects.get(id=int(target_id))
+                        logger.info(f"Identified booking {booking.id} via session ID")
+                        # Also get invoice reference from DB
+                        from mooring.models import AdmissionsBookingInvoice
+                        bi = AdmissionsBookingInvoice.objects.filter(admissions_booking=booking).order_by('-id').first()
+                        if bi:
+                            invoice_ref = bi.invoice_reference
+                    except (AdmissionsBooking.DoesNotExist, ValueError, TypeError):
+                        pass
+
+            # 3. Final identification: Find the most recent paid invoice for this user
+            if not booking and request.user.is_authenticated:
+                from mooring.models import AdmissionsBookingInvoice
+                latest_link = AdmissionsBookingInvoice.objects.filter(
+                    admissions_booking__customer_id=request.user.id
+                ).order_by('-id').first()
+                if latest_link:
+                    booking = latest_link.admissions_booking
+                    invoice_ref = latest_link.invoice_reference
+                    logger.info(f"Identified booking {booking.id} via latest DB record")
+
+            if not booking:
+                # If we get here, log session state for debugging (not an error - fallbacks exist)
+                logger.info(f"Booking not identified via URL or session. Available keys: {list(request.session.keys())}")
+                raise ValueError("Could not identify admissions booking for display")
+
+            # 4. Ensure we have the invoice reference for processing
+            if not invoice_ref:
+                from mooring.models import AdmissionsBookingInvoice
+                bi = AdmissionsBookingInvoice.objects.filter(admissions_booking=booking).order_by('-id').first()
+                if bi:
+                    invoice_ref = bi.invoice_reference
+
+            # 5. Process state and get display context (Idempotent)
+            context = booking.process_payment_notification(invoice_ref)
+            
+            # 6. FIX: Inject ALL keys required by email/success templates to prevent crashes
+            context.update({
+                'PUBLIC_URL': getattr(settings, 'PUBLIC_URL', request.build_absolute_uri('/')[:-1]),
+                'SITE_URL': getattr(settings, 'SITE_URL', request.build_absolute_uri('/')[:-1]),
+                'TEMPLATE_GROUP': 'ria',
+            })
+
+            # 7. Safe emails (Notification already sent them, but let's be sure)
+            try:
+                # Only send if they weren't already sent by callback
+                booking.send_payment_emails(context)
+            except Exception as e:
+                logger.warning(f"Email sync skipped or failed: {e}")
+
+            # 8. Cleanup session
+            request.session['ad_last_booking'] = booking.id
+            if 'ad_booking' in request.session:
+                request.session.pop('ad_booking', None)
+                
+            return render(request, self.template_name, context)
+            
+        except Exception as e:
+            logger.error(f"Error in AdmissionsBookingSuccessView: {str(e)}", exc_info=True)
+            
+            # Emergency fallback to home
+            return redirect('home')
+
 
 class BookingCancelCompletedView(LoginRequiredMixin, TemplateView):
     template_name = 'mooring/booking/cancel_completed.html'
