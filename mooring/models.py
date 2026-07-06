@@ -1491,6 +1491,8 @@ class Booking(models.Model):
     property_cache = django_models.JSONField(null=True, blank=True, default=dict)
     property_cache_version = models.CharField(max_length=10, blank=True, null=True)
     property_cache_stale = models.BooleanField(default=True)
+    # UUID for stateless payment flow (external public URLs)
+    uuid = models.UUIDField(default=uuid.uuid4, editable=False, unique=True, null=True)
 
 
     def save(self, *args,**kwargs):
