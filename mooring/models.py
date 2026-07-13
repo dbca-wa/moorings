@@ -1493,7 +1493,7 @@ class Booking(models.Model):
     property_cache_stale = models.BooleanField(default=True)
     # UUID for stateless payment flow (external public URLs)
     # Note: unique constraint will be added in a separate migration after data backfill
-    uuid = models.UUIDField(default=uuid.uuid4, editable=False, null=True, db_index=True)
+    uuid = models.UUIDField(default=uuid.uuid4, editable=False, null=False, unique=True, db_index=True)
 
 
     def save(self, *args,**kwargs):
