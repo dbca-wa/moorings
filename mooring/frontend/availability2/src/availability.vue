@@ -746,6 +746,7 @@ export default {
               vm.loadingID = vm.loadingID + 1;
               var submitData = {
                   booking_item: booking_item_id,
+                  booking_uuid: (typeof bookingUuid !== 'undefined') ? bookingUuid : null
               };
 
               $.ajax({
@@ -817,7 +818,8 @@ export default {
                   booking_finish: booking_finish,
                   num_adult: vm.numAdults,
                   num_children : vm.numChildren,
-                  num_infant: vm.numInfants
+                  num_infant: vm.numInfants,
+                  booking_uuid: (typeof bookingUuid !== 'undefined') ? bookingUuid : null
               };
 
               $.ajax({
@@ -1095,7 +1097,8 @@ export default {
                         vessel_beam: vm.vesselBeam,
                         vessel_weight: vm.vesselWeight,
                         vessel_rego: vm.vesselRego,
-                        distance_radius: vm.distanceRadius
+                        distance_radius: vm.distanceRadius,
+                        booking_uuid: (typeof bookingUuid !== 'undefined') ? bookingUuid : null
                     };
                     if (parseInt(vm.parkstayGroundRatisId) > 0) {
                         var url = vm.parkstayUrl + '/api/availability_ratis/'+ vm.parkstayGroundRatisId +'/?'+$.param(params);
