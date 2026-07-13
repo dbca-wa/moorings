@@ -2242,6 +2242,23 @@ def get_session_booking(session):
     except Booking.DoesNotExist:
         raise Exception('Booking not found for booking_id {}'.format(booking_id))
 
+def get_booking_from_uuid_or_session(booking_uuid, session):
+    """Resolve a Booking from UUID (primary) or session['ps_booking'] (fallback).
+    Returns None if the booking cannot be found via either method.
+    """
+    if booking_uuid:
+        try:
+            return Booking.objects.get(uuid=booking_uuid)
+        except Booking.DoesNotExist:
+            logger.warning(f'get_booking_from_uuid_or_session: booking not found for uuid {booking_uuid}')
+            return None
+    if 'ps_booking' in session:
+        try:
+            return Booking.objects.get(pk=session['ps_booking'])
+        except Booking.DoesNotExist:
+            return None
+    return None
+
 def daterange(start_date, end_date):
     for n in range(int ((end_date - start_date).days)):
         yield start_date + timedelta(n)

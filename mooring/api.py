@@ -620,7 +620,8 @@ def current_booking(request, *args, **kwargs):
     response_data = {}
     response_data['result'] = 'success'
     response_data['message'] = ''
-    ongoing_booking = Booking.objects.get(pk=request.session['ps_booking']) if 'ps_booking' in request.session else None
+    booking_uuid = request.GET.get('booking_uuid')
+    ongoing_booking = utils.get_booking_from_uuid_or_session(booking_uuid, request.session)
     if ongoing_booking:
         logger.info(f'ongoing_booking: [{ongoing_booking}] has been retrieved.')
     else:
@@ -652,28 +653,26 @@ def delete_booking(request, *args, **kwargs):
     if request.user.is_authenticated:
         payments_officer_group = request.user.groups().filter(name='Payments Officers').exists()
     nowtime = datetime.strptime(str(datetime.utcnow().strftime('%Y-%m-%d %H:%M:%S')), '%Y-%m-%d %H:%M:%S')+timedelta(hours=8)
-    booking = None
     booking_item = request.POST['booking_item']
-    if 'ps_booking' in request.session:
-        booking_id = request.session['ps_booking']
-        if booking_id:
-            booking = Booking.objects.get(id=booking_id)
-            ms_booking = MooringsiteBooking.objects.get(id=booking_item,booking=booking)
-            msb = datetime.strptime(str(ms_booking.from_dt.strftime('%Y-%m-%d %H:%M:%S')), '%Y-%m-%d %H:%M:%S')+timedelta(hours=8)
-            if msb > nowtime:
-                  ms_booking.delete()
-            elif payments_officer_group is True:
-                  ms_booking.delete()
-            else:
-                 if msb.date() == nowtime.date():
-                     if booking.old_booking is None:
-                          ms_booking.delete() 
-                     else:
-                         response_data['result'] = 'error'
-                         response_data['message'] = 'Unable to delete booking'
+    booking_uuid = request.POST.get('booking_uuid')
+    booking = utils.get_booking_from_uuid_or_session(booking_uuid, request.session)
+    if booking:
+        ms_booking = MooringsiteBooking.objects.get(id=booking_item,booking=booking)
+        msb = datetime.strptime(str(ms_booking.from_dt.strftime('%Y-%m-%d %H:%M:%S')), '%Y-%m-%d %H:%M:%S')+timedelta(hours=8)
+        if msb > nowtime:
+              ms_booking.delete()
+        elif payments_officer_group is True:
+              ms_booking.delete()
+        else:
+             if msb.date() == nowtime.date():
+                 if booking.old_booking is None:
+                      ms_booking.delete()
                  else:
                      response_data['result'] = 'error'
                      response_data['message'] = 'Unable to delete booking'
+             else:
+                 response_data['result'] = 'error'
+                 response_data['message'] = 'Unable to delete booking'
     return HttpResponse(json.dumps(response_data), content_type='application/json')
 
 
@@ -699,27 +698,40 @@ def add_booking(request, *args, **kwargs):
     start_booking_date = request.POST['date']
     finish_booking_date = request.POST['date']
 
+    booking_uuid = request.POST.get('booking_uuid')
     booking = None
-    if 'ps_booking' in request.session:
+
+    if booking_uuid:
+        try:
+            booking = Booking.objects.get(uuid=booking_uuid)
+            logger.info(f"Booking [{booking.id}] retrieved via UUID {booking_uuid}.")
+        except Booking.DoesNotExist:
+            logger.error(f"add_booking: booking not found for UUID {booking_uuid}")
+            response_data['result'] = 'error'
+            response_data['message'] = 'Booking not found'
+            return HttpResponse(json.dumps(response_data), content_type='application/json')
+    elif 'ps_booking' in request.session:
         booking_id = request.session['ps_booking']
         logger.info(f"session['ps_booking']: [{booking_id}] exists.")
         if booking_id:
             booking = Booking.objects.get(id=booking_id)
             logger.info(f"Booking: [{booking}] has been retrieved.")
-            booking.arrival = booking_period_start
-            booking.departure = booking_period_finish
-            if not booking.details:
-                booking.details = {}
-            booking.details['num_adults'] = num_adults
-            booking.details['num_children'] = num_children
-            booking.details['num_infants'] = num_infants
-            booking.details['vessel_size'] = vessel_size
-            booking.details['vessel_draft'] = vessel_draft
-            booking.details['vessel_beam'] = vessel_beam
-            booking.details['vessel_weight'] = vessel_weight
-            booking.details['vessel_rego'] = vessel_rego
-            booking.save()
-            logger.info(f"Booking: [{booking}] has been updated.")
+
+    if booking:
+        booking.arrival = booking_period_start
+        booking.departure = booking_period_finish
+        if not booking.details:
+            booking.details = {}
+        booking.details['num_adults'] = num_adults
+        booking.details['num_children'] = num_children
+        booking.details['num_infants'] = num_infants
+        booking.details['vessel_size'] = vessel_size
+        booking.details['vessel_draft'] = vessel_draft
+        booking.details['vessel_beam'] = vessel_beam
+        booking.details['vessel_weight'] = vessel_weight
+        booking.details['vessel_rego'] = vessel_rego
+        booking.save()
+        logger.info(f"Booking: [{booking}] has been updated.")
     else:
         details = {
            'num_adults' : num_adults,
@@ -1606,7 +1618,8 @@ class BaseAvailabilityViewSet(viewsets.ReadOnlyModelViewSet):
         # convert GET parameters to objects
         ground = self.get_object()
         # check if the user has an ongoing booking
-        ongoing_booking = Booking.objects.get(pk=request.session['ps_booking']) if 'ps_booking' in request.session else None
+        booking_uuid = request.GET.get('booking_uuid')
+        ongoing_booking = utils.get_booking_from_uuid_or_session(booking_uuid, request.session)
         # Validate parameters
         data = {
             "arrival" : request.GET.get('arrival'),
@@ -1882,7 +1895,8 @@ class BaseAvailabilityViewSet2(viewsets.ReadOnlyModelViewSet):
         # convert GET parameters to objects
         ground = self.get_object()
         # check if the user has an ongoing booking
-        ongoing_booking = Booking.objects.get(pk=request.session['ps_booking']) if 'ps_booking' in request.session else None
+        booking_uuid = request.GET.get('booking_uuid')
+        ongoing_booking = utils.get_booking_from_uuid_or_session(booking_uuid, request.session)
         timer = None
         expiry = None
         if ongoing_booking:
