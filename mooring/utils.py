@@ -1916,9 +1916,9 @@ def checkout(request, booking, lines, invoice_text=None, vouchers=[], internal=F
     basket_params = convert_decimal_to_float(basket_params)
     basket_hash = create_basket_session(request, booking.customer.id, basket_params)
     if settings.EMAIL_INSTANCE == 'DEV':
-        booking_preload_url = settings.PARKSTAY_EXTERNAL_URL.rstrip('/') + reverse('public_booking_success')
+        booking_preload_url = settings.PARKSTAY_EXTERNAL_URL.rstrip('/') + reverse('public_booking_success', kwargs={'booking_token': str(booking.uuid)})
     else:
-        booking_preload_url = request.build_absolute_uri(reverse('public_booking_success'))
+        booking_preload_url = request.build_absolute_uri(reverse('public_booking_success', kwargs={'booking_token': str(booking.uuid)}))
     
     # Build notification URL for Ledger callbacks
     notification_url = None
@@ -1927,14 +1927,17 @@ def checkout(request, booking, lines, invoice_text=None, vouchers=[], internal=F
         booking_type = booking.__class__.__name__
         if booking_type == 'Booking':
             endpoint = 'api-booking-payment-notification'
+            endpoint_kwargs = {'booking_token': str(booking.uuid)}
         elif booking_type == 'AdmissionsBooking':
             endpoint = 'api-admissions-payment-notification'
+            endpoint_kwargs = {'pk': booking.id}
         else:
             logger.error(f'Unknown booking type: {booking_type}')
             endpoint = None
+            endpoint_kwargs = {}
         
         if endpoint:
-            notification_path = reverse(endpoint, kwargs={'pk': booking.id})
+            notification_path = reverse(endpoint, kwargs=endpoint_kwargs)
             if settings.EXTERNAL_CALLBACK_URL:
                 notification_url = f"{settings.EXTERNAL_CALLBACK_URL}{notification_path}"
             else:
@@ -1946,7 +1949,7 @@ def checkout(request, booking, lines, invoice_text=None, vouchers=[], internal=F
     checkout_params = {
         'system': settings.PS_PAYMENT_SYSTEM_ID,
         'fallback_url': request.build_absolute_uri('/'),
-        'return_url': request.build_absolute_uri(reverse('public_booking_success')),
+        'return_url': request.build_absolute_uri(reverse('public_booking_success', kwargs={'booking_token': str(booking.uuid)})),
         'return_preload_url': notification_url,
         'force_redirect': True,
         'proxy': True if internal else False,

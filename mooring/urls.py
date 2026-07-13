@@ -85,7 +85,7 @@ api_patterns = [
     re_path(r'^api/mooring_map/', api.mooring_map_view, name='mooring_map_api'),
     re_path(r'^api/create_admissions_booking', api.create_admissions_booking, name="create_admissions_booking"),
     # Payment notification endpoints (session-less, called by Ledger)
-    re_path(r'^api/booking-payment-notification/(?P<pk>[0-9a-f-]+)/$',
+    re_path(r'^api/booking-payment-notification/(?P<booking_token>[0-9a-f-]{36})/$',
             BookingPaymentNotificationView.as_view(),
             name='api-booking-payment-notification'),
     re_path(r'^api/admissions-payment-notification/(?P<pk>[0-9a-f-]+)/$',
@@ -188,7 +188,7 @@ urlpatterns = [
     re_path(r'^change-booking/(?P<pk>[0-9]+)/', views.ChangeBookingView.as_view(), name='public_change_booking'),
     re_path(r'^cancel-booking/(?P<pk>[0-9]+)/', views.CancelBookingView.as_view(), name='public_cancel_booking'),
     re_path(r'^cancel-admissions-booking/(?P<pk>[0-9]+)/', views.CancelAdmissionsBookingView.as_view(), name='public_cancel_admissions_booking'),
-    re_path(r'^success/', views.BookingSuccessView.as_view(), name='public_booking_success'),
+    re_path(r'^success/(?P<booking_token>[0-9a-f-]{36})/', views.BookingSuccessView.as_view(), name='public_booking_success'),
     re_path(r'^annual-admission-success/', views.AnnualAdmissionSuccessView.as_view(), name='public_booking_annual_admission_success'),
     re_path(r'^cancel-completed/(?P<booking_id>[0-9]+)/', views.BookingCancelCompletedView.as_view(), name='public_booking_cancelled'),
     re_path(r'^cancel-admission-completed/(?P<booking_id>[0-9]+)/', views.AdmissionBookingCancelCompletedView.as_view(), name='public_admission_booking_cancelled'),

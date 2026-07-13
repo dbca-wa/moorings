@@ -3323,85 +3323,17 @@ class BookingSuccessView(TemplateView):
     template_name = 'mooring/booking/success.html'
 
     def get(self, request, *args, **kwargs):
-        print (" BOOKING SUCCESS ")
-
         try:
-            context_processor = template_context(self.request)
-            
-            # Get invoice reference from payment redirect (URL parameter)
+            booking = get_object_or_404(Booking, uuid=kwargs['booking_token'])
+
             invoice_ref = request.GET.get('invoice')
-            booking = None
-            
-            if invoice_ref:
-                # Payment completed - find booking via invoice
-                try:
-                    inv = Invoice.objects.get(reference=invoice_ref)
-                    basket = Basket.objects.filter(
-                        owner=inv.owner,
-                        system=settings.PAYMENT_SYSTEM_ID,
-                        status='Submitted',
-                        booking_reference__startswith=settings.MOORING_BOOKING_REF_PREFIX
-                    ).order_by('-date_submitted').first()
-                    
-                    if basket and basket.booking_reference:
-                        booking_id = int(basket.booking_reference.replace(settings.MOORING_BOOKING_REF_PREFIX, ''))
-                        booking = Booking.objects.get(id=booking_id)
-                except (Invoice.DoesNotExist, Booking.DoesNotExist, ValueError) as e:
-                    logger.error(f'Error finding booking via invoice {invoice_ref}: {e}')
-                    booking = None
-            
-            if not booking:
-                # During checkout flow - get from session
-                booking = utils.get_session_booking(request.session)
-                booking_reference = settings.MOORING_BOOKING_REF_PREFIX + str(booking.id)
-                logger.info(f'Looking for basket with booking_reference: {booking_reference}')
-                
-                basket = Basket.objects.filter(
-                    status='Submitted',
-                    system=settings.PAYMENT_SYSTEM_ID,
-                    booking_reference=booking_reference
-                ).order_by('-id').first()
-                
-                if basket:
-                    logger.info(f'Found basket with id: {basket.id}')
-                    try:
-                        order = Order.objects.get(basket_id=basket.id)
-                        logger.info(f'Found order with number: {order.number}')
-                        invoice = Invoice.objects.get(order_number=order.number)
-                        invoice_ref = invoice.reference
-                        logger.info(f'Found invoice with reference: {invoice_ref}')
-                    except Exception as e:
-                        logger.error(f'Error retrieving order/invoice: {e}', exc_info=True)
-                        raise
-            
-            # Process payment (idempotent - safe if already called by notification)
             context = booking.process_payment_notification(invoice_ref)
-            
-            # Send emails (idempotent - checks if already sent)
+
             booking.send_payment_emails(request)
-            
-            # Session cleanup
-            request.session['ps_last_booking'] = booking.id
-            utils.delete_session_booking(request.session)
-            
-            # Render success page
-            response = render(request, self.template_name, context)
-            response.delete_cookie(settings.OSCAR_BASKET_COOKIE_OPEN)
-            return response
- 
+
+            return render(request, self.template_name, context)
         except Exception as e:
             logger.error('Error in BookingSuccessView: {}'.format(e))
-
-            # Fallback to last booking from session
-            if ('ps_last_booking' in request.session) and Booking.objects.filter(id=request.session['ps_last_booking']).exists():
-                booking = Booking.objects.get(id=request.session['ps_last_booking'])
-                if BookingInvoice.objects.filter(booking=booking).count() > 0:
-                    bi = BookingInvoice.objects.filter(booking=booking)
-                    book_inv = bi[0].invoice_reference
-                    # Get current state (no processing, just display)
-                    context = booking.process_payment_notification(book_inv)
-                    return render(request, self.template_name, context)
-            
             return redirect('home')
 
 
