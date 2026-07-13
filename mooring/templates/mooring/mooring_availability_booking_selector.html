@@ -26,6 +26,11 @@
     {% if ground_id %}    
         var parkstayGroundId = '{{ ground_id|escapejs }}';
     {% endif %}
+    {% if booking_uuid %}
+        var bookingUuid = '{{ booking_uuid|escapejs }}';
+    {% else %}
+        var bookingUuid = null;
+    {% endif %}
     </script>
 
     {% vite_asset vue3_entry_script_availability2 app='availability2_app' %}

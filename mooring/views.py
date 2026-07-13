@@ -145,7 +145,10 @@ class MooringAvailability2Selector(TemplateView):
 
         booking = None
         if 'ps_booking' in request.session:
-            pass
+            # Populate booking_uuid from existing session booking (e.g. change booking flow)
+            existing = Booking.objects.filter(id=request.session['ps_booking']).first()
+            if existing and existing.uuid:
+                context['booking_uuid'] = str(existing.uuid)
         else:
             details = {
                'num_adults' : num_adults,
@@ -169,6 +172,7 @@ class MooringAvailability2Selector(TemplateView):
             )
             logger.info(f'New Booking: [{booking}] has been created.')
             utils.set_session_booking(request.session, booking)
+            context['booking_uuid'] = str(booking.uuid)
 
         return render(request, self.template_name, context)
 
