@@ -1050,9 +1050,10 @@ class MakeBookingsView(TemplateView):
         #occ = request.GET.get('occ', 'false')
         #overide_change_fees = False
 
-        booking = Booking.objects.get(pk=request.session['ps_booking']) if 'ps_booking' in request.session else None
+        booking_uuid = kwargs.get('booking_uuid')
+        booking = utils.get_booking_from_uuid_or_session(booking_uuid, request.session)
 
-        if booking is None:
+        if booking is None or booking.expiry_time is None:
            messages.error(self.request, 'Sorry your booking has expired')
            return HttpResponseRedirect(reverse('map'))
 
@@ -1142,8 +1143,9 @@ class MakeBookingsView(TemplateView):
 
 
     def post(self, request, *args, **kwargs):
-        booking = Booking.objects.get(pk=request.session['ps_booking']) if 'ps_booking' in request.session else None
-        if booking is None:
+        booking_uuid = kwargs.get('booking_uuid')
+        booking = utils.get_booking_from_uuid_or_session(booking_uuid, request.session)
+        if booking is None or booking.expiry_time is None:
            messages.error(self.request, 'Sorry your booking has expired')
            return HttpResponseRedirect(reverse('map'))
 

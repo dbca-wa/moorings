@@ -175,6 +175,7 @@ urlpatterns = [
     re_path(r'^dashboard/', views.DashboardView.as_view(), name='dash'),
     #url(r'^dashboard/bookingperiods2', views.DashboardView.as_view(), name='dash-bookingperiod2'),
     re_path(r'^booking/abort$', views.abort_booking_view, name='public_abort_booking'),
+    re_path(r'^booking/make/(?P<booking_uuid>[0-9a-f-]{36})/', views.MakeBookingsView.as_view(), name='public_make_booking_uuid'),
     re_path(r'^booking/', views.MakeBookingsView.as_view(), name='public_make_booking'),
     # re_path(r'^refund-payment/', views.RefundPaymentView.as_view(), name='refund_payment'),
     # re_path(r'^no-payment/', views.ZeroBookingView.as_view(), name='no_payment_booking'),
