@@ -144,12 +144,15 @@ class MooringAvailability2Selector(TemplateView):
                 context['ground_id'] = cg.first().id
 
         booking = None
-        if 'ps_booking' in request.session:
-            # Populate booking_uuid from existing session booking (e.g. change booking flow)
-            existing = Booking.objects.filter(id=request.session['ps_booking']).first()
-            if existing and existing.uuid:
+        # Accept booking_uuid from URL parameter (e.g. change booking redirect)
+        booking_uuid_param = request.GET.get('booking_uuid')
+        if booking_uuid_param:
+            existing = Booking.objects.filter(uuid=booking_uuid_param, booking_type=3).first()
+            if existing:
                 context['booking_uuid'] = str(existing.uuid)
-        else:
+
+        if 'booking_uuid' not in context:
+            # Create a new temporary booking
             details = {
                'num_adults' : num_adults,
                'num_children' : num_children,
@@ -171,7 +174,6 @@ class MooringAvailability2Selector(TemplateView):
                 departure=booking_period_finish
             )
             logger.info(f'New Booking: [{booking}] has been created.')
-            utils.set_session_booking(request.session, booking)
             context['booking_uuid'] = str(booking.uuid)
 
         return render(request, self.template_name, context)
@@ -338,7 +340,10 @@ def abort_booking_view(request, *args, **kwargs):
         change_ratis = request.GET.get('change_ratis',None)
         change_id = request.GET.get('change_id',None)
         change_to = None
-        booking = utils.get_session_booking(request.session)
+        booking_uuid = request.GET.get('booking_uuid')
+        booking = utils.get_booking_from_uuid_or_session(booking_uuid)
+        if not booking:
+            raise Exception('No booking found for abort')
         if change_ratis:
             try:
                 c_id = MooringArea.objects.get(ratis_id=change_ratis).id
@@ -370,7 +375,6 @@ def abort_booking_view(request, *args, **kwargs):
             # only ever delete a booking object if it's marked as temporary
             if booking.booking_type == 3:
                 booking.delete()
-            utils.delete_session_booking(request.session)
             # Redirect to explore parks
             return redirect('map')
     except Exception as e:
@@ -432,13 +436,6 @@ class CancelBookingView(TemplateView):
         if request.user.is_authenticated:
             payments_officer_group = request.user.groups().filter(name='Payments Officers').exists()
         failed_refund = False
-
-        if request.session:
-           if 'ps_booking' in request.session:
-               booking_session = utils.get_session_booking(request.session)
-               if booking_session.booking_type == 3:
-                  booking_session.delete()
-               utils.delete_session_booking(request.session)
 
         if occ == 'true':
             if payments_officer_group:
@@ -3859,8 +3856,7 @@ class ChangeBookingView(LoginRequiredMixin, TemplateView):
                                 booking_period_option=bi.booking_period_option
                               )
                          campsite_id= bi.campsite_id
-                    utils.set_session_booking(request.session, booking_temp)
-                    change_booking_url_redirect = reverse('mooring_availaiblity2_selector')+'?site_id='+str(booking.mooringarea_id)+'&arrival='+str(booking.arrival.strftime('%Y/%m/%d'))+'&departure='+str(booking.departure.strftime('%Y/%m/%d'))+'&vessel_size='+str(booking.details['vessel_size'])+'&vessel_draft='+str(booking.details['vessel_draft'])+'&vessel_beam='+str(booking.details['vessel_beam'])+'&vessel_weight='+str(booking.details['vessel_weight'])+'&vessel_rego='+str(booking.details['vessel_rego'])+'&num_adult='+str(booking.details['num_adults'])+'&num_children='+str(booking.details['num_children'])+'&num_infants='+str(booking.details['num_infants'])+'&distance_radius='+str(booking.mooringarea.park.distance_radius)
+                    change_booking_url_redirect = reverse('mooring_availaiblity2_selector')+'?site_id='+str(booking.mooringarea_id)+'&booking_uuid='+str(booking_temp.uuid)+'&arrival='+str(booking.arrival.strftime('%Y/%m/%d'))+'&departure='+str(booking.departure.strftime('%Y/%m/%d'))+'&vessel_size='+str(booking.details['vessel_size'])+'&vessel_draft='+str(booking.details['vessel_draft'])+'&vessel_beam='+str(booking.details['vessel_beam'])+'&vessel_weight='+str(booking.details['vessel_weight'])+'&vessel_rego='+str(booking.details['vessel_rego'])+'&num_adult='+str(booking.details['num_adults'])+'&num_children='+str(booking.details['num_children'])+'&num_infants='+str(booking.details['num_infants'])+'&distance_radius='+str(booking.mooringarea.park.distance_radius)
 
                     response = HttpResponse("<script> window.location='"+change_booking_url_redirect+"';</script> <a href='"+change_booking_url_redirect+"'> Redirecting please wait </a>")
                     response.delete_cookie(settings.OSCAR_BASKET_COOKIE_OPEN)

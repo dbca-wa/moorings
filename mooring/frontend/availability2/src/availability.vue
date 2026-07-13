@@ -62,7 +62,7 @@
                                     Time Left: <strong class="ms-1">{{ timeleft }}</strong>
                                 </span>
                                 <!-- Cancel Button -->
-                                <a v-if="current_booking.length > 0" :href="parkstayUrl+'/booking/abort'" class="btn btn-sm btn-warning">Cancel in-progress booking</a>
+                                <a v-if="current_booking.length > 0" :href="bookingUuid ? parkstayUrl+'/booking/abort?booking_uuid='+bookingUuid : parkstayUrl+'/booking/abort'" class="btn btn-sm btn-warning">Cancel in-progress booking</a>
                             </div>
                         </div>
                         
@@ -119,12 +119,12 @@
                                 Complete in-progress booking
                             </a>
                             <template v-if="parseInt(parkstayGroundRatisId) > 0">
-                                <a :href="parkstayUrl+'/booking/abort?change=true&change_ratis='+parkstayGroundRatisId" class="btn btn-warning ms-2">
+                                <a :href="parkstayUrl+'/booking/abort?'+(bookingUuid ? 'booking_uuid='+bookingUuid+'&' : '')+'change=true&change_ratis='+parkstayGroundRatisId" class="btn btn-warning ms-2">
                                     Cancel in-progress booking
                                 </a>
                             </template>
                             <template v-else>
-                                <a :href="parkstayUrl+'/booking/abort?change=true&change_id='+parkstayGroundId" class="btn btn-warning ms-2">
+                                <a :href="parkstayUrl+'/booking/abort?'+(bookingUuid ? 'booking_uuid='+bookingUuid+'&' : '')+'change=true&change_id='+parkstayGroundId" class="btn btn-warning ms-2">
                                     Cancel in-progress booking
                                 </a>
                             </template>
