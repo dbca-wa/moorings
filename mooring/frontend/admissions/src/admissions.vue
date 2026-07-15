@@ -8,6 +8,14 @@
                         <div class="well" style="text-align:center;">
                             <h3>Paying Admission Fees</h3>
                         </div>
+                        <div class="alert alert-info" style="margin-top:2%;">
+                            <h4>Privacy Notice</h4>
+                            <p>The Rottnest Island Authority (RIA) collects this personal information to determine your suitability for use of specified moorings and issue you with appropriate permissions and conditions.</p>
+                            <p>We may share this information with other organisations/individuals, to undertake compliance and monitoring of your activity on the island and to advise you of any changes to permissions or conditions as they arise. It may also be used to ensure compliance with other relevant legislation.</p>
+                            <p>You are required to provide this information/specific personal information to comply with Rottnest Island Regulations 1988 and Rottnest Island Authority Act 1987.</p>
+                            <p>If you choose not to provide the required information, we will be unable to provide permission to use moorings, and any use will be non-compliant.</p>
+                            <p>For further details on how RIA manage your personal information, you can read the <a href="https://www.dbca.wa.gov.au/media/6324/download">Privacy Policy</a>. If you have any questions about how your personal information will be handled, or if you would like to access your personal information, please contact RIA on 08 9432 9300 or email <a href="mailto:privacy.rottnest@dbca.wa.gov.au">privacy.rottnest@dbca.wa.gov.au</a>.</p>
+                        </div>
                         <div class="row" style="margin-top:2%;">
                             <div class="col-lg-6">
                                 <div class="well">

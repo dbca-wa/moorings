@@ -16713,6 +16713,14 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
 //
 //
 //
+//
+//
+//
+//
+//
+//
+//
+//
 
 var $ = _jquery2.default;
 var nowTemp = new Date();
@@ -22623,7 +22631,7 @@ module.exports={render:function (){var _vm=this;var _h=_vm.$createElement;var _c
     staticClass: "row"
   }, [_c('div', {
     staticClass: "col-lg-12"
-  }, [_vm._m(0), _vm._v(" "), _c('div', {
+  }, [_vm._m(0), _vm._v(" "), _vm._m(1), _vm._v(" "), _c('div', {
     staticClass: "row",
     staticStyle: {
       "margin-top": "2%"
@@ -23140,7 +23148,7 @@ module.exports={render:function (){var _vm=this;var _h=_vm.$createElement;var _c
     staticClass: "col-md-6"
   }, [_c('div', {
     staticClass: "form-group"
-  }, [_vm._m(1), _vm._v(" "), _c('div', {
+  }, [_vm._m(2), _vm._v(" "), _c('div', {
     staticClass: "input-group"
   }, [_c('span', {
     staticClass: "input-group-addon"
@@ -23300,6 +23308,21 @@ module.exports={render:function (){var _vm=this;var _h=_vm.$createElement;var _c
       "text-align": "center"
     }
   }, [_c('h3', [_vm._v("Paying Admission Fees")])])
+},function (){var _vm=this;var _h=_vm.$createElement;var _c=_vm._self._c||_h;
+  return _c('div', {
+    staticClass: "alert alert-info",
+    staticStyle: {
+      "margin-top": "2%"
+    }
+  }, [_c('h4', [_vm._v("Privacy Notice")]), _vm._v(" "), _c('p', [_vm._v("The Rottnest Island Authority (RIA) collects this personal information to determine your suitability for use of specified moorings and issue you with appropriate permissions and conditions.")]), _vm._v(" "), _c('p', [_vm._v("We may share this information with other organisations/individuals, to undertake compliance and monitoring of your activity on the island and to advise you of any changes to permissions or conditions as they arise. It may also be used to ensure compliance with other relevant legislation.")]), _vm._v(" "), _c('p', [_vm._v("You are required to provide this information/specific personal information to comply with Rottnest Island Regulations 1988 and Rottnest Island Authority Act 1987.")]), _vm._v(" "), _c('p', [_vm._v("If you choose not to provide the required information, we will be unable to provide permission to use moorings, and any use will be non-compliant.")]), _vm._v(" "), _c('p', [_vm._v("For further details on how RIA manage your personal information, you can read the "), _c('a', {
+    attrs: {
+      "href": "https://www.dbca.wa.gov.au/media/6324/download"
+    }
+  }, [_vm._v("Privacy Policy")]), _vm._v(". If you have any questions about how your personal information will be handled, or if you would like to access your personal information, please contact RIA on 08 9432 9300 or email "), _c('a', {
+    attrs: {
+      "href": "mailto:privacy.rottnest@dbca.wa.gov.au"
+    }
+  }, [_vm._v("privacy.rottnest@dbca.wa.gov.au")]), _vm._v(".")])])
 },function (){var _vm=this;var _h=_vm.$createElement;var _c=_vm._self._c||_h;
   return _c('label', {
     attrs: {
