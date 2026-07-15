@@ -81,8 +81,6 @@
 {% endblock %}
 {% block vue-component %}
 
-    {% include 'mooring/includes/collection_notice.html' %}
-
     <input id="location" name="location" type="hidden" value="{{loc}}"/>
     <input id="terms" name="terms" type="hidden" value="{{ context_processor.DAILY_TERMS_URL }}"/>
     <input id="daily_terms_url" name="terms" type="hidden" value="{{ context_processor.DAILY_FEES_URL}}"/>
