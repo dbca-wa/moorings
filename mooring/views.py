@@ -3327,6 +3327,16 @@ class BookingSuccessView(TemplateView):
             booking = get_object_or_404(Booking, uuid=kwargs['booking_token'])
 
             invoice_ref = request.GET.get('invoice')
+
+            # Ledger's return_url does not include ?invoice=, so fall back to the
+            # BookingInvoice record that the notification endpoint already created.
+            if not invoice_ref:
+                bi = BookingInvoice.objects.filter(
+                    booking=booking, system_invoice=False
+                ).order_by('-id').first()
+                if bi:
+                    invoice_ref = bi.invoice_reference
+
             context = booking.process_payment_notification(invoice_ref)
 
             booking.send_payment_emails(request)
