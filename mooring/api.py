@@ -2455,7 +2455,6 @@ def create_admissions_booking(request, *args, **kwargs):
     admissionsLine.cost = total
     admissionsLine.save()
 
-    request.session['ad_booking'] = admissionsBooking.pk
     logger = logging.getLogger('booking_checkout')
     logger.info('{} built admissions booking {} and handing over to payment gateway'.format('User {} with id {}'.format(admissionsBooking.customer.get_full_name(),admissionsBooking.customer.id) if admissionsBooking.customer else 'An anonymous user',admissionsBooking.id))
 
