@@ -2202,17 +2202,6 @@ def delete_session_booking(session):
         session.modified = True
         logger.info(f"session['ps_booking'] has been deleted")
 
-def get_session_admissions_booking(session):
-    if 'ad_booking' in session:
-        booking_id = session['ad_booking']
-    else:
-        raise Exception('Admissions booking not in Session')
-
-    try:
-        return AdmissionsBooking.objects.get(id=booking_id)
-    except AdmissionsBooking.DoesNotExist:
-        raise Exception('Admissions booking not found for booking_id {}'.format(booking_id))
-
 def get_annual_admission_session_booking(session):
     if 'annual_admission_booking' in session:
         booking_id = session['annual_admission_booking']
@@ -2227,11 +2216,6 @@ def get_annual_admission_session_booking(session):
 def delete_annual_admission_session_booking(session):
     if 'annual_admission_booking' in session:
         del session['annual_admission_booking']
-        session.modified = True
-
-def delete_session_admissions_booking(session):
-    if 'ad_booking' in session:
-        del session['ad_booking']
         session.modified = True
 
 def get_session_booking(session):
