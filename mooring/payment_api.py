@@ -74,69 +74,56 @@ class BookingPaymentNotificationView(APIView):
 
 class AdmissionsPaymentNotificationView(APIView):
     """
-    Revised endpoint for Ledger to notify about admissions booking payment completion.
+    Session-less endpoint for Ledger to notify about admissions booking payment completion.
+    AdmissionsBooking is identified by UUID (booking_token URL parameter).
     Supports both GET (Ledger default) and POST.
     """
-    
+
     authentication_classes = []
     permission_classes = []
-    
-    def get(self, request, pk, format=None):
-        """
-        Handle GET requests from Ledger.
-        """
-        # Extract invoice from query string (?invoice=XXXX)
+
+    def get(self, request, booking_token, format=None):
+        logger.info(f"Received GET admissions payment notification for booking {booking_token} with query params: {request.query_params}")
         invoice_reference = request.query_params.get('invoice') or request.query_params.get('invoice_reference')
-        return self._handle_notification(request, pk, invoice_reference)
+        return self._handle_notification(request, booking_token, invoice_reference)
 
-    def post(self, request, pk, format=None):
-        """
-        Handle POST requests for backward compatibility.
-        """
-        # Extract from POST data or fallback to query params
-        invoice_reference = (request.data.get('invoice') or 
-                           request.data.get('invoice_reference') or 
-                           request.query_params.get('invoice'))
-        return self._handle_notification(request, pk, invoice_reference)
+    def post(self, request, booking_token, format=None):
+        logger.info(f"Received POST admissions payment notification for booking {booking_token} with body: {request.data}")
+        invoice_reference = (request.data.get('invoice') or
+                             request.data.get('invoice_reference') or
+                             request.query_params.get('invoice'))
+        return self._handle_notification(request, booking_token, invoice_reference)
 
-    def _handle_notification(self, request, pk, invoice_reference):
-        """
-        Shared logic for processing admissions payment notifications.
-        """
-        # Get client IP for audit logging
+    def _handle_notification(self, request, booking_token, invoice_reference):
         x_forwarded_for = request.META.get('HTTP_X_FORWARDED_FOR')
         client_ip = x_forwarded_for.split(',')[0].strip() if x_forwarded_for else request.META.get('REMOTE_ADDR', 'unknown')
-        
-        logger.info(f'Admissions payment notification received: booking_id={pk}, '
-                   f'invoice={invoice_reference}, ip={client_ip}')
-        
+
+        logger.info(f'Admissions payment notification received: booking_token={booking_token}, '
+                    f'invoice={invoice_reference}, ip={client_ip}')
+
         if not invoice_reference:
             logger.warning(f'Admissions payment notification rejected: missing invoice, '
-                          f'booking_id={pk}, ip={client_ip}')
+                           f'booking_token={booking_token}, ip={client_ip}')
             return Response({'error': 'Missing invoice'}, status=status.HTTP_400_BAD_REQUEST)
-        
+
         try:
-            # Note: Ensure pk matches your model ID type (int or uuid)
-            booking = AdmissionsBooking.objects.get(id=pk)
-            
-            # Process payment notification (idempotent)
+            booking = AdmissionsBooking.objects.get(uuid=booking_token)
+
             context = booking.process_payment_notification(invoice_reference)
-            
-            # Send confirmation emails
             booking.send_payment_emails(context)
-            
+
             logger.info(f'Admissions notification processed successfully: '
-                       f'booking_id={pk}, invoice={invoice_reference}, ip={client_ip}')
-            
+                        f'booking_token={booking_token}, invoice={invoice_reference}, ip={client_ip}')
+
             return Response({
                 'status': 'success',
-                'booking_id': str(pk),
+                'booking_token': str(booking_token),
                 'invoice': invoice_reference
             }, status=status.HTTP_200_OK)
-            
+
         except AdmissionsBooking.DoesNotExist:
-            logger.error(f'Admissions booking not found: {pk}')
+            logger.error(f'Admissions booking not found for uuid: {booking_token}')
             return Response({'error': 'Admissions booking not found'}, status=status.HTTP_404_NOT_FOUND)
         except Exception as e:
-            logger.error(f'Error processing admissions notification: {str(e)}', exc_info=True)
+            logger.error(f'Error processing admissions notification for {booking_token}: {str(e)}', exc_info=True)
             return Response({'error': 'Internal server error'}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
