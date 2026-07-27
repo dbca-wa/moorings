@@ -2507,8 +2507,7 @@ class AdmissionsBooking(models.Model):
     override_lines = django_models.JSONField(null=True, blank=True, default=dict)
     mobile = models.CharField(max_length=50, blank=True, null=True)
     # UUID for stateless payment flow (public notification and success URLs)
-    # null=True initially for safe production migration; backfilled and made unique in migration 0175
-    uuid = models.UUIDField(default=uuid.uuid4, editable=False, null=True, db_index=True)
+    uuid = models.UUIDField(default=uuid.uuid4, editable=False, null=False, unique=True, db_index=True)
 
     def __str__(self):
         email = ''
