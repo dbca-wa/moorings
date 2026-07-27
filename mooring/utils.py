@@ -1786,16 +1786,16 @@ def admissionsCheckout(request, admissionsBooking, lines, invoice_text=None, vou
     basket_params = convert_decimal_to_float(basket_params)
     basket_hash = create_basket_session(request, request.user.id, basket_params)
     if settings.EMAIL_INSTANCE == 'DEV':
-        admissions_preload_url = settings.PARKSTAY_EXTERNAL_URL.rstrip('/') + reverse('public_admissions_success')
+        admissions_preload_url = settings.PARKSTAY_EXTERNAL_URL.rstrip('/') + reverse('public_admissions_success', kwargs={'booking_token': str(admissionsBooking.uuid)})
     else:
-        admissions_preload_url = request.build_absolute_uri(reverse('public_admissions_success'))
-    
+        admissions_preload_url = request.build_absolute_uri(reverse('public_admissions_success', kwargs={'booking_token': str(admissionsBooking.uuid)}))
+
     # Build notification URL for Ledger callbacks
     notification_url = None
     if return_preload_url is None:
         # Auto-generate for AdmissionsBooking
         endpoint = 'api-admissions-payment-notification'
-        notification_path = reverse(endpoint, kwargs={'pk': admissionsBooking.id})
+        notification_path = reverse(endpoint, kwargs={'booking_token': str(admissionsBooking.uuid)})
         if settings.EXTERNAL_CALLBACK_URL:
             notification_url = f"{settings.EXTERNAL_CALLBACK_URL}{notification_path}"
         else:
@@ -1803,11 +1803,11 @@ def admissionsCheckout(request, admissionsBooking, lines, invoice_text=None, vou
     else:
         # Use provided URL
         notification_url = return_preload_url
-    
+
     checkout_params = {
         'system': settings.PS_PAYMENT_SYSTEM_ID,
         'fallback_url': request.build_absolute_uri('/'),
-        'return_url': request.build_absolute_uri(reverse('public_admissions_success')),
+        'return_url': admissions_preload_url,
         'return_preload_url': notification_url,
         'force_redirect': True,
         'proxy': True if internal else False,
@@ -1930,7 +1930,7 @@ def checkout(request, booking, lines, invoice_text=None, vouchers=[], internal=F
             endpoint_kwargs = {'booking_token': str(booking.uuid)}
         elif booking_type == 'AdmissionsBooking':
             endpoint = 'api-admissions-payment-notification'
-            endpoint_kwargs = {'pk': booking.id}
+            endpoint_kwargs = {'booking_token': str(booking.uuid)}
         else:
             logger.error(f'Unknown booking type: {booking_type}')
             endpoint = None
