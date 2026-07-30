@@ -2436,11 +2436,12 @@ def create_admissions_booking(request, *args, **kwargs):
         try:
             customer = EmailUser.objects.get(email=request.POST.get('email').lower())
         except EmailUser.DoesNotExist:
-            customer = EmailUser.objects.create(
+            EmailUser.objects.create(
                     email=request.POST.get('email').lower(),
                     first_name=request.POST.get('givenName'),
                     last_name=request.POST.get('lastName')
             )
+            customer = EmailUser.objects.get(email=request.POST.get('email').lower())
     else:
         customer = request.user 
     
@@ -2459,8 +2460,11 @@ def create_admissions_booking(request, *args, **kwargs):
     logger.info('{} built admissions booking {} and handing over to payment gateway'.format('User {} with id {}'.format(admissionsBooking.customer.get_full_name(),admissionsBooking.customer.id) if admissionsBooking.customer else 'An anonymous user',admissionsBooking.id))
 
     # generate invoice
+    customer_name = u'{} {}'.format(
+        admissionsBooking.customer.first_name, admissionsBooking.customer.last_name
+    ) if admissionsBooking.customer else 'Guest'
     invoice = u"Invoice for {} on {}".format(
-            u'{} {}'.format(admissionsBooking.customer.first_name, admissionsBooking.customer.last_name),
+            customer_name,
             admissionsLine.arrivalDate.strftime('%d-%m-%Y')
     )
     #Not strictly needed.
@@ -2637,6 +2641,44 @@ def get_confirmation(request, *args, **kwargs):
     response['Content-Disposition'] = 'filename="confirmation-PS{}.pdf"'.format(booking_id)
 
     response.write(pdf.create_confirmation(response, booking, mooring_bookings, context_processor))
+    return response
+
+
+@require_http_methods(['GET'])
+def get_confirmation_by_uuid(request, *args, **kwargs):
+    context_processor = template_context(request)
+    booking_token = kwargs.get('booking_token')
+    try:
+        booking = Booking.objects.get(uuid=booking_token)
+    except Booking.DoesNotExist:
+        return HttpResponse('Booking unavailable', status=403)
+
+    if (not is_officer(request.user)) and (not booking.paid):
+        return HttpResponse('Booking unavailable', status=403)
+
+    try:
+        mooring_bookings = MooringsiteBooking.objects.filter(booking=booking).order_by('from_dt')
+    except MooringsiteBooking.DoesNotExist:
+        return HttpResponse('Mooringsite Booking unavailable', status=403)
+
+    response = HttpResponse(content_type='application/pdf')
+    response['Content-Disposition'] = 'filename="confirmation-PS{}.pdf"'.format(booking.id)
+    response.write(pdf.create_confirmation(response, booking, mooring_bookings, context_processor))
+    return response
+
+
+@require_http_methods(['GET'])
+def get_admissions_confirmation_by_uuid(request, *args, **kwargs):
+    context_processor = template_context(request)
+    booking_token = kwargs.get('booking_token')
+    try:
+        booking = AdmissionsBooking.objects.get(uuid=booking_token)
+    except AdmissionsBooking.DoesNotExist:
+        return HttpResponse('Booking unavailable', status=403)
+
+    response = HttpResponse(content_type='application/pdf')
+    response['Content-Disposition'] = 'filename="confirmation-AD{}.pdf"'.format(booking.id)
+    pdf.create_admissions_confirmation(response, booking, context_processor)
     return response
 
 
@@ -3702,13 +3744,14 @@ class BookingViewSet(viewsets.ModelViewSet):
                 emailUser = request.data['customer']
                 customer = EmailUser.objects.get(email = emailUser['email'].lower())
             except EmailUser.DoesNotExist:
-                customer = EmailUser.objects.create(
+                EmailUser.objects.create(
                     email = emailUser['email'].lower(),
                     first_name = emailUser['first_name'],
                     last_name = emailUser['last_name'],
                     phone_number = emailUser['phone'],
                     mobile_number  = emailUser['phone'],
                 )
+                customer = EmailUser.objects.get(email = emailUser['email'].lower())
 
                 userCreated = True
                 try:

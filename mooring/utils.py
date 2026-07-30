@@ -1784,7 +1784,8 @@ def admissionsCheckout(request, admissionsBooking, lines, invoice_text=None, vou
     }
 
     basket_params = convert_decimal_to_float(basket_params)
-    basket_hash = create_basket_session(request, request.user.id, basket_params)
+    customer_id = admissionsBooking.customer.id if admissionsBooking.customer else None
+    basket_hash = create_basket_session(request, customer_id, basket_params)
     # if settings.EMAIL_INSTANCE == 'DEV':
     #     admissions_preload_url = settings.PARKSTAY_EXTERNAL_URL.rstrip('/') + reverse('public_admissions_success', kwargs={'booking_token': str(admissionsBooking.uuid)})
     # else:

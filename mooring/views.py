@@ -3019,6 +3019,9 @@ class AdmissionsBookingSuccessView(TemplateView):
                 'PUBLIC_URL': getattr(settings, 'PUBLIC_URL', request.build_absolute_uri('/')[:-1]),
                 'SITE_URL': getattr(settings, 'SITE_URL', request.build_absolute_uri('/')[:-1]),
                 'TEMPLATE_GROUP': 'ria',
+                # Grant confirmation/invoice access to any user arriving via the correct UUID URL.
+                # booking_view.html checks this alongside the usual user/session conditions.
+                'arrived_via_payment': True,
             })
 
             # Only send emails if Path A (notification endpoint) has not already sent them.
@@ -3204,6 +3207,9 @@ class BookingSuccessView(TemplateView):
 
             was_already_processed = (booking.booking_type == 1)
             context = booking.process_payment_notification(invoice_ref)
+
+            # Grant confirmation/invoice access to any user arriving via the correct UUID URL.
+            context['arrived_via_payment'] = True
 
             # Only send emails if Path A (notification endpoint) has not already sent them.
             # process_payment_notification() is idempotent but send_payment_emails() is not.
