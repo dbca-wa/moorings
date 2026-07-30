@@ -78,11 +78,10 @@ class BpointTransaction():
     pass
 # from ledger.payments.utils import systemid_check, update_payments
 # from ledger.checkout.utils import place_order_submission 
-from ledger_api_client.utils import update_payments, place_order_submission, get_or_create
+from ledger_api_client.utils import update_payments, place_order_submission, get_or_create, Order
 # from ledger.payments.cash.models import CashTransaction 
 # Ledger
 # from ledger.order.models import Order
-from ledger_api_client.order import Order
 from django_ical.views import ICalFeed
 from datetime import datetime, timedelta, date
 from decimal import *
@@ -145,9 +144,15 @@ class MooringAvailability2Selector(TemplateView):
                 context['ground_id'] = cg.first().id
 
         booking = None
-        if 'ps_booking' in request.session:
-            pass
-        else:
+        # Accept booking_uuid from URL parameter (e.g. change booking redirect)
+        booking_uuid_param = request.GET.get('booking_uuid')
+        if booking_uuid_param:
+            existing = Booking.objects.filter(uuid=booking_uuid_param, booking_type=3).first()
+            if existing:
+                context['booking_uuid'] = str(existing.uuid)
+
+        if 'booking_uuid' not in context:
+            # Create a new temporary booking
             details = {
                'num_adults' : num_adults,
                'num_children' : num_children,
@@ -169,7 +174,7 @@ class MooringAvailability2Selector(TemplateView):
                 departure=booking_period_finish
             )
             logger.info(f'New Booking: [{booking}] has been created.')
-            utils.set_session_booking(request.session, booking)
+            context['booking_uuid'] = str(booking.uuid)
 
         return render(request, self.template_name, context)
 
@@ -335,7 +340,10 @@ def abort_booking_view(request, *args, **kwargs):
         change_ratis = request.GET.get('change_ratis',None)
         change_id = request.GET.get('change_id',None)
         change_to = None
-        booking = utils.get_session_booking(request.session)
+        booking_uuid = request.GET.get('booking_uuid')
+        booking = utils.get_booking_from_uuid_or_session(booking_uuid)
+        if not booking:
+            raise Exception('No booking found for abort')
         if change_ratis:
             try:
                 c_id = MooringArea.objects.get(ratis_id=change_ratis).id
@@ -367,7 +375,6 @@ def abort_booking_view(request, *args, **kwargs):
             # only ever delete a booking object if it's marked as temporary
             if booking.booking_type == 3:
                 booking.delete()
-            utils.delete_session_booking(request.session)
             # Redirect to explore parks
             return redirect('map')
     except Exception as e:
@@ -429,13 +436,6 @@ class CancelBookingView(TemplateView):
         if request.user.is_authenticated:
             payments_officer_group = request.user.groups().filter(name='Payments Officers').exists()
         failed_refund = False
-
-        if request.session:
-           if 'ps_booking' in request.session:
-               booking_session = utils.get_session_booking(request.session)
-               if booking_session.booking_type == 3:
-                  booking_session.delete()
-               utils.delete_session_booking(request.session)
 
         if occ == 'true':
             if payments_officer_group:
@@ -1047,9 +1047,10 @@ class MakeBookingsView(TemplateView):
         #occ = request.GET.get('occ', 'false')
         #overide_change_fees = False
 
-        booking = Booking.objects.get(pk=request.session['ps_booking']) if 'ps_booking' in request.session else None
+        booking_uuid = kwargs.get('booking_uuid')
+        booking = utils.get_booking_from_uuid_or_session(booking_uuid, request.session)
 
-        if booking is None:
+        if booking is None or booking.expiry_time is None:
            messages.error(self.request, 'Sorry your booking has expired')
            return HttpResponseRedirect(reverse('map'))
 
@@ -1139,8 +1140,9 @@ class MakeBookingsView(TemplateView):
 
 
     def post(self, request, *args, **kwargs):
-        booking = Booking.objects.get(pk=request.session['ps_booking']) if 'ps_booking' in request.session else None
-        if booking is None:
+        booking_uuid = kwargs.get('booking_uuid')
+        booking = utils.get_booking_from_uuid_or_session(booking_uuid, request.session)
+        if booking is None or booking.expiry_time is None:
            messages.error(self.request, 'Sorry your booking has expired')
            return HttpResponseRedirect(reverse('map'))
 
@@ -2996,124 +2998,46 @@ class AdmissionsBookingSuccessView(TemplateView):
 
     def get(self, request, *args, **kwargs):
         try:
-            context_processor = template_context(self.request)
-            
-            # Get invoice_ref from URL parameter (payment completion redirect)
+            booking = get_object_or_404(AdmissionsBooking, uuid=kwargs['booking_token'])
+
             invoice_ref = request.GET.get('invoice')
-            
-            if invoice_ref:
-                # Payment completed - get booking from invoice
-                logger.info(f"Payment completed with invoice: {invoice_ref}")
-                inv = Invoice.objects.get(reference=invoice_ref)
-                
-                # Find basket by booking_reference
-                basket = Basket.objects.filter(
-                    owner=inv.owner,
-                    system=settings.PAYMENT_SYSTEM_ID,
-                    status='Submitted',
-                    booking_reference__startswith=settings.DAILY_ADMISSION_REF_PREFIX
-                ).order_by('-date_submitted')[:1]
-                
-                if not basket or not basket[0].booking_reference:
-                    raise Exception('Could not find basket with booking reference')
-                
-                # Get booking from basket's booking_reference
-                booking_id = int(basket[0].booking_reference.replace(settings.DAILY_ADMISSION_REF_PREFIX, ''))
-                booking = AdmissionsBooking.objects.get(id=booking_id)
-                
-                logger.info(f"Found booking {booking.id} from invoice")
-            else:
-                # No invoice parameter - try session (during payment flow)
-                logger.info("No invoice parameter, getting from session")
-                booking = utils.get_session_admissions_booking(request.session)
-                booking_reference = settings.DAILY_ADMISSION_REF_PREFIX + str(booking.id)
-                basket = Basket.objects.filter(
-                    status='Submitted',
-                    system=settings.PAYMENT_SYSTEM_ID,
-                    booking_reference=booking_reference
-                ).order_by('-id')[:1]
-                invoice_ref = None  # Will be retrieved in utils function
-            
-            # Process booking success
-            context = utils.booking_admission_success(basket, booking, context_processor, invoice_ref)
-            request.session['ad_last_booking'] = booking.id
-            utils.delete_session_admissions_booking(request.session)
+
+            # Ledger's return_url does not include ?invoice=, so fall back to the
+            # AdmissionsBookingInvoice record already created by the notification endpoint.
+            if not invoice_ref:
+                bi = AdmissionsBookingInvoice.objects.filter(
+                    admissions_booking=booking, system_invoice=False
+                ).order_by('-id').first()
+                if bi:
+                    invoice_ref = bi.invoice_reference
+
+            was_already_processed = (booking.booking_type == 1)
+            context = booking.process_payment_notification(invoice_ref)
+
+            # Inject keys required by admissions email/success templates
+            context.update({
+                'PUBLIC_URL': getattr(settings, 'PUBLIC_URL', request.build_absolute_uri('/')[:-1]),
+                'SITE_URL': getattr(settings, 'SITE_URL', request.build_absolute_uri('/')[:-1]),
+                'TEMPLATE_GROUP': 'ria',
+                # Grant confirmation/invoice access to any user arriving via the correct UUID URL.
+                # booking_view.html checks this alongside the usual user/session conditions.
+                'arrived_via_payment': True,
+            })
+
+            # Only send emails if Path A (notification endpoint) has not already sent them.
+            # process_payment_notification() is idempotent but send_payment_emails() is not.
+            if not was_already_processed:
+                try:
+                    booking.send_payment_emails(context)
+                except Exception as e:
+                    logger.warning(f'Email sending failed in AdmissionsBookingSuccessView: {e}')
+
             return render(request, self.template_name, context)
-        except Exception as e:
-            logger.error(f"Error in AdmissionsBookingSuccessView: {str(e)}", exc_info=True)
-            raise
-
-            #arrival = AdmissionsLine.objects.filter(admissionsBooking=booking)[0].arrivalDate
-            #overnight = AdmissionsLine.objects.filter(admissionsBooking=booking)[0].overnightStay
-            #
-            #booking_reference = "AD-"+str(booking.id)
-            #basket = Basket.objects.filter(status='Submitted', booking_reference=booking_reference).order_by('-id')[:1]
-
-            #invoice_ref = request.GET.get('invoice')
-
-            #if booking.booking_type == 3:
-            #    try:
-            #        inv = Invoice.objects.get(reference=invoice_ref)
-            #        order = Order.objects.get(number=inv.order_number)
-            #        order.user = booking.customer
-            #        order.save()
-            #    except Invoice.DoesNotExist:
-            #        logger.error('{} tried making a booking with an incorrect invoice'.format('User {} with id {}'.format(booking.customer.get_full_name(),booking.customer.id) if booking.customer else 'An anonymous user'))
-            #        return redirect('admissions', args=(booking.location.key,))
-
-            #    if inv.system not in ['0516']:
-            #        logger.error('{} tried making a booking with an invoice from another system with reference number {}'.format('User {} with id {}'.format(booking.customer.get_full_name(),booking.customer.id) if booking.customer else 'An anonymous user',inv.reference))
-            #        return redirect('admissions', args=(booking.location.key,))
-
-            #    try:
-            #        b = AdmissionsBookingInvoice.objects.get(invoice_reference=invoice_ref)
-            #        logger.error('{} tried making an admission booking with an already used invoice with reference number {}'.format('User {} with id {}'.format(booking.customer.get_full_name(),booking.customer.id) if booking.customer else 'An anonymous user',inv.reference))
-            #        return redirect('admissions',  args=(booking.location.key,))
-            #    except AdmissionsBookingInvoice.DoesNotExist:
-            #        logger.info('{} finished temporary booking {}, creating new AdmissionBookingInvoice with reference {}'.format('User {} with id {}'.format(booking.customer.get_full_name(),booking.customer.id) if booking.customer else 'An anonymous user',booking.id, invoice_ref))
-            #        # FIXME: replace with server side notify_url callback
-            #        admissionsInvoice = AdmissionsBookingInvoice.objects.get_or_create(admissions_booking=booking, invoice_reference=invoice_ref)
-            #        #if request.user.__class__.__name__ == 'EmailUser':
-            #        #    booking.created_by = request.user
-
-            #        # set booking to be permanent fixture
-            #        booking.booking_type = 1  # internet booking
-            #        booking.save()
-            #        request.session['ad_last_booking'] = booking.id
-            #        utils.delete_session_admissions_booking(request.session)
-
-            #        # send out the invoice before the confirmation is sent
-            #        emails.send_admissions_booking_invoice(booking, request, context_processor)
-            #        # for fully paid bookings, fire off confirmation email
-            #        emails.send_admissions_booking_confirmation(booking,request, context_processor)
-
-
-            #        context = {
-            #           'admissionsBooking': booking,
-            #           'arrival' : arrival,
-            #           'overnight': overnight,
-            #           'admissionsInvoice': [invoice_ref]
-            #        }
-            #        return render(request, self.template_name, context)
 
         except Exception as e:
-            if ('ad_last_booking' in request.session) and AdmissionsBooking.objects.filter(id=request.session['ad_last_booking']).exists():
-                booking = AdmissionsBooking.objects.get(id=request.session['ad_last_booking'])
-                arrival = AdmissionsLine.objects.filter(admissionsBooking=booking)[0].arrivalDate
-                overnight = AdmissionsLine.objects.filter(admissionsBooking=booking)[0].overnightStay
-                invoice_ref = AdmissionsBookingInvoice.objects.get(admissions_booking=booking).invoice_reference
-            else:
-                return redirect('home')
+            logger.error(f'Error in AdmissionsBookingSuccessView: {str(e)}', exc_info=True)
+            return redirect('home')
 
-#        if request.user.is_staff:
-#            return redirect('dash-bookings')
-        context = {
-            'admissionsBooking': booking,
-            'arrival' : arrival,
-            'overnight': overnight,
-            'admissionsInvoice': [invoice_ref]
-        }
-        return render(request, self.template_name, context)
 
 class BookingCancelCompletedView(LoginRequiredMixin, TemplateView):
     template_name = 'mooring/booking/cancel_completed.html'
@@ -3267,41 +3191,35 @@ class BookingSuccessView(TemplateView):
     template_name = 'mooring/booking/success.html'
 
     def get(self, request, *args, **kwargs):
-        print (" BOOKING SUCCESS ")
-
         try:
-            context_processor = template_context(self.request)
-            basket = None
-            booking = utils.get_session_booking(request.session)
-            booking_reference = settings.MOORING_BOOKING_REF_PREFIX + str(booking.id)
-            basket = Basket.objects.filter(status='Submitted', system=settings.PAYMENT_SYSTEM_ID, booking_reference=booking_reference).order_by('-id')[:1]
-            context = utils.booking_success(basket,booking,context_processor)
+            booking = get_object_or_404(Booking, uuid=kwargs['booking_token'])
 
-            request.session['ps_last_booking'] = booking.id
-            utils.delete_session_booking(request.session)
-            response = render(request, self.template_name, context)
-            response.delete_cookie(settings.OSCAR_BASKET_COOKIE_OPEN)
-            return response
- 
+            invoice_ref = request.GET.get('invoice')
+
+            # Ledger's return_url does not include ?invoice=, so fall back to the
+            # BookingInvoice record that the notification endpoint already created.
+            if not invoice_ref:
+                bi = BookingInvoice.objects.filter(
+                    booking=booking, system_invoice=False
+                ).order_by('-id').first()
+                if bi:
+                    invoice_ref = bi.invoice_reference
+
+            was_already_processed = (booking.booking_type == 1)
+            context = booking.process_payment_notification(invoice_ref)
+
+            # Grant confirmation/invoice access to any user arriving via the correct UUID URL.
+            context['arrived_via_payment'] = True
+
+            # Only send emails if Path A (notification endpoint) has not already sent them.
+            # process_payment_notification() is idempotent but send_payment_emails() is not.
+            if not was_already_processed:
+                booking.send_payment_emails(context)
+
+            return render(request, self.template_name, context)
         except Exception as e:
             logger.error('Error in BookingSuccessView: {}'.format(e))
-
-            if ('ps_last_booking' in request.session) and Booking.objects.filter(id=request.session['ps_last_booking']).exists():
-                booking = Booking.objects.get(id=request.session['ps_last_booking'])
-                if BookingInvoice.objects.filter(booking=booking).count() > 0:
-                    bi = BookingInvoice.objects.filter(booking=booking)
-                    book_inv = bi[0].invoice_reference
-#                    book_inv = BookingInvoice.objects.get(booking=booking).invoice_reference
-            else:
-                return redirect('home')
-
-        #if request.user.is_staff:
-        #    return redirect('dash-bookings')
-            context = {
-               'booking': booking,
-               'book_inv': [book_inv]
-            }
-        return render(request, self.template_name, context)
+            return redirect('home')
 
 
 class MyBookingsView(LoginRequiredMixin, TemplateView):
@@ -3755,8 +3673,7 @@ class ChangeBookingView(LoginRequiredMixin, TemplateView):
                                 booking_period_option=bi.booking_period_option
                               )
                          campsite_id= bi.campsite_id
-                    utils.set_session_booking(request.session, booking_temp)
-                    change_booking_url_redirect = reverse('mooring_availaiblity2_selector')+'?site_id='+str(booking.mooringarea_id)+'&arrival='+str(booking.arrival.strftime('%Y/%m/%d'))+'&departure='+str(booking.departure.strftime('%Y/%m/%d'))+'&vessel_size='+str(booking.details['vessel_size'])+'&vessel_draft='+str(booking.details['vessel_draft'])+'&vessel_beam='+str(booking.details['vessel_beam'])+'&vessel_weight='+str(booking.details['vessel_weight'])+'&vessel_rego='+str(booking.details['vessel_rego'])+'&num_adult='+str(booking.details['num_adults'])+'&num_children='+str(booking.details['num_children'])+'&num_infants='+str(booking.details['num_infants'])+'&distance_radius='+str(booking.mooringarea.park.distance_radius)
+                    change_booking_url_redirect = reverse('mooring_availaiblity2_selector')+'?site_id='+str(booking.mooringarea_id)+'&booking_uuid='+str(booking_temp.uuid)+'&arrival='+str(booking.arrival.strftime('%Y/%m/%d'))+'&departure='+str(booking.departure.strftime('%Y/%m/%d'))+'&vessel_size='+str(booking.details['vessel_size'])+'&vessel_draft='+str(booking.details['vessel_draft'])+'&vessel_beam='+str(booking.details['vessel_beam'])+'&vessel_weight='+str(booking.details['vessel_weight'])+'&vessel_rego='+str(booking.details['vessel_rego'])+'&num_adult='+str(booking.details['num_adults'])+'&num_children='+str(booking.details['num_children'])+'&num_infants='+str(booking.details['num_infants'])+'&distance_radius='+str(booking.mooringarea.park.distance_radius)
 
                     response = HttpResponse("<script> window.location='"+change_booking_url_redirect+"';</script> <a href='"+change_booking_url_redirect+"'> Redirecting please wait </a>")
                     response.delete_cookie(settings.OSCAR_BASKET_COOKIE_OPEN)

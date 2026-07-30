@@ -62,7 +62,7 @@
                                     Time Left: <strong class="ms-1">{{ timeleft }}</strong>
                                 </span>
                                 <!-- Cancel Button -->
-                                <a v-if="current_booking.length > 0" :href="parkstayUrl+'/booking/abort'" class="btn btn-sm btn-warning">Cancel in-progress booking</a>
+                                <a v-if="current_booking.length > 0" :href="bookingUuid ? parkstayUrl+'/booking/abort?booking_uuid='+bookingUuid : parkstayUrl+'/booking/abort'" class="btn btn-sm btn-warning">Cancel in-progress booking</a>
                             </div>
                         </div>
                         
@@ -91,7 +91,7 @@
                                     <button title="Please enter vessel details" class="btn btn-primary" @click="validateVessel()">Proceed to Check Out</button>
                                 </div>
                                 <div v-else>
-                                    <a v-if="current_booking.length > 0 && booking_changed == true && numAdults >= 0" class="btn btn-primary" :href="parkstayUrl+'/booking'">Proceed to Check Out</a>
+                                    <a v-if="current_booking.length > 0 && booking_changed == true && numAdults >= 0" class="btn btn-primary" :href="bookingUuid ? parkstayUrl+'/booking/make/'+bookingUuid+'/' : parkstayUrl+'/booking/'">Proceed to Check Out</a>
                                     <button v-else-if="current_booking.length > 0 && booking_changed == true && numAdults < 0" class="btn btn-secondary" disabled>Please select minimum of 1 adult guest</button>
                                     <button v-else class="btn btn-secondary" disabled>Add items to Proceed to Check Out</button>
                                 </div>
@@ -115,16 +115,16 @@
                     <div class="d-flex justify-content-between align-items-center">
                         <span>{{ timeleft }}</span>
                         <div>
-                            <a :href="parkstayUrl+'/booking'" class="btn btn-warning">
+                            <a :href="bookingUuid ? parkstayUrl+'/booking/make/'+bookingUuid+'/' : parkstayUrl+'/booking/'" class="btn btn-warning">
                                 Complete in-progress booking
                             </a>
                             <template v-if="parseInt(parkstayGroundRatisId) > 0">
-                                <a :href="parkstayUrl+'/booking/abort?change=true&change_ratis='+parkstayGroundRatisId" class="btn btn-warning ms-2">
+                                <a :href="parkstayUrl+'/booking/abort?'+(bookingUuid ? 'booking_uuid='+bookingUuid+'&' : '')+'change=true&change_ratis='+parkstayGroundRatisId" class="btn btn-warning ms-2">
                                     Cancel in-progress booking
                                 </a>
                             </template>
                             <template v-else>
-                                <a :href="parkstayUrl+'/booking/abort?change=true&change_id='+parkstayGroundId" class="btn btn-warning ms-2">
+                                <a :href="parkstayUrl+'/booking/abort?'+(bookingUuid ? 'booking_uuid='+bookingUuid+'&' : '')+'change=true&change_id='+parkstayGroundId" class="btn btn-warning ms-2">
                                     Cancel in-progress booking
                                 </a>
                             </template>
@@ -554,7 +554,8 @@ export default {
             mooring_book_row_display: [],
             loadingID: 0,
             timerInterval: null,
-            initialTimerValue: null
+            initialTimerValue: null,
+            bookingUuid: (typeof bookingUuid !== 'undefined') ? bookingUuid : null
         };
     },
     computed: {
@@ -746,6 +747,7 @@ export default {
               vm.loadingID = vm.loadingID + 1;
               var submitData = {
                   booking_item: booking_item_id,
+                  booking_uuid: (typeof bookingUuid !== 'undefined') ? bookingUuid : null
               };
 
               $.ajax({
@@ -817,7 +819,8 @@ export default {
                   booking_finish: booking_finish,
                   num_adult: vm.numAdults,
                   num_children : vm.numChildren,
-                  num_infant: vm.numInfants
+                  num_infant: vm.numInfants,
+                  booking_uuid: (typeof bookingUuid !== 'undefined') ? bookingUuid : null
               };
 
               $.ajax({
@@ -890,7 +893,7 @@ export default {
                 },
                 success: function(data, stat, xhr) {
                     if (data.status == 'success') {
-                        window.location.href = vm.parkstayUrl + '/booking';
+                        window.location.href = vm.bookingUuid ? vm.parkstayUrl + '/booking/make/' + vm.bookingUuid + '/' : vm.parkstayUrl + '/booking/';
                     }
                 },
                 error: function(xhr, stat, err) {
@@ -1095,7 +1098,8 @@ export default {
                         vessel_beam: vm.vesselBeam,
                         vessel_weight: vm.vesselWeight,
                         vessel_rego: vm.vesselRego,
-                        distance_radius: vm.distanceRadius
+                        distance_radius: vm.distanceRadius,
+                        booking_uuid: (typeof bookingUuid !== 'undefined') ? bookingUuid : null
                     };
                     if (parseInt(vm.parkstayGroundRatisId) > 0) {
                         var url = vm.parkstayUrl + '/api/availability_ratis/'+ vm.parkstayGroundRatisId +'/?'+$.param(params);

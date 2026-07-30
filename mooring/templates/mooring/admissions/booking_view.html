@@ -79,11 +79,11 @@
             </div>
             {% endif %}
             <div class="row"><div class="col-sm-12" style="margin-top: 1em">
-                {% if request.user == admissionsBooking.customer or request.user.is_staff or request.session.ad_last_booking == admissionsBooking.id%}
-                    <a href="{% url 'get_admissions_confirmation' admissionsBooking.id %}" class="btn btn-info btn-lg" >Confirmation</a>
+                {% if request.user == admissionsBooking.customer or request.user.is_staff or request.session.ad_last_booking == admissionsBooking.id or arrived_via_payment %}
+                    <a href="{% url 'get_admissions_confirmation_by_uuid' admissionsBooking.uuid %}" class="btn btn-info btn-lg" target="_blank">Confirmation</a>
                     {% if request.user.is_authenticated %}
                         {% for bi in admissionsInvoice %}
-                            <a href="{% url 'mooring-invoice-pdf' bi %}" class="btn btn-info btn-lg" >Invoice</a>
+                            <a href="{% url 'mooring-invoice-pdf' bi.invoice_reference %}" class="btn btn-info btn-lg" target="_blank">Invoice</a>
                         {% endfor %}
                         {% if admissionsBooking.in_future and not admissionsBooking.part_booking %}
                             <a href="{% url 'public_cancel_admissions_booking' admissionsBooking.id %}" class="btn btn-info btn-lg">Cancel Admission Booking</a>

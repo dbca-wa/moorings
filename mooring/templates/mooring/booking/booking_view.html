@@ -61,12 +61,11 @@
                 <div class="row">
                     <div class="col-sm-12 mt-4">
                     {% if booking.invoice_status == 'paid' or booking.invoice_status == 'over_paid' %}
-                        {% if request.user == booking.customer or request.user.is_staff or request.session.ps_last_booking == booking.id %}
-                            <a href="{% url 'get_confirmation' booking.id %}" class="btn btn-info btn-lg me-2 mb-2" target="_blank" >Confirmation</a>
+                        {% if request.user == booking.customer or request.user.is_staff or request.session.ps_last_booking == booking.id or arrived_via_payment %}
+                            <a href="{% url 'get_confirmation_by_uuid' booking.uuid %}" class="btn btn-info btn-lg me-2 mb-2" target="_blank" >Confirmation</a>
                             {% if request.user.is_authenticated %}
                                 {% for bi in book_inv %}
-                                    <!-- <a href="{% url 'mooring-invoice-pdf' bi %}" class="btn btn-info btn-lg" >Invoice</a> -->
-                                    <a href="/ledger-toolkit-api/invoice-pdf/{{ bi }}" class="btn btn-info btn-lg me-2 mb-2" target="invoice-pdf-{{ bi }}" style='text-decoration: none;'>Invoice</a>
+                                    <a href="/ledger-toolkit-api/invoice-pdf/{{ bi.invoice_reference }}" class="btn btn-info btn-lg me-2 mb-2" target="invoice-pdf-{{ bi.invoice_reference }}" style='text-decoration: none;'>Invoice</a>
                                 {% endfor %}
                                 {% if booking.in_future %}
                                     <a href="{% url 'public_view_booking' booking.id %}" class="btn btn-info btn-lg me-2 mb-2">Change Booking</a>

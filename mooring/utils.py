@@ -1774,7 +1774,7 @@ def create_or_update_booking(request, booking_details, updating=False, override_
 #         booking.save()
 #     return booking
 
-def admissionsCheckout(request, admissionsBooking, lines, invoice_text=None, vouchers=[], internal=False):
+def admissionsCheckout(request, admissionsBooking, lines, invoice_text=None, vouchers=[], internal=False, return_preload_url=None):
     basket_params = {
         'products': lines,
         'vouchers': vouchers,
@@ -1784,16 +1784,36 @@ def admissionsCheckout(request, admissionsBooking, lines, invoice_text=None, vou
     }
 
     basket_params = convert_decimal_to_float(basket_params)
-    basket_hash = create_basket_session(request, request.user.id, basket_params)
-    if settings.EMAIL_INSTANCE == 'DEV':
-        admissions_preload_url = settings.PARKSTAY_EXTERNAL_URL.rstrip('/') + reverse('public_admissions_success')
+    customer_id = admissionsBooking.customer.id if admissionsBooking.customer else None
+    basket_hash = create_basket_session(request, customer_id, basket_params)
+    # if settings.EMAIL_INSTANCE == 'DEV':
+    #     admissions_preload_url = settings.PARKSTAY_EXTERNAL_URL.rstrip('/') + reverse('public_admissions_success', kwargs={'booking_token': str(admissionsBooking.uuid)})
+    # else:
+    #     admissions_preload_url = request.build_absolute_uri(reverse('public_admissions_success', kwargs={'booking_token': str(admissionsBooking.uuid)}))
+    # if settings.EMAIL_INSTANCE == 'DEV':
+    #     booking_preload_url = settings.PARKSTAY_EXTERNAL_URL.rstrip('/') + reverse('public_booking_success', kwargs={'booking_token': str(booking.uuid)})
+    # else:
+    #     booking_preload_url = request.build_absolute_uri(reverse('public_booking_success', kwargs={'booking_token': str(booking.uuid)}))
+
+    # Build notification URL for Ledger callbacks
+    notification_url = None
+    if return_preload_url is None:
+        # Auto-generate for AdmissionsBooking
+        endpoint = 'api-admissions-payment-notification'
+        notification_path = reverse(endpoint, kwargs={'booking_token': str(admissionsBooking.uuid)})
+        if settings.EXTERNAL_CALLBACK_URL:
+            notification_url = f"{settings.EXTERNAL_CALLBACK_URL}{notification_path}"
+        else:
+            notification_url = request.build_absolute_uri(notification_path)
     else:
-        admissions_preload_url = request.build_absolute_uri(reverse('public_admissions_success'))
+        # Use provided URL
+        notification_url = return_preload_url
+
     checkout_params = {
         'system': settings.PS_PAYMENT_SYSTEM_ID,
         'fallback_url': request.build_absolute_uri('/'),
-        'return_url': request.build_absolute_uri(reverse('public_admissions_success')),
-        'return_preload_url': admissions_preload_url,
+        'return_url': request.build_absolute_uri(reverse('public_admissions_success', kwargs={'booking_token': str(admissionsBooking.uuid)})),
+        'return_preload_url': notification_url,
         'force_redirect': True,
         'proxy': True if internal else False,
         'invoice_text': invoice_text,
@@ -1884,7 +1904,7 @@ def annual_admission_checkout(request, booking, lines, invoice_text=None, vouche
     return response
 
 
-def checkout(request, booking, lines, invoice_text=None, vouchers=[], internal=False):
+def checkout(request, booking, lines, invoice_text=None, vouchers=[], internal=False, return_preload_url=None):
     old_booking = '' 
     if booking.old_booking:
         old_booking = settings.MOORING_BOOKING_REF_PREFIX + str(booking.old_booking.id)
@@ -1900,15 +1920,42 @@ def checkout(request, booking, lines, invoice_text=None, vouchers=[], internal=F
 
     basket_params = convert_decimal_to_float(basket_params)
     basket_hash = create_basket_session(request, booking.customer.id, basket_params)
-    if settings.EMAIL_INSTANCE == 'DEV':
-        booking_preload_url = settings.PARKSTAY_EXTERNAL_URL.rstrip('/') + reverse('public_booking_success')
+    # if settings.EMAIL_INSTANCE == 'DEV':
+    #     booking_preload_url = settings.PARKSTAY_EXTERNAL_URL.rstrip('/') + reverse('public_booking_success', kwargs={'booking_token': str(booking.uuid)})
+    # else:
+    #     booking_preload_url = request.build_absolute_uri(reverse('public_booking_success', kwargs={'booking_token': str(booking.uuid)}))
+    
+    # Build notification URL for Ledger callbacks
+    notification_url = None
+    if return_preload_url is None:
+        # Auto-generate based on booking type
+        booking_type = booking.__class__.__name__
+        if booking_type == 'Booking':
+            endpoint = 'api-booking-payment-notification'
+            endpoint_kwargs = {'booking_token': str(booking.uuid)}
+        elif booking_type == 'AdmissionsBooking':
+            endpoint = 'api-admissions-payment-notification'
+            endpoint_kwargs = {'booking_token': str(booking.uuid)}
+        else:
+            logger.error(f'Unknown booking type: {booking_type}')
+            endpoint = None
+            endpoint_kwargs = {}
+        
+        if endpoint:
+            notification_path = reverse(endpoint, kwargs=endpoint_kwargs)
+            if settings.EXTERNAL_CALLBACK_URL:
+                notification_url = f"{settings.EXTERNAL_CALLBACK_URL}{notification_path}"
+            else:
+                notification_url = request.build_absolute_uri(notification_path)
     else:
-        booking_preload_url = request.build_absolute_uri(reverse('public_booking_success'))
+        # Use provided URL
+        notification_url = return_preload_url
+    
     checkout_params = {
         'system': settings.PS_PAYMENT_SYSTEM_ID,
         'fallback_url': request.build_absolute_uri('/'),
-        'return_url': request.build_absolute_uri(reverse('public_booking_success')),
-        'return_preload_url': booking_preload_url,
+        'return_url': request.build_absolute_uri(reverse('public_booking_success', kwargs={'booking_token': str(booking.uuid)})),
+        'return_preload_url': notification_url,
         'force_redirect': True,
         'proxy': True if internal else False,
         'invoice_text': invoice_text,
@@ -1918,6 +1965,16 @@ def checkout(request, booking, lines, invoice_text=None, vouchers=[], internal=F
 
     if internal or request.user.is_anonymous:
         checkout_params['basket_owner'] = booking.customer.id
+
+    try:
+        # Use json.dumps for a clean JSON-like format
+        # 'default=str' ensures that UUIDs or other non-serializable objects are converted to strings
+        formatted_json = json.dumps(checkout_params, indent=4, default=str)
+        logger.info(f'checkout_params: \n{formatted_json}')
+    except Exception as e:
+        # Fallback to simple logging if serialization fails
+        logger.error(f'Failed to serialize checkout_params: {e}')
+        logger.info(f'checkout_params: {checkout_params}')
 
     create_checkout_session(request, checkout_params)
 
@@ -2150,17 +2207,6 @@ def delete_session_booking(session):
         session.modified = True
         logger.info(f"session['ps_booking'] has been deleted")
 
-def get_session_admissions_booking(session):
-    if 'ad_booking' in session:
-        booking_id = session['ad_booking']
-    else:
-        raise Exception('Admissions booking not in Session')
-
-    try:
-        return AdmissionsBooking.objects.get(id=booking_id)
-    except AdmissionsBooking.DoesNotExist:
-        raise Exception('Admissions booking not found for booking_id {}'.format(booking_id))
-
 def get_annual_admission_session_booking(session):
     if 'annual_admission_booking' in session:
         booking_id = session['annual_admission_booking']
@@ -2177,11 +2223,6 @@ def delete_annual_admission_session_booking(session):
         del session['annual_admission_booking']
         session.modified = True
 
-def delete_session_admissions_booking(session):
-    if 'ad_booking' in session:
-        del session['ad_booking']
-        session.modified = True
-
 def get_session_booking(session):
     if 'ps_booking' in session:
         booking_id = session['ps_booking']
@@ -2192,6 +2233,19 @@ def get_session_booking(session):
         return Booking.objects.get(id=booking_id)
     except Booking.DoesNotExist:
         raise Exception('Booking not found for booking_id {}'.format(booking_id))
+
+def get_booking_from_uuid_or_session(booking_uuid, session=None):
+    """Resolve a Booking from UUID.
+    Returns None if booking_uuid is not provided or booking not found.
+    The session parameter is retained for API compatibility but is no longer used.
+    """
+    if booking_uuid:
+        try:
+            return Booking.objects.get(uuid=booking_uuid)
+        except Booking.DoesNotExist:
+            logger.warning(f'get_booking_from_uuid_or_session: booking not found for uuid {booking_uuid}')
+            return None
+    return None
 
 def daterange(start_date, end_date):
     for n in range(int ((end_date - start_date).days)):
@@ -2348,147 +2402,32 @@ def get_provinces(country_code):
 
 
 def booking_success(basket, booking, context_processor):
-
-    print("MLINE 1.01", datetime.now().strftime("%d/%m/%Y %H:%M:%S"))
-    order = Order.objects.get(basket_id=basket[0].id)
-    invoice = Invoice.objects.get(order_number=order.number)
-    print("MLINE 1.02", datetime.now().strftime("%d/%m/%Y %H:%M:%S"))
-    invoice_ref = invoice.reference
-    book_inv, created = BookingInvoice.objects.get_or_create(booking=booking, invoice_reference=invoice_ref)
-    print("MLINE 1.03", datetime.now().strftime("%d/%m/%Y %H:%M:%S"))
-    #invoice_ref = request.GET.get('invoice')
-    if booking.booking_type == 3:
-        print("MLINE 2.01", datetime.now().strftime("%d/%m/%Y %H:%M:%S"))
+    """
+    DEPRECATED: Use booking.process_payment_notification() instead.
+    This function is kept for backward compatibility with existing code
+    (e.g., management commands).
+    
+    Thin wrapper that delegates to the model's payment processing method.
+    """
+    import warnings
+    warnings.warn(
+        'booking_success() is deprecated. Use booking.process_payment_notification() instead.',
+        DeprecationWarning,
+        stacklevel=2
+    )
+    
+    # Extract invoice reference from basket
+    invoice_ref = None
+    if basket and len(basket) > 0:
         try:
-            inv = Invoice.objects.get(reference=invoice_ref)
-            # order = Order.objects.get(number=inv.order_number)
-            # order.user = booking.customer
-            # order.save()
-        except Invoice.DoesNotExist:
-            print ("INVOICE ERROR")
-            logger.error('{} tried making a booking with an incorrect invoice'.format('User {} with id {}'.format(booking.customer.get_full_name(),booking.customer.id) if booking.customer else 'An anonymous user'))
-            return redirect('public_make_booking')
-        if inv.system not in ['0516']:
-            print ("SYSTEM ERROR")
-            logger.error('{} tried making a booking with an invoice from another system with reference number {}'.format('User {} with id {}'.format(booking.customer.get_full_name(),booking.customer.id) if booking.customer else 'An anonymous user',inv.reference))
-            return redirect('public_make_booking')
-        print("MLINE 3.01", datetime.now().strftime("%d/%m/%Y %H:%M:%S"))
-        if book_inv:
-            print("MLINE 4.01", datetime.now().strftime("%d/%m/%Y %H:%M:%S"))
-            if booking.old_booking:
-                old_booking = Booking.objects.get(id=booking.old_booking.id)
-                old_booking.booking_type = 4
-                old_booking.cancelation_time = datetime.now()
-                old_booking.canceled_by = booking.created_by #request.user
-                old_booking.save()
-                booking_items = MooringsiteBooking.objects.filter(booking=old_booking)
-                # Find admissions booking for old booking
-                if old_booking.admission_payment:
-                    old_booking.admission_payment.booking_type = 4
-                    old_booking.admission_payment.cancelation_time = datetime.now()
-                    old_booking.admission_payment.canceled_by = booking.created_by #request.user
-                    old_booking.admission_payment.save()
-                for bi in booking_items:
-                    bi.booking_type = 4
-                    bi.save()
-            print("MLINE 5.01", datetime.now().strftime("%d/%m/%Y %H:%M:%S"))
-            booking_items_current = MooringsiteBooking.objects.filter(booking=booking)
-            for bi in booking_items_current:
-               if str(bi.id) in booking.override_lines:
-                  bi.amount = Decimal(booking.override_lines[str(bi.id)])
-               bi.save()
-            print("MLINE 6.01", datetime.now().strftime("%d/%m/%Y %H:%M:%S"))
-            msb = MooringsiteBooking.objects.filter(booking=booking).order_by('from_dt')
-            from_date = msb[0].from_dt
-            to_date = msb[msb.count()-1].to_dt
-            timestamp = calendar.timegm(from_date.timetuple())
-            local_dt = datetime.fromtimestamp(timestamp)
-            from_dt = local_dt.replace(microsecond=from_date.microsecond)
-            from_date_converted = from_dt.date()
-            timestamp = calendar.timegm(to_date.timetuple())
-            local_dt = datetime.fromtimestamp(timestamp)
-            to_dt = local_dt.replace(microsecond=to_date.microsecond)
-            to_date_converted = to_dt.date()
-            booking.arrival = from_date_converted
-            booking.departure = to_date_converted
-            # set booking to be permanent fixture
-            booking.booking_type = 1  # internet booking
-            booking.expiry_time = None
-            print("MLINE 7.01", datetime.now().strftime("%d/%m/%Y %H:%M:%S"))
-            # update_payments(invoice_ref)
-            print("MLINE 8.01", datetime.now().strftime("%d/%m/%Y %H:%M:%S"))
-            #Calculate Admissions and create object
-            if booking.admission_payment:
-                 ad_booking = AdmissionsBooking.objects.get(pk=booking.admission_payment.pk)
-                 #if request.user.__class__.__name__ == 'EmailUser':
-                 ad_booking.created_by = booking.created_by
-                 ad_booking.booking_type=1
-                 print("MLINE 8.02", datetime.now().strftime("%d/%m/%Y %H:%M:%S"))
-                 ad_booking.save()
-                 print("MLINE 8.03", datetime.now().strftime("%d/%m/%Y %H:%M:%S"))
-                 ad_invoice = AdmissionsBookingInvoice.objects.get_or_create(admissions_booking=ad_booking, invoice_reference=invoice_ref)
-                 print("MLINE 8.04", datetime.now().strftime("%d/%m/%Y %H:%M:%S"))
-
-                 for al in ad_booking.override_lines.keys():
-                     ad_line = AdmissionsLine.objects.get(id=int(al))
-                     ad_line.cost = ad_booking.override_lines[str(al)]
-                     ad_line.save()
-                 print("MLINE 8.05", datetime.now().strftime("%d/%m/%Y %H:%M:%S"))
-                # booking.admission_payment = ad_booking
-            booking.save()
-            print("MLINE 9.01", datetime.now().strftime("%d/%m/%Y %H:%M:%S"))
-            #if not request.user.is_staff:
-            #    print "USER IS NOT STAFF."
-            #request.session['ps_last_booking'] = booking.id
-            #utils.delete_session_booking(request.session)
-            # send out the invoice before the confirmation is sent if total is greater than zero
-            #if booking.cost_total > 0:
-            print("MLINE 10.01", datetime.now().strftime("%d/%m/%Y %H:%M:%S"))
-            try:
-                emails.send_booking_invoice(booking,context_processor)
-            except Exception as e:
-                print ("Error Sending Invoice ("+str(booking.id)+") :"+str(e))
-            # for fully paid bookings, fire off confirmation emaili
-            #if booking.invoice_status == 'paid':
-            print("MLINE 11.01", datetime.now().strftime("%d/%m/%Y %H:%M:%S"))
-            try:
-                emails.send_booking_confirmation(booking,context_processor)
-            except Exception as e:
-                print ("Error Sending Booking Confirmation ("+str(booking.id)+") :"+str(e))
-            print("MLINE 12.01", datetime.now().strftime("%d/%m/%Y %H:%M:%S"))
-            refund_failed = None
-            if models.RefundFailed.objects.filter(booking=booking).count() > 0:
-                refund_failed = models.RefundFailed.objects.filter(booking=booking)
-            # Create/Update Vessel in VesselDetails Table
-            print("MLINE 13.01", datetime.now().strftime("%d/%m/%Y %H:%M:%S"))
-            try:
-
-                if models.VesselDetail.objects.filter(rego_no=booking.details['vessel_rego']).count() > 0:
-                        vd = models.VesselDetail.objects.filter(rego_no=booking.details['vessel_rego'])
-                        p = vd[0]
-                        p.vessel_size=booking.details['vessel_size']
-                        p.vessel_draft=booking.details['vessel_draft']
-                        p.vessel_beam=booking.details['vessel_beam']
-                        p.vessel_weight=booking.details['vessel_weight']
-                        p.save()
-                else:
-                        models.VesselDetail.objects.create(rego_no=booking.details['vessel_rego'],
-                                                       vessel_size=booking.details['vessel_size'],
-                                                       vessel_draft=booking.details['vessel_draft'],
-                                                       vessel_beam=booking.details['vessel_beam'],
-                                                       vessel_weight=booking.details['vessel_weight']
-                                                      )
-                print("MLINE 14.01", datetime.now().strftime("%d/%m/%Y %H:%M:%S"))
-            except:
-                print ("ERROR: create vesseldetails on booking success")
-
-            context = {
-              'booking': booking,
-              'book_inv': [book_inv],
-              'refund_failed' : refund_failed
-            }
-            print("MLINE 15.01", datetime.now().strftime("%d/%m/%Y %H:%M:%S"))
-            return context
+            order = Order.objects.get(basket_id=basket[0].id)
+            invoice = Invoice.objects.get(order_number=order.number)
+            invoice_ref = invoice.reference
+        except (Order.DoesNotExist, Invoice.DoesNotExist) as e:
+            logger.error(f'Error getting invoice from basket: {e}')
+    
+    # Call model method
+    return booking.process_payment_notification(invoice_ref)
 
 
 
@@ -2563,70 +2502,28 @@ def booking_annual_admission_success(basket, booking, context_processor):
 
 
 def booking_admission_success(basket, booking, context_processor, invoice_ref=None):
-
-     arrival = models.AdmissionsLine.objects.filter(admissionsBooking=booking)[0].arrivalDate
-     overnight = models.AdmissionsLine.objects.filter(admissionsBooking=booking)[0].overnightStay
-
-     # Get invoice reference if not provided
-     if not invoice_ref:
-         order = Order.objects.get(basket_id=basket[0].id)
-         invoice = Invoice.objects.get(order_number=order.number)
-         invoice_ref = invoice.reference
-
-     if booking.booking_type == 3:
-         try:
-             inv = Invoice.objects.get(reference=invoice_ref)
-             # Note: Order is an API wrapper object, not a Django model
-             # It doesn't have a save() method, so we can't update order.user here
-             # If order user update is needed, use Ledger API's update endpoint
-             # order = Order.objects.get(number=inv.order_number)
-             # order.user = booking.customer
-             # order.save()  # This would fail - OrderObject has no save method
-         except Invoice.DoesNotExist:
-             logger.error('{} tried making a booking with an incorrect invoice {}'.format('User {} with id {}'.format(booking.customer.get_full_name(),booking.customer.id) if booking.customer else 'An anonymous user', invoice_ref))
-             raise Exception(f'Invoice {invoice_ref} not found')
-         except Exception as e:
-             logger.error(f'Error validating invoice {invoice_ref}: {str(e)}')
-             raise
-
-         if inv.system not in ['0516']:
-             logger.error('{} tried making a booking with an invoice from another system with reference number {}'.format('User {} with id {}'.format(booking.customer.get_full_name(),booking.customer.id) if booking.customer else 'An anonymous user',inv.reference))
-             raise Exception(f'Invoice {invoice_ref} is from wrong system: {inv.system}')
-
-         try:
-             b = AdmissionsBookingInvoice.objects.get(invoice_reference=invoice_ref)
-             logger.error('{} tried making an admission booking with an already used invoice with reference number {}'.format('User {} with id {}'.format(booking.customer.get_full_name(),booking.customer.id) if booking.customer else 'An anonymous user',inv.reference))
-             raise Exception(f'Invoice {invoice_ref} has already been used')
-         except AdmissionsBookingInvoice.DoesNotExist:
-             logger.info('{} finished temporary booking {}, creating new AdmissionBookingInvoice with reference {}'.format('User {} with id {}'.format(booking.customer.get_full_name(),booking.customer.id) if booking.customer else 'An anonymous user',booking.id, invoice_ref))
-             # FIXME: replace with server side notify_url callback
-             admissionsInvoice = AdmissionsBookingInvoice.objects.get_or_create(admissions_booking=booking, invoice_reference=invoice_ref)
-             #if request.user.__class__.__name__ == 'EmailUser':
-             #    booking.created_by = request.user
-
-             # set booking to be permanent fixture
-             booking.booking_type = 1  # internet booking
-             booking.save()
-             #request.session['ad_last_booking'] = booking.id
-             #utils.delete_session_admissions_booking(request.session)
-
-             try:
-                 # send out the invoice before the confirmation is sent
-                 emails.send_admissions_booking_invoice(booking,context_processor) 
-             except Exception as e:
-                 print ("Error Sending Invoice ("+str(booking.id)+") :"+str(e))
-
-             try:
-                 # for fully paid bookings, fire off confirmation email
-                 emails.send_admissions_booking_confirmation(booking,context_processor)
-             except Exception as e:
-                 print ("Error Sending Booking Confirmation ("+str(booking.id)+") :"+str(e))
-
-     # Return context for template rendering
-     context = {
-        'admissionsBooking': booking,
-        'arrival' : arrival,
-        'overnight': overnight,
-        'admissionsInvoice': [invoice_ref]
-     }
-     return context
+    """
+    DEPRECATED: Use booking.process_payment_notification() instead.
+    This function is kept for backward compatibility with existing code
+    (e.g., management commands).
+    
+    Thin wrapper that delegates to the model's payment processing method.
+    """
+    import warnings
+    warnings.warn(
+        'booking_admission_success() is deprecated. Use booking.process_payment_notification() instead.',
+        DeprecationWarning,
+        stacklevel=2
+    )
+    
+    # Get invoice reference if not provided
+    if not invoice_ref and basket and len(basket) > 0:
+        try:
+            order = Order.objects.get(basket_id=basket[0].id)
+            invoice = Invoice.objects.get(order_number=order.number)
+            invoice_ref = invoice.reference
+        except (Order.DoesNotExist, Invoice.DoesNotExist) as e:
+            logger.error(f'Error getting invoice from basket: {e}')
+    
+    # Call model method
+    return booking.process_payment_notification(invoice_ref)

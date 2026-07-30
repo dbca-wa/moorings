@@ -164,6 +164,19 @@ PAYMENT_SYSTEM_ID = PS_PAYMENT_SYSTEM_ID
 if not VALID_SYSTEMS:
     VALID_SYSTEMS = [PS_PAYMENT_SYSTEM_ID]
 
+# External callback URL for development environments
+# EXTERNAL_CALLBACK_URL is used in development when the app runs behind a proxy
+# or in a container with non-routable internal IPs. Ledger's payment system needs
+# a publicly accessible URL to send payment notifications. In production, this
+# should be None (uses relative URLs). For local dev, use ngrok or similar tunneling.
+#
+# Authentication for notification endpoints is handled by validating invoice ownership
+# via direct Ledger API queries (basket.booking_reference verification).
+#
+# Example: 'https://dev-moorings.example.com' or 'https://abc123.ngrok.io'
+# Leave as None for production (uses relative URLs)
+EXTERNAL_CALLBACK_URL = decouple.config('EXTERNAL_CALLBACK_URL', default=None)
+
 SYSTEM_NAME = decouple.config('SYSTEM_NAME', default='Mooring Rental System')
 SYSTEM_NAME_SHORT = decouple.config('SYSTEM_NAME_SHORT', default='mooring')
 CAMPGROUNDS_EMAIL = decouple.config('CAMPGROUNDS_EMAIL', default='mooringbookings@dbca.wa.gov.au')
