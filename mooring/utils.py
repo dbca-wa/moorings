@@ -1785,10 +1785,14 @@ def admissionsCheckout(request, admissionsBooking, lines, invoice_text=None, vou
 
     basket_params = convert_decimal_to_float(basket_params)
     basket_hash = create_basket_session(request, request.user.id, basket_params)
-    if settings.EMAIL_INSTANCE == 'DEV':
-        admissions_preload_url = settings.PARKSTAY_EXTERNAL_URL.rstrip('/') + reverse('public_admissions_success', kwargs={'booking_token': str(admissionsBooking.uuid)})
-    else:
-        admissions_preload_url = request.build_absolute_uri(reverse('public_admissions_success', kwargs={'booking_token': str(admissionsBooking.uuid)}))
+    # if settings.EMAIL_INSTANCE == 'DEV':
+    #     admissions_preload_url = settings.PARKSTAY_EXTERNAL_URL.rstrip('/') + reverse('public_admissions_success', kwargs={'booking_token': str(admissionsBooking.uuid)})
+    # else:
+    #     admissions_preload_url = request.build_absolute_uri(reverse('public_admissions_success', kwargs={'booking_token': str(admissionsBooking.uuid)}))
+    # if settings.EMAIL_INSTANCE == 'DEV':
+    #     booking_preload_url = settings.PARKSTAY_EXTERNAL_URL.rstrip('/') + reverse('public_booking_success', kwargs={'booking_token': str(booking.uuid)})
+    # else:
+    #     booking_preload_url = request.build_absolute_uri(reverse('public_booking_success', kwargs={'booking_token': str(booking.uuid)}))
 
     # Build notification URL for Ledger callbacks
     notification_url = None
@@ -1915,10 +1919,10 @@ def checkout(request, booking, lines, invoice_text=None, vouchers=[], internal=F
 
     basket_params = convert_decimal_to_float(basket_params)
     basket_hash = create_basket_session(request, booking.customer.id, basket_params)
-    if settings.EMAIL_INSTANCE == 'DEV':
-        booking_preload_url = settings.PARKSTAY_EXTERNAL_URL.rstrip('/') + reverse('public_booking_success', kwargs={'booking_token': str(booking.uuid)})
-    else:
-        booking_preload_url = request.build_absolute_uri(reverse('public_booking_success', kwargs={'booking_token': str(booking.uuid)}))
+    # if settings.EMAIL_INSTANCE == 'DEV':
+    #     booking_preload_url = settings.PARKSTAY_EXTERNAL_URL.rstrip('/') + reverse('public_booking_success', kwargs={'booking_token': str(booking.uuid)})
+    # else:
+    #     booking_preload_url = request.build_absolute_uri(reverse('public_booking_success', kwargs={'booking_token': str(booking.uuid)}))
     
     # Build notification URL for Ledger callbacks
     notification_url = None
