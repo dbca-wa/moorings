@@ -4,6 +4,10 @@ from django.urls import include, re_path
 from django.conf.urls.static import static
 from rest_framework import routers
 from mooring import are_migrations_running, views, api
+from mooring.payment_api import (
+    BookingPaymentNotificationView,
+    AdmissionsPaymentNotificationView,
+)
 from mooring.admin import admin
 from django_crispy_jcaptcha import views as jcaptcha_views
 
@@ -80,9 +84,18 @@ api_patterns = [
     re_path(r'^api/create_booking', api.create_booking, name='create_booking'),
     re_path(r'^api/mooring_map/', api.mooring_map_view, name='mooring_map_api'),
     re_path(r'^api/create_admissions_booking', api.create_admissions_booking, name="create_admissions_booking"),
+    # Payment notification endpoints (session-less, called by Ledger)
+    re_path(r'^api/booking-payment-notification/(?P<booking_token>[0-9a-f-]{36})/$',
+            BookingPaymentNotificationView.as_view(),
+            name='api-booking-payment-notification'),
+    re_path(r'^api/admissions-payment-notification/(?P<booking_token>[0-9a-f-]{36})/$',
+            AdmissionsPaymentNotificationView.as_view(),
+            name='api-admissions-payment-notification'),
     re_path(r'api/get_confirmation/(?P<booking_id>[0-9]+)/$', api.get_confirmation, name='get_confirmation'),
+    re_path(r'api/get_confirmation/(?P<booking_token>[0-9a-f-]{36})/$', api.get_confirmation_by_uuid, name='get_confirmation_by_uuid'),
     re_path(r'^api/get_aa_letter/(?P<booking_id>[0-9]+)/$', api.get_annual_admission_letter, name='get_aa_letter'),
     re_path(r'api/get_admissions_confirmation/(?P<booking_id>[0-9]+)/$', api.get_admissions_confirmation, name='get_admissions_confirmation'),
+    re_path(r'api/get_admissions_confirmation/(?P<booking_token>[0-9a-f-]{36})/$', api.get_admissions_confirmation_by_uuid, name='get_admissions_confirmation_by_uuid'),
     re_path(r'^api/reports/booking_refunds$', api.BookingRefundsReportView.as_view(),name='booking-refunds-report'),
     re_path(r'^api/reports/bookings$', api.BookingReportView.as_view(),name='bookings-report'),
     re_path(r'^api/reports/booking-mooring-created$', api.BookingCreatedReportView.as_view(),name='bookings-created-report'),
@@ -164,6 +177,7 @@ urlpatterns = [
     re_path(r'^dashboard/', views.DashboardView.as_view(), name='dash'),
     #url(r'^dashboard/bookingperiods2', views.DashboardView.as_view(), name='dash-bookingperiod2'),
     re_path(r'^booking/abort$', views.abort_booking_view, name='public_abort_booking'),
+    re_path(r'^booking/make/(?P<booking_uuid>[0-9a-f-]{36})/', views.MakeBookingsView.as_view(), name='public_make_booking_uuid'),
     re_path(r'^booking/', views.MakeBookingsView.as_view(), name='public_make_booking'),
     # re_path(r'^refund-payment/', views.RefundPaymentView.as_view(), name='refund_payment'),
     # re_path(r'^no-payment/', views.ZeroBookingView.as_view(), name='no_payment_booking'),
@@ -176,11 +190,11 @@ urlpatterns = [
     re_path(r'^change-booking/(?P<pk>[0-9]+)/', views.ChangeBookingView.as_view(), name='public_change_booking'),
     re_path(r'^cancel-booking/(?P<pk>[0-9]+)/', views.CancelBookingView.as_view(), name='public_cancel_booking'),
     re_path(r'^cancel-admissions-booking/(?P<pk>[0-9]+)/', views.CancelAdmissionsBookingView.as_view(), name='public_cancel_admissions_booking'),
-    re_path(r'^success/', views.BookingSuccessView.as_view(), name='public_booking_success'),
+    re_path(r'^success/(?P<booking_token>[0-9a-f-]{36})/', views.BookingSuccessView.as_view(), name='public_booking_success'),
     re_path(r'^annual-admission-success/', views.AnnualAdmissionSuccessView.as_view(), name='public_booking_annual_admission_success'),
     re_path(r'^cancel-completed/(?P<booking_id>[0-9]+)/', views.BookingCancelCompletedView.as_view(), name='public_booking_cancelled'),
     re_path(r'^cancel-admission-completed/(?P<booking_id>[0-9]+)/', views.AdmissionBookingCancelCompletedView.as_view(), name='public_admission_booking_cancelled'),
-    re_path(r'^success_admissions/', views.AdmissionsBookingSuccessView.as_view(), name='public_admissions_success'),
+    re_path(r'^success_admissions/(?P<booking_token>[0-9a-f-]{36})/', views.AdmissionsBookingSuccessView.as_view(), name='public_admissions_success'),
     re_path(r'^createdbasket/', views.AdmissionsBasketCreated.as_view(), name='created_basket'),
     re_path(r'^map/', views.MapView.as_view(), name='map'),
     re_path(r'^admissions/(?P<loc>[a-z]+)/$', views.AdmissionFeesView.as_view(), name='admissions'),

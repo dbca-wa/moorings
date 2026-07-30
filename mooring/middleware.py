@@ -142,36 +142,18 @@ class BookingTimerMiddleware(object):
 
     def process_view(self, request, view_func, view_args, view_kwargs):
         logger.info("in BookingTimerMiddleware.process_view()...")
-        if 'ad_booking' in request.session:
-            logger.info(f"session['ad_booking']: [{request.session['ad_booking']}] exists.")
-            try:
-                booking = AdmissionsBooking.objects.get(pk=request.session['ad_booking'])
-            except:
-                # no idea what object is in self.request.session['ad_booking'], ditch it
-                del request.session['ad_booking']
-                return
-            if booking.booking_type != 3:
-                # booking in the session is not a temporary type, ditch it
-                del request.session['ad_booking']
-            elif CHECKOUT_PATH.match(request.path) and request.method == 'POST':
-                # safeguard against e.g. part 1 of the multipart checkout confirmation process passing, then part 2 timing out.
-                # on POST boosts remaining time to at least 2 minutes
-                booking.save()
-        else:
-            logger.info('session[ad_booking] does not exist.')
-
         if 'annual_admission_booking' in request.session:
             logger.info(f"session['annual_admission_booking']: [{request.session['annual_admission_booking']}] exists.")
             try:
                 booking = BookingAnnualAdmission.objects.get(pk=request.session['annual_admission_booking'])
             except:
-                # no idea what object is in self.request.session['ad_booking'], ditch it
+                # no idea what object is in self.request.session['annual_admission_booking'], ditch it
                 del request.session['annual_admission_booking']
                 return
-            if booking.booking_type != 3:
-                # booking in the session is not a temporary type, ditch it
-                del request.session['annual_admission_booking']
-            elif CHECKOUT_PATH.match(request.path) and request.method == 'POST':
+            # Note: Don't delete session key based on booking_type here.
+            # Views are responsible for session cleanup after successful completion.
+            # booking_type changes from 3->1 during payment, but session key needed for success view.
+            if CHECKOUT_PATH.match(request.path) and request.method == 'POST':
                 # safeguard against e.g. part 1 of the multipart checkout confirmation process passing, then part 2 timing out.
                 # on POST boosts remaining time to at least 2 minutes
                 booking.save()
@@ -209,10 +191,10 @@ class BookingTimerMiddleware(object):
                 delete_session_booking(request.session)
                 return
 
-            if booking.booking_type != 3:
-                # booking in the session is not a temporary type, ditch it
-                delete_session_booking(request.session)
-            elif timezone.now() > booking.expiry_time:
+            # Note: Don't delete session key based on booking_type here.
+            # Views are responsible for session cleanup after successful completion.
+            # booking_type changes from 3->1 during payment, but session key needed for success view.
+            if timezone.now() > booking.expiry_time:
                 # expiry time has been hit, destroy the Booking then ditch it
                 #booking.delete()
                 delete_session_booking(request.session)
@@ -227,12 +209,6 @@ class BookingTimerMiddleware(object):
         if CHECKOUT_PATH.match(request.path):
             try:
                 booking = Booking.objects.get(pk=request.session['ps_booking'])
-                try:
-                    del request.session['ad_booking']
-                    del request.session['annual_admission_booking']
-                except:
-                    pass
-
                 if timezone.now() > booking.expiry_time:
                     try:
                         delete_session_booking(request.session)
@@ -243,8 +219,10 @@ class BookingTimerMiddleware(object):
                 pass
 
         # force a redirect if in the checkout
+        # Note: 'payment_session' is set by create_basket_session/create_checkout_session in the
+        # stateless payment flow (no ps_booking). Allow access to /ledger-api/* when it is present.
         if ('ps_booking_internal' not in request.COOKIES) and CHECKOUT_PATH.match(request.path):
-            if ('ps_booking' not in request.session) and CHECKOUT_PATH.match(request.path) and ('ad_booking' not in request.session) and ('annual_admission_booking' not in request.session):
+            if ('ps_booking' not in request.session) and CHECKOUT_PATH.match(request.path) and ('annual_admission_booking' not in request.session) and ('payment_session' not in request.session):
                 # return HttpResponseRedirect(reverse('public_make_booking'))
                 url_redirect = reverse('public_make_booking')
                 response = HttpResponse("<script> window.location='"+url_redirect+"';</script> <center><div class='container'><div class='alert alert-primary' role='alert'><a href='"+url_redirect+"'> Redirecting please wait: "+url_redirect+"</a><div></div></center>")

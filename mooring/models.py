@@ -15,6 +15,7 @@ from django.db.models import Q
 from django.contrib.gis.db import models
 from django.db import models as django_models
 from django.db import IntegrityError, transaction, connection
+from django.http import HttpRequest
 from django.utils import timezone
 from datetime import date, time, datetime, timedelta
 from django.conf import settings
@@ -25,7 +26,8 @@ from mooring.exceptions import BookingRangeWithinException
 from django.core.cache import cache
 # from ledger.payments.models import Invoice
 # from ledger.accounts.models import EmailUser
-from ledger_api_client.ledger_models import EmailUserRO as EmailUser, Invoice
+from ledger_api_client.ledger_models import EmailUserRO as EmailUser, Invoice, Basket
+from ledger_api_client.utils import Order, update_payments
 from django.core.files.storage import FileSystemStorage
 from django.core import serializers
 from django.utils.crypto import get_random_string
@@ -1489,6 +1491,9 @@ class Booking(models.Model):
     property_cache = django_models.JSONField(null=True, blank=True, default=dict)
     property_cache_version = models.CharField(max_length=10, blank=True, null=True)
     property_cache_stale = models.BooleanField(default=True)
+    # UUID for stateless payment flow (external public URLs)
+    # Note: unique constraint will be added in a separate migration after data backfill
+    uuid = models.UUIDField(default=uuid.uuid4, editable=False, null=False, unique=True, db_index=True)
 
 
     def save(self, *args,**kwargs):
@@ -1902,6 +1907,291 @@ class Booking(models.Model):
             pass
         return payment_dict
 
+    def _get_success_context(self, invoice_reference=None):
+        """
+        Build context dictionary for success page/notifications.
+        Used by process_payment_notification to return consistent data.
+        """
+        from mooring.models import BookingInvoice, RefundFailed
+        
+        book_inv = None
+        if invoice_reference:
+            book_inv = BookingInvoice.objects.filter(
+                booking=self, 
+                invoice_reference=invoice_reference
+            ).first()
+        
+        refund_failed = None
+        if RefundFailed.objects.filter(booking=self).count() > 0:
+            refund_failed = RefundFailed.objects.filter(booking=self)
+        
+        return {
+            'booking': self,
+            'book_inv': [book_inv] if book_inv else [],
+            'refund_failed': refund_failed
+        }
+
+    @transaction.atomic
+    def process_payment_notification(self, invoice_reference):
+        """
+        Process payment notification from Ledger (idempotent).
+        
+        This method handles payment confirmation for a booking, whether called
+        from the user-facing success view or from a background notification endpoint.
+        It's designed to be idempotent - safe to call multiple times with the same
+        invoice_reference.
+        
+        Args:
+            invoice_reference (str): Invoice reference from Ledger payment system
+            
+        Returns:
+            dict: Context dictionary with booking data for email/display
+            
+        Raises:
+            ValueError: If invoice validation fails
+            Invoice.DoesNotExist: If invoice not found in Ledger
+        """
+        from mooring.models import (
+            BookingInvoice, MooringsiteBooking, AdmissionsBooking, 
+            AdmissionsBookingInvoice, AdmissionsLine, VesselDetail
+        )
+        from mooring import emails
+        
+        logger.info(f'Processing payment notification for booking {self.id}, invoice {invoice_reference}')
+        
+        # Lock booking row to prevent race conditions
+        booking = Booking.objects.select_for_update().get(id=self.id)
+        
+        # Idempotency check - if already processed, return current state
+        if booking.booking_type == 1:
+            logger.info(f'Booking {booking.id} already processed (booking_type=1), returning current state')
+            return booking._get_success_context(invoice_reference)
+        
+        # Validate invoice exists and belongs to this booking
+        try:
+            inv = Invoice.objects.get(reference=invoice_reference)
+        except Invoice.DoesNotExist:
+            logger.error(f'{booking.customer.get_full_name() if booking.customer else "Anonymous user"} '
+                        f'tried making a booking with an incorrect invoice {invoice_reference}')
+            raise
+        
+        # Verify invoice is from correct payment system
+        if inv.system not in ['0516']:
+            logger.error(f'{booking.customer.get_full_name() if booking.customer else "Anonymous user"} '
+                        f'tried making a booking with an invoice from another system: {inv.system}, '
+                        f'invoice reference: {inv.reference}')
+            raise ValueError(f'Invoice {invoice_reference} is from wrong system: {inv.system}')
+        
+        # Fetch the corresponding Order
+        try:
+            order = Order.objects.get(number=inv.order_number)
+        except Order.DoesNotExist:
+            logger.error(f'Order {inv.order_number} not found for invoice {invoice_reference}')
+            raise ValueError(f'Order not found for invoice {invoice_reference}')
+        
+        # Verify order belongs to the booking's customer
+        if not booking.customer:
+            logger.error(f'Booking {booking.id} has no customer')
+            raise ValueError(f'Booking {booking.id} has no customer')
+        
+        if order.user_id != booking.customer.id:
+            logger.error(f'Order {order.number} user_id {order.user_id} does not match booking {booking.id} customer {booking.customer.id}')
+            raise ValueError(f'Invoice ownership validation failed - user mismatch for booking {booking.id}')
+        
+        # Verify a basket exists for this booking with correct status
+        booking_reference = settings.MOORING_BOOKING_REF_PREFIX + str(booking.id)
+        basket = Basket.objects.filter(
+            status='Submitted',
+            system=settings.PAYMENT_SYSTEM_ID,
+            booking_reference=booking_reference
+        ).order_by('-id')
+        
+        if not basket.exists():
+            logger.error(f'No submitted basket found for booking {booking.id} with reference {booking_reference}')
+            raise ValueError(f'No submitted basket found for booking {booking.id}')
+        
+        logger.info(f'Verified invoice {invoice_reference} belongs to booking {booking.id} via user_id {order.user_id} and basket verification')
+        
+        # Create/get BookingInvoice linking record
+        book_inv, created = BookingInvoice.objects.get_or_create(
+            booking=booking, 
+            invoice_reference=invoice_reference
+        )
+        
+        if created:
+            logger.info(f'Created BookingInvoice for booking {booking.id}, invoice {invoice_reference}')
+        else:
+            logger.info(f'BookingInvoice already exists for booking {booking.id}, invoice {invoice_reference}')
+        
+        # Handle old_booking cancellation (for booking changes)
+        if booking.old_booking:
+            logger.info(f'Cancelling old booking {booking.old_booking.id} for booking change')
+            old_booking = Booking.objects.get(id=booking.old_booking.id)
+            old_booking.booking_type = 4  # Cancelled Booking
+            old_booking.cancelation_time = datetime.now()
+            old_booking.canceled_by = booking.created_by
+            old_booking.save()
+            
+            # Cancel old booking's mooringsite bookings
+            booking_items = MooringsiteBooking.objects.filter(booking=old_booking)
+            for bi in booking_items:
+                bi.booking_type = 4
+                bi.save()
+            
+            # Cancel old booking's admission payment if exists
+            if old_booking.admission_payment:
+                old_booking.admission_payment.booking_type = 4
+                old_booking.admission_payment.cancelation_time = datetime.now()
+                old_booking.admission_payment.canceled_by = booking.created_by
+                old_booking.admission_payment.save()
+        
+        # Apply override_lines amounts to booking items
+        booking_items_current = MooringsiteBooking.objects.filter(booking=booking)
+        for bi in booking_items_current:
+            if str(bi.id) in booking.override_lines:
+                bi.amount = D(booking.override_lines[str(bi.id)])
+            bi.save()
+        
+        # Update arrival and departure dates from mooringsite bookings
+        msb = MooringsiteBooking.objects.filter(booking=booking).order_by('from_dt')
+        if msb.exists():
+            from_date = msb[0].from_dt
+            to_date = msb[msb.count()-1].to_dt
+            
+            # Convert timezone-aware datetime to date
+            timestamp = calendar.timegm(from_date.timetuple())
+            local_dt = datetime.fromtimestamp(timestamp)
+            from_dt = local_dt.replace(microsecond=from_date.microsecond)
+            from_date_converted = from_dt.date()
+            
+            timestamp = calendar.timegm(to_date.timetuple())
+            local_dt = datetime.fromtimestamp(timestamp)
+            to_dt = local_dt.replace(microsecond=to_date.microsecond)
+            to_date_converted = to_dt.date()
+            
+            booking.arrival = from_date_converted
+            booking.departure = to_date_converted
+        
+        # Update booking state - set to confirmed
+        booking.booking_type = 1  # Internet booking (confirmed)
+        booking.expiry_time = None
+        
+        # Update payments via ledger
+        try:
+            update_payments()
+            logger.info(f'Updated payments for invoice {invoice_reference}')
+        except Exception as e:
+            logger.warning(f'Error updating payments for invoice {invoice_reference}: {e}')
+            # Don't fail the whole transaction for payment update errors
+        
+        # Handle admission payment if exists
+        if booking.admission_payment:
+            logger.info(f'Processing admission payment {booking.admission_payment.id}')
+            ad_booking = AdmissionsBooking.objects.get(pk=booking.admission_payment.pk)
+            ad_booking.created_by = booking.created_by
+            ad_booking.booking_type = 1
+            ad_booking.save()
+            
+            # Create admission invoice record
+            ad_invoice, created = AdmissionsBookingInvoice.objects.get_or_create(
+                admissions_booking=ad_booking, 
+                invoice_reference=invoice_reference
+            )
+            
+            # Apply admission override lines
+            for al in ad_booking.override_lines.keys():
+                ad_line = AdmissionsLine.objects.get(id=int(al))
+                ad_line.cost = ad_booking.override_lines[str(al)]
+                ad_line.save()
+        
+        # Update/create VesselDetail records from booking.details
+        if booking.details and 'vessel_rego' in booking.details:
+            try:
+                vessel_rego = booking.details['vessel_rego']
+                if VesselDetail.objects.filter(rego_no=vessel_rego).exists():
+                    # Update existing vessel
+                    vd = VesselDetail.objects.filter(rego_no=vessel_rego).first()
+                    vd.vessel_size = booking.details.get('vessel_size', vd.vessel_size)
+                    vd.vessel_draft = booking.details.get('vessel_draft', vd.vessel_draft)
+                    vd.vessel_beam = booking.details.get('vessel_beam', vd.vessel_beam)
+                    vd.vessel_weight = booking.details.get('vessel_weight', vd.vessel_weight)
+                    vd.save()
+                    logger.info(f'Updated VesselDetail for rego {vessel_rego}')
+                else:
+                    # Create new vessel
+                    VesselDetail.objects.create(
+                        rego_no=vessel_rego,
+                        vessel_size=booking.details.get('vessel_size', D('0.00')),
+                        vessel_draft=booking.details.get('vessel_draft', D('0.00')),
+                        vessel_beam=booking.details.get('vessel_beam', D('0.00')),
+                        vessel_weight=booking.details.get('vessel_weight', D('0.00'))
+                    )
+                    logger.info(f'Created VesselDetail for rego {vessel_rego}')
+            except Exception as e:
+                logger.error(f'Error creating/updating VesselDetail for booking {booking.id}: {e}')
+                # Don't fail the whole transaction for vessel detail errors
+        
+        # Save booking
+        booking.save()
+        logger.info(f'Successfully processed payment notification for booking {booking.id}')
+        
+        # Return context dict for email/display
+        return booking._get_success_context(invoice_reference)
+    
+    def send_payment_emails(self, request_or_context):
+        """
+        Send payment confirmation and invoice emails.
+        
+        This method can be called from either:
+        1. Success views with HttpRequest (sync flow after payment redirect)
+        2. API notification endpoints with context dict (async background callback)
+        
+        Args:
+            request_or_context: Either HttpRequest object or dict containing context data
+        
+        Raises:
+            No exceptions - email errors are logged but don't fail the transaction
+        """
+        from mooring import emails
+        from mooring.context_processors import template_context, mooring_url_group
+        
+        try:
+            # Determine if input is HttpRequest or dict context
+            if isinstance(request_or_context, HttpRequest):
+                # Sync flow - extract context from request
+                context_processor = template_context(request_or_context)
+                logger.info(f'Sending payment emails for booking {self.id} (sync flow with HttpRequest)')
+            else:
+                # Async flow - use provided context dict and ensure required template variables
+                context_processor = request_or_context.copy() if isinstance(request_or_context, dict) else {}
+                
+                # Add default template group and other required context variables if not present
+                if 'TEMPLATE_GROUP' not in context_processor:
+                    # Default to 'pvs' template group
+                    default_context = mooring_url_group('pvs')
+                    context_processor.update(default_context)
+                    logger.info(f'Added default template context for booking {self.id} (TEMPLATE_GROUP: {default_context.get("TEMPLATE_GROUP")})')
+                
+                logger.info(f'Sending payment emails for booking {self.id} (async flow with context dict)')
+            
+            # Send invoice email
+            try:
+                emails.send_booking_invoice(self, context_processor)
+                logger.info(f'Successfully sent invoice email for booking {self.id}')
+            except Exception as e:
+                logger.error(f'Error sending invoice email for booking {self.id}: {e}', exc_info=True)
+            
+            # Send confirmation email
+            try:
+                emails.send_booking_confirmation(self, context_processor)
+                logger.info(f'Successfully sent confirmation email for booking {self.id}')
+            except Exception as e:
+                logger.error(f'Error sending confirmation email for booking {self.id}: {e}', exc_info=True)
+                
+        except Exception as e:
+            # Catch-all for any unexpected errors - log but don't fail
+            logger.error(f'Unexpected error sending payment emails for booking {self.id}: {e}', exc_info=True)
+
 class BookingHistory(models.Model):
     booking = models.ForeignKey(Booking, related_name='history', null=True, blank=True, on_delete=models.SET_NULL)
     created = models.DateTimeField(auto_now_add=True)
@@ -2216,6 +2506,8 @@ class AdmissionsBooking(models.Model):
     location = models.ForeignKey(AdmissionsLocation, blank=True, null=True, on_delete=models.SET_NULL)    
     override_lines = django_models.JSONField(null=True, blank=True, default=dict)
     mobile = models.CharField(max_length=50, blank=True, null=True)
+    # UUID for stateless payment flow (public notification and success URLs)
+    uuid = models.UUIDField(default=uuid.uuid4, editable=False, null=False, unique=True, db_index=True)
 
     def __str__(self):
         email = ''
@@ -2271,6 +2563,210 @@ class AdmissionsBooking(models.Model):
     def active_invoice(self):
         active_invoices = Invoice.objects.filter(reference__in=[x.invoice_reference for x in self.invoices.all()]).order_by('-created')
         return active_invoices[0] if active_invoices else None
+
+    def _get_success_context(self, invoice_reference=None):
+        """
+        Build context dictionary for success page/notifications.
+        Used by process_payment_notification to return consistent data.
+        """
+        from mooring.models import AdmissionsLine, AdmissionsBookingInvoice
+        
+        # Get arrival date and overnight status from first AdmissionsLine
+        arrival = None
+        overnight = False
+        admissions_lines = AdmissionsLine.objects.filter(admissionsBooking=self)
+        if admissions_lines.exists():
+            arrival = admissions_lines[0].arrivalDate
+            overnight = admissions_lines[0].overnightStay
+        
+        # Get invoice objects (not just reference strings)
+        invoice_objs = []
+        if invoice_reference:
+            # Try to get the specific invoice object
+            invoice_obj = AdmissionsBookingInvoice.objects.filter(
+                admissions_booking=self, 
+                invoice_reference=invoice_reference
+            ).first()
+            if invoice_obj:
+                invoice_objs = [invoice_obj]
+        
+        # Fallback: get all invoices for this booking if none found
+        if not invoice_objs:
+            invoice_objs = list(AdmissionsBookingInvoice.objects.filter(admissions_booking=self).order_by('-id'))
+        
+        return {
+            'admissionsBooking': self,
+            'arrival': arrival,
+            'overnight': overnight,
+            'admissionsInvoice': invoice_objs
+        }
+
+    @transaction.atomic
+    def process_payment_notification(self, invoice_reference):
+        """
+        Process payment notification from Ledger for admissions booking (idempotent).
+        
+        This method handles payment confirmation for an admissions booking, whether called
+        from the user-facing success view or from a background notification endpoint.
+        It's designed to be idempotent - safe to call multiple times with the same
+        invoice_reference.
+        
+        Args:
+            invoice_reference (str): Invoice reference from Ledger payment system
+            
+        Returns:
+            dict: Context dictionary with booking data for email/display
+            
+        Raises:
+            ValueError: If invoice validation fails
+            Invoice.DoesNotExist: If invoice not found in Ledger
+        """
+        from mooring.models import AdmissionsBookingInvoice, AdmissionsLine
+        from mooring import emails
+        
+        logger.info(f'Processing payment notification for admissions booking {self.id}, invoice {invoice_reference}')
+        
+        # Lock booking row to prevent race conditions
+        booking = AdmissionsBooking.objects.select_for_update().get(id=self.id)
+        
+        # Idempotency check - if already processed, return current state
+        if booking.booking_type == 1:
+            logger.info(f'AdmissionsBooking {booking.id} already processed (booking_type=1), returning current state')
+            context = self._get_success_context(invoice_reference)
+            context.update({
+                'TEMPLATE_GROUP': 'ria',
+                'PUBLIC_URL': getattr(settings, 'PUBLIC_URL', ''),
+            })
+            return context
+        
+        # Validate invoice exists and belongs to this booking
+        try:
+            inv = Invoice.objects.get(reference=invoice_reference)
+        except Invoice.DoesNotExist:
+            logger.error(f'{booking.customer.get_full_name() if booking.customer else "Anonymous user"} '
+                        f'tried making an admissions booking with an incorrect invoice {invoice_reference}')
+            raise
+        
+        # Verify invoice is from correct payment system
+        if inv.system not in ['0516']:
+            logger.error(f'{booking.customer.get_full_name() if booking.customer else "Anonymous user"} '
+                        f'tried making an admissions booking with an invoice from another system: {inv.system}, '
+                        f'invoice reference: {inv.reference}')
+            raise ValueError(f'Invoice {invoice_reference} is from wrong system: {inv.system}')
+        
+        # Verify invoice ownership via basket booking_reference
+        booking_reference = settings.DAILY_ADMISSION_REF_PREFIX + str(booking.id)
+        basket = Basket.objects.filter(
+            status='Submitted',
+            system=settings.PAYMENT_SYSTEM_ID,
+            booking_reference=booking_reference
+        ).order_by('-id')
+        
+        if not basket.exists():
+            logger.error(f'No basket found for admissions booking {booking.id} with reference {booking_reference}')
+            raise ValueError(f'No basket found for admissions booking {booking.id}')
+        
+        # Verify invoice order matches basket
+        order = Order.objects.get(number=inv.order_number)
+        order_user_id = getattr(order, 'user_id', None)
+        booking_user_id = booking.customer.id if booking.customer else None
+
+        logger.info(f"Validating ownership: Ledger Order User={order_user_id}, Booking Customer={booking_user_id}")
+
+        if order_user_id != booking_user_id:
+            logger.error(f'Invoice {invoice_reference} order does not match basket for admissions booking {booking.id}')
+            raise ValueError(f'Invoice ownership validation failed for admissions booking {booking.id}')
+        
+        # Check if invoice has already been used (duplicate check)
+        existing_invoice = AdmissionsBookingInvoice.objects.filter(invoice_reference=invoice_reference).exclude(admissions_booking=booking)
+        if existing_invoice.exists():
+            logger.error(f'{booking.customer.get_full_name() if booking.customer else "Anonymous user"} '
+                        f'tried making an admission booking with an already used invoice {invoice_reference}')
+            raise ValueError(f'Invoice {invoice_reference} has already been used')
+        
+        # Create/get AdmissionsBookingInvoice linking record
+        admissions_invoice, created = AdmissionsBookingInvoice.objects.get_or_create(
+            admissions_booking=booking,
+            invoice_reference=invoice_reference
+        )
+        
+        if created:
+            logger.info(f'Created AdmissionsBookingInvoice for booking {booking.id}, invoice {invoice_reference}')
+        else:
+            logger.info(f'AdmissionsBookingInvoice already exists for booking {booking.id}, invoice {invoice_reference}')
+        
+        # Apply override_lines amounts to admissions lines
+        for al_id in booking.override_lines.keys():
+            try:
+                ad_line = AdmissionsLine.objects.get(id=int(al_id))
+                ad_line.cost = booking.override_lines[str(al_id)]
+                ad_line.save()
+                logger.info(f'Applied override amount {booking.override_lines[str(al_id)]} to AdmissionsLine {al_id}')
+            except AdmissionsLine.DoesNotExist:
+                logger.warning(f'AdmissionsLine {al_id} not found for override in booking {booking.id}')
+        
+        # Update booking state - set to confirmed
+        booking.booking_type = 1  # Internet booking (confirmed)
+        
+        # Save booking
+        booking.save()
+        logger.info(f'Successfully processed payment notification for admissions booking {booking.id}')
+        
+        # Return context dict for email/display
+        # return booking._get_success_context(invoice_reference)
+        context = booking._get_success_context(invoice_reference)
+        context.update({
+            'TEMPLATE_GROUP': 'ria',
+            'PUBLIC_URL': getattr(settings, 'PUBLIC_URL', ''),
+            'SITE_URL': getattr(settings, 'SITE_URL', ''),
+        })
+        return context
+    
+    def send_payment_emails(self, request_or_context):
+        """
+        Send payment confirmation and invoice emails for admissions booking.
+        
+        This method can be called from either:
+        1. Success views with HttpRequest (sync flow after payment redirect)
+        2. API notification endpoints with context dict (async background callback)
+        
+        Args:
+            request_or_context: Either HttpRequest object or dict containing context data
+        
+        Raises:
+            No exceptions - email errors are logged but don't fail the transaction
+        """
+        from mooring import emails
+        from mooring.context_processors import template_context
+        
+        try:
+            # Determine if input is HttpRequest or dict context
+            if isinstance(request_or_context, HttpRequest):
+                # Sync flow - extract context from request
+                context_processor = template_context(request_or_context)
+                logger.info(f'Sending payment emails for admissions booking {self.id} (sync flow with HttpRequest)')
+            else:
+                # Async flow - use provided context dict
+                context_processor = request_or_context
+                logger.info(f'Sending payment emails for admissions booking {self.id} (async flow with context dict)')
+            
+            # Send invoice email
+            try:
+                emails.send_admissions_booking_invoice(self, context_processor)
+                logger.info(f'Successfully sent invoice email for admissions booking {self.id}')
+            except Exception as e:
+                logger.error(f'Error sending invoice email for admissions booking {self.id}: {e}', exc_info=True)
+            
+            # Send confirmation email
+            try:
+                emails.send_admissions_booking_confirmation(self, context_processor)
+                logger.info(f'Successfully sent confirmation email for admissions booking {self.id}')
+            except Exception as e:
+                logger.error(f'Error sending confirmation email for admissions booking {self.id}: {e}', exc_info=True)
+                
+        except Exception as e:
+            # Catch-all for any unexpected errors - log but don't fail
+            logger.error(f'Unexpected error sending payment emails for admissions booking {self.id}: {e}', exc_info=True)
 
 
 class AdmissionsLine(models.Model):
