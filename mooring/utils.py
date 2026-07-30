@@ -1811,7 +1811,7 @@ def admissionsCheckout(request, admissionsBooking, lines, invoice_text=None, vou
     checkout_params = {
         'system': settings.PS_PAYMENT_SYSTEM_ID,
         'fallback_url': request.build_absolute_uri('/'),
-        'return_url': admissions_preload_url,
+        'return_url': request.build_absolute_uri(reverse('public_admissions_success', kwargs={'booking_token': str(admissionsBooking.uuid)})),
         'return_preload_url': notification_url,
         'force_redirect': True,
         'proxy': True if internal else False,
