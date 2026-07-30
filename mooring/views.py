@@ -3011,6 +3011,7 @@ class AdmissionsBookingSuccessView(TemplateView):
                 if bi:
                     invoice_ref = bi.invoice_reference
 
+            was_already_processed = (booking.booking_type == 1)
             context = booking.process_payment_notification(invoice_ref)
 
             # Inject keys required by admissions email/success templates
@@ -3020,10 +3021,13 @@ class AdmissionsBookingSuccessView(TemplateView):
                 'TEMPLATE_GROUP': 'ria',
             })
 
-            try:
-                booking.send_payment_emails(context)
-            except Exception as e:
-                logger.warning(f'Email sending failed in AdmissionsBookingSuccessView: {e}')
+            # Only send emails if Path A (notification endpoint) has not already sent them.
+            # process_payment_notification() is idempotent but send_payment_emails() is not.
+            if not was_already_processed:
+                try:
+                    booking.send_payment_emails(context)
+                except Exception as e:
+                    logger.warning(f'Email sending failed in AdmissionsBookingSuccessView: {e}')
 
             return render(request, self.template_name, context)
 
@@ -3198,9 +3202,13 @@ class BookingSuccessView(TemplateView):
                 if bi:
                     invoice_ref = bi.invoice_reference
 
+            was_already_processed = (booking.booking_type == 1)
             context = booking.process_payment_notification(invoice_ref)
 
-            booking.send_payment_emails(request)
+            # Only send emails if Path A (notification endpoint) has not already sent them.
+            # process_payment_notification() is idempotent but send_payment_emails() is not.
+            if not was_already_processed:
+                booking.send_payment_emails(context)
 
             return render(request, self.template_name, context)
         except Exception as e:
