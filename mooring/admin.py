@@ -237,12 +237,13 @@ class BookingAdmin(admin.ModelAdmin):
         'cost_total',
         'property_cache_version',
         'property_cache_stale',
+        'uuid',
         'created'
     )
     ordering = ('-id',)
     search_fields = ('mooringarea__name', 'customer','id','admission_payment','cost_total')
     list_filter = ('mooringarea', 'booking_type', 'property_cache_stale',)
-    readonly_fields=('created','property_cache',)
+    readonly_fields=('created','property_cache','uuid',)
     inlines = [
         BookingInvoiceInline,
         BookingVehicleRegoInline,
@@ -530,8 +531,8 @@ class AdmissionLineInline(admin.TabularInline):
 @admin.register(models.AdmissionsBooking)
 class AdmissionBooking(admin.ModelAdmin):
     # raw_id_fields = ('customer', 'created_by', 'canceled_by')
-    list_display = ('confirmation_number', 'booking_type','customer_id','mobile', 'totalCost','created')
-    readonly_fields=('created_by_id','canceled_by_id',)
+    list_display = ('confirmation_number', 'booking_type','customer_id','mobile', 'totalCost','uuid','created',)
+    readonly_fields=('created_by_id','canceled_by_id','uuid',)
     inlines = [AdmissionLineInline]
 
 
