@@ -531,9 +531,17 @@ class AdmissionLineInline(admin.TabularInline):
 @admin.register(models.AdmissionsBooking)
 class AdmissionBooking(admin.ModelAdmin):
     # raw_id_fields = ('customer', 'created_by', 'canceled_by')
-    list_display = ('confirmation_number', 'booking_type','customer_id','mobile', 'totalCost','uuid','created',)
+    list_display = ('confirmation_number', 'booking_type','customer_id','mobile','vesselRegNo','warningReferenceNo','totalCost','uuid','created',)
     readonly_fields=('created_by_id','canceled_by_id','uuid',)
     inlines = [AdmissionLineInline]
+    search_fields = (
+        'id',
+        'uuid',
+        'vesselRegNo',
+        'mobile',
+        'warningReferenceNo',
+        'invoices__invoice_reference',
+    )
 
 
 @admin.register(models.BookingPeriod)
