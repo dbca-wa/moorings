@@ -55,7 +55,7 @@ phonenumbers==8.12.15
 psycopg2-binary>=2.9.4
 python-decouple==3.8
 numpy==1.26.3
-oauthlib==3.2.2
+oauthlib==4.0.0
 setuptools==83.0.0
 wheel~=0.46.3
 requests==2.33.1
