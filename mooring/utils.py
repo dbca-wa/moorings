@@ -2275,8 +2275,17 @@ def calculate_checkouthash_from_booking_uuid(booking_uuid):
         # Fallback to hashing the raw UUID string
         return hashlib.sha256(str(booking_uuid).encode('utf-8')).hexdigest()
 
+def calculate_checkouthash_from_token_payment_session(token_payment_session):
+    return hashlib.sha256(str(token_payment_session).encode('utf-8')).hexdigest()
 
 def calculate_checkouthash_from_request(request):
+
+    #if there is a ledger api client token_payment_session AND we are navigating to payment-details, override ps_booking and return own checkouthash
+    if "token_payment_session" in request.session and request.path.startswith('/ledger-api/payment-details'):
+        if 'ps_booking' in request.session:
+            del request.session['ps_booking']
+        return calculate_checkouthash_from_token_payment_session(request.session["token_payment_session"])
+
     # Return the checkouthash for whichever flow is currently active
     # 1. Booking flow: check active_booking_token cookie first, then fallback to session
     booking_token = request.COOKIES.get(ACTIVE_BOOKING_COOKIE_NAME)

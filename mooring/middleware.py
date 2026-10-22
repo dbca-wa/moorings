@@ -17,6 +17,7 @@ from mooring.utils import (
     calculate_checkouthash_from_booking_id,
     delete_session_booking,
     validate_payment_checkouthash,
+    calculate_checkouthash_from_token_payment_session,
 )
 
 
@@ -65,6 +66,39 @@ class BookingTimerMiddleware(object):
                 booking.save()
         else:
             logger.info(f'session[annual_admission_booking] does not exist.')
+
+        #checkouthash validation for ledger api client token_payment_session
+        if 'token_payment_session' in request.session:
+            logger.info(f"session['token_payment_session']: [{request.session['token_payment_session']}] exists.")
+            expected_hash = calculate_checkouthash_from_token_payment_session(request.session['token_payment_session'])
+
+            checkouthash_cookie = request.COOKIES.get('checkouthash')
+            logger.info(f'checkouthash dynamically calc: [{expected_hash}]')
+            logger.info(f'checkouthash stored in cookie: [{checkouthash_cookie}]')
+
+            is_payment_submission = request.method == 'POST' and request.path.startswith("/ledger-api/process-payment")
+            if is_payment_submission:
+                hash_ok = validate_payment_checkouthash(request, expected_hash)
+            else:
+                # For GET requests, bypass checkouthash validation. A stale cookie from a previous 
+                # failed/cancelled checkout might be present causing a false positive mismatch. 
+                # The client-side JS will overwrite it upon loading, and actual multi-tab protection 
+                # is strictly enforced on the POST submission anyway.
+                hash_ok = True
+
+            if not hash_ok:
+                # Checkouthash mismatch which implies the user is handling multiple browser tabs with different booking details,
+                # redirect user to the booking page
+                logger.warning(f"checkouthashs are mismatched!")
+
+                if request.path.startswith("/ledger-api/process-payment") or request.path.startswith('/ledger-api/payment-details'):
+                    # Redirect user to the booking page when attempting payment processing
+                    # due to mismatch between backend booking data and frontend submitted data,
+                    # likely caused by multiple browser tabs being open.
+                    logger.warning(f"Redirecting to the booking page due to mismatch of the booking data between the one stored in the backend and the one sent from the frontend.")
+                    url_redirect = reverse('public_make_booking')
+                    response = HttpResponse("<script> window.location='" + url_redirect + "';</script> <center><div class='container'><div class='alert alert-primary' role='alert'><a href='" + url_redirect + "'> Redirecting please wait: " + url_redirect + "</a><div></div></center>")
+                    return response 
 
         if 'ps_booking' in request.session:
             logger.info(f"session['ps_booking']: [{request.session['ps_booking']}] exists.")

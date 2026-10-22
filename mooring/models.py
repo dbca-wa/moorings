@@ -2019,6 +2019,11 @@ class Booking(SanitisationModelMixin, models.Model):
             booking_reference=booking_reference
         ).order_by('-id')
         
+        #check booking reference with invoice reference
+        if not ledger_api_utils.validate_booking_and_invoice_references(booking_reference, invoice_reference):
+            logger.error('Booking reference and invoice reference do not belong to the same order/basket')
+            raise ValueError('Booking reference and invoice reference do not belong to the same order/basket')
+
         if not basket.exists():
             logger.error(f'No submitted basket found for booking {booking.id} with reference {booking_reference}')
             raise ValueError(f'No submitted basket found for booking {booking.id}')
@@ -2684,7 +2689,12 @@ class AdmissionsBooking(SanitisationModelMixin, models.Model):
             system=settings.PAYMENT_SYSTEM_ID,
             booking_reference=booking_reference
         ).order_by('-id')
-        
+
+        #check booking reference with invoice reference
+        if not ledger_api_utils.validate_booking_and_invoice_references(booking_reference, invoice_reference):
+            logger.error('Booking reference and invoice reference do not belong to the same order/basket')
+            raise ValueError('Booking reference and invoice reference do not belong to the same order/basket')
+
         if not basket.exists():
             logger.error(f'No basket found for admissions booking {booking.id} with reference {booking_reference}')
             raise ValueError(f'No basket found for admissions booking {booking.id}')

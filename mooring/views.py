@@ -96,7 +96,7 @@ from ledger_api_client.mixins import InvoiceOwnerMixin
 # from mooring.invoice_pdf import create_invoice_pdf_bytes
 from mooring.context_processors import mooring_url, template_context
 # from ledger.checkout.utils import create_basket_session, create_checkout_session, place_order_submission, get_cookie_basket
-from ledger_api_client.utils import create_basket_session, create_checkout_session, place_order_submission, process_api_refund 
+from ledger_api_client.utils import create_basket_session, create_checkout_session, place_order_submission, process_api_refund, validate_booking_and_invoice_references
 # from ledger.payments.invoice import utils as utils_ledger_payment_invoice
 
 
@@ -3036,6 +3036,8 @@ class AdmissionsBookingSuccessView(UserPassesTestMixin, TemplateView):
             # Allow access for anonymous/guest users who hold the valid active admissions cookie
             if not self.request.user.is_authenticated and utils.validate_admissions_cookie(self.request, booking):
                 return True
+            if "token_payment_session" in self.request.session:
+                return True
         except Exception:
             pass
         return False
@@ -3045,6 +3047,12 @@ class AdmissionsBookingSuccessView(UserPassesTestMixin, TemplateView):
             booking = get_object_or_404(AdmissionsBooking, uuid=kwargs['booking_token'])
 
             invoice_ref = request.GET.get('invoice')
+
+            if "token_payment_session" in request.session:
+                booking_reference = settings.MOORING_BOOKING_REF_PREFIX + str(booking.id)
+                if not validate_booking_and_invoice_references(booking_reference, invoice_ref):
+                    return redirect('home')
+                del request.session["token_payment_session"]
 
             # Ledger's return_url does not include ?invoice=, so fall back to the
             # AdmissionsBookingInvoice record already created by the notification endpoint.
@@ -3138,6 +3146,8 @@ class AnnualAdmissionSuccessView(UserPassesTestMixin, TemplateView):
                 return True
             if self.request.user.is_authenticated and self.request.user.id == booking.customer_id:
                 return True
+            if "token_payment_session" in self.request.session:
+                return True
         except Exception:
             pass
         return False
@@ -3157,6 +3167,10 @@ class AnnualAdmissionSuccessView(UserPassesTestMixin, TemplateView):
             context = utils.booking_annual_admission_success(basket, booking, context_processor)
             utils.delete_annual_admission_session_booking(request.session)
             request.session['annual_admission_last_booking'] = booking.id
+
+            if "token_payment_session" in request.session:
+                del request.session["token_payment_session"]
+
             return render(request, self.template_name, context)
             #order = Order.objects.get(basket=basket[0])
             #invoice = Invoice.objects.get(order_number=order.number)
@@ -3261,6 +3275,8 @@ class BookingSuccessView(UserPassesTestMixin, TemplateView):
             # Allow access for anonymous/guest users who hold the valid active booking cookie
             if not self.request.user.is_authenticated and utils.validate_booking_cookie(self.request, booking):
                 return True
+            if "token_payment_session" in self.request.session:
+                return True
         except Exception:
             pass
         return False
@@ -3270,6 +3286,12 @@ class BookingSuccessView(UserPassesTestMixin, TemplateView):
             booking = get_object_or_404(Booking, uuid=kwargs['booking_token'])
 
             invoice_ref = request.GET.get('invoice')
+
+            if "token_payment_session" in request.session:
+                booking_reference = settings.MOORING_BOOKING_REF_PREFIX + str(booking.id)
+                if not validate_booking_and_invoice_references(booking_reference, invoice_ref):
+                    return redirect('home')
+                del request.session["token_payment_session"]
 
             # Ledger's return_url does not include ?invoice=, so fall back to the
             # BookingInvoice record that the notification endpoint already created.
