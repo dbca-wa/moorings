@@ -3051,7 +3051,7 @@ class AdmissionsBookingSuccessView(UserPassesTestMixin, TemplateView):
             if "token_payment_session" in request.session:
                 booking_reference = settings.MOORING_BOOKING_REF_PREFIX + str(booking.id)
                 basket = Basket.objects.filter(booking_reference=booking_reference).order_by('-id').first()
-                if basket.id != request.session["token_payment_session"] or not validate_booking_and_invoice_references(booking_reference, invoice_ref):
+                if str(basket.id) != str(request.session["token_payment_session"]) or not validate_booking_and_invoice_references(booking_reference, invoice_ref):
                     return redirect('home')
                 del request.session["token_payment_session"]
 
@@ -3170,7 +3170,7 @@ class AnnualAdmissionSuccessView(UserPassesTestMixin, TemplateView):
             request.session['annual_admission_last_booking'] = booking.id
 
             if "token_payment_session" in request.session:
-                if basket.id != "token_payment_session" in request.session:
+                if str(basket.id) != str(request.session["token_payment_session"]):
                     return redirect('home')
                 del request.session["token_payment_session"]
 
@@ -3285,6 +3285,7 @@ class BookingSuccessView(UserPassesTestMixin, TemplateView):
         return False
 
     def get(self, request, *args, **kwargs):
+        print("BookingSuccessView")
         try:
             booking = get_object_or_404(Booking, uuid=kwargs['booking_token'])
 
@@ -3293,7 +3294,13 @@ class BookingSuccessView(UserPassesTestMixin, TemplateView):
             if "token_payment_session" in request.session:
                 booking_reference = settings.MOORING_BOOKING_REF_PREFIX + str(booking.id)
                 basket = Basket.objects.filter(booking_reference=booking_reference).order_by('-id').first()
-                if basket.id != request.session["token_payment_session"] or not validate_booking_and_invoice_references(booking_reference, invoice_ref):
+
+                print(booking_reference)
+                print(basket.id)
+                print(request.session["token_payment_session"])
+                print(validate_booking_and_invoice_references(booking_reference, invoice_ref))
+
+                if str(basket.id) != str(request.session["token_payment_session"]) or not validate_booking_and_invoice_references(booking_reference, invoice_ref):
                     return redirect('home')
                 del request.session["token_payment_session"]
 
