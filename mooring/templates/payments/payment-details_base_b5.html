@@ -42,9 +42,10 @@
 
         // If another tab overwrites the shared checkouthash cookie with a different booking's
         // hash, this tab is stale: leave the payment page before the user can submit payment.
-        setInterval(function() {
+        var checkoutInterval = setInterval(function() {
             writeValidationCookie();
             if (readCookie('checkouthash') !== expectedCheckoutHash) {
+                clearInterval(checkoutInterval);
                 window.location = "/";
             }
         }, 500);
