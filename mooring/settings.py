@@ -53,6 +53,11 @@ MIDDLEWARE_CLASSES += [
     'mooring.middleware.CacheHeaders',
     'mooring.middleware.ForceDebugInContextMiddleware',
 ]
+# Put XFrameOptionsMiddleware first so that responses created by other
+# middlewares (e.g. the APPEND_SLASH redirect from CommonMiddleware) also get
+# the X-Frame-Options header.
+MIDDLEWARE_CLASSES.remove('django.middleware.clickjacking.XFrameOptionsMiddleware')
+MIDDLEWARE_CLASSES.insert(0, 'django.middleware.clickjacking.XFrameOptionsMiddleware')
 MIDDLEWARE = MIDDLEWARE_CLASSES
 MIDDLEWARE_CLASSES = None
 
