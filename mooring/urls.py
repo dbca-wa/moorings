@@ -82,7 +82,7 @@ api_patterns = [
     re_path(r'^api/booking/update_sticker_admission_booking/', api.update_sticker_admission_booking, name='update_sticker_admission_booking'),
     re_path(r'^api/get_vessel_info/', api.get_vessel_info, name='get_vessel_info'),
     re_path(r'^api/create_booking', api.create_booking, name='create_booking'),
-    re_path(r'^api/mooring_map/', api.mooring_map_view, name='mooring_map_api'),
+    re_path(r'^api/mooring_map/$', api.mooring_map_view, name='mooring_map_api'),
     re_path(r'^api/create_admissions_booking', api.create_admissions_booking, name="create_admissions_booking"),
     # Payment notification endpoints (session-less, called by Ledger)
     re_path(r'^api/booking-payment-notification/(?P<booking_token>[0-9a-f-]{36})/$',
