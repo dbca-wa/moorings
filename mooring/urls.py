@@ -1,6 +1,7 @@
 from django.conf import settings
 # from django.conf.urls import url, include
 from django.urls import include, re_path
+from django.contrib.auth.views import LogoutView
 from django.conf.urls.static import static
 from rest_framework import routers
 from mooring import are_migrations_running, views, api
@@ -14,6 +15,20 @@ from django_crispy_jcaptcha import views as jcaptcha_views
 # from ledger.urls import urlpatterns as ledger_patterns
 from ledger_api_client.urls import urlpatterns as ledger_patterns
 from mooring.default_data_manager import DefaultDataManager
+
+
+class LogoutAnyMethodView(LogoutView):
+    """TEMPORARY workaround.
+
+    Django 5 only accepts POST on LogoutView, but the Logout links of the
+    webtemplate_dbca package (page header) and of two admissions templates are
+    plain GET links, so they answered 405. This view also accepts GET.
+    Remove it (and its route below) when the package sends Logout as a POST form.
+    """
+    http_method_names = ["get", "post", "options"]
+
+    def get(self, request, *args, **kwargs):
+        return self.post(request, *args, **kwargs)
 
 
 # API patterns
@@ -125,6 +140,8 @@ api_patterns = [
 ]
 # URL Patterns
 urlpatterns = [
+    # TEMPORARY: see LogoutAnyMethodView. Before ledger_patterns, so this route is used.
+    re_path(r'^logout/$', LogoutAnyMethodView.as_view(), {'next_page': '/'}, name='logout'),
     re_path(r'^admin/', admin.site.urls),
     re_path(r'^jcaptcha/image-selection/(?P<hashkey>\w+).(?P<extension>\w\w\w)$', jcaptcha_views.getImagePrimary, name='jcaptcha-image-primary'),
     re_path(r'^jcaptcha/image-match/(?P<hashkey>\w+).(?P<extension>\w\w\w)$', jcaptcha_views.getImageHash, name='jcaptcha-image-match'),
