@@ -58,6 +58,8 @@ MIDDLEWARE_CLASSES += [
 # the X-Frame-Options header.
 MIDDLEWARE_CLASSES.remove('django.middleware.clickjacking.XFrameOptionsMiddleware')
 MIDDLEWARE_CLASSES.insert(0, 'django.middleware.clickjacking.XFrameOptionsMiddleware')
+# The Content-Security-Policy header is added by the outermost middleware for the same reason.
+MIDDLEWARE_CLASSES.insert(0, 'mooring.middleware.ContentSecurityPolicyMiddleware')
 MIDDLEWARE = MIDDLEWARE_CLASSES
 MIDDLEWARE_CLASSES = None
 
@@ -215,6 +217,14 @@ ML_ADMISSION_PAID_CHECK=decouple.config('ML_ADMISSION_PAID_CHECK', default=False
 #os.environ.setdefault("UPDATE_PAYMENT_ALLOCATION", True)
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 X_FRAME_OPTIONS = 'SAMEORIGIN'
+
+# Minimal Content-Security-Policy, sent by mooring.middleware.ContentSecurityPolicyMiddleware.
+# It only limits who may frame the site, plugins and the <base> tag; it does not restrict
+# scripts, styles, images or connections. An empty value switches the header off.
+CONTENT_SECURITY_POLICY = decouple.config(
+    'CONTENT_SECURITY_POLICY',
+    default="frame-ancestors 'self'; object-src 'none'; base-uri 'self'",
+)
 
 
 DEFAULT_AUTO_FIELD = 'django.db.models.AutoField'
