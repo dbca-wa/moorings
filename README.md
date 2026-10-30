@@ -42,6 +42,7 @@ required environment variables at run time. Example content:
     PRODUCTION_EMAIL=False (Send system emails to NON_PROD_EMAIL if False)
     EMAIL_INSTANCE='UAT' (DEV/TEST/UAT/PROD)
     NON_PROD_EMAIL='comma@separated.email,listfor@nonproduction.emails'
+    CONTENT_SECURITY_POLICY="frame-ancestors 'self'; object-src 'none'; base-uri 'self'" (optional, this is the default; an empty value switches the Content-Security-Policy header off)
 
 # Mooring Rental Booking System
 

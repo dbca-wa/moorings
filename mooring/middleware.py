@@ -23,6 +23,21 @@ from mooring.utils import (
 
 logger = logging.getLogger(__name__)
 
+class ContentSecurityPolicyMiddleware(object):
+    """Adds the Content-Security-Policy header to every response.
+    An empty settings.CONTENT_SECURITY_POLICY switches the header off."""
+
+    def __init__(self, get_response):
+        self.get_response = get_response
+        self.policy = settings.CONTENT_SECURITY_POLICY
+
+    def __call__(self, request):
+        response = self.get_response(request)
+        if self.policy:
+            response['Content-Security-Policy'] = self.policy
+        return response
+
+
 class CacheHeaders(object):
     # def process_response(self, request, response):
     #      if request.path[:5] == '/api/':
