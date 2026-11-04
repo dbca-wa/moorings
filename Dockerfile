@@ -49,13 +49,12 @@ RUN /tmp/default_script_installer.sh
 FROM builder_base_moorings as python_libs_moorings
 WORKDIR /app
 USER oim
-RUN python3 -m venv $VIRTUAL_ENV
+RUN python -m venv $VIRTUAL_ENV
 ENV PATH=$VIRTUAL_ENV/bin:$PATH
 RUN git config --global --add safe.directory /app
 COPY requirements.txt ./
-RUN pip install --upgrade pip
 RUN touch /app/git_hash
-RUN pip install --no-cache-dir -r requirements.txt
+RUN uv pip install -r requirements.txt
 
 # Install the project (ensure that frontend projects have been built prior to this step).
 FROM python_libs_moorings
