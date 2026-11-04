@@ -53,7 +53,11 @@ stages:
         docker push $(imageName):$(tagDate)-$(shortSha)
       displayName: 'Push Main Image'
 
-    # 5. FIXED: Build Dev Image using native Bash
+    # 5. Purge images
+    - script: |
+        docker system prune -af
+      displayName: 'Cleanup Docker space'   
+    # 6. FIXED: Build Dev Image using native Bash
     - bash: |
         export DOCKER_BUILDKIT=1
         docker build \
@@ -64,13 +68,13 @@ stages:
           -f $(Build.SourcesDirectory)/dockerdev/Dockerfile .
       displayName: 'Docker Build Dev Image'
 
-    # 6. Push Dev Image tags
+    # 7. Push Dev Image tags
     - bash: |
         docker push $(devImageName):moorings_dev_django5_latest
         docker push $(devImageName):moorings_dev_django5_$(tagDate)-$(shortSha)
       displayName: 'Push Dev Image'
               
-    # 7. Purge images
+    # 8. Purge images
     - script: |
         docker system prune -af
       displayName: 'Cleanup Docker space'   
