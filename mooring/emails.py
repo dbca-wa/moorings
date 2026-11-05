@@ -15,7 +15,7 @@ from mooring.helpers import is_inventory, is_admin
 from django.core.mail import EmailMessage, EmailMultiAlternatives
 
 # from ledger.emails.emails import EmailBase2
-from ledger_api_client.emails import EmailBase2 
+from wagov_utils.components.utils.email import TemplateEmailBase as WAGovUtilsTemplateEmailBase
 from django.template.loader import render_to_string, get_template
 # from confy import env
 import decouple
@@ -34,7 +34,9 @@ default_from_email = settings.DEFAULT_FROM_EMAIL
 default_campground_email = settings.CAMPGROUNDS_EMAIL
 default_rottnest_email = settings.ROTTNEST_EMAIL
 
-class TemplateEmailBase(EmailBase2):
+# Every Mooring Booking email must be sent by wagov_utils TemplateEmailBase.send()
+# (EMAIL_DELIVERY switch, logs/email.log, System-Environment header).
+class TemplateEmailBase(WAGovUtilsTemplateEmailBase):
     subject = ''
     html_template = 'mooring/email/base_email.html'
     # txt_template can be None, in this case a 'tag-stripped' version of the html will be sent. (see send)
