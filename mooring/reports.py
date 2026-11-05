@@ -4,9 +4,9 @@ import datetime
 from six.moves import StringIO
 from wsgiref.util import FileWrapper
 from django.utils import timezone
-from django.core.mail import EmailMessage 
 from django.conf import settings
 from mooring.models import Booking, BookingInvoice, OutstandingBookingRecipient, BookingHistory, AdmissionsBooking, AdmissionsBookingInvoice
+from mooring.emails import TemplateEmailBase
 # from ledger.payments.models import OracleParser,OracleParserInvoice, CashTransaction, BpointTransaction, BpayTransaction,Invoice, TrackRefund
 from ledger_api_client.ledger_models import Invoice
 # Copied from the parkstay_bs_v2: https://github.com/dbca-wa/parkstay_bs_v2/blob/605b4c2efdfb68be68dd4239c643cba02d2c44ec/parkstay/reports.py#L10
@@ -45,14 +45,20 @@ def outstanding_bookings():
         dt = datetime.datetime.now().strftime('%Y/%m/%d %H:%M:%S')
         recipients = []
         recipients = OutstandingBookingRecipient.objects.all()
-        email = EmailMessage(
-            'Unpaid Bookings Summary as at {}'.format(dt),
-            'Unpaid Bookings as at {}'.format(dt),
-            settings.DEFAULT_FROM_EMAIL,
-            to=[r.email for r in recipients]if recipients else [settings.NOTIFICATION_EMAIL]
+        # Send through wagov_utils: EMAIL_DELIVERY switch, email log, System-Environment header
+        email = TemplateEmailBase(subject='Unpaid Bookings Summary as at {}'.format(dt))
+        # Plain text only, as before. Set after __init__, which ignores a falsy html_template.
+        email.html_template = None
+        email.txt_template = 'mooring/email/outstanding_bookings.txt'
+        result = email.send(
+            [r.email for r in recipients]if recipients else [settings.NOTIFICATION_EMAIL],
+            from_address=settings.DEFAULT_FROM_EMAIL,
+            context={'dt': dt},
+            attachments=[('OustandingBookings_{}.csv'.format(dt), _file.getvalue(), 'text/csv')],
         )
-        email.attach('OustandingBookings_{}.csv'.format(dt), _file.getvalue(), 'text/csv')
-        email.send()
+        if result is None:
+            # Keep the cron job failing when sending fails, as before (wagov_utils logs the error)
+            raise Exception('Error sending the unpaid bookings report email')
     except:
         raise
 def annual_admissions_booking_report(aadata):
