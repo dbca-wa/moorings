@@ -191,6 +191,8 @@ SYSTEM_NAME_SHORT = decouple.config('SYSTEM_NAME_SHORT', default='mooring')
 CAMPGROUNDS_EMAIL = decouple.config('CAMPGROUNDS_EMAIL', default='mooringbookings@dbca.wa.gov.au')
 ROTTNEST_EMAIL = decouple.config('ROTTNEST_EMAIL', default='mooringbookings@dbca.wa.gov.au')
 DEFAULT_FROM_EMAIL = decouple.config('EMAIL_FROM', default='no-reply@dbca.wa.gov.au')
+# wagov_utils TemplateEmailBase sends emails only when this is 'on'
+EMAIL_DELIVERY = decouple.config('EMAIL_DELIVERY', default='off')
 EXPLORE_PARKS_URL = decouple.config('EXPLORE_PARKS_URL', default='https://mooring.dbca.wa.gov.au/')
 PARKSTAY_EXTERNAL_URL = decouple.config('PARKSTAY_EXTERNAL_URL', default='https://mooring.dbca.wa.gov.au/')
 ROTTNEST_ISLAND_URL = decouple.config('ROTTNEST_URL', default=[])

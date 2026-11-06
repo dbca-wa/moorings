@@ -12,10 +12,9 @@ from ledger_api_client.ledger_models import Invoice
 from ledger_api_client.managed_models import SystemGroup
 from mooring import settings 
 from mooring.helpers import is_inventory, is_admin
-from django.core.mail import EmailMessage, EmailMultiAlternatives
 
 # from ledger.emails.emails import EmailBase2
-from ledger_api_client.emails import EmailBase2 
+from wagov_utils.components.utils.email import TemplateEmailBase as WAGovUtilsTemplateEmailBase
 from django.template.loader import render_to_string, get_template
 # from confy import env
 import decouple
@@ -34,23 +33,20 @@ default_from_email = settings.DEFAULT_FROM_EMAIL
 default_campground_email = settings.CAMPGROUNDS_EMAIL
 default_rottnest_email = settings.ROTTNEST_EMAIL
 
-class TemplateEmailBase(EmailBase2):
+# Every Mooring Booking email must be sent by wagov_utils TemplateEmailBase.send()
+# (EMAIL_DELIVERY switch, logs/email.log, System-Environment header).
+class TemplateEmailBase(WAGovUtilsTemplateEmailBase):
     subject = ''
     html_template = 'mooring/email/base_email.html'
     # txt_template can be None, in this case a 'tag-stripped' version of the html will be sent. (see send)
     txt_template = 'mooring/email/base_email.txt'
 
 def sendHtmlEmail(to,subject,context,template,cc,bcc,from_email,template_group,attachments=None):
-    email_delivery = decouple.config('EMAIL_DELIVERY', default='off')
     override_email = decouple.config('OVERRIDE_EMAIL', default=None)
-    email_instance = decouple.config('EMAIL_INSTANCE', default='DEV')
     context['default_url'] = decouple.config('DEFAULT_HOST', default='')
     context['default_url_internal'] = decouple.config('DEFAULT_URL_INTERNAL', default='')
     log_hash = int(hashlib.sha1(str(datetime.datetime.now()).encode('utf-8')).hexdigest(), 16) % (10 ** 8)
     email_log(str(log_hash)+' '+subject+":"+str(to)+":"+template_group)
-    if email_delivery != 'on':
-        print ("EMAIL DELIVERY IS OFF NO EMAIL SENT -- email.py ")
-        return False
 
     if template is None:
         raise ValidationError('Invalid Template')
@@ -70,13 +66,11 @@ def sendHtmlEmail(to,subject,context,template,cc,bcc,from_email,template_group,a
     context['body'] = get_template(template).render(context)
     # Main Email Template Style ( body template is populated in the center
     if template_group == 'rottnest':
-        main_template = get_template('mooring/email/base_email-rottnest.html').render(context)
+        main_template = 'mooring/email/base_email-rottnest.html'
     elif template_group == 'system-oim':
-        main_template = get_template('mooring/email/base_email-oim.html').render(context)
+        main_template = 'mooring/email/base_email-oim.html'
     else:
-        main_template = get_template('mooring/email/base_email2.html').render(context)
-   
-    reply_to=None
+        main_template = 'mooring/email/base_email2.html'
 
     if attachments is None:
         attachments = []
@@ -100,39 +94,13 @@ def sendHtmlEmail(to,subject,context,template,cc,bcc,from_email,template_group,a
         if bcc:
             bcc = override_email.split(",")
 
-    if len(to) > 1:
-        msg = EmailMultiAlternatives(subject, "Please open with a compatible html email client.", from_email=from_email, to=to, attachments=_attachments, cc=cc, bcc=bcc, reply_to=reply_to, headers={'System-Environment': email_instance})
-        msg.attach_alternative(main_template, 'text/html')
+    # Send through wagov_utils: EMAIL_DELIVERY switch, email log, System-Environment header
+    email_obj = TemplateEmailBase(subject=subject, html_template=main_template)
+    email_obj.txt_template = 'mooring/email/html_only.txt'
+    result = email_obj.send(to, from_address=from_email, context=context, attachments=_attachments, cc=cc, bcc=bcc)
 
-        #msg = EmailMessage(subject, main_template, to=[to_email],cc=cc, from_email=from_email)
-        #msg.content_subtype = 'html'
-        #if attachment1:
-        #    for a in attachment1:
-        #        msg.attach(a)
-        try:
-             email_log(str(log_hash)+' '+subject) 
-             msg.send()
-             email_log(str(log_hash)+' Successfully sent to mail gateway')
-        except Exception as e:
-                email_log(str(log_hash)+' Error Sending - '+str(e)) 
-    else:
-          msg = EmailMultiAlternatives(subject, "Please open with a compatible html email client.", from_email=from_email, to=to, attachments=_attachments, cc=cc, bcc=bcc, reply_to=reply_to, headers={'System-Environment': email_instance})
-          msg.attach_alternative(main_template, 'text/html')
-
-          #msg = EmailMessage(subject, main_template, to=to,cc=cc, from_email=from_email)
-          #msg.content_subtype = 'html'
-          #if attachment1:
-          #    for a in attachment1:
-          #        msg.attach(a)
-          try:
-               email_log(str(log_hash)+' '+subject) 
-               msg.send()
-               email_log(str(log_hash)+' Successfully sent to mail gateway')
-          except Exception as e:
-               email_log(str(log_hash)+' Error Sending - '+str(e))
-
-
-    return True
+    # Same return value as before: False only when email delivery is off
+    return result is not False
 
 
 
