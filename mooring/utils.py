@@ -51,6 +51,9 @@ def set_active_booking_cookie(response, booking):
         max_age=settings.BOOKING_TIMEOUT, path='/', samesite='Lax',
         secure=not settings.DEBUG, httponly=True
     )
+    # Only one checkout flow is active at a time: the payment pages share the same URLs,
+    # so a leftover admissions cookie would make the checkouthash refer to the wrong booking.
+    response.delete_cookie(ACTIVE_ADMISSIONS_COOKIE_NAME, path='/')
     return response
 
 
@@ -75,6 +78,8 @@ def set_active_admissions_cookie(response, admissions_booking):
         max_age=settings.OSCAR_BASKET_COOKIE_LIFETIME, path='/', samesite='Lax',
         secure=settings.OSCAR_BASKET_COOKIE_SECURE, httponly=True
     )
+    # Only one checkout flow is active at a time (see set_active_booking_cookie).
+    response.delete_cookie(ACTIVE_BOOKING_COOKIE_NAME, path='/')
     return response
 
 
@@ -2038,6 +2043,8 @@ def checkout(request, booking, lines, invoice_text=None, vouchers=[], internal=F
             'ledgergw-payment-details'
             ) + "'> Redirecting please wait: " + reverse('ledgergw-payment-details') + "</a>"
         )
+    # Starting the payment makes this booking the active checkout (multi-tab concurrency control)
+    set_active_booking_cookie(response, booking)
 
     # inject the current basket into the redirect response cookies
     # or else, anonymous users will be directionless
