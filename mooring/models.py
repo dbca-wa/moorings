@@ -2000,7 +2000,13 @@ class Booking(SanitisationModelMixin, models.Model):
         if booking.booking_type == 1:
             logger.info(f'Booking {booking.id} already processed (booking_type=1), returning current state')
             return booking._get_success_context(invoice_reference)
-        
+
+        # Only a temporary booking can be confirmed. A cancelled booking has a later refund
+        # basket with the same booking reference and must never be confirmed again.
+        if booking.booking_type != 3:
+            logger.error(f'Booking {booking.id} is not a temporary booking (booking_type={booking.booking_type}); payment notification ignored')
+            raise ValueError(f'Booking {booking.id} is not a temporary booking')
+
         # Validate invoice exists and belongs to this booking
         try:
             inv = Invoice.objects.get(reference=invoice_reference)
@@ -2691,7 +2697,12 @@ class AdmissionsBooking(SanitisationModelMixin, models.Model):
                 'PUBLIC_URL': getattr(settings, 'PUBLIC_URL', ''),
             })
             return context
-        
+
+        # Only an in-complete (temporary) admissions booking can be confirmed (see Booking).
+        if booking.booking_type != 3:
+            logger.error(f'AdmissionsBooking {booking.id} is not an in-complete booking (booking_type={booking.booking_type}); payment notification ignored')
+            raise ValueError(f'AdmissionsBooking {booking.id} is not an in-complete booking')
+
         # Validate invoice exists and belongs to this booking
         try:
             inv = Invoice.objects.get(reference=invoice_reference)
