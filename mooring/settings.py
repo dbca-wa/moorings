@@ -216,6 +216,8 @@ UNALLOCATED_ORACLE_CODE = 'NNP449 GST'
 DATA_UPLOAD_MAX_NUMBER_FIELDS = 10240 
 BOOKING_PROPERTY_CACHE_VERSION = '2.00'
 ML_ADMISSION_PAID_CHECK=decouple.config('ML_ADMISSION_PAID_CHECK', default=False, cast=bool)
+# Annual admissions for RIA are sold by Mooring Licensing; this system redirects to its page
+ML_ADMISSION_URL = decouple.config('ML_ADMISSION_URL', default='https://www.ria.wa.gov.au/boating/admission-fees')
 #os.environ.setdefault("UPDATE_PAYMENT_ALLOCATION", True)
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 X_FRAME_OPTIONS = 'SAMEORIGIN'
