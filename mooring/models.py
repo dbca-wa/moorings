@@ -2643,7 +2643,7 @@ class AdmissionsBooking(SanitisationModelMixin, models.Model):
             'admissionsBooking': self,
             'arrival': arrival,
             'overnight': overnight,
-            'admissionsInvoice': invoice_objs
+            'admissionsInvoice': [i.invoice_reference for i in invoice_objs]
         }
 
     @transaction.atomic
