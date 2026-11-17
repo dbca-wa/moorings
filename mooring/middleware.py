@@ -13,8 +13,9 @@ import hashlib
 
 from mooring.utils import (
     ACTIVE_ADMISSIONS_COOKIE_NAME,
-    calculate_checkouthash_from_admissions_uuid,
+    ACTIVE_BOOKING_COOKIE_NAME,
     calculate_checkouthash_from_booking_id,
+    calculate_checkouthash_from_request,
     delete_session_booking,
     validate_payment_checkouthash,
     calculate_checkouthash_from_token_payment_session,
@@ -173,11 +174,15 @@ class BookingTimerMiddleware(object):
             logger.info('session[ps_booking] does not exist.')
 
             if (request.path.startswith("/ledger-api/process-payment") or request.path.startswith('/ledger-api/payment-details')) and not 'token_payment_session' in request.session:
+                booking_token = request.COOKIES.get(ACTIVE_BOOKING_COOKIE_NAME)
                 admissions_token = request.COOKIES.get(ACTIVE_ADMISSIONS_COOKIE_NAME)
-                if admissions_token:
-                    expected_hash = calculate_checkouthash_from_admissions_uuid(admissions_token)
-                    checkouthash_cookie = request.COOKIES.get('checkouthash')
-                    record_exists = AdmissionsBooking.objects.filter(uuid=admissions_token, booking_type=3).exists()
+                if booking_token or admissions_token:
+                    # Use the same rule as the payment page (context processor) so that both sides hash
+                    # the same booking. A leftover admissions cookie must not block a Booking payment.
+                    expected_hash = calculate_checkouthash_from_request(request)
+                    record_exists = True
+                    if not booking_token:
+                        record_exists = AdmissionsBooking.objects.filter(uuid=admissions_token, booking_type=3).exists()
 
                     is_payment_submission = request.method == 'POST' and request.path.startswith("/ledger-api/process-payment")
                     if is_payment_submission:
@@ -190,7 +195,7 @@ class BookingTimerMiddleware(object):
                         hash_ok = True
 
                     if not hash_ok or not record_exists:
-                        logger.warning('Admissions checkouthash validation failed or booking no longer pending; redirecting user.')
+                        logger.warning('Checkouthash validation failed or admissions booking no longer pending; redirecting user.')
                         url_redirect = reverse('home')
                         response = HttpResponse("<script> window.location='" + url_redirect + "';</script> <center><div class='container'><div class='alert alert-primary' role='alert'><a href='" + url_redirect + "'> Redirecting please wait: " + url_redirect + "</a><div></div></center>")
                         return response
