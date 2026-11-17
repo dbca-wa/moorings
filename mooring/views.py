@@ -96,7 +96,7 @@ from ledger_api_client.mixins import InvoiceOwnerMixin
 # from mooring.invoice_pdf import create_invoice_pdf_bytes
 from mooring.context_processors import mooring_url, template_context
 # from ledger.checkout.utils import create_basket_session, create_checkout_session, place_order_submission, get_cookie_basket
-from ledger_api_client.utils import create_basket_session, create_checkout_session, place_order_submission, process_api_refund, validate_booking_and_invoice_references
+from ledger_api_client.utils import create_basket_session, create_checkout_session, place_order_submission, process_api_refund
 # from ledger.payments.invoice import utils as utils_ledger_payment_invoice
 
 
@@ -3036,8 +3036,6 @@ class AdmissionsBookingSuccessView(UserPassesTestMixin, TemplateView):
             # Allow access for anonymous/guest users who hold the valid active admissions cookie
             if not self.request.user.is_authenticated and utils.validate_admissions_cookie(self.request, booking):
                 return True
-            if "token_payment_session" in self.request.session:
-                return True
         except Exception:
             pass
         return False
@@ -3046,26 +3044,13 @@ class AdmissionsBookingSuccessView(UserPassesTestMixin, TemplateView):
         try:
             booking = get_object_or_404(AdmissionsBooking, uuid=kwargs['booking_token'])
 
-            invoice_ref = request.GET.get('invoice')
-
-            if "token_payment_session" in request.session:
-                booking_reference = settings.MOORING_BOOKING_REF_PREFIX + str(booking.id)
-                basket = Basket.objects.filter(booking_reference=booking_reference).order_by('-id').first()
-                if str(basket.id) != str(request.session["token_payment_session"]) or not validate_booking_and_invoice_references(booking_reference, invoice_ref):
-                    return redirect('home')
-                del request.session["token_payment_session"]
-
-            # Ledger's return_url does not include ?invoice=, so fall back to the
-            # AdmissionsBookingInvoice record already created by the notification endpoint.
-            if not invoice_ref:
-                bi = AdmissionsBookingInvoice.objects.filter(
-                    admissions_booking=booking, system_invoice=False
-                ).order_by('-id').first()
-                if bi:
-                    invoice_ref = bi.invoice_reference
+            # Session-less: the booking is found by UUID and the invoice is looked up from
+            # the submitted Ledger basket inside process_payment_notification().
+            # Clear the ledger_api_client payment key so it is not reused by the next checkout.
+            request.session.pop('token_payment_session', None)
 
             was_already_processed = (booking.booking_type == 1)
-            context = booking.process_payment_notification(invoice_ref)
+            context = booking.process_payment_notification()
 
             # Inject keys required by admissions email/success templates
             context.update({
@@ -3278,8 +3263,6 @@ class BookingSuccessView(UserPassesTestMixin, TemplateView):
             # Allow access for anonymous/guest users who hold the valid active booking cookie
             if not self.request.user.is_authenticated and utils.validate_booking_cookie(self.request, booking):
                 return True
-            if "token_payment_session" in self.request.session:
-                return True
         except Exception:
             pass
         return False
@@ -3289,32 +3272,13 @@ class BookingSuccessView(UserPassesTestMixin, TemplateView):
         try:
             booking = get_object_or_404(Booking, uuid=kwargs['booking_token'])
 
-            invoice_ref = request.GET.get('invoice')
-
-            if "token_payment_session" in request.session:
-                booking_reference = settings.MOORING_BOOKING_REF_PREFIX + str(booking.id)
-                basket = Basket.objects.filter(booking_reference=booking_reference).order_by('-id').first()
-
-                print(booking_reference)
-                print(basket.id)
-                print(request.session["token_payment_session"])
-                print(validate_booking_and_invoice_references(booking_reference, invoice_ref))
-
-                if str(basket.id) != str(request.session["token_payment_session"]) or not validate_booking_and_invoice_references(booking_reference, invoice_ref):
-                    return redirect('home')
-                del request.session["token_payment_session"]
-
-            # Ledger's return_url does not include ?invoice=, so fall back to the
-            # BookingInvoice record that the notification endpoint already created.
-            if not invoice_ref:
-                bi = BookingInvoice.objects.filter(
-                    booking=booking, system_invoice=False
-                ).order_by('-id').first()
-                if bi:
-                    invoice_ref = bi.invoice_reference
+            # Session-less: the booking is found by UUID and the invoice is looked up from
+            # the submitted Ledger basket inside process_payment_notification().
+            # Clear the ledger_api_client payment key so it is not reused by the next checkout.
+            request.session.pop('token_payment_session', None)
 
             was_already_processed = (booking.booking_type == 1)
-            context = booking.process_payment_notification(invoice_ref)
+            context = booking.process_payment_notification()
 
             # Grant confirmation/invoice access to any user arriving via the correct UUID URL.
             context['arrived_via_payment'] = True

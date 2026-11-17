@@ -1454,6 +1454,27 @@ class BookingAnnualInvoice(models.Model):
         return False
 
 
+def find_submitted_invoice_reference(booking_reference):
+    """
+    Find the invoice reference of the latest submitted Ledger basket for a booking reference.
+
+    The payment confirmation is session-less: the booking is found by its UUID and the
+    invoice is looked up here (basket -> order -> invoice) instead of being passed in
+    by Ledger or the browser. Returns None if the payment has not been submitted.
+    """
+    basket = Basket.objects.filter(
+        status='Submitted',
+        system=settings.PAYMENT_SYSTEM_ID,
+        booking_reference=booking_reference
+    ).order_by('-id').first()
+    if not basket:
+        return None
+    order = Order.objects.filter(basket_id=basket.id).order_by('-id').first()
+    if not order:
+        return None
+    invoice = Invoice.objects.filter(order_number=order.number).order_by('-id').first()
+    return invoice.reference if invoice else None
+
 
 class Booking(SanitisationModelMixin, models.Model):
     sanitise_exclude_fields = set()
@@ -1936,18 +1957,19 @@ class Booking(SanitisationModelMixin, models.Model):
         }
 
     @transaction.atomic
-    def process_payment_notification(self, invoice_reference):
+    def process_payment_notification(self, invoice_reference=None):
         """
         Process payment notification from Ledger (idempotent).
-        
+
         This method handles payment confirmation for a booking, whether called
         from the user-facing success view or from a background notification endpoint.
         It's designed to be idempotent - safe to call multiple times with the same
         invoice_reference.
-        
+
         Args:
-            invoice_reference (str): Invoice reference from Ledger payment system
-            
+            invoice_reference (str): Invoice reference from Ledger payment system.
+                If not given, it is looked up from the submitted Ledger basket.
+
         Returns:
             dict: Context dictionary with booking data for email/display
             
@@ -1960,9 +1982,12 @@ class Booking(SanitisationModelMixin, models.Model):
             AdmissionsBookingInvoice, AdmissionsLine, VesselDetail
         )
         from mooring import emails
-        
+
+        if not invoice_reference:
+            invoice_reference = find_submitted_invoice_reference(settings.MOORING_BOOKING_REF_PREFIX + str(self.id))
+
         logger.info(f'Processing payment notification for booking {self.id}, invoice {invoice_reference}')
-        
+
         if not invoice_reference:
             logger.error(f'Missing invoice_reference for booking {self.id}')
             raise ValueError(f'Missing invoice_reference for booking {self.id}')
@@ -2621,18 +2646,19 @@ class AdmissionsBooking(SanitisationModelMixin, models.Model):
         }
 
     @transaction.atomic
-    def process_payment_notification(self, invoice_reference):
+    def process_payment_notification(self, invoice_reference=None):
         """
         Process payment notification from Ledger for admissions booking (idempotent).
-        
+
         This method handles payment confirmation for an admissions booking, whether called
         from the user-facing success view or from a background notification endpoint.
         It's designed to be idempotent - safe to call multiple times with the same
         invoice_reference.
-        
+
         Args:
-            invoice_reference (str): Invoice reference from Ledger payment system
-            
+            invoice_reference (str): Invoice reference from Ledger payment system.
+                If not given, it is looked up from the submitted Ledger basket.
+
         Returns:
             dict: Context dictionary with booking data for email/display
             
@@ -2642,7 +2668,10 @@ class AdmissionsBooking(SanitisationModelMixin, models.Model):
         """
         from mooring.models import AdmissionsBookingInvoice, AdmissionsLine
         from mooring import emails
-        
+
+        if not invoice_reference:
+            invoice_reference = find_submitted_invoice_reference(settings.DAILY_ADMISSION_REF_PREFIX + str(self.id))
+
         logger.info(f'Processing payment notification for admissions booking {self.id}, invoice {invoice_reference}')
         
         if not invoice_reference:
