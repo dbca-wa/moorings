@@ -1469,8 +1469,9 @@ def find_submitted_invoice_reference(booking_reference):
     ).order_by('-id').first()
     if not basket:
         return None
-    order = Order.objects.filter(basket_id=basket.id).order_by('-id').first()
-    if not order:
+    try:
+        order = Order.objects.get(basket_id=basket.id)
+    except Order.DoesNotExist:
         return None
     invoice = Invoice.objects.filter(order_number=order.number).order_by('-id').first()
     return invoice.reference if invoice else None
